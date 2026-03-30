@@ -233,7 +233,12 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
                 // Placeholder: will link to chat later
               }}
             >
-              <span style={{ fontSize: '24px', flexShrink: 0 }}>{crew.member.emoji}</span>
+              <div className="overflow-hidden transform-gpu shrink-0" style={{
+                width: '36px', height: '36px', borderRadius: '50%',
+                border: `2px solid ${crew.accentColor}`,
+              }}>
+                <img src={crew.member.image} alt={crew.member.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
               <div>
                 <p
                   style={{

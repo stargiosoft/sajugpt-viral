@@ -165,10 +165,14 @@ export default function StockBriefing({ briefing, onStart }: Props) {
               padding: '14px 16px',
               borderRadius: '12px',
               backgroundColor: 'rgba(255,255,255,0.03)',
-              borderLeft: `3px solid ${entry.member.color}`,
             }}
           >
-            <span style={{ fontSize: '20px', flexShrink: 0 }}>{entry.member.emoji}</span>
+            <div className="overflow-hidden transform-gpu shrink-0" style={{
+              width: '44px', height: '44px', borderRadius: '50%',
+              border: `2px solid ${entry.member.color}`,
+            }}>
+              <img src={entry.member.image} alt={entry.member.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
             <div>
               <p
                 style={{

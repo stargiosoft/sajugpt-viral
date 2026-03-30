@@ -58,7 +58,12 @@ export default function StockTurn({ turnData, onChoice }: Props) {
                 className="flex items-center gap-2"
                 style={{ marginBottom: '8px' }}
               >
-                <span style={{ fontSize: '14px' }}>{crew.emoji}</span>
+                <div className="overflow-hidden transform-gpu shrink-0" style={{
+                  width: '24px', height: '24px', borderRadius: '50%',
+                  border: `1.5px solid ${crew.color}`,
+                }}>
+                  <img src={crew.image} alt={crew.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
                 <span
                   style={{
                     fontSize: '13px',
@@ -145,7 +150,12 @@ export default function StockTurn({ turnData, onChoice }: Props) {
                 (e.currentTarget as HTMLButtonElement).style.borderColor = '#2a2a3e';
               }}
             >
-              <span style={{ fontSize: '16px', flexShrink: 0 }}>{crew.emoji}</span>
+              <div className="overflow-hidden transform-gpu shrink-0" style={{
+                width: '28px', height: '28px', borderRadius: '50%',
+                border: `1.5px solid ${crew.color}`,
+              }}>
+                <img src={crew.image} alt={crew.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
               <span
                 style={{
                   fontSize: '14px',

@@ -395,9 +395,12 @@ export default function StockClient({ stockId }: Props) {
                 paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
                 background: 'linear-gradient(transparent, #0a0a14 30%)',
               }}>
-                <button
-                  onClick={() => setStep('result')}
+                <a
+                  href="https://www.sajugpt.co.kr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
+                    display: 'block',
                     width: '100%',
                     padding: '16px',
                     borderRadius: '14px',
@@ -408,10 +411,12 @@ export default function StockClient({ stockId }: Props) {
                     letterSpacing: '-0.32px',
                     border: 'none',
                     cursor: 'pointer',
+                    textAlign: 'center',
+                    textDecoration: 'none',
                   }}
                 >
-                  공유하기
-                </button>
+                  3단계 작전 실행하기
+                </a>
               </div>
             </motion.div>
           )}

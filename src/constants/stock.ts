@@ -18,38 +18,42 @@ export interface CrewMemberInfo {
   tone: string;
   emoji: string;
   color: string;
+  image: string;
 }
 
 export const CREW_MEMBERS: Record<CrewMemberId, CrewMemberInfo> = {
   kang: {
     id: 'kang',
-    name: '강도현',
+    name: '윤태산',
     position: '작전 본부장',
     faction: '공격파',
     philosophy: '비상장이 문제. 시장에 나가야 주가가 움직인다',
     tone: '반말, 직설, 급함',
     emoji: '⚡',
     color: '#DC2626',
+    image: '/characters/yoon-taesan.webp',
   },
   yoon: {
     id: 'yoon',
-    name: '윤서율',
+    name: '서휘윤',
     position: '펀더멘털 분석가',
     faction: '가치파',
     philosophy: '적정가가 높아도 본인이 자기 값어치를 모르면 시장가는 바닥',
     tone: '존댓말, 차분, 날카로움',
     emoji: '📊',
     color: '#2563EB',
+    image: '/characters/seo-hwiyoon.webp',
   },
   cha: {
     id: 'cha',
-    name: '차민혁',
+    name: '최설계',
     position: '차트 전략가',
     faction: '타이밍파',
     philosophy: '타이밍이 전부. 준비 안 끝나면 1년 더 기다려야',
     tone: '반존대, 계산적, 긴급함',
     emoji: '📈',
     color: '#059669',
+    image: '/characters/choi-seolgye.webp',
   },
 };
 

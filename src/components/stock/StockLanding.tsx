@@ -439,14 +439,15 @@ export default function StockLanding({ onStart }: Props) {
                   padding: '14px 16px',
                 }}
               >
-                {/* 왼쪽 컬러 바 */}
-                <div style={{
-                  width: '3px',
-                  height: '32px',
-                  borderRadius: '2px',
-                  backgroundColor: crew.color,
-                  flexShrink: 0,
-                }} />
+                {/* 캐릭터 썸네일 */}
+                <div className="overflow-hidden transform-gpu shrink-0" style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  border: `2px solid ${crew.color}`,
+                }}>
+                  <img src={crew.image} alt={crew.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
 
                 <div className="flex-1" style={{ minWidth: 0 }}>
                   <div className="flex items-center gap-2" style={{ marginBottom: '2px' }}>
