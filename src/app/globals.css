@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand-primary: #7A38D8;
+  --color-brand-dark: #6B2FC2;
+  --color-brand-pressed: #5E28AB;
+  --color-brand-light: #F7F2FA;
+  --color-bg: #ffffff;
+  --color-text: #151515;
+  --color-border: #e7e7e7;
+  --color-card-dark: #1a1a2e;
+  --color-card-dark-secondary: #16213e;
+  --color-grade-sss: #FFD700;
+  --color-grade-ss: #FF4444;
+  --color-grade-s: #7A38D8;
+  --color-grade-a: #4488FF;
+  --color-grade-b: #44BB44;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100dvh;
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo',
+    'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  color: #151515;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
