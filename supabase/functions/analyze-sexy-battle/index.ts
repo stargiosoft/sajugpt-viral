@@ -447,7 +447,57 @@ Deno.serve(async (req: Request) => {
       battleRecord = inserted;
     }
 
-    // ─── 9. 응답 ──────────────────────────────────
+    // ─── 9. 배틀 비교 데이터 (수락자인 경우) ──────────
+    let battle = null;
+    if (battleId && battleRecord) {
+      const challengerResult = battleRecord.challenger_result as Record<string, unknown> | null;
+      const cHeadcount = battleRecord.challenger_headcount as number;
+      const cScore = battleRecord.challenger_score as number;
+      const cGrade = battleRecord.challenger_grade as string;
+      const cTitle = (challengerResult?.title as string) ?? GRADE_MAP[Math.min(cHeadcount, 5)]?.title ?? '';
+
+      let winner: 'challenger' | 'acceptor' | 'draw';
+      let winType: '압승' | '신승' | '무승부';
+
+      if (cHeadcount > headcount) {
+        winner = 'challenger';
+        winType = cHeadcount - headcount >= 3 ? '압승' : '신승';
+      } else if (headcount > cHeadcount) {
+        winner = 'acceptor';
+        winType = headcount - cHeadcount >= 3 ? '압승' : '신승';
+      } else if (cScore > analysis.score) {
+        winner = 'challenger';
+        winType = '신승';
+      } else if (analysis.score > cScore) {
+        winner = 'acceptor';
+        winType = '신승';
+      } else {
+        winner = 'draw';
+        winType = '무승부';
+      }
+
+      const winnerLabel = winner === 'challenger' ? '도전자' : winner === 'acceptor' ? '수락자' : '';
+      const loserLabel = winner === 'challenger' ? '수락자' : winner === 'acceptor' ? '도전자' : '';
+
+      let winnerMessage: string;
+      if (winType === '압승') {
+        winnerMessage = `${winnerLabel}의 페로몬이 ${loserLabel}를 아예 증발시킴. 상대가 안 됨.`;
+      } else if (winType === '신승') {
+        winnerMessage = `간발의 차! ${loserLabel}도 만만치 않았지만 ${winnerLabel}의 사주가 한 끗 앞섬.`;
+      } else {
+        winnerMessage = 'AI 짐승남들 판정 불가. 둘 다 너무 치명적이라 선택 거부.';
+      }
+
+      battle = {
+        challenger: { headcount: cHeadcount, grade: cGrade, title: cTitle, score: cScore },
+        acceptor: { headcount, grade: gradeInfo.grade, title: gradeInfo.title, score: analysis.score },
+        winner,
+        winType,
+        winnerMessage,
+      };
+    }
+
+    // ─── 10. 응답 ──────────────────────────────────
     return jsonResponse(req, {
       battleId: battleRecord?.id ?? crypto.randomUUID(),
       score: analysis.score,
@@ -458,6 +508,7 @@ Deno.serve(async (req: Request) => {
       verdict,
       chatScript,
       sajuHighlights,
+      ...(battle ? { battle } : {}),
     });
 
   } catch (err) {

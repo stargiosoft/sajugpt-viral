@@ -2,13 +2,14 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Gender, Step, BattleResult } from '@/types/battle';
+import type { Gender, Step, BattleResult, ChallengerPreview } from '@/types/battle';
 import BirthInput from '@/components/BirthInput';
 import GenderSelect from '@/components/GenderSelect';
 import BirthTimeInput from '@/components/BirthTimeInput';
 import AnalyzingScreen from '@/components/AnalyzingScreen';
 import ResultCard from '@/components/ResultCard';
 import ShareButtons from '@/components/ShareButtons';
+import BattleVSCard from '@/components/BattleVSCard';
 import CutScene from '@/components/CutScene';
 import OnboardingLanding from '@/components/OnboardingLanding';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
@@ -16,6 +17,7 @@ import { parseUTM, trackEvent } from '@/lib/analytics';
 
 interface Props {
   battleId?: string;
+  challengerPreview?: ChallengerPreview | null;
 }
 
 /** 24시간 형식으로 변환: "오후 02:30" → "1430" */
@@ -48,7 +50,8 @@ function saveCache(data: { birthDate: string; birthTime: string; unknownTime: bo
   try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* noop */ }
 }
 
-export default function SexyBattleClient({ battleId }: Props) {
+export default function SexyBattleClient({ battleId, challengerPreview }: Props) {
+  const isBattleAccept = !!battleId && !!challengerPreview;
   // 입력 상태 — sessionStorage 캐시 복원
   const cached = typeof window !== 'undefined' ? loadCache() : null;
   const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
@@ -56,7 +59,7 @@ export default function SexyBattleClient({ battleId }: Props) {
   const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
   const [gender, setGender] = useState<Gender>(cached?.gender ?? 'female');
 
-  // 플로우 상태 — UTM이나 battleId가 있으면 입력 폼으로 바로 진입
+  // 플로우 상태 — UTM이나 배틀 수락이면 입력 폼으로 바로 진입
   const [step, setStep] = useState<Step>(battleId ? 'input' : 'landing');
   const [result, setResult] = useState<BattleResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +67,7 @@ export default function SexyBattleClient({ battleId }: Props) {
   const [submitting, setSubmitting] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const vsCardRef = useRef<HTMLDivElement>(null);
   const birthTimeRef = useRef<HTMLDivElement>(null);
 
   // UTM 자동입력 — 파라미터 있으면 landing 스킵하고 입력폼 직행
@@ -162,11 +166,15 @@ export default function SexyBattleClient({ battleId }: Props) {
       setResult(data);
       trackEvent('sexy_battle_result', { headcount: data.headcount, grade: data.grade });
 
-      if (data.headcount === 0) {
-        setShowCutScene(true);
+      if (data.battle) {
+        trackEvent('sexy_battle_invite_accept', { headcount: data.headcount, grade: data.grade });
+        setStep('battleResult');
+      } else {
+        if (data.headcount === 0) {
+          setShowCutScene(true);
+        }
+        setStep('result');
       }
-
-      setStep('result');
     } catch (err) {
       console.error('분석 실패:', err);
       setError('분석 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
@@ -227,9 +235,29 @@ export default function SexyBattleClient({ battleId }: Props) {
                 <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#151515', marginBottom: '8px', textAlign: 'center', letterSpacing: '-0.56px' }}>
                   색기 배틀
                 </h1>
-                <p style={{ fontSize: '15px', color: '#666', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
-                  얼굴 가리고<br />사주만으로 남자를 홀려보세요
-                </p>
+                {isBattleAccept ? (
+                  <div className="flex flex-col items-center" style={{ gap: '8px' }}>
+                    <p style={{ fontSize: '15px', color: '#666', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
+                      친구한테 도발장이 날아왔어요
+                    </p>
+                    <div
+                      style={{
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        backgroundColor: '#F7F2FA',
+                        border: '1px solid #E8DCF5',
+                      }}
+                    >
+                      <p style={{ fontSize: '16px', fontWeight: 700, color: '#7A38D8', textAlign: 'center', letterSpacing: '-0.32px' }}>
+                        "나는 {challengerPreview!.headcount}명 꼬이는데, 넌?"
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '15px', color: '#666', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
+                    얼굴 가리고<br />사주만으로 남자를 홀려보세요
+                  </p>
+                )}
               </div>
 
               {/* 입력 폼 — 나다운세 MansePage 스타일 */}
@@ -341,7 +369,7 @@ export default function SexyBattleClient({ battleId }: Props) {
                       color: isFormValid() && !submitting ? '#fff' : '#b7b7b7',
                       whiteSpace: 'nowrap',
                     }}>
-                      {submitting ? '분석 중...' : '내 페로몬 등급 확인하기'}
+                      {submitting ? '분석 중...' : isBattleAccept ? '배틀 도전하기' : '내 페로몬 등급 확인하기'}
                     </p>
                   </motion.div>
                 </div>
@@ -399,6 +427,49 @@ export default function SexyBattleClient({ battleId }: Props) {
                   </div>
                 </>
               )}
+            </motion.div>
+          )}
+          {/* ─── BATTLE RESULT STEP ─── */}
+          {step === 'battleResult' && result?.battle && (
+            <motion.div
+              key="battleResult"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              style={{ padding: '24px 20px 48px' }}
+            >
+              {/* VS 비교 카드 */}
+              <div className="flex justify-center" style={{ marginBottom: '24px' }}>
+                <BattleVSCard ref={vsCardRef} battle={result.battle} />
+              </div>
+
+              {/* 내 개인 결과 카드 */}
+              <div className="flex justify-center" style={{ marginBottom: '24px' }}>
+                <ResultCard ref={cardRef} result={result} />
+              </div>
+
+              {/* 공유 버튼 */}
+              <ShareButtons headcount={result.headcount} battleId={result.battleId} cardRef={vsCardRef} />
+
+              <div style={{ padding: '0 20px', marginTop: '12px' }}>
+                <button
+                  onClick={handleReset}
+                  style={{
+                    width: '100%',
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: 'transparent',
+                    color: '#999',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    border: '1px solid #e7e7e7',
+                    cursor: 'pointer',
+                  }}
+                >
+                  다시 해보기
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

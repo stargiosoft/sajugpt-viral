@@ -58,8 +58,10 @@ const ITEMS: ViralItem[] = [
   {
     title: '주가 조작단',
     description: '저평가된 당신의 연애운, 주가 조작 작전을 세워드립니다',
-    href: '#',
-    ready: false,
+    href: '/stock',
+    ready: true,
+    tag: 'NEW',
+    tagColor: '#22C55E',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
@@ -81,8 +83,10 @@ const ITEMS: ViralItem[] = [
   {
     title: '기생 시뮬레이션',
     description: '사주 기반 기생 능력치로 선비 3명을 몰래 관리',
-    href: '#',
-    ready: false,
+    href: '/gisaeng',
+    ready: true,
+    tag: 'NEW',
+    tagColor: '#EC4899',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EC4899" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />

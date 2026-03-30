@@ -156,15 +156,24 @@ const DeathCertificate = forwardRef<HTMLDivElement, Props>(({ result }, ref) => 
       </div>
 
       {/* 하단 워터마크 */}
-      <p style={{
-        fontSize: '10px',
-        color: '#C4B896',
-        textAlign: 'center',
-        marginTop: '12px',
-        letterSpacing: '0.5px',
-      }}>
-        sajugpt-viral.vercel.app/autopsy
-      </p>
+      <a
+        href="https://sajugpt.co.kr"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          fontSize: '11px',
+          fontWeight: 600,
+          color: '#7A38D8',
+          textAlign: 'center',
+          marginTop: '12px',
+          letterSpacing: '0.3px',
+          textDecoration: 'underline',
+          textUnderlineOffset: '2px',
+          display: 'block',
+        }}
+      >
+        sajugpt.co.kr
+      </a>
     </div>
   );
 });

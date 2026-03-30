@@ -63,31 +63,24 @@ export default function BirthInput({ value, onChange, onComplete }: Props) {
             ref={inputRef}
             type="text"
             inputMode="numeric"
-            value={value}
+            value={valid ? `${value} (양력)` : value}
             onChange={e => handleChange(e.target.value)}
             placeholder="예: 1992-07-15"
             autoComplete="off"
             autoFocus
-            className="peer flex-1 outline-none bg-transparent w-full"
+            onFocus={() => {
+              if (valid && inputRef.current) {
+                inputRef.current.value = value;
+              }
+            }}
+            className="flex-1 outline-none bg-transparent w-full"
             style={{
               fontSize: '16px',
               lineHeight: '20px',
               letterSpacing: '-0.45px',
-              color: valid ? 'transparent' : '#151515',
+              color: '#151515',
             }}
           />
-          {valid && (
-            <div
-              className="absolute left-3 h-full flex items-center pointer-events-none peer-focus:hidden"
-            >
-              <span style={{ fontSize: '16px', lineHeight: '20px', letterSpacing: '-0.45px', color: '#151515' }}>
-                {value}
-              </span>
-              <span style={{ fontSize: '16px', lineHeight: '20px', letterSpacing: '-0.45px', color: '#848484', marginLeft: '4px' }}>
-                (양력)
-              </span>
-            </div>
-          )}
         </div>
       </div>
       {error && (

@@ -695,4 +695,907 @@ CTA 버튼 클릭
 
 ---
 
-**최종 업데이트**: 2026-03-26
+## 기술 구체화
+
+### T1. 죄목 배정 — 사주 API 필드 매핑
+
+Stargio API 응답에서 사용하는 필드:
+
+| 필드 | 데이터 구조 | 용도 |
+|------|-----------|------|
+| `십성` | `string[][]` (4주 천간/지지) | 편인·상관·비견 등 개별 카운트 |
+| `발달십성` | `{인성, 관성, 식상, 비겁, 재성}` (%) | 십성 그룹별 발달도 |
+| `12신살` | `string` | "도화" 포함 여부 |
+| `기타신살` | `string` | "홍염" 포함 여부 |
+| `일주론` | `{총평, 연애성향, ...}` | AI 프롬프트 컨텍스트 |
+| `천간` / `지지` | `string[]` (4개씩) | 일주 키 추출 (천간[2]+지지[2]) |
+
+#### T1-1. 십성 카운트 헬퍼
+
+색기배틀·부검실과 동일한 `countSipsung()` 재사용:
+
+```typescript
+function countSipsung(sipsung: string[][], target: string): number {
+  return sipsung.flat().filter(s => s === target).length;
+}
+```
+
+#### T1-2. 사주 하이라이트 추출
+
+```typescript
+interface CourtSajuHighlights {
+  // 십성 카운트
+  pyeonInCount: number;     // 편인 (자격지심·혼자 끙끙)
+  jeongInCount: number;     // 정인 (기다림·배려)
+  sangGwanCount: number;    // 상관 (자의식·비교)
+  siksangPercent: number;   // 발달십성.식상 (%)
+  sikSinCount: number;      // 식신 (감성·프렌드존)
+  biGyeonCount: number;     // 비견 (자존심)
+  geobJaeCount: number;     // 겁재 (비교심리)
+  pyeonGwanCount: number;   // 편관 (카리스마)
+  jeongGwanCount: number;   // 정관 (인연·책임)
+  jeongJaeCount: number;    // 정재 (표현 방식)
+  pyeonJaeCount: number;    // 편재 (충동·술)
+
+  // 발달십성 (%)
+  insung: number;           // 인성
+  gwansung: number;         // 관성
+  siksang: number;          // 식상
+  bigyeob: number;          // 비겁
+  jasung: number;           // 재성
+
+  // 신살
+  doHwaSal: boolean;        // 도화살
+  hongYeomSal: boolean;     // 홍염살
+  doHwaChung: boolean;      // 도화살 충 (합/충 판별)
+
+  // 일주론
+  yeonaeSeongHyang: string; // 연애성향 텍스트
+  ilJuKey: string;          // 일주 (예: "갑자")
+}
+```
+
+#### T1-3. 죄목 배정 로직 — `determineCrime()`
+
+부검실 `determineCauseOfDeath()`와 동일한 패턴: 각 죄목별 check 함수 → 점수 계산 → 최고 점수 선택.
+
+```typescript
+interface CrimeMapping {
+  id: string;
+  label: string;
+  check: (h: CourtSajuHighlights) => number;  // 0~5 기본 점수
+}
+
+const CRIME_MAPPINGS: CrimeMapping[] = [
+  {
+    id: 'unrequited_3years',
+    label: '짝사랑만 3년 죄',
+    // 편인 과다 + 정관 약 → 속으로만 좋아하고 행동 못함
+    check: (h) => {
+      let score = 0;
+      if (h.pyeonInCount >= 2) score += 3;
+      else if (h.pyeonInCount >= 1) score += 1;
+      if (h.insung >= 25) score += 1;
+      if (h.jeongGwanCount === 0 && h.gwansung < 15) score += 1; // 정관 약
+      return score;
+    },
+  },
+  {
+    id: 'never_confessed',
+    label: '좋아한다는 말 못 한 죄',
+    // 편인 월주 + 비견 강 → 자기 안에서만 정리
+    check: (h) => {
+      let score = 0;
+      if (h.pyeonInCount >= 1) score += 2;
+      if (h.biGyeonCount >= 2) score += 2;
+      else if (h.biGyeonCount >= 1) score += 1;
+      if (h.bigyeob >= 25) score += 1;
+      return score;
+    },
+  },
+  {
+    id: 'solo_breakup',
+    label: '혼자 이별한 죄',
+    // 상관 과다 + 정관 충 → 시뮬 돌리고 혼자 포기
+    check: (h) => {
+      let score = 0;
+      if (h.sangGwanCount >= 2) score += 3;
+      else if (h.sangGwanCount >= 1) score += 1;
+      if (h.siksang >= 25) score += 1;
+      if (h.jeongGwanCount === 0) score += 1; // 정관 없음 = 시작 못함
+      return score;
+    },
+  },
+  {
+    id: 'self_deprecation',
+    label: '"나 같은 게 뭐" 죄',
+    // 편인 + 상관 동주 → 자격지심 극대화
+    check: (h) => {
+      let score = 0;
+      if (h.pyeonInCount >= 1 && h.sangGwanCount >= 1) score += 3; // 동주
+      if (h.pyeonInCount >= 2) score += 1;
+      if (h.sangGwanCount >= 2) score += 1;
+      return score;
+    },
+  },
+  {
+    id: 'pretend_ok_after_ghosted',
+    label: '읽씹당하고 괜찮은 척한 죄',
+    // 비견 강 + 정재 약 → 자존심은 높은데 표현 못함
+    check: (h) => {
+      let score = 0;
+      if (h.biGyeonCount >= 2) score += 2;
+      else if (h.biGyeonCount >= 1) score += 1;
+      if (h.bigyeob >= 25) score += 1;
+      if (h.jeongJaeCount === 0 && h.jasung < 15) score += 2; // 정재 약
+      return score;
+    },
+  },
+  {
+    id: 'always_friendzoned',
+    label: '맨날 친구로만 남은 죄',
+    // 식신 과다 + 편관 약 → 좋은 사람 이미지 고착
+    check: (h) => {
+      let score = 0;
+      if (h.sikSinCount >= 2) score += 3;
+      else if (h.sikSinCount >= 1) score += 1;
+      if (h.siksang >= 25) score += 1;
+      if (h.pyeonGwanCount === 0 && h.gwansung < 15) score += 1; // 편관 약
+      return score;
+    },
+  },
+  {
+    id: 'mirror_sigh',
+    label: '거울 보고 한숨 쉰 죄',
+    // 상관 과다 + 도화살 합/충 → 자의식 높은데 도화 에너지 막힘
+    check: (h) => {
+      let score = 0;
+      if (h.sangGwanCount >= 2) score += 2;
+      else if (h.sangGwanCount >= 1) score += 1;
+      if (h.siksang >= 30) score += 1;
+      if (h.doHwaSal && h.doHwaChung) score += 2; // 도화 있는데 충
+      else if (h.doHwaSal) score += 1;
+      return score;
+    },
+  },
+  {
+    id: 'comparison_envy',
+    label: '"쟤는 원래 이쁘니까" 죄',
+    // 겁재 강 + 편인 → 비교 심리 + 자기비하
+    check: (h) => {
+      let score = 0;
+      if (h.geobJaeCount >= 2) score += 2;
+      else if (h.geobJaeCount >= 1) score += 1;
+      if (h.bigyeob >= 25) score += 1;
+      if (h.pyeonInCount >= 1) score += 2;
+      return score;
+    },
+  },
+  {
+    id: 'drunk_confession_deleted',
+    label: '취중고백 후 기억 삭제한 죄',
+    // 식신 + 도화살 + 편재 → 술 + 매력 + 충동
+    check: (h) => {
+      let score = 0;
+      if (h.sikSinCount >= 1) score += 1;
+      if (h.doHwaSal) score += 2;
+      if (h.pyeonJaeCount >= 1) score += 2;
+      return score;
+    },
+  },
+  {
+    id: 'phone_checking',
+    label: '연락 올까봐 폰만 본 죄',
+    // 정인 과다 + 편관 암장 → 기다림 + 숨겨진 열정
+    check: (h) => {
+      let score = 0;
+      if (h.jeongInCount >= 2) score += 3;
+      else if (h.jeongInCount >= 1) score += 1;
+      if (h.insung >= 25) score += 1;
+      if (h.pyeonGwanCount >= 1 && h.gwansung < 20) score += 1; // 편관 암장(약하게)
+      return score;
+    },
+  },
+];
+```
+
+**배정 알고리즘**:
+1. 모든 CRIME_MAPPINGS 순회 → `check(highlights)` 점수 산출
+2. **동점 시 배열 순서(위)가 우선** — 순서는 바이럴 임팩트 높은 순 배치
+3. 최고 점수 죄목 1개 선택
+4. 점수 0인 경우 → fallback: `'self_deprecation'` ("나 같은 게 뭐" 죄 — 가장 범용적)
+
+---
+
+### T2. 형량·현상금·퍼센타일 산정 로직
+
+#### T2-1. 매력 점수 (charmScore) — 사주 기반
+
+```typescript
+function calculateCharmScore(h: CourtSajuHighlights): number {
+  let score = 0;
+
+  // 도화살 (최대 +3)
+  if (h.doHwaSal && h.hongYeomSal) score += 3;       // 둘 다 → +3
+  else if (h.doHwaSal) score += 2;                     // 도화만 → +2
+  else if (h.hongYeomSal) score += 2;                  // 홍염만 → +2
+
+  // 정관/정인 동주 — 진심 낭비 (+2)
+  if (h.jeongGwanCount >= 1 && h.jeongInCount >= 1) score += 2;
+
+  // 식신 보유 — 감성 낭비 (+1)
+  if (h.sikSinCount >= 1) score += 1;
+
+  // 편관격 — 카리스마 낭비 (+1)
+  if (h.pyeonGwanCount >= 1 && h.gwansung >= 20) score += 1;
+
+  return score; // 0~7
+}
+```
+
+#### T2-2. 형량 산정
+
+```typescript
+function calculateSentence(
+  charmScore: number,
+  periodInput: 'under_6m' | '6m_1y' | '1y_3y' | '3y_5y' | 'over_5y'
+): number {
+  const BASE = 1; // 기본 1년
+
+  // 매력 가중 (charmScore → 형량 변환)
+  const charmBonus =
+    charmScore >= 6 ? 5 :  // 극상 매력
+    charmScore >= 4 ? 3 :  // 높은 매력
+    charmScore >= 2 ? 2 :  // 보통 매력
+    charmScore >= 1 ? 1 :  // 약간 매력
+    0;                      // 무매력
+
+  // 기간 가중
+  const periodBonus: Record<string, number> = {
+    'under_6m': 0,
+    '6m_1y': 1,
+    '1y_3y': 2,
+    '3y_5y': 4,
+    'over_5y': 7,
+  };
+
+  return BASE + charmBonus + periodBonus[periodInput];
+  // 범위: 1년(무매력+6개월미만) ~ 13년(극상매력+5년이상)
+}
+```
+
+#### T2-3. 등급·현상금·퍼센타일
+
+```typescript
+function getSentenceGrade(sentence: number) {
+  if (sentence >= 13) return { grade: 'extreme', label: '극형', borderStyle: 'gold_extreme' };
+  if (sentence >= 8)  return { grade: 'felony',  label: '강력범', borderStyle: 'gold' };
+  if (sentence >= 4)  return { grade: 'serious', label: '중범죄', borderStyle: 'silver' };
+  return                      { grade: 'minor',   label: '경범죄', borderStyle: 'default' };
+}
+
+function calculateBounty(sentence: number): number {
+  return sentence * 500; // 만원 단위. 9년 = 4,500만원
+}
+
+// 퍼센타일은 관대하게 설계 — 대부분 상위 30% 이내
+function calculatePercentile(sentence: number): number {
+  if (sentence >= 13) return 3;   // 상위 3%
+  if (sentence >= 10) return 7;   // 상위 7%
+  if (sentence >= 8)  return 10;  // 상위 10%
+  if (sentence >= 6)  return 20;  // 상위 20%
+  if (sentence >= 4)  return 30;  // 상위 30%
+  if (sentence >= 2)  return 50;  // 상위 50%
+  return 70;                       // 하위 30%
+}
+```
+
+> **설계 의도**: 도화살/홍염살 보유자(약 30%)는 자동으로 charmScore 2+ → 형량 4년+ → 상위 30% 이내. 기간 3년 이상 + 도화살 = 형량 8년+ → 상위 10%. 숫자가 높을수록 자랑이 되는 구조.
+
+---
+
+### T3. 석방 예정일 산정 알고리즘
+
+#### T3-1. 설계 방향
+
+석방 예정일은 **사주의 대운·세운에서 억압 요소가 풀리는 시점**이 이상적이지만, 현재 Stargio API에서 대운/세운 필드를 `excludeKeys`로 제외 중. **2가지 옵션**:
+
+| 옵션 | 방식 | 장점 | 단점 |
+|------|------|------|------|
+| **A: 대운 필드 활성화** | excludeKeys에서 `'대운'`, `'대운순서'`, `'대운시작나이'` 제거 → 대운 배열에서 합·충 해소 시점 계산 | 정확한 사주 근거 | API 응답 크기 증가, 파싱 복잡 |
+| **B: 규칙 기반 산출** | 현재 사주 원국 데이터 + 형량으로 합리적 시점 산출 | 가볍고 빠름, 구현 간단 | "진짜 대운"은 아님 |
+
+**MVP 권장: 옵션 B** — Phase 1에서는 규칙 기반, Phase 2에서 대운 연동.
+
+#### T3-2. 규칙 기반 석방 예정일 (옵션 B)
+
+```typescript
+function calculateReleaseDate(
+  sentence: number,
+  charmScore: number,
+  crimeId: string
+): { year: number; month: number } {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  // 기본 석방 시점: 현재 + (형량 ÷ 4)개월 (빠르게 풀리는 느낌)
+  // 형량 1~3년 → 3~9개월 후
+  // 형량 4~7년 → 12~21개월 후
+  // 형량 8~12년 → 24~36개월 후
+  // 형량 13년+ → 36~48개월 후
+  const baseMonths = Math.ceil(sentence * 3);
+
+  // 매력 보정: 매력 높으면 더 빨리 석방 (역설 — 매력 있으니까)
+  const charmReduction = Math.min(charmScore * 2, 12); // 최대 12개월 감면
+
+  // 시즌 보정: 봄(3~5월) 또는 연말(11~12월)에 풀리면 바이럴 효과 (시즌 연애)
+  let totalMonths = baseMonths - charmReduction;
+  totalMonths = Math.max(totalMonths, 2); // 최소 2개월 후
+
+  let releaseMonth = currentMonth + totalMonths;
+  let releaseYear = currentYear + Math.floor((releaseMonth - 1) / 12);
+  releaseMonth = ((releaseMonth - 1) % 12) + 1;
+
+  return { year: releaseYear, month: releaseMonth };
+}
+```
+
+> **핵심**: "2026년 8월" 같은 구체적 시점이 바이럴 트리거. 정확도보다 **구체성**이 중요. "곧 풀린다"(2~6개월)가 너무 많으면 희소성 하락 → 분포를 적당히 퍼뜨림.
+
+#### T3-3. 대운 연동 (Phase 2 — 옵션 A)
+
+Phase 2에서 `excludeKeys`에서 대운 관련 필드를 제거하고, 아래 로직으로 정밀 산출:
+
+```
+1. 대운 배열에서 현재 대운 식별 (나이 기반)
+2. 죄목의 원인 십성(편인·상관 등)이 합거·충 해소되는 대운 탐색
+3. 해당 대운의 시작 연도 → 석방 예정 연월
+4. 없으면 세운(연운)에서 탐색
+5. 최대 5년 내로 제한 (너무 멀면 희망감 하락)
+```
+
+---
+
+### T4. Edge Function 스펙
+
+#### T4-1. 함수 정보
+
+| 항목 | 값 |
+|------|---|
+| 함수명 | `analyze-saju-court` |
+| 런타임 | Deno (Supabase Edge Functions) |
+| JWT 검증 | 없음 (`--no-verify-jwt`) |
+| 배포 | `npx supabase functions deploy analyze-saju-court --no-verify-jwt --project-ref tdrmvbsmxcewwaeuoqdx` |
+| CORS | `supabase/functions/server/cors.ts` 사용 |
+| Secrets | `SAJU_API_KEY`, `GOOGLE_API_KEY` |
+
+#### T4-2. Input JSON
+
+```typescript
+interface CourtInput {
+  birthday: string;           // "199603121400" (YYYYMMDDHHMM)
+  gender: 'male' | 'female';
+  lunar?: boolean;            // 기본 false (양력)
+}
+```
+
+> **기간(period)은 Input에 포함하지 않음** — 기소장은 사주만으로 생성. 기간은 프론트엔드 재판 인터랙션에서 수집 후, 형량 재산정은 **클라이언트에서 계산**.
+
+#### T4-3. Output JSON
+
+```typescript
+interface CourtOutput {
+  courtId: string;                // UUID
+
+  // 죄목
+  crimeId: string;                // 'unrequited_3years' 등 10가지
+  crimeLabel: string;             // '짝사랑만 3년 죄'
+
+  // 매력 점수 (형량 산정 기초)
+  charmScore: number;             // 0~7
+
+  // 형량 (기간 입력 전 — charmScore 기반 예비 형량)
+  baseSentence: number;           // 기본형(1) + 매력가중만
+  // → 최종 형량은 프론트에서 periodBonus 추가
+
+  // 검사 팩폭 + 변호사 반박 (기소장 카드용)
+  prosecutorLine: string;         // "3년이면 사랑이 아니라 습관입니다"
+  defenderLine: string;           // "3년을 버틴 건 습관이 아니라 진심입니다"
+
+  // 사주 하이라이트 (재판 인터랙션용)
+  sajuHighlights: CourtSajuHighlights;
+
+  // AI 생성 텍스트 (Gemini)
+  prosecutorOpening: string;      // 검사 기소 발언 (1턴)
+  defenderClosing: string;        // 변호사 최후변론 (4턴)
+  verdictComment: string;         // 판사 코멘트 (등급별)
+
+  // 석방 근거 텍스트 (변호사 변론용)
+  releaseRationale: string;       // "偏印이 합거되는 시점 — 자격지심 해소"
+
+  // 석방 예정일 (기소장에서 블러, 판결문에서 공개)
+  releaseDate: { year: number; month: number };
+
+  // 석방 조건 (판사 명언)
+  releaseCondition: string;       // "나 같은 게라고 하지 말 것"
+
+  // 메타
+  createdAt: string;              // ISO 8601
+}
+```
+
+#### T4-4. Edge Function 처리 흐름
+
+```
+1. 입력 검증 (birthday 형식, gender 유효성)
+    ↓
+2. Stargio API 호출 (fetchWithRetry 3회)
+    ↓
+3. excludeKeys 경량화 (기존 8개 유지)
+    ↓
+4. extractCourtHighlights() — 사주 하이라이트 추출
+    ↓
+5. determineCrime() — 죄목 배정
+    ↓
+6. calculateCharmScore() — 매력 점수
+    ↓
+7. baseSentence = 1 + charmBonus
+    ↓
+8. calculateReleaseDate() — 석방 예정일
+    ↓
+9. lookupCrimeTexts() — 죄목별 검사/변호사 고정 대사
+    ↓
+10. Gemini API 호출 — 검사 기소발언 + 변호사 최후변론 + 판사 코멘트
+    ↓
+11. DB 저장 (saju_courts)
+    ↓
+12. 응답 반환
+```
+
+#### T4-5. 형량 최종 산정 — 클라이언트 계산
+
+**기간(period)은 재판 인터랙션 중 수집** → 클라이언트에서 최종 형량 계산:
+
+```typescript
+// 프론트엔드에서 실행
+const finalSentence = courtResult.baseSentence + periodBonus[selectedPeriod];
+const bounty = finalSentence * 500;
+const percentile = calculatePercentile(finalSentence);
+const grade = getSentenceGrade(finalSentence);
+```
+
+> **Edge Function에서 기간까지 받으면?** 재판 인터랙션 없이 기소장만 공유하는 유저도 있으므로, 기소장 생성(Edge Function)과 형량 확정(클라이언트)을 분리. Edge Function은 1회만 호출.
+
+---
+
+### T5. DB 스키마
+
+```sql
+-- 사주 법정 테이블
+CREATE TABLE saju_courts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- 유저 사주 정보
+  birthday TEXT NOT NULL,
+  birth_time TEXT,
+  gender TEXT NOT NULL,
+
+  -- 죄목
+  crime_id TEXT NOT NULL,         -- 'unrequited_3years' 등
+  crime_label TEXT NOT NULL,      -- '짝사랑만 3년 죄'
+
+  -- 점수/형량
+  charm_score NUMERIC NOT NULL,   -- 0~7
+  base_sentence INT NOT NULL,     -- 기본형 + 매력가중 (기간 미포함)
+  final_sentence INT,             -- 기간 포함 최종 형량 (재판 완료 시)
+  period_input TEXT,              -- 'under_6m' | '6m_1y' | '1y_3y' | '3y_5y' | 'over_5y'
+  bounty INT,                     -- 현상금 (만원)
+  percentile INT,                 -- 상위 N%
+
+  -- 석방
+  release_year INT NOT NULL,
+  release_month INT NOT NULL,
+  release_condition TEXT NOT NULL, -- 석방 조건 (판사 명언)
+
+  -- AI 생성 텍스트
+  prosecutor_line TEXT NOT NULL,   -- 검사 팩폭 (카드용)
+  defender_line TEXT NOT NULL,     -- 변호사 반박 (카드용)
+  prosecutor_opening TEXT,         -- 검사 기소 발언 (재판 1턴)
+  defender_closing TEXT,           -- 변호사 최후변론 (재판 4턴)
+  verdict_comment TEXT,            -- 판사 코멘트
+
+  -- 전체 결과 JSONB
+  result JSONB NOT NULL,
+
+  -- 공범 지목
+  accomplice_crime TEXT,           -- '소개팅 안 시켜준 죄' 등
+  accomplice_shared BOOLEAN DEFAULT false,
+
+  -- 재판 진행 상태
+  trial_completed BOOLEAN DEFAULT false,
+
+  -- 메타
+  status TEXT DEFAULT 'created',   -- created | trial_done | shared
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  trial_completed_at TIMESTAMPTZ,
+
+  -- 추적
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT
+);
+
+-- 인덱스: 죄목별 통계 (월간 랭킹)
+CREATE INDEX idx_saju_courts_crime ON saju_courts(crime_id);
+CREATE INDEX idx_saju_courts_created ON saju_courts(created_at);
+
+-- RLS: 읽기 공개, 쓰기 서비스 키만
+ALTER TABLE saju_courts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can read courts"
+  ON saju_courts FOR SELECT
+  USING (true);
+
+CREATE POLICY "Service role can insert"
+  ON saju_courts FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Service role can update"
+  ON saju_courts FOR UPDATE
+  USING (true);
+```
+
+#### T5-1. 월간 죄목 랭킹 뷰 (재방문 트리거)
+
+```sql
+CREATE OR REPLACE VIEW court_crime_stats AS
+SELECT
+  crime_id,
+  crime_label,
+  COUNT(*) AS total_count,
+  ROUND(AVG(COALESCE(final_sentence, base_sentence)), 1) AS avg_sentence,
+  ROUND(AVG(bounty), 0) AS avg_bounty
+FROM saju_courts
+WHERE created_at >= NOW() - INTERVAL '30 days'
+GROUP BY crime_id, crime_label
+ORDER BY total_count DESC;
+```
+
+---
+
+### T6. 상태 머신 정의
+
+```
+┌──────────────┐
+│   landing    │  "당신이 연애 못한 이유, 사주로 기소합니다"
+└──────┬───────┘
+       │ CTA 클릭
+       ↓
+┌──────────────┐
+│   input      │  생년월일시 + 성별 입력
+└──────┬───────┘
+       │ 제출
+       ↓
+┌──────────────┐
+│  analyzing   │  "긴급 체포 영장 발부 중..." (2~3초)
+│              │  → "검사 윤태산 출석..."
+│              │  → "변호사 서휘윤 출석..."
+│              │  → "피고인의 사주 원국 분석 중..."
+└──────┬───────┘
+       │ Edge Function 응답 수신
+       ↓
+┌──────────────┐
+│  indictment  │  기소장 카드 표시 (바이럴 지점 1)
+│              │  - 죄목, 예비 형량, 현상금, 퍼센타일
+│              │  - 검사 팩폭 + 변호사 반박
+│              │  - 석방일 블러
+│              │  [재판 참여하기] [내 기소장 보내기]
+└──────┬───────┘
+       │ "재판 참여하기" 클릭
+       ↓
+┌──────────────┐
+│  trial_1     │  검사 기소 — "피고인, 좋아하는 사람 있죠?"
+│              │  유저 선택지 2~3개
+└──────┬───────┘
+       │ 유저 선택
+       ↓
+┌──────────────┐
+│  trial_2     │  검사 반박 + 기간 입력 수집
+│              │  "얼마나 됐습니까?" → 4개 선택지
+│              │  → 기간 선택 시 형량 재산정 (클라이언트)
+└──────┬───────┘
+       │ 기간 선택
+       ↓
+┌──────────────┐
+│  trial_3     │  변호사 반격 + 사주 해설
+│              │  유저에게 질문 — 선택지 2~3개
+└──────┬───────┘
+       │ 유저 선택
+       ↓
+┌──────────────┐
+│  trial_4     │  변호사 최후변론 + 검사 팩폭 마무리
+│              │  유저 선택 반영된 감동 변론
+└──────┬───────┘
+       │ 자동 전환 (2초 후)
+       ↓
+┌──────────────┐
+│   verdict    │  판결문 카드 표시 (바이럴 지점 2)
+│              │  - 석방일 공개 (대형 활자)
+│              │  - 석방 조건 (판사 명언)
+│              │  - 형량 + 현상금 + 퍼센타일
+│              │  [공유] [공범 지목하기]
+└──────┬───────┘
+       │ "공범 지목하기" 클릭
+       ↓
+┌──────────────┐
+│  accomplice  │  공범 선택 (5가지 + 직접입력)
+│              │  → 카카오톡 공유 메시지 생성
+│              │  [공범에게 기소장 보내기]
+└──────┬───────┘
+       │ 공유 완료 or 스킵
+       ↓
+┌──────────────┐
+│  conversion  │  "항소하기" CTA
+│              │  윤태산 / 서휘윤 선택
+│              │  → /chat/{characterId}?birthday=...&gender=...
+└──────────────┘
+```
+
+#### T6-1. 각 상태별 데이터
+
+```typescript
+type CourtState =
+  | 'landing'
+  | 'input'
+  | 'analyzing'
+  | 'indictment'
+  | 'trial_1'
+  | 'trial_2'
+  | 'trial_3'
+  | 'trial_4'
+  | 'verdict'
+  | 'accomplice'
+  | 'conversion';
+
+interface CourtStateData {
+  // input에서 수집
+  birthday: string;
+  gender: 'male' | 'female';
+  birthTime?: string;
+
+  // analyzing → indictment (Edge Function 응답)
+  courtResult: CourtOutput | null;
+
+  // trial_1에서 수집
+  trial1Choice: number | null;      // 0 | 1 | 2
+
+  // trial_2에서 수집
+  periodInput: string | null;       // 기간 선택
+
+  // trial_2에서 클라이언트 계산
+  finalSentence: number | null;
+  bounty: number | null;
+  percentile: number | null;
+  sentenceGrade: SentenceGrade | null;
+
+  // trial_3에서 수집
+  trial3Choice: number | null;      // 0 | 1 | 2
+
+  // accomplice에서 수집
+  accompliceCrime: string | null;
+}
+```
+
+---
+
+### T7. Gemini 프롬프트 설계
+
+#### T7-1. 템플릿 vs Gemini 구분
+
+| 요소 | 방식 | 이유 |
+|------|------|------|
+| **죄목별 검사 팩폭** | 고정 템플릿 | PRD에 이미 10가지 확정. 밈화될 문장이므로 품질 통제 |
+| **죄목별 변호사 반박** | 고정 템플릿 | 위와 동일 |
+| **석방 조건 (판사 명언)** | 고정 템플릿 | 10가지 확정 |
+| **검사 기소 발언 (1턴)** | Gemini 생성 | 사주 데이터 기반 맞춤 질문 |
+| **변호사 최후변론 (4턴)** | Gemini 생성 | 유저 선택 반영 필요 |
+| **판사 코멘트** | 등급별 고정 | 4등급 × 1문장 |
+| **석방 근거 텍스트** | Gemini 생성 | 사주 해석 필요 |
+
+> **원칙**: 캡처·공유될 문장(카드)은 **고정 템플릿**으로 품질 보장. 재판 과정의 몰입감 대사는 **Gemini 동적 생성**으로 사주 맞춤화.
+
+#### T7-2. Gemini 프롬프트 — 검사 기소 발언 (1턴)
+
+```
+역할: 당신은 사주 법정의 검사 윤태산입니다.
+톤: 반말. 도발적이지만 유머러스. 피고인을 찌르되 상처가 아닌 뜨끔함을 줍니다.
+캐릭터: 거칠고 직설적인 검사. 법정 용어를 섞어 사용.
+
+입력 데이터:
+- 죄목: {crimeLabel}
+- 사주 하이라이트: 도화살({doHwaSal}), 편인({pyeonInCount}개), 상관({sangGwanCount}개)
+- 연애성향: {yeonaeSeongHyang}
+- 일주: {ilJuKey}
+
+작성 규칙:
+1. 검사 기소 발언 3~5줄 생성
+2. "피고인"이라는 호칭 사용
+3. 죄목과 관련된 구체적 행동을 지적 (사주 근거 1가지 이상)
+4. 마지막에 질문으로 끝내서 유저 선택지로 이어지게
+5. 사주 용어는 한자 병기 가능하되 자연어로 풀어서 설명
+6. 반말체, 문장 끝에 "~입니까" "~인 거잖아요" 등 법정 심문 톤
+
+출력 형식:
+JSON { "opening": "..." }
+```
+
+#### T7-3. Gemini 프롬프트 — 변호사 최후변론 (4턴)
+
+```
+역할: 당신은 사주 법정의 변호사 서휘윤입니다.
+톤: 존댓말. 따뜻하고 공감적. 피고인의 아픈 곳을 어루만지면서 사주 근거로 뒤집습니다.
+캐릭터: 다정하고 진지한 변호사. 피고인을 향한 진심 어린 변론.
+
+입력 데이터:
+- 죄목: {crimeLabel}
+- 사주 하이라이트: (전체)
+- 연애성향: {yeonaeSeongHyang}
+- 일주: {ilJuKey}
+- 유저 선택: trial_1 → "{trial1ChoiceText}", trial_3 → "{trial3ChoiceText}"
+- 석방 근거: {releaseRationale}
+
+작성 규칙:
+1. 최후변론 5~8줄 생성
+2. 유저가 재판 중 선택한 항변(trial1Choice, trial3Choice)을 반드시 1번 이상 인용
+3. 사주 용어로 "이건 피고인의 잘못이 아니라 사주 구조의 문제"를 논증
+4. 마지막에 "판사님, ~를 호소합니다" 톤으로 마무리
+5. 존댓말체, 감동적이되 과하지 않게
+
+출력 형식:
+JSON { "closing": "..." }
+```
+
+#### T7-4. Gemini 프롬프트 — 석방 근거 텍스트
+
+```
+역할: 당신은 사주 전문 변호사입니다.
+톤: 전문적이면서 이해하기 쉽게.
+
+입력 데이터:
+- 죄목: {crimeLabel} (원인 십성: {causeSipsung})
+- 사주 원국: 천간 {천간}, 지지 {지지}
+- 현재 억압 요소: {원인 십성}이 과다/합/충 상태
+
+작성 규칙:
+1. 1~2문장으로 "왜 지금 억압되어 있고, 언제 풀리는지" 설명
+2. 한자 용어는 1~2개만 사용하되 풀이 병기
+3. 예: "偏印(편인)이 桃花(도화)를 누르고 있어 매력이 발현되지 못하는 구조"
+
+출력 형식:
+JSON { "rationale": "..." }
+```
+
+---
+
+### T8. TypeScript 타입 + 컴포넌트 목록
+
+#### T8-1. 핵심 타입 정의
+
+```typescript
+// ──── 죄목 ────
+type CrimeId =
+  | 'unrequited_3years'        // 짝사랑만 3년 죄
+  | 'never_confessed'          // 좋아한다는 말 못 한 죄
+  | 'solo_breakup'             // 혼자 이별한 죄
+  | 'self_deprecation'         // "나 같은 게 뭐" 죄
+  | 'pretend_ok_after_ghosted' // 읽씹당하고 괜찮은 척한 죄
+  | 'always_friendzoned'       // 맨날 친구로만 남은 죄
+  | 'mirror_sigh'              // 거울 보고 한숨 쉰 죄
+  | 'comparison_envy'          // "쟤는 원래 이쁘니까" 죄
+  | 'drunk_confession_deleted' // 취중고백 후 기억 삭제한 죄
+  | 'phone_checking';          // 연락 올까봐 폰만 본 죄
+
+// ──── 기간 ────
+type PeriodInput = 'under_6m' | '6m_1y' | '1y_3y' | '3y_5y' | 'over_5y';
+
+// ──── 형량 등급 ────
+type SentenceGradeId = 'minor' | 'serious' | 'felony' | 'extreme';
+
+interface SentenceGrade {
+  grade: SentenceGradeId;
+  label: string;       // '경범죄' | '중범죄' | '강력범' | '극형'
+  borderStyle: string; // 카드 테두리 스타일
+}
+
+// ──── 공범 죄목 ────
+type AccompliceCrime =
+  | 'no_blind_date'            // 소개팅 한 번 안 시켜준 죄
+  | 'just_watched'             // 옆에서 구경만 한 죄
+  | 'why_no_bf'                // "넌 왜 남친이 없어" 상해죄
+  | 'solo_advisor'             // 본인도 솔로면서 조언한 죄
+  | 'custom';                  // 직접 입력
+
+// ──── 재판 선택지 ────
+interface TrialChoice {
+  id: number;
+  text: string;
+  prosecutorReaction?: string;   // 검사 반응 (선택 시)
+  defenderReaction?: string;     // 변호사 반응 (선택 시)
+}
+
+// ──── Edge Function 응답 ────
+interface CourtResult {
+  courtId: string;
+  crimeId: CrimeId;
+  crimeLabel: string;
+  charmScore: number;
+  baseSentence: number;
+  prosecutorLine: string;
+  defenderLine: string;
+  sajuHighlights: CourtSajuHighlights;
+  prosecutorOpening: string;
+  defenderClosing: string;
+  verdictComment: string;
+  releaseRationale: string;
+  releaseDate: { year: number; month: number };
+  releaseCondition: string;
+  createdAt: string;
+}
+```
+
+#### T8-2. 컴포넌트 목록
+
+```
+src/components/court/
+├── SajuCourtClient.tsx         # 메인 상태머신 (11개 상태 관리)
+├── CourtLanding.tsx            # 랜딩 — "사주로 기소합니다" + CTA
+├── CourtInput.tsx              # 입력 — 생년월일시 + 성별 (기존 BirthInput 재사용)
+├── CourtAnalyzing.tsx          # 로딩 — "긴급 체포 영장 발부 중..."
+├── IndictmentCard.tsx          # 기소장 카드 (9:16, toPng 캡처)
+├── TrialScreen.tsx             # 재판 인터랙션 (1~4턴 통합)
+│   ├── TrialMessage.tsx        # 검사/변호사 말풍선
+│   └── TrialChoices.tsx        # 유저 선택지 버튼
+├── VerdictCard.tsx             # 판결문 카드 (9:16, toPng 캡처)
+├── AccompliceScreen.tsx        # 공범 지목 화면
+├── ConversionCTA.tsx           # 항소 → 챗봇 전환
+└── CourtShareButtons.tsx       # 공유 (카카오톡, 이미지, 링크)
+```
+
+#### T8-3. 기존 컴포넌트 재사용
+
+| 기존 컴포넌트 | 재사용 방식 |
+|-------------|-----------|
+| `BirthInput.tsx` | 그대로 재사용 (YYYY-MM-DD 자동포맷) |
+| `GenderSelect.tsx` | 그대로 재사용 (슬라이딩 토글) |
+| `BirthTimeInput.tsx` | 그대로 재사용 (4자리 → 오전/오후) |
+| `ShareButtons.tsx` | 공유 로직 재사용, UI는 법정 톤 커스텀 |
+| `AnalyzingScreen.tsx` | 구조 참조, 메시지만 법정용으로 교체 |
+
+#### T8-4. 페이지 라우트
+
+```
+src/app/court/
+├── page.tsx                    # /court — 메인 (정적 OG)
+└── [courtId]/
+    └── page.tsx                # /court/[courtId] — 공범 유입 (동적 OG, SSR)
+```
+
+**동적 OG 메타태그** (`/court/[courtId]/page.tsx`):
+```typescript
+export async function generateMetadata({ params }) {
+  const court = await supabase.from('saju_courts').select('*').eq('id', params.courtId).single();
+  return {
+    title: `⚖️ ${court.crime_label} — 징역 ${court.final_sentence ?? court.base_sentence}년`,
+    description: `현상금 ${court.bounty ?? court.base_sentence * 500}만원 | ${court.prosecutor_line}`,
+    openGraph: {
+      title: `⚖️ 사주 법정 기소장`,
+      description: `${court.crime_label} | 징역 ${court.final_sentence ?? court.base_sentence}년 선고`,
+    },
+  };
+}
+```
+
+---
+
+**최종 업데이트**: 2026-03-30

@@ -27,6 +27,21 @@ export interface BattleResult {
   verdict: string;
   chatScript: string;
   sajuHighlights: SajuHighlights;
+  battle?: BattleComparison;
 }
 
-export type Step = 'landing' | 'input' | 'analyzing' | 'result';
+export interface BattleComparison {
+  challenger: { headcount: number; grade: Grade; title: string; score: number };
+  acceptor: { headcount: number; grade: Grade; title: string; score: number };
+  winner: 'challenger' | 'acceptor' | 'draw';
+  winType: '압승' | '신승' | '무승부';
+  winnerMessage: string;
+}
+
+export interface ChallengerPreview {
+  headcount: number;
+  grade: Grade;
+  title: string;
+}
+
+export type Step = 'landing' | 'input' | 'analyzing' | 'result' | 'battleResult';

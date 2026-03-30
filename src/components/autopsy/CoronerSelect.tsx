@@ -33,7 +33,18 @@ export default function CoronerSelect({ value, onChange }: Props) {
                 transition: 'all 0.15s ease',
               }}
             >
-              <span style={{ fontSize: '32px' }}>{coroner.emoji}</span>
+              <div className="overflow-hidden transform-gpu" style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                border: selected ? '2px solid #7A38D8' : '2px solid #eee',
+              }}>
+                <img
+                  src={coroner.thumbnail}
+                  alt={coroner.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
               <span style={{ fontSize: '15px', fontWeight: 700, color: selected ? '#7A38D8' : '#333' }}>
                 {coroner.name}
               </span>

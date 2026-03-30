@@ -39,8 +39,8 @@ export default function AutopsyClient({ autopsyId }: Props) {
   // 입력 상태
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
-  const [unknownTime, setUnknownTime] = useState(true);
-  const [gender, setGender] = useState<Gender>('male');
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [gender, setGender] = useState<Gender>('female');
   const [causeInput, setCauseInput] = useState<CauseOfDeathInput | null>(null);
   const [duration, setDuration] = useState<RelationshipDuration | null>(null);
   const [coronerId, setCoronerId] = useState<CoronerId | null>(null);
@@ -158,8 +158,8 @@ export default function AutopsyClient({ autopsyId }: Props) {
     setError(null);
     setBirthDate('');
     setBirthTime('');
-    setUnknownTime(true);
-    setGender('male');
+    setUnknownTime(false);
+    setGender('female');
     setCauseInput(null);
     setDuration(null);
     setCoronerId(null);
@@ -180,54 +180,315 @@ export default function AutopsyClient({ autopsyId }: Props) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="flex flex-col items-center justify-center"
-              style={{ minHeight: '100dvh', padding: '0 24px' }}
+              className="flex flex-col"
+              style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '120px' }}
             >
-              <span style={{ fontSize: '48px', marginBottom: '16px' }}>🔬</span>
-              <h1 style={{
-                fontSize: '26px',
-                fontWeight: 800,
-                color: '#222',
-                textAlign: 'center',
-                lineHeight: '1.4',
-                letterSpacing: '-0.5px',
-                marginBottom: '12px',
-              }}>
-                너를 못 알아본 놈,<br />사주로 부검합니다
-              </h1>
-              <p style={{
-                fontSize: '15px',
-                color: '#888',
-                textAlign: 'center',
-                lineHeight: '1.6',
-                marginBottom: '48px',
-              }}>
-                전남친 사주를 넣으면<br />
-                검시관이 왜 그 놈이 널 못 알아봤는지<br />
-                사망진단서를 발급합니다
-              </p>
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                onClick={() => {
-                  trackEvent('autopsy_land');
-                  setStep('input');
-                }}
-                className="transform-gpu"
-                style={{
-                  width: '100%',
-                  maxWidth: '300px',
-                  height: '56px',
-                  borderRadius: '16px',
-                  backgroundColor: '#7A38D8',
-                  color: '#fff',
-                  fontSize: '16px',
+              {/* 상단 여백 */}
+              <div style={{ height: '64px' }} />
+
+              {/* 감정 훅 — 헤드라인 */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                style={{ marginBottom: '8px' }}
+              >
+                <p style={{
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: '#7A38D8',
+                  letterSpacing: '-0.28px',
+                  marginBottom: '12px',
+                }}>
+                  전남친 사주 부검실
+                </p>
+                <h1 style={{
+                  fontSize: '26px',
                   fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
+                  color: '#151515',
+                  lineHeight: '38px',
+                  letterSpacing: '-0.52px',
+                }}>
+                  그 놈이 널 못 알아본 건<br />
+                  네 탓이 아니야
+                </h1>
+              </motion.div>
+
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                style={{
+                  fontSize: '15px',
+                  fontWeight: 400,
+                  color: '#6d6d6d',
+                  lineHeight: '24px',
+                  letterSpacing: '-0.45px',
+                  marginBottom: '32px',
                 }}
               >
-                부검 시작하기
-              </motion.button>
+                사주로 증명해 줄게. 생년월일만 넣어봐.
+              </motion.p>
+
+              {/* 히어로 비주얼 — 사망진단서 미리보기 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.7, ease: [0.32, 0.72, 0, 1] }}
+                style={{
+                  position: 'relative',
+                  marginBottom: '32px',
+                }}
+              >
+                {/* 뒤 그림자 카드 (깊이감) */}
+                <div className="transform-gpu" style={{
+                  position: 'absolute',
+                  top: '8px',
+                  left: '12px',
+                  right: '12px',
+                  bottom: '-4px',
+                  borderRadius: '16px',
+                  backgroundColor: '#EDE5F7',
+                  transform: 'rotate(2deg)',
+                }} />
+
+                {/* 메인 사망진단서 카드 */}
+                <div className="relative transform-gpu" style={{
+                  backgroundColor: '#FFFDF7',
+                  borderRadius: '16px',
+                  border: '1px solid #E8E0D0',
+                  padding: '24px 20px 20px',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+                }}>
+                  {/* 문서 헤더 */}
+                  <div className="flex items-center justify-between" style={{ marginBottom: '16px' }}>
+                    <div>
+                      <p style={{ fontSize: '10px', fontWeight: 500, color: '#C4B896', letterSpacing: '1px' }}>
+                        사주 부검실
+                      </p>
+                      <p style={{ fontSize: '16px', fontWeight: 700, color: '#151515', letterSpacing: '-0.32px', marginTop: '2px' }}>
+                        연애 사망진단서
+                      </p>
+                    </div>
+                    <div style={{ fontSize: '10px', fontWeight: 500, color: '#b7b7b7' }}>
+                      제2026-0330호
+                    </div>
+                  </div>
+
+                  {/* 구분선 */}
+                  <div style={{ height: '1px', background: 'linear-gradient(90deg, #E8E0D0, transparent)', marginBottom: '16px' }} />
+
+                  {/* 판정 내용 */}
+                  <div className="flex flex-col gap-3">
+                    {/* 사망 원인 — 강조 */}
+                    <div style={{
+                      backgroundColor: '#FAF8FC',
+                      borderRadius: '12px',
+                      padding: '14px 16px',
+                    }}>
+                      <p style={{ fontSize: '11px', fontWeight: 500, color: '#848484', marginBottom: '4px' }}>사망 원인</p>
+                      <p style={{ fontSize: '20px', fontWeight: 700, color: '#151515', letterSpacing: '-0.4px' }}>안목 사망</p>
+                    </div>
+
+                    {/* 수치 2개 */}
+                    <div className="flex gap-3">
+                      <div style={{
+                        flex: 1,
+                        backgroundColor: '#f9f9f9',
+                        borderRadius: '12px',
+                        padding: '12px 14px',
+                      }}>
+                        <p style={{ fontSize: '11px', fontWeight: 500, color: '#848484', marginBottom: '4px' }}>매력 감별</p>
+                        <div className="flex items-baseline gap-1">
+                          <p style={{ fontSize: '24px', fontWeight: 800, color: '#DC2626', letterSpacing: '-0.48px' }}>F</p>
+                          <p style={{ fontSize: '12px', fontWeight: 500, color: '#DC2626' }}>등급</p>
+                        </div>
+                      </div>
+                      <div style={{
+                        flex: 1,
+                        backgroundColor: '#f9f9f9',
+                        borderRadius: '12px',
+                        padding: '12px 14px',
+                      }}>
+                        <p style={{ fontSize: '11px', fontWeight: 500, color: '#848484', marginBottom: '4px' }}>후회 확률</p>
+                        <div className="flex items-baseline gap-1">
+                          <p style={{ fontSize: '24px', fontWeight: 800, color: '#7A38D8', letterSpacing: '-0.48px' }}>94.7</p>
+                          <p style={{ fontSize: '12px', fontWeight: 500, color: '#7A38D8' }}>%</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 소견 */}
+                    <div style={{
+                      borderTop: '1px dashed #E8E0D0',
+                      paddingTop: '12px',
+                    }}>
+                      <p style={{
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        color: '#525252',
+                        lineHeight: '20px',
+                        letterSpacing: '-0.26px',
+                        fontStyle: 'italic',
+                      }}>
+                        &ldquo;이런 놈 때문에 울었다고? 화난다 진짜.&rdquo;
+                      </p>
+                      <p style={{ fontSize: '12px', fontWeight: 600, color: '#7A38D8', marginTop: '6px' }}>
+                        — 윤태산 검시관
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 도장 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '20px',
+                    right: '20px',
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    border: '2px solid #DC2626',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: 'rotate(-12deg)',
+                    opacity: 0.7,
+                  }}>
+                    <p style={{ fontSize: '18px', fontWeight: 900, color: '#DC2626', fontFamily: 'serif' }}>F</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* 검시관 선택 티저 */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                className="flex gap-3"
+                style={{ marginBottom: '28px' }}
+              >
+                {[
+                  { name: '윤태산', tone: '분노형', quote: '이런 놈 때문에 울었다고?', img: '/characters/yoon-taesan.webp' },
+                  { name: '서휘윤', tone: '치유형', quote: '당신 탓이 아니에요', img: '/characters/seo-hwiyoon.webp' },
+                ].map((c) => (
+                  <div
+                    key={c.name}
+                    className="flex-1"
+                    style={{
+                      backgroundColor: '#fff',
+                      borderRadius: '14px',
+                      border: '1px solid #f0f0f0',
+                      padding: '14px',
+                      boxShadow: '4px 4px 14px rgba(0,0,0,0.04)',
+                    }}
+                  >
+                    <div className="flex items-center gap-2" style={{ marginBottom: '8px' }}>
+                      <div className="overflow-hidden transform-gpu" style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        border: '1px solid #f0f0f0',
+                      }}>
+                        <img
+                          src={c.img}
+                          alt={c.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '13px', fontWeight: 600, color: '#151515', letterSpacing: '-0.26px' }}>{c.name}</p>
+                        <p style={{ fontSize: '11px', fontWeight: 500, color: '#7A38D8' }}>{c.tone}</p>
+                      </div>
+                    </div>
+                    <p style={{
+                      fontSize: '12px',
+                      fontWeight: 400,
+                      color: '#848484',
+                      lineHeight: '17px',
+                      letterSpacing: '-0.24px',
+                    }}>
+                      &ldquo;{c.quote}&rdquo;
+                    </p>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* 안내 문구 */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.5 }}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 400,
+                  color: '#b7b7b7',
+                  lineHeight: '18px',
+                  letterSpacing: '-0.24px',
+                  textAlign: 'center',
+                }}
+              >
+                재미로 보는 사주 콘텐츠이며, 실제 심리 진단이 아닙니다
+              </motion.p>
+
+              {/* 하단 고정 CTA */}
+              <div
+                className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10 pointer-events-auto"
+                style={{
+                  maxWidth: '440px',
+                  backgroundColor: '#fff',
+                  boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
+                  paddingBottom: 'env(safe-area-inset-bottom)',
+                }}
+              >
+                <div style={{ padding: '12px 20px' }}>
+                  <div
+                    onClick={() => {
+                      trackEvent('autopsy_land');
+                      setStep('input');
+                    }}
+                    className="transform-gpu cursor-pointer"
+                    style={{
+                      height: '56px',
+                      borderRadius: '16px',
+                      backgroundColor: '#7A38D8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.15s ease',
+                    }}
+                    onMouseDown={(e) => {
+                      e.currentTarget.style.transform = 'scale(0.98)';
+                      e.currentTarget.style.backgroundColor = '#5E28AB';
+                    }}
+                    onMouseUp={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.backgroundColor = '#7A38D8';
+                    }}
+                    onTouchStart={(e) => {
+                      e.currentTarget.style.transform = 'scale(0.98)';
+                      e.currentTarget.style.backgroundColor = '#5E28AB';
+                    }}
+                    onTouchEnd={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.backgroundColor = '#7A38D8';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.backgroundColor = '#7A38D8';
+                    }}
+                  >
+                    <p style={{
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      lineHeight: '25px',
+                      letterSpacing: '-0.32px',
+                      color: '#fff',
+                    }}>
+                      부검 시작하기
+                    </p>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
 
@@ -464,8 +725,8 @@ export default function AutopsyClient({ autopsyId }: Props) {
                     setCoronerId(null);
                     setBirthDate('');
                     setBirthTime('');
-                    setUnknownTime(true);
-                    setGender('male');
+                    setUnknownTime(false);
+                    setGender('female');
                     setStep('input');
                   }}
                   style={{

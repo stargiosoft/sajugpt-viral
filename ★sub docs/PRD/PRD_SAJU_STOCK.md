@@ -4,6 +4,10 @@
 
 - **기능명**: 주가 조작단 — "연애 시장 내 값어치는?"
 - **바이럴 공식**: [주식 투자/시라노 연애 조작단 A] + [사주 기반 연애 주가 조작 작전 B] = "이런 건 처음이다"
+- **라우트**: `/stock`, `/stock/[stockId]`
+- **Edge Function**: `analyze-saju-stock` (개인 분석 + 턴제 토론), `analyze-stock-ma` (M&A 시너지)
+- **DB 테이블**: `saju_stocks`, `stock_ma_analyses`
+- **캐릭터**: 강도현 (공격파), 윤서율 (가치파), 차민혁 (타이밍파) — 3명
 - **바이럴 기능 간단 요약**: 사용자의 사주를 입력하면 연애운을 **주식 시세**로 환산한 종목 리포트 카드가 즉시 생성된다. 핵심 역설은 **"적정가는 20,000원인데 현재 시장가는 1,200원밖에 안 한다"** — 펀더멘털 대비 극심한 저평가. 이 바닥 주가를 올리기 위해 **주가 조작단** 3명이 소집된다. 공격파 본부장(당장 상장하라), 가치파 분석가(자기 가치 인식부터), 타이밍파 전략가(7월까지 기다려라) — 세 캐릭터가 서로 **토론하고 싸우면서** 유저의 연애 문제를 진단하고 주가 상승 작전을 설계한다. 유저는 턴마다 누구 편을 들지 선택하며, 선택이 최종 **작전 계획서**에 반영된다. 작전은 3단계(자기 가치 인식 → 모멘텀 확보 → 급등 트리거)로 구성되지만, **3단계 상세 전략은 잠겨 있다** — "작전 실행은 조작단원과 1:1로." 이 미완의 작전이 캐릭터 챗봇으로의 전환 호기심을 만든다. 결과물은 **종목 리포트 카드 1장**(현재가 + 적정가 + 저평가율 + 투자의견) — "내 연애 적정가 2만원인데 시장가 1,200원이래ㅋㅋ 저평가 국밥주" 가 대화를 만들고, **커플 M&A 시너지 분석**이 강제 2인 루프를 만든다.
 
 ---
@@ -15,7 +19,7 @@
 1. **입력**: 생년월일시 + 현재 연애 상태 입력 (10초, 가입 불필요) → "사주증권 리서치센터 분석 중..." 로딩 연출
 2. **종목 리포트 카드**: 현재가 + 적정가 + 저평가율 + 투자의견이 담긴 카드 1장 즉시 생성 → **바이럴 지점 1**
 3. **주가 조작단 소집**: "이 주가, 조작 안 하면 상폐됩니다" → 3명의 조작단원이 소집되어 턴제 토론 시작
-4. **작전 회의** (턴제 시뮬레이션): 3캐릭터가 서로 싸우며 유저의 문제를 진단 + 유저가 편을 드는 선택 (4~5턴)
+4. **작전 회의** (턴제 시뮬레이션): 3캐릭터가 서로 싸우며 유저의 문제를 진단 + 유저가 편을 드는 선택 (4턴)
 5. **작전 계획서**: 3단계 주가 상승 작전 → 단, 3단계(급등 트리거)는 잠금 → **호기심 극대화**
 6. **M&A 시너지 분석**: 상대방 생년월일 입력 → 합병 시너지 분석 → **강제 2인 루프**
 7. **전환**: "작전 실행하기" → 조작단원 캐릭터 챗봇 1:1 유료 상담
@@ -47,6 +51,33 @@
 **Want to** (무엇을 원한다): 내 연애 주가가 왜 바닥인지 조작단원들의 토론을 보며 재밌게 진단받고, 주가를 올릴 구체적 작전을 받아서, 종목 리포트 카드를 친구들과 공유하며 "너는 현재가 얼마야?" 대화를 하기를 원한다.
 
 **So that** (어떤 목적/가치를 위해): "적정가는 2만원인데 시장이 못 알아본 거"라는 숫자로 자존감을 회복하고, 조작단의 작전으로 "내가 뭘 바꿔야 하는지" 방향을 잡고, 잠긴 3단계(급등 트리거)가 궁금해져서 캐릭터 챗봇과 1:1로 작전을 실행하기 위해.
+
+---
+
+## 상태 머신 (State Machine)
+
+```
+input → analyzing → report → briefing → turn1 → turn2 → turn3 → turn4 → plan → ma(선택) → result
+  ↑___________________________________________________________________________↓ (handleReset)
+```
+
+| Step | 화면 | 설명 |
+|------|------|------|
+| `input` | 입력 폼 | 성별 + 생년월일 + 시간 + 양음력 + 연애 상태 |
+| `analyzing` | 로딩 연출 | "사주증권 리서치센터 분석 중..." 순차 텍스트 (2.5초 최소, Edge Function 응답까지) |
+| `report` | 종목 리포트 카드 | 현재가 + 적정가 + 차트 + 투자의견 → **바이럴 핵심 (toPng 캡처)** + 공유 버튼 |
+| `briefing` | 긴급 소집 | "이 주가, 이대로 두실 겁니까?" → 조작단 입장 연출 |
+| `turn1` | 1턴: 현황 진단 | 3캐릭터 발언 + 유저 3지선다 |
+| `turn2` | 2턴: 작전 충돌 | 턴1 선택 반영 분기 + 유저 3지선다 |
+| `turn3` | 3턴: 핵심 찌르기 | 3캐릭터 수렴 + 유저 응답 3지선다 |
+| `turn4` | 4턴: 작전 설계 | 역할 분담 + 유저 목표 선택 3지선다 |
+| `plan` | 작전 계획서 | 3단계 로드맵 (3단계 잠금) + CTA 버튼 |
+| `ma` | M&A 시너지 | 상대 종목코드 입력 → 합병 시너지 카드 (선택적) |
+| `result` | 결과 + 공유 | 공유 버튼 + 리플레이 + 전환 CTA |
+
+> **report 단계에서 1차 공유 포인트**, **plan/result 단계에서 2차 공유 포인트**. 종목 리포트 카드가 가장 강력한 바이럴 자산이므로 report → briefing 전환 전에 충분한 공유 유도.
+
+> **report에서 바로 result로 스킵 가능** — 턴제 토론을 원치 않는 유저를 위해 "바로 공유하기" 옵션 제공. 하지만 기본 플로우는 briefing으로 진행.
 
 ---
 
@@ -107,8 +138,20 @@ if (genderParam) {
   - "종목 데이터 수집 중..."
   - "원국 밸류에이션 산정 중..."
   - "도화살 모멘텀 분석 중..."
-  - "주가 조작단 소집 중... 📊"
-  - → 증권사 느낌의 긴장감 빌드업 (2~3초)
+  - "주가 조작단 소집 중..."
+  - → 증권사 느낌의 긴장감 빌드업 (2.5초 최소, Edge Function 응답까지)
+
+#### 1-1. 현재 연애 상태 반영 방식
+
+입력된 연애 상태가 분석 전체에 영향을 미친다:
+
+| 상태 | 종목 프레이밍 | 현재가 영향 | 토론 방향 | 작전 목표 |
+|------|-------------|-----------|----------|----------|
+| **싱글** | "비상장 종목" | 기본 계산 그대로 | "왜 시장에 안 나갔는가" (비상장 문제) | 상장 → 적정가 달성 |
+| **썸** | "IPO 준비 중" | +500원 가산 | "IPO 타이밍을 잡아야 한다" (전환 시점) | IPO 성공 → 시초가 방어 |
+| **연애중** | "상장 종목 — 저평가 구간" | +1,000원 가산 | "왜 시장이 적정가를 못 매기는가" (관계 내 저평가) | 시장 재평가 → 적정가 회복 |
+
+> **싱글이 기본 타겟**이므로 "비상장" 프레이밍이 가장 풍부하게 설계됨. 썸/연애중은 프레이밍만 바뀌고 핵심 구조(현재가↔적정가 괴리 + 3단계 작전)는 동일.
 
 ### Step 2. 종목 리포트 카드 생성 (바이럴 핵심 — 1장 캡처 공유)
 
@@ -120,11 +163,11 @@ if (genderParam) {
 
 | 투자의견 | 사주 트리거 | 의미 | 카드 표시 |
 |---------|-----------|------|----------|
-| **강력 매수** | 도화살 2개 이상 + 현재 억압(편인 과다) | 매력 폭발 직전, 지금이 바닥 | 🔴 빨간 뱃지 |
-| **매수** | 도화살 1개 + 정관/정인 동주 | 안정적 상승 예상 | 🟠 주황 뱃지 |
-| **보유(존버)** | 식신 보유 + 현재 대운 평이 | 급등은 아니지만 손절 금지 | 🟡 노랑 뱃지 |
-| **비중 축소** | 편관격 + 도화살 충 | 현재 고점, 차익 실현 시기 | 🟢 초록 뱃지 |
-| **관리종목** | 공망 진입 + 편인 과다 + 도화살 합거 | 일시 거래 정지 상태 | ⚫ 회색 뱃지 |
+| **강력 매수** | 도화살 2개 이상 + 현재 억압(편인 과다) | 매력 폭발 직전, 지금이 바닥 | 빨간 뱃지 |
+| **매수** | 도화살 1개 + 정관/정인 동주 | 안정적 상승 예상 | 주황 뱃지 |
+| **보유(존버)** | 식신 보유 + 현재 대운 평이 | 급등은 아니지만 손절 금지 | 노랑 뱃지 |
+| **비중 축소** | 편관격 + 도화살 충 | 현재 고점, 차익 실현 시기 | 초록 뱃지 |
+| **관리종목** | 공망 진입 + 편인 과다 + 도화살 합거 | 일시 거래 정지 상태 | 회색 뱃지 |
 
 #### 2-2. 종목 리포트 카드 레이아웃
 
@@ -133,7 +176,7 @@ if (genderParam) {
 ```
 ┌──────────────────────────────┐
 │                              │
-│  📊 사주증권 리서치센터       │
+│  사주증권 리서치센터          │
 │                              │
 │  김○○의 연애운               │
 │  섹터: 도화살 관련주          │
@@ -147,7 +190,7 @@ if (genderParam) {
 │       ╱╲                     │
 │  ╱╲╱  ╲  ╱╲╱╲             │
 │ ╱      ╲╱      ╱           │
-│  NOW→        7월 🚀         │
+│  NOW→        7월 급등        │
 │                              │
 │  투자의견: ★ 강력 매수 ★     │
 │                              │
@@ -168,25 +211,33 @@ if (genderParam) {
 | **투자의견** | 한 단어로 상태 요약 | "강력매수래ㅋㅋ" "관리종목이래..." |
 | **한 줄 코멘트** | 캡처 트리거 — 찌르거나 웃김 | "적정가 2만원짜리가 1,200원에 팔리고 있다" |
 
-#### 2-3. 현재가 산정 로직
+#### 2-3. 현재가 산정 로직 — `calculateCurrentPrice()`
 
-**현재가 = 기본가(5,000원) - 억압 감소분 + 모멘텀 가산분**
+**현재가 = 기본가(5,000원) + 연애상태 가산 - 억압 감소분 + 모멘텀 가산분**
 
 현재 사주에서 연애운을 억압하는 요소가 많을수록 현재가가 낮아진다. **현재가가 낮을수록 = 저평가 폭이 크다 = 상승 여력이 크다**는 역설이 핵심. 800원 받아도 기분 나쁘지 않음 — "바닥이니까 강력매수"니까.
 
 ```
+연애상태 가산:
+  싱글                          +0원
+  썸                           +500원
+  연애중                       +1,000원
+
 억압 감소분 (사주에서 산출):
-  편인 과다 (자격지심)        -1,500원
-  도화살 합거 (매력 봉인)     -1,200원
-  정관 약 (인연 부재)         -1,000원
-  공망 진입                   -800원
-  상관 과다 (자기 의심)       -600원
+  편인 과다 (자격지심)          -1,500원
+  도화살 합거 (매력 봉인)       -1,200원
+  정관 약 (인연 부재)           -1,000원
+  공망 진입                     -800원
+  상관 과다 (자기 의심)         -600원
 
 모멘텀 가산분 (현재 대운/세운):
   도화살 운 진입 예정(3개월 내)  +1,500원
   정관 운 진입 예정(6개월 내)    +800원
-  편인 합거 예정               +600원
-  식신 운 진행 중              +300원
+  편인 합거 예정                +600원
+  식신 운 진행 중               +300원
+
+최소값: 300원 (0원 이하 방지)
+최대값: 12,000원
 ```
 
 | 현재가 구간 | 등급 | 카드 스타일 |
@@ -199,25 +250,25 @@ if (genderParam) {
 
 > 역대 저점(800~1,999원)이 가장 화려한 네온 레드 → 공유 욕구 최대. "관리종목"은 희귀 등급으로 화제성 극대.
 
-#### 2-4. 적정가 산정 로직
+#### 2-4. 적정가 산정 로직 — `calculateFairValue()`
 
 현재가와 별개로 **사주가 말하는 진짜 값어치**를 산정하는 것이 핵심 위로 장치. "적정가 20,000원인데 시장가 1,200원" — 이 한 줄이 위로의 전부.
 
 ```
 적정가 = 기본가(10,000원) + 매력 가산 + 내면 가산 + 역량 가산
 
-매력 가산 (도화살·홍염살·편재 조합):
+매력 가산 (도화살/홍염살/편재 조합):
   도화살 1개                    +3,000원
   도화살 2개                    +7,000원
   홍염살 보유                   +2,000원
   편재 투출                     +1,500원
 
-내면 가산 (정인·식신·비견 조합):
+내면 가산 (정인/식신/비견 조합):
   정인+식신 동주                +3,000원
   비견 적당                     +1,500원
   정관+정인 동주 (진심의 무게)   +4,000원
 
-역량 가산 (편관·정관·편인 조합):
+역량 가산 (편관/정관/편인 조합):
   정관격                        +3,000원
   편관격                        +2,500원
   편인+정관 (커리어형)           +2,000원
@@ -233,9 +284,9 @@ if (genderParam) {
 
 **핵심 설계**: 적정가는 대부분 높게 나오도록 설계. 현재가가 1,200원이어도 적정가는 20,000원 — **"저평가율이 높다 = 값어치는 높은데 시장이 몰라본다"**. 현재가와 적정가의 괴리가 클수록 위로가 강해지고, 동시에 조작단의 작전 필요성이 설득력을 가짐.
 
-#### 2-5. 목표가 + 급등 시점 산정 로직
+#### 2-5. 목표가 + 급등 시점 산정 로직 — `calculateTargetPrice()`
 
-사주 대운·세운에서 **억압 요소가 풀리는 시점**을 급등 시점으로 환산:
+사주 대운/세운에서 **억압 요소가 풀리는 시점**을 급등 시점으로 환산:
 
 ```
 주요 판단 기준:
@@ -249,11 +300,35 @@ if (genderParam) {
 표시: "7월 도화살 진입 시 목표가 18,000원 (↑1,400%)"
 ```
 
-#### 2-6. 투자의견별 애널리스트 코멘트
+#### 2-6. 차트 데이터 생성 — `generateChartData()`
 
-카드에 박히는 핵심 문장. **이 코멘트가 캡처·공유의 트리거.**
+종목 리포트 카드의 차트를 위한 12개월 데이터 포인트를 생성한다:
 
-| 투자의견 | 애널리스트 코멘트 | 공유 포인트 |
+```typescript
+// 12개월 차트 (현재 월 기준 -3개월 ~ +9개월)
+// 과거 3개월: 현재가 근처에서 소폭 등락 (±200원)
+// 현재: currentPrice
+// 급등 시점까지: 완만 상승
+// 급등 시점: targetPrice의 70~100%
+// 급등 이후: targetPrice 근처 유지
+
+function generateChartData(
+  currentPrice: number,
+  targetPrice: number,
+  surgeMonthOffset: number // 현재 기준 몇 개월 후
+): number[] {
+  // 12개 데이터포인트 배열 반환
+  // SVG Path 또는 CSS로 렌더링
+}
+```
+
+> 차트는 시각적 장치일 뿐 — 정확한 예측이 아니라 "지금은 바닥이고 곧 오른다"는 내러티브를 시각화.
+
+#### 2-7. 투자의견별 애널리스트 코멘트
+
+카드에 박히는 핵심 문장. **이 코멘트가 캡처/공유의 트리거.** Gemini가 사주 데이터를 반영하여 개인화된 코멘트를 생성하되, 아래가 톤 레퍼런스:
+
+| 투자의견 | 코멘트 레퍼런스 | 공유 포인트 |
 |---------|----------------|-----------|
 | 강력 매수 | "펀더멘털 대비 극심한 저평가. 시장이 이 종목을 모르고 있다." | "시장이 나를 모른대ㅋㅋ" |
 | 매수 | "안정적 상승 추세 진입. 중장기 보유 추천." | "꾸준히 오른대" |
@@ -269,9 +344,9 @@ if (genderParam) {
 
 | 캐릭터 | 포지션 | 투자 철학 | 말투 | 사주 담당 영역 |
 |--------|--------|----------|------|--------------|
-| **강도현** | 작전 본부장 (공격파) | "비상장이 문제. 시장에 나가야 주가가 움직인다" | 반말, 직설, 급함 | **도화살·편관** (매력·행동력) |
-| **윤서율** | 펀더멘털 분석가 (가치파) | "적정가가 높아도 본인이 자기 값어치를 모르면 시장가는 바닥" | 존댓말, 차분, 날카로움 | **편인·정인** (자존감·내면) |
-| **차민혁** | 차트 전략가 (타이밍파) | "타이밍이 전부. 7월 전에 준비 안 끝나면 1년 더 기다려야" | 반존대, 계산적, 긴급함 | **대운·세운** (시점·타이밍) |
+| **강도현** | 작전 본부장 (공격파) | "비상장이 문제. 시장에 나가야 주가가 움직인다" | 반말, 직설, 급함 | **도화살/편관** (매력/행동력) |
+| **윤서율** | 펀더멘털 분석가 (가치파) | "적정가가 높아도 본인이 자기 값어치를 모르면 시장가는 바닥" | 존댓말, 차분, 날카로움 | **편인/정인** (자존감/내면) |
+| **차민혁** | 차트 전략가 (타이밍파) | "타이밍이 전부. 7월 전에 준비 안 끝나면 1년 더 기다려야" | 반존대, 계산적, 긴급함 | **대운/세운** (시점/타이밍) |
 
 **캐릭터 간 긴장 구도**:
 
@@ -290,14 +365,14 @@ if (genderParam) {
 - **윤서율 vs 차민혁**: "자기 가치 인식부터 바꿔야 한다" vs "7월 전에 안 끝나면 기회 날린다" → 완벽주의 vs 현실주의 논쟁
 - **차민혁 vs 강도현**: "타이밍 안 맞으면 다 소용없다" vs "타이밍 재다가 상폐된다" → 신중 vs 과감 논쟁
 
-**왜 3명이 싸워야 하는가**: 유저를 직접 찌르면 불쾌. 캐릭터끼리 싸우는 걸 보면서 **"ㅋㅋ 맞아 저 말이 맞는데"** 편들기 — 관전자 포지션에서 자연스럽게 자기 문제를 인식하게 됨. 시라노 연애 조작단이 "네가 문제야"라고 말하는 게 아니라, 서로 "이 작전이 맞다" 싸우는 과정에서 유저의 문제가 드러나는 구조.
+**왜 3명이 싸워야 하는가**: 유저를 직접 찌르면 불쾌. 캐릭터끼리 싸우는 걸 보면서 **"ㅋㅋ 맞아 저 말이 맞는데"** 편들기 — 관전자 포지션에서 자연스럽게 자기 문제를 인식하게 됨.
 
-#### 3-2. 소집 연출
+#### 3-2. 소집 연출 (briefing 화면)
 
 ```
 ━━━━━━ 긴급 소집 ━━━━━━
 
-📊 사주증권 특별 보고
+사주증권 특별 보고
 
 김○○ 종목이
 현재가 1,200원까지 하락했습니다.
@@ -328,7 +403,47 @@ if (genderParam) {
 [작전 회의 시작하기 →]
 ```
 
-#### 3-3. 작전 회의 — 턴제 토론 (4~5턴)
+#### 3-3. 턴제 토론 구현 방식
+
+**핵심 결정: Edge Function 1회 호출로 전체 턴 대사를 사전 생성한다.**
+
+- 턴마다 API를 호출하면 대기 시간이 길어져 이탈 발생
+- 전체 4턴 대사를 한번에 생성하여 프론트엔드에서 클라이언트 사이드로 턴 전환
+- 유저의 턴1 선택에 따라 턴2가 분기 (3가지 변형) → **총 6세트의 턴 대사** 생성
+
+**분기 구조:**
+
+```
+턴1 (공통 1세트)
+  ├─ 유저 선택 A (강도현) → 턴2-A (1세트)
+  ├─ 유저 선택 B (윤서율) → 턴2-B (1세트)
+  └─ 유저 선택 C (차민혁) → 턴2-C (1세트)
+턴3 (공통 1세트) ← 선택과 무관하게 "수렴"
+턴4 (공통 1세트) ← 역할 분담 + 목표 선택
+```
+
+> 턴3~4가 공통인 이유: PRD 설계상 턴3은 "유저의 선택과 무관하게 핵심 원인에 수렴"하는 턴이고, 턴4는 "수렴된 원인을 기반으로 작전 설계"하는 턴. 사주 분석 결과(핵심 원인)는 유저의 선택과 무관하게 고정이므로.
+
+**프론트엔드 턴 전환:**
+
+```typescript
+// 턴 전환은 framer-motion AnimatePresence + 슬라이드
+// ChatBubble 컴포넌트로 대화 버블 순차 등장 (타이핑 효과)
+// 유저 선택지는 하단 고정 3버튼
+// 선택 후 다음 턴 대사가 위에서 순차 등장
+
+type TurnState = 'turn1' | 'turn2' | 'turn3' | 'turn4';
+type UserChoice = 'A' | 'B' | 'C';
+
+interface TurnChoices {
+  turn1: UserChoice | null;
+  turn2: UserChoice | null;
+  turn3: UserChoice | null;  // 턴3 질문 응답
+  turn4: UserChoice | null;  // 목표 선택
+}
+```
+
+#### 3-4. 턴제 토론 상세 (4턴)
 
 **1턴: 현황 진단 — "왜 바닥인가"**
 
@@ -378,14 +493,14 @@ if (genderParam) {
 ```
 누구 말이 맞다고 생각하세요?
 
-  ① 강도현: "맞아, 나가봐야 알지"
-  ② 윤서율: "솔직히 자신감이 문제인 건 맞아..."
-  ③ 차민혁: "타이밍이 안 맞았던 건가"
+  A 강도현: "맞아, 나가봐야 알지"
+  B 윤서율: "솔직히 자신감이 문제인 건 맞아..."
+  C 차민혁: "타이밍이 안 맞았던 건가"
 ```
 
 **2턴: 작전 충돌 — "어떻게 올릴 것인가"**
 
-유저의 1턴 선택에 따라 토론 방향이 갈린다. 유저가 ②번(윤서율)을 선택한 경우:
+유저의 1턴 선택에 따라 토론 방향이 갈린다. 유저가 B번(윤서율)을 선택한 경우:
 
 ```
 윤서율 (펀더멘털 분석가):
@@ -443,9 +558,9 @@ if (genderParam) {
 ```
 당신의 작전은?
 
-  ① 강도현 안: "바로 시장에 나간다"
-  ② 윤서율 안: "내 값어치부터 알아야지"
-  ③ 차민혁 안: "시간표대로 단계별로"
+  A 강도현 안: "바로 시장에 나간다"
+  B 윤서율 안: "내 값어치부터 알아야지"
+  C 차민혁 안: "시간표대로 단계별로"
 ```
 
 **3턴: 핵심 찌르기 — "진짜 원인"**
@@ -459,11 +574,11 @@ if (genderParam) {
  혹시 좋아하는 사람한테
  먼저 연락한 적 있어?"
 
-  ① "...없어"
-  ② "했는데 안 됐어"
-  ③ "좋아하는 사람이 없어"
+  A "...없어"
+  B "했는데 안 됐어"
+  C "좋아하는 사람이 없어"
 
-→ ①번 선택 시:
+→ A번 선택 시:
 
 강도현:
 "그게 비상장이라는 거야.
@@ -536,18 +651,18 @@ if (genderParam) {
 ```
 주가가 올랐을 때, 어떤 모습이길 원하세요?
 
-  ① "좋아하는 사람에게 먼저 말 거는 사람"
-  ② "내 가치를 아는 사람이 찾아오는 것"
-  ③ "연애든 뭐든 자신감 있는 사람"
+  A "좋아하는 사람에게 먼저 말 거는 사람"
+  B "내 가치를 아는 사람이 찾아오는 것"
+  C "연애든 뭐든 자신감 있는 사람"
 ```
 
-#### 3-4. 핵심 설계 원칙
+#### 3-5. 핵심 설계 원칙
 
 | 원칙 | 이유 |
 |------|------|
 | **캐릭터끼리 싸우고, 유저는 심판** | 직접 찌르면 불쾌. 관전하면서 "ㅋㅋ 맞아 저 말이 맞는데" 편들기가 더 몰입됨 |
-| **싸우다가 하나로 수렴** | 3명이 다른 말 하다가 같은 결론에 도달하면 설득력이 3배. "매력을 꺼놓은 거"가 3명 입에서 나옴 |
-| **선택지는 2~3개, 최대 4~5턴** | 길면 이탈. 5~7분 내 끝나야 함 |
+| **싸우다가 하나로 수렴** | 3명이 다른 말 하다가 같은 결론에 도달하면 설득력이 3배 |
+| **선택지는 3개, 최대 4턴** | 길면 이탈. 5~7분 내 끝나야 함 |
 | **유저의 선택이 작전 계획서에 반영** | "먼저 말 거는 사람" 선택 → 작전 3단계에 "공격적 시장 진출" 배치 |
 | **문제 인식 → 해결 방향 제시 → 상세는 잠금** | 챗봇 전환을 위한 호기심 설계 |
 
@@ -562,7 +677,7 @@ if (genderParam) {
 ```
 ┌──────────────────────────────┐
 │                              │
-│  📋 주가 상승 작전 계획서     │
+│  주가 상승 작전 계획서        │
 │                              │
 │  종목: 김○○의 연애운         │
 │                              │
@@ -573,7 +688,7 @@ if (genderParam) {
 │                              │
 │  4월  ■■□□□□□□  자기 인식   │
 │  6월  □□□□■■□□  모멘텀 확보 │
-│  7월  □□□□□□■■  급등 🔒     │
+│  7월  □□□□□□■■  급등 잠금   │
 │                              │
 │  ── 조작단 한마디 ──         │
 │                              │
@@ -581,7 +696,7 @@ if (genderParam) {
 │   1,200원에 팔리고 있다.     │
 │   이건 시장의 실수다."       │
 │                              │
-│  🔒 3단계 작전은 1:1로만     │
+│  잠금: 3단계 작전은 1:1로만  │
 │                              │
 │  nadaunse.com/stock          │
 └──────────────────────────────┘
@@ -595,7 +710,7 @@ if (genderParam) {
 | **↑1,400%** | 큰 숫자 하나가 시선 고정 | "1,400% 상승 여력이래" |
 | **작전 로드맵 바** | 3단계가 시각적으로 보임 | "7월에 급등인데 잠겨있어" |
 | **조작단 한마디** | 캡처 트리거 — 짧고 찌르는 한 줄 | "시장의 실수래ㅋㅋ" |
-| **🔒 잠금** | 호기심 유발 | "3단계가 뭔데?" → 전환 |
+| **잠금** | 호기심 유발 | "3단계가 뭔데?" → 전환 |
 
 > 작전 상세(편인 해체, 도화살 타이밍 등)는 카드가 아니라 **턴제 토론 과정**에서 이미 전달됨. 카드는 결론만.
 
@@ -604,7 +719,7 @@ if (genderParam) {
 | 요소 | 역할 |
 |------|------|
 | **숫자(↑1,400%)** | "이만큼 오를 수 있다니?" → 기대감 |
-| **로드맵에서 7월만 🔒** | 시각적으로 "마지막만 빠져있다" |
+| **로드맵에서 7월만 잠금** | 시각적으로 "마지막만 빠져있다" |
 | **조작단 한마디** | 토론에서 감정이입한 캐릭터의 말 → 신뢰 |
 | **"1:1로만"** | 비밀 작전 느낌 → 호기심 → 클릭 |
 
@@ -616,16 +731,51 @@ if (genderParam) {
 
 #### 5-1. M&A 분석 입력
 
-상대 종목명(이름) + 종목코드(생년월일) 입력. 또는 **"상대에게 종목코드 요청하기"** → 카카오톡 링크 전송.
+상대 종목명(이름) + 종목코드(생년월일+성별) 입력. 또는 **"상대에게 종목코드 요청하기"** → 카카오톡 링크 전송.
 
-#### 5-2. M&A 리포트 카드
+#### 5-2. M&A 시너지 산정 로직 — `calculateMaSynergy()`
 
-**설계 원칙**: 이름궁합 테스트처럼 **큰 숫자 하나 + 한 줄 판정**으로 끝. 시너지 내역·리스크 상세는 카드 아래 접힌 영역에.
+두 사람의 사주 원국을 비교하여 합병 시너지를 산출한다:
+
+```
+시너지 점수 = 합(합 요소) - 합(충 요소)
+
+합 요소 (궁합 가산):
+  일간 천간합 (甲己, 乙庚 등)           +15%
+  일지 지지합 (子丑, 寅亥 등)           +12%
+  용신 보완 (A의 기신 = B의 용신)       +10%
+  도화살 공명 (양쪽 도화살 동일)          +8%
+  정관-정인 교차 (A정관 = B정인지지)      +8%
+  식신 상호 (양쪽 식신 보유)              +5%
+
+충 요소 (궁합 감산):
+  일간 천간충                           -12%
+  일지 지지충 (子午, 丑未 등)           -10%
+  기신 강화 (A의 기신 = B의 기신)        -8%
+  편관 충돌 (양쪽 편관 과다)             -8%
+  공망 겹침                              -5%
+
+시너지 범위: -35% ~ +50%
+```
+
+| 시너지 | 등급 | 별점 | 투자의견 |
+|--------|------|------|---------|
+| **+30% 이상** | 황금 합병 | ★★★★★ | "역대급 시너지. 즉시 합병 추천" |
+| **+15~29%** | 우호적 합병 | ★★★★☆ | "합병 추천. 시너지 기대" |
+| **0~14%** | 보통 합병 | ★★★☆☆ | "보유 관찰. 나쁘지 않다" |
+| **-15~-1%** | 리스크 합병 | ★★☆☆☆ | "합병 리스크 존재. 신중 검토" |
+| **-16% 이하** | 적대적 합병 | ★☆☆☆☆ | "합병 시 양쪽 주가 하락 위험" |
+
+**충돌 확률** = `min(100, max(0, 충 요소 합계의 절대값 × 2.5))` → 0~100% 범위
+
+#### 5-3. M&A 리포트 카드 레이아웃
+
+**설계 원칙**: 이름궁합 테스트처럼 **큰 숫자 하나 + 한 줄 판정**으로 끝. 시너지 내역/리스크 상세는 카드 아래 접힌 영역에.
 
 ```
 ┌──────────────────────────────┐
 │                              │
-│  🤝 합병 시너지 분석          │
+│  합병 시너지 분석             │
 │                              │
 │  김○○  ×  이○○              │
 │                              │
@@ -637,7 +787,7 @@ if (genderParam) {
 │  "이 조합, 같이 있으면       │
 │   서로의 주가가 오릅니다."   │
 │                              │
-│  ⚠️ 충돌 확률 23%            │
+│  충돌 확률 23%               │
 │                              │
 │  nadaunse.com/stock          │
 └──────────────────────────────┘
@@ -659,12 +809,12 @@ if (genderParam) {
 - "+30%" 숫자가 비교 대화 유발 → "우리 시너지 몇 %야?"
 - 마이너스가 나오면 더 웃김 → "합병하면 주가 떨어진대ㅋㅋ" → 자조 공유
 
-#### 5-3. M&A 전송 메시지
+#### 5-4. M&A 전송 메시지
 
 ```
 ┌─ 카카오톡 공유 메시지 ──────────┐
 │                                  │
-│  📊 [합병 시너지 분석 요청]      │
+│  [합병 시너지 분석 요청]         │
 │                                  │
 │  [OO]님이 당신과의 합병          │
 │  시너지를 분석하고 싶어합니다.   │
@@ -724,15 +874,15 @@ CTA 버튼 클릭
 
 ```
 ┌──────────────────────────────┐
-│  [📱 카카오톡으로 보내기]     │
-│  [📸 인스타 스토리에 올리기]  │
-│  [🔗 링크 복사]              │
-│  [💾 이미지 저장]            │
+│  [카카오톡으로 보내기]        │
+│  [인스타 스토리에 올리기]     │
+│  [링크 복사]                 │
+│  [이미지 저장]               │
 │                              │
-│  [🤝 M&A 시너지 분석하기]    │
+│  [M&A 시너지 분석하기]       │
 │  → "관심 종목과 합병 분석"    │
 │                              │
-│  [🔄 다른 종목 분석하기]     │
+│  [다른 종목 분석하기]        │
 │  → "친구 종목코드 넣어서      │
 │     리포트 뽑기"              │
 └──────────────────────────────┘
@@ -749,9 +899,438 @@ CTA 버튼 클릭
 | 트리거 | 내용 |
 |--------|------|
 | **주간 시황 리포트** | 매주 월요일 "이번 주 연애운 시황" 자동 생성 → "수요일 급등 주의보" 일별 예보 → 재방문 |
-| **급등 알림** | 급등 예정 월 접근 시: "📈 7월 급등 시그널 감지. 작전 준비 상태를 점검하세요." → 재방문 |
+| **급등 알림** | 급등 예정 월 접근 시: "7월 급등 시그널 감지. 작전 준비 상태를 점검하세요." → 재방문 |
 | **조작단 속보** | "강도현: 3단계 시장 상황이 바뀌었습니다. 작전 수정 필요." → 캐릭터 푸시로 재방문 |
 
 ---
 
-**최종 업데이트**: 2026-03-26
+## 기술 명세
+
+### 1. Edge Function 설계
+
+#### `analyze-saju-stock` (개인 분석 + 턴제 토론)
+
+```
+클라이언트 요청:
+POST /functions/v1/analyze-saju-stock
+{
+  "gender": "female",
+  "birthDate": "1991-12-25",
+  "birthTime": "23:15",        // nullable ("모름" → null)
+  "calendarType": "solar",
+  "relationshipStatus": "single" // "single" | "some" | "dating"
+}
+
+처리 흐름:
+1. 입력 검증 (birthDate 포맷, gender enum 등)
+2. 사주 API 호출 (StargioSaju, SAJU_API_KEY, 재시도 3회)
+   - excludeKeys: 월운보기, 본사주, 대운 등 8개
+3. 사주 데이터 파싱 → 원국 요소 추출
+4. 가격 계산 (deterministic):
+   - calculateCurrentPrice(sajuData, relationshipStatus)
+   - calculateFairValue(sajuData)
+   - calculateTargetPrice(sajuData, fairValue)
+   - determineInvestmentOpinion(sajuData, currentPrice, fairValue)
+   - generateChartData(currentPrice, targetPrice, surgeMonth)
+5. Gemini 2.5 Flash 호출 — 턴제 토론 대사 + 코멘트 생성
+6. 작전 계획서 구성
+7. DB 저장 (saju_stocks)
+8. 응답 반환
+```
+
+**응답 JSON 스키마:**
+
+```typescript
+interface StockAnalysisResponse {
+  id: string;                // UUID — DB PK, 공유 링크용
+
+  // 종목 리포트
+  stockReport: {
+    currentPrice: number;    // 300~12,000
+    fairValue: number;       // 12,000~35,000
+    targetPrice: number;     // fairValue의 80~100%
+    undervalueRate: number;  // (1 - currentPrice/fairValue) × 100
+    investmentOpinion: 'strong_buy' | 'buy' | 'hold' | 'reduce' | 'warning';
+    surgeMonth: string;      // "2026-07" 형식
+    surgeMonthLabel: string; // "7월" 표시용
+    sector: string;          // "도화살 관련주", "정관 안정주" 등
+    priceGrade: 'premium' | 'mid' | 'small' | 'penny' | 'warning';
+    fairValueGrade: 'bluechip' | 'quality' | 'growth';
+    analystComment: string;  // Gemini 생성 — 1~2문장
+    chartData: number[];     // 12개 데이터포인트
+    relationshipFrame: 'unlisted' | 'ipo' | 'listed'; // 싱글/썸/연애중
+  };
+
+  // 턴제 토론
+  discussion: {
+    briefing: {
+      headline: string;      // "김○○ 종목이 현재가 1,200원까지 하락"
+      subtext: string;       // "적정가 20,000원 대비 저평가율 ▼94%"
+    };
+    turn1: TurnData;
+    turn2: {
+      A: TurnData;           // 유저가 턴1에서 강도현(A) 선택 시
+      B: TurnData;           // 유저가 턴1에서 윤서율(B) 선택 시
+      C: TurnData;           // 유저가 턴1에서 차민혁(C) 선택 시
+    };
+    turn3: TurnData;         // 공통 — 수렴
+    turn4: TurnData;         // 공통 — 작전 설계
+  };
+
+  // 작전 계획서
+  operationPlan: {
+    currentToTarget: string; // "1,200원 → 18,000원"
+    growthRate: string;      // "↑1,400%"
+    phase1: { month: string; title: string; summary: string; };
+    phase2: { month: string; title: string; summary: string; };
+    phase3: { month: string; title: string; locked: true; teaser: string; };
+    crewComment: string;     // Gemini 생성
+  };
+
+  // 사주 원국 요약 (프론트에서 턴 대사 맥락용)
+  sajuSummary: {
+    dayMaster: string;       // 일간
+    dominantElements: string[];
+    keyTraits: string[];
+  };
+}
+
+interface TurnData {
+  title: string;             // "1턴: 현황 진단"
+  dialogs: {
+    characterId: 'kang' | 'yoon' | 'cha';
+    characterName: string;
+    position: string;        // "작전 본부장 (공격파)"
+    lines: string;           // 대사 전체 (줄바꿈 포함)
+  }[];
+  question: string;          // 유저에게 던지는 질문
+  choices: {
+    id: 'A' | 'B' | 'C';
+    characterId: 'kang' | 'yoon' | 'cha';
+    label: string;           // 선택지 텍스트
+  }[];
+}
+```
+
+#### `analyze-stock-ma` (M&A 시너지 분석)
+
+```
+클라이언트 요청:
+POST /functions/v1/analyze-stock-ma
+{
+  "stockId": "uuid-of-person-a",  // saju_stocks의 id
+  "targetGender": "male",
+  "targetBirthDate": "1989-05-14",
+  "targetBirthTime": null,
+  "targetCalendarType": "solar",
+  "targetName": "이○○"            // 카드 표시용 (optional)
+}
+
+처리 흐름:
+1. stockId로 person A의 saju_stocks 조회
+2. person B의 사주 API 호출
+3. calculateMaSynergy(sajuA, sajuB)
+4. Gemini 호출 — 시너지 코멘트 1줄 생성
+5. DB 저장 (stock_ma_analyses)
+6. 응답 반환
+```
+
+**응답 JSON 스키마:**
+
+```typescript
+interface MaAnalysisResponse {
+  id: string;
+  stockId: string;           // person A
+  targetName: string;
+  synergy: number;           // -35 ~ +50
+  synergyGrade: 'golden' | 'friendly' | 'neutral' | 'risky' | 'hostile';
+  starRating: number;        // 1~5
+  conflictRate: number;      // 0~100
+  comment: string;           // Gemini 생성 — 1줄
+  investmentOpinion: string; // "합병 추천", "신중 검토" 등
+}
+```
+
+### 2. Gemini 프롬프트 설계
+
+**시스템 프롬프트:**
+
+```
+당신은 "사주증권 리서치센터"의 수석 스크립트 작가입니다.
+사주 원국 데이터를 기반으로 주가 조작단 3명의 토론 대사를 작성합니다.
+
+## 캐릭터 톤
+- 강도현 (kang): 반말, 직설적, "~해", "~거야", 급하고 결단력 있음. 행동을 강조.
+- 윤서율 (yoon): 존댓말, "~입니다", "~세요", 차분하지만 날카로움. 내면/자존감을 분석.
+- 차민혁 (cha): 반존대, "~요", "~겠습니다", 계산적이고 데이터 중심. 타이밍을 강조.
+
+## 규칙
+1. 각 대사는 5~8문장, 증권 용어를 자연스럽게 섞되 설명 없이 사용
+2. 사주 용어(偏印, 正官, 桃花殺 등)를 대화 속에 녹여서 사용 — 유저가 몰라도 맥락으로 이해되게
+3. 캐릭터끼리 의견이 충돌해야 함 — 동의하지 마세요
+4. 턴3에서 3명이 같은 핵심 원인으로 수렴 — "이것 때문"이라는 한 지점
+5. 핵심 원인은 반드시 사주 데이터에서 도출 — 추측 금지
+6. 유저를 직접 공격하지 마세요 — 캐릭터끼리 싸우되 유저는 "심판"
+7. 턴3의 수렴 포인트에서 유저가 "아..." 하는 감정적 임팩트 필수
+8. 연애 상태(싱글/썸/연애중)에 맞는 프레이밍 사용
+```
+
+**유저 프롬프트 (구조화):**
+
+```
+## 분석 대상
+- 성별: {gender}
+- 연애 상태: {relationshipStatus} → {relationshipFrame}
+- 사주 원국: {sajuData 요약}
+- 현재가: {currentPrice}원 / 적정가: {fairValue}원
+- 투자의견: {investmentOpinion}
+- 급등 시점: {surgeMonth}
+
+## 출력 형식 (JSON)
+{
+  "analystComment": "종목 리포트 한줄 코멘트 (20자 내외, 찌르거나 웃긴 톤)",
+  "turn1": { ... TurnData },
+  "turn2_A": { ... 강도현 선택 시 분기 },
+  "turn2_B": { ... 윤서율 선택 시 분기 },
+  "turn2_C": { ... 차민혁 선택 시 분기 },
+  "turn3": { ... 수렴 턴 },
+  "turn4": { ... 작전 설계 턴 },
+  "crewComment": "작전 계획서 한줄 코멘트"
+}
+
+각 턴의 dialogs 배열은 3개 (강도현, 윤서율, 차민혁 순서).
+각 턴의 choices 배열은 3개 (A, B, C).
+```
+
+### 3. DB 스키마
+
+```sql
+-- 001_create_saju_stocks.sql
+
+CREATE TABLE saju_stocks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ DEFAULT now(),
+
+  -- 입력
+  gender TEXT NOT NULL CHECK (gender IN ('male', 'female')),
+  birth_date TEXT NOT NULL,
+  birth_time TEXT,                -- null = "모름"
+  calendar_type TEXT NOT NULL DEFAULT 'solar' CHECK (calendar_type IN ('solar', 'lunar')),
+  relationship_status TEXT NOT NULL CHECK (relationship_status IN ('single', 'some', 'dating')),
+
+  -- 사주 원국 (API 응답 캐시)
+  saju_data JSONB NOT NULL,
+
+  -- 산출 결과
+  current_price INTEGER NOT NULL,
+  fair_value INTEGER NOT NULL,
+  target_price INTEGER NOT NULL,
+  undervalue_rate NUMERIC(5,2) NOT NULL,
+  investment_opinion TEXT NOT NULL,
+  surge_month TEXT,
+  sector TEXT,
+  price_grade TEXT NOT NULL,
+  fair_value_grade TEXT NOT NULL,
+
+  -- Gemini 생성 콘텐츠
+  analyst_comment TEXT NOT NULL,
+  discussion_data JSONB NOT NULL,    -- 전체 턴 대사
+  operation_plan JSONB NOT NULL,     -- 작전 계획서
+  chart_data JSONB NOT NULL,         -- 12개 차트 포인트
+
+  -- 유저 인터랙션
+  user_choices JSONB,                -- { turn1: 'A', turn2: 'B', turn3: 'A', turn4: 'C' }
+  reached_step TEXT DEFAULT 'report', -- 마지막 도달 화면
+
+  -- 메타
+  share_count INTEGER DEFAULT 0,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT
+);
+
+-- RLS 비활성화 (비회원 전용)
+ALTER TABLE saju_stocks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert" ON saju_stocks FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can read own" ON saju_stocks FOR SELECT USING (true);
+CREATE POLICY "Anyone can update own" ON saju_stocks FOR UPDATE USING (true);
+
+-- M&A 분석 테이블
+CREATE TABLE stock_ma_analyses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ DEFAULT now(),
+
+  -- 관계
+  stock_id UUID NOT NULL REFERENCES saju_stocks(id),  -- person A
+  target_name TEXT,
+
+  -- 상대 사주
+  target_gender TEXT NOT NULL,
+  target_birth_date TEXT NOT NULL,
+  target_birth_time TEXT,
+  target_calendar_type TEXT NOT NULL DEFAULT 'solar',
+  target_saju_data JSONB NOT NULL,
+
+  -- 시너지 결과
+  synergy INTEGER NOT NULL,           -- -35 ~ +50
+  synergy_grade TEXT NOT NULL,
+  star_rating INTEGER NOT NULL,       -- 1~5
+  conflict_rate INTEGER NOT NULL,     -- 0~100
+  comment TEXT NOT NULL,
+  investment_opinion TEXT NOT NULL
+);
+
+ALTER TABLE stock_ma_analyses ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert" ON stock_ma_analyses FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can read" ON stock_ma_analyses FOR SELECT USING (true);
+
+-- 인덱스
+CREATE INDEX idx_saju_stocks_created ON saju_stocks(created_at DESC);
+CREATE INDEX idx_stock_ma_stock_id ON stock_ma_analyses(stock_id);
+```
+
+### 4. 동적 OG 메타 + 공유 링크
+
+#### URL 구조
+
+| URL | 용도 |
+|-----|------|
+| `/stock` | 메인 랜딩 (정적 OG) |
+| `/stock/[stockId]` | 개인 결과 (동적 OG — SSR) |
+
+#### SSR `generateMetadata()` — `/stock/[stockId]/page.tsx`
+
+```typescript
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { stockId } = await params;
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from('saju_stocks')
+    .select('current_price, fair_value, investment_opinion, analyst_comment')
+    .eq('id', stockId)
+    .single();
+
+  if (!data) {
+    return { title: '사주증권 리서치센터 | 주가 조작단' };
+  }
+
+  const opinionLabel = {
+    strong_buy: '강력 매수',
+    buy: '매수',
+    hold: '보유(존버)',
+    reduce: '비중 축소',
+    warning: '관리종목'
+  }[data.investment_opinion];
+
+  return {
+    title: `현재가 ${data.current_price.toLocaleString()}원 | 투자의견: ${opinionLabel}`,
+    description: data.analyst_comment,
+    openGraph: {
+      title: `연애 주가 ${data.current_price.toLocaleString()}원 — 적정가 ${data.fair_value.toLocaleString()}원`,
+      description: `${opinionLabel} | ${data.analyst_comment}`,
+      images: [`/api/og/stock/${stockId}`],  // OG 이미지 API
+      type: 'website',
+    },
+  };
+}
+```
+
+#### OG 이미지
+
+종목 리포트 카드의 축약 버전을 OG 이미지로 생성 (Next.js `ImageResponse` 또는 정적 이미지 캐시):
+
+```
+┌─────────────────────────┐
+│  사주증권 리서치센터      │
+│                         │
+│  현재가 1,200원          │
+│  적정가 20,000원 ▼94%   │
+│                         │
+│  투자의견: ★ 강력 매수   │
+│                         │
+│  "나도 시세 조회하기"    │
+└─────────────────────────┘
+```
+
+> 1200x630 사이즈. "나도 시세 조회하기" CTA가 클릭 유도.
+
+### 5. 사주 API → 점수 매핑 함수
+
+사주 API(StargioSaju) 응답에서 필요한 요소를 추출하는 매핑 함수. 색기 배틀의 `calculateSexyScore()` 패턴을 따른다.
+
+```typescript
+interface SajuStockFactors {
+  // 억압 요소 (현재가 감소)
+  hasExcessPyeonin: boolean;     // 편인 과다
+  hasDohwasalMerge: boolean;     // 도화살 합거 (매력 봉인)
+  hasWeakJeonggwan: boolean;     // 정관 약
+  hasGongmang: boolean;          // 공망 진입
+  hasExcessSanggwan: boolean;    // 상관 과다
+
+  // 매력 요소 (적정가 가산)
+  dohwasalCount: number;         // 도화살 개수
+  hasHongyeomsal: boolean;       // 홍염살
+  hasPyeonjae: boolean;          // 편재 투출
+
+  // 내면 요소 (적정가 가산)
+  hasJeonginSikshin: boolean;    // 정인+식신 동주
+  hasBigyeonBalanced: boolean;   // 비견 적당
+  hasJeonggwanJeongin: boolean;  // 정관+정인 동주
+
+  // 역량 요소 (적정가 가산)
+  isJeonggwanGyeok: boolean;     // 정관격
+  isPyeongwanGyeok: boolean;     // 편관격
+  hasPyeoninJeonggwan: boolean;  // 편인+정관 조합
+
+  // 타이밍 요소 (목표가/급등 시점)
+  dohwasalEntryMonth: string | null;  // 도화살 운 진입 예정 월
+  jeonggwanEntryMonth: string | null; // 정관 운 진입 예정 월
+  pyeoninMergeMonth: string | null;   // 편인 합거 예정 월
+
+  // 모멘텀 요소 (현재가 가산)
+  hasDohwasalMomentum: boolean;  // 3개월 내 도화살 운
+  hasJeonggwanMomentum: boolean; // 6개월 내 정관 운
+  hasPyeoninMergeSoon: boolean;  // 편인 합거 예정
+  hasSikshinActive: boolean;     // 식신 운 진행 중
+}
+
+// 사주 API 응답 → SajuStockFactors 변환
+function extractStockFactors(sajuData: SajuApiResponse): SajuStockFactors {
+  // 색기 배틀의 extractSexyFactors() 패턴 참조
+  // 사주 API 응답 구조에 맞춰 구현 시 매핑
+}
+```
+
+> **구현 시 주의**: 사주 API 응답의 정확한 필드명은 기존 `analyze-sexy-battle` Edge Function의 사주 데이터 파싱 로직을 참조하여 매핑한다. 위 인터페이스는 **비즈니스 로직 설계용**이며, 실제 API 필드명과 1:1 대응은 구현 단계에서 확정.
+
+---
+
+## 컴포넌트 구조 (예상)
+
+```
+src/components/stock/
+├── StockClient.tsx           # 메인 상태머신 (input→analyzing→report→...→result)
+├── StockInput.tsx            # 입력 폼 (성별+생년월일+시간+양음력+연애상태)
+├── StockAnalyzing.tsx        # 분석 중 로딩 연출
+├── StockReportCard.tsx       # 종목 리포트 카드 (toPng 캡처 대상)
+├── StockBriefing.tsx         # 긴급 소집 연출
+├── StockTurn.tsx             # 턴제 토론 (ChatBubble 재사용)
+├── StockPlanCard.tsx         # 작전 계획서 카드
+├── StockMaInput.tsx          # M&A 상대 입력
+├── StockMaCard.tsx           # M&A 시너지 카드 (toPng 캡처 대상)
+├── StockResult.tsx           # 결과 + 공유 + CTA
+└── StockShareButtons.tsx     # 공유 버튼 (ShareButtons 확장)
+
+src/constants/
+├── stockCharacters.ts        # 3캐릭터 상수
+└── stockGrades.ts            # 투자의견/가격등급 상수
+
+src/types/
+└── stock.ts                  # StockAnalysisResponse, MaAnalysisResponse 등
+```
+
+> 기존 `BirthInput`, `GenderSelect`, `BirthTimeInput`, `ChatBubble`, `CharacterAvatar` 컴포넌트는 최대한 재사용.
+
+---
+
+**최종 업데이트**: 2026-03-30
