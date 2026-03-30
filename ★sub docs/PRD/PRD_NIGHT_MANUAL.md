@@ -145,57 +145,244 @@ if (genderParam) {
 └─────────────────────────────┘
 ```
 
-#### 1-2. 능력치 5가지 — 사주 요소 매핑
+#### 1-2. 사주 API 응답 구조 및 활용 필드
 
-| 능력치 | 사주 근거 | 의미 |
-|---|---|---|
-| **감도** | 정인/편인 + 목욕 + 도화살 | 자극에 대한 민감한 반응. 감각이 열리는 속도 |
-| **지배력** | 편관/정관 + 겁재 + 양인 | 주도권을 쥐는 힘. 상대를 리드하는 기질 |
-| **중독성** | 홍염살 + 편재 + 상관 | 한 번 경험한 상대가 다시 찾게 만드는 기운 |
-| **민감도** | 식신 + 정인 + 화개살 | 미세한 변화를 감지하는 촉각. 분위기 읽기 |
-| **지구력** | 비견/겁재 + 건록/관대 + 편관 | 밤이 깊어져도 흐트러지지 않는 체력 |
-
-#### 1-3. 능력치 산정 로직
+Stargio Saju API (`/StargioSaju`) 응답에서 사용하는 필드:
 
 ```
-각 능력치 = 0~100
+응답 구조 (관련 필드만):
+{
+  "십성": [                          // 4주(년·월·일·시) × [천간십성, 지지십성]
+    ["편관","정재"],                  // 년주
+    ["비견","정의"],                  // 월주
+    ["상관","편재"],                  // 일주
+    ["식신","비견"]                   // 시주
+  ],
+  "발달십성": {                      // 십성 그룹별 발달 비율 (합계 ≈ 100)
+    "식상": 15,                      // 식신+상관
+    "재성": 45,                      // 편재+정재
+    "관성": 11,                      // 편관+정관
+    "비겁": 9,                       // 비견+겁재
+    "인성": 20                       // 정인+편인
+  },
+  "12신살": [                        // 4주별 신살 배열
+    ["지살"],                        // 년주
+    ["역마살"],                      // 월주
+    ["도화살"],                      // 일주 → 도화살 보유!
+    ["화개살"]                       // 시주 → 화개살 보유!
+  ],
+  "기타신살": [                      // 4주별 기타 신살
+    ["관계학관","빌살","천의성"],     // 년주
+    ["효신살","낙정관살"],           // 월주
+    ["천을귀인","원진살"],           // 일주
+    ["태극귀인","복성귀인","암록","음욕살","현궤살","원진살"]  // 시주
+  ],
+  "십이운성": ["태","제왕","절","관대"],  // 4주별 12운성
+  "본사주": {
+    "양인살": "",                    // 비어있으면 미보유
+    "괴강살": "",
+    "백호살": ""
+  },
+  "사주강약": "극신약",              // 신강/신약/극신강/극신약
+  "물상론": {
+    "성격": "내면엔 뜨거움이 있으나...",
+    "인간관계": "말수 적고 침착하지만..."
+  }
+}
+```
 
-감도:
-  정인 투출        +25
-  편인 투출        +20
-  목욕 보유        +25
-  도화살 보유      +15
-  인성 없음        기본 20
+#### 1-2a. 능력치 5가지 — API 필드 매핑
 
-지배력:
-  편관 투출        +30
-  정관 투출        +20
-  겁재 보유        +15
-  양인 보유        +15
-  관성 없음        기본 15
+| 능력치 | 사주 API 근거 | 의미 | 바이럴 기능 |
+|---|---|---|---|
+| **감도** | `발달십성.인성` + `십성[]`에서 정인/편인 투출 + `12신살[]`에서 도화살 + `십이운성[]`에서 목욕 + `기타신살[]`에서 음욕살 | 자극에 대한 민감한 반응. 감각이 열리는 속도 | "감도 82래ㅋㅋ" 숫자 자랑 |
+| **지배력** | `발달십성.관성` + `십성[]`에서 편관/정관/겁재 투출 + `본사주.양인살` + `십이운성[]`에서 제왕 + `본사주.괴강살` | 주도권을 쥐는 힘. 상대를 리드하는 기질 | "지배력 S인데 시종이 벌벌 떰ㅋㅋ" |
+| **중독성** | `발달십성.식상` + `발달십성.재성` + `기타신살[]`에서 홍염살 + `십성[]`에서 상관/편재 투출 + `12신살[]`에서 도화살 + `기타신살[]`에서 음욕살 | 한 번 경험한 상대가 다시 찾게 만드는 기운 | "중독성 94래 나 무섭다ㅋㅋ" 핵심 밈 |
+| **민감도** | `발달십성.식상` + `십성[]`에서 식신/정인 투출 + `12신살[]`에서 화개살 + `기타신살[]`에서 음욕살 | 미세한 변화를 감지하는 촉각. 분위기 읽기 | "민감도 높으면 시종이 당황함" |
+| **지구력** | `발달십성.비겁` + `십성[]`에서 비견/겁재 투출 + `십이운성[]`에서 건록/관대/제왕 + `십성[]`에서 편관 투출 + `사주강약` | 밤이 깊어져도 흐트러지지 않는 체력 | "지구력 96 시종이 교대함ㅋㅋ" |
 
-중독성:
-  홍염살 보유      +35
-  편재 투출        +20
-  상관 투출        +20
-  도화살 동주      +10
-  홍염살 없음      기본 20
+#### 1-3. 능력치 산정 로직 — 구현 상세
 
-민감도:
-  식신 투출        +25
-  정인 투출        +20
-  화개살 보유      +20
-  식신+정인 동시   +15 (보너스)
-  식신 없음        기본 20
+**판별 함수 정의:**
 
-지구력:
-  비견 투출        +20
-  겁재 투출        +20
-  건록/관대 보유   +20
-  편관 투출        +15
-  비겁 없음        기본 25
+```typescript
+// 십성 투출 판별: 십성 2D 배열 전체에서 해당 십성 존재 여부
+function hasSipsung(sipsung: string[][], name: string): boolean {
+  return sipsung.some(pair => pair.some(s => s === name));
+}
+
+// 십성 투출 횟수: 같은 십성이 여러 주에 나올 수 있음
+function countSipsung(sipsung: string[][], name: string): number {
+  return sipsung.flat().filter(s => s === name).length;
+}
+
+// 12신살 보유 판별: 4주 중 어디든 해당 살 존재
+function has12Sinsal(sinsal12: string[][], name: string): boolean {
+  return sinsal12.some(arr => arr.some(s => s.includes(name)));
+}
+
+// 기타신살 보유 판별: 4주 중 어디든 해당 살 존재
+function hasGitaSinsal(gitaSinsal: string[][], name: string): boolean {
+  return gitaSinsal.some(arr => arr.some(s => s.includes(name)));
+}
+
+// 십이운성 보유 판별: 4주 중 어디든 해당 운성
+function has12Unseong(unseong: string[], name: string): boolean {
+  return unseong.some(u => u === name);
+}
+
+// 본사주 살 보유 판별: 빈 문자열이 아니면 보유
+function hasBonjuSal(bonju: Record<string, string>, key: string): boolean {
+  return bonju[key] !== undefined && bonju[key] !== '';
+}
+```
+
+**능력치 산정 공식:**
+
+```
+각 능력치 = Base + 투출 보너스 + 신살 보너스
+  → Math.min(100, Math.max(10, 결과))
+
+════════════════════════════════════════════════
+감도 (Sensitivity) — 자극 반응 속도
+════════════════════════════════════════════════
+  Base:     발달십성.인성 × 1.2                  (0~60)
+  Floor:    15 (인성 0이어도 최소 15)
+
+  투출 보너스:
+    정인 투출 (hasSipsung)         +12
+    편인 투출                      +10
+    정인 2회 이상 (countSipsung≥2) +5  (추가)
+
+  신살·운성 보너스:
+    도화살 (12신살)                +15
+    음욕살 (기타신살)              +12
+    목욕 (십이운성)                +10
+
+  → 예상 범위: 15~95
+  → 설계 의도: 인성(직관·감수성) + 도화살(감각) + 목욕(벗겨짐) = 감각 개방
+
+════════════════════════════════════════════════
+지배력 (Dominance) — 주도권
+════════════════════════════════════════════════
+  Base:     발달십성.관성 × 1.2                  (0~60)
+  Floor:    12
+
+  투출 보너스:
+    편관 투출                      +12
+    정관 투출                      +8
+    겁재 투출                      +8
+    편관 2회 이상                   +5  (추가)
+
+  신살·운성 보너스:
+    양인살 (본사주)                +15
+    괴강살 (본사주)                +12
+    제왕 (십이운성)                +10
+
+  → 예상 범위: 12~95
+  → 설계 의도: 관성(통제력) + 양인(칼날) + 괴강(극강) + 제왕(정점) = 지배
+
+════════════════════════════════════════════════
+중독성 (Addiction) — 다시 찾게 만드는 기운
+════════════════════════════════════════════════
+  Base:     (발달십성.식상 × 0.6) + (발달십성.재성 × 0.6)  (0~60)
+  Floor:    15
+
+  투출 보너스:
+    상관 투출                      +10
+    편재 투출                      +8
+    상관 2회 이상                   +5  (추가)
+
+  신살·운성 보너스:
+    홍염살 (기타신살)              +18
+    도화살 (12신살)                +10
+    음욕살 (기타신살)              +8
+
+  → 예상 범위: 15~97
+  → 설계 의도: 상관(매혹적 표현력) + 편재(쾌락추구) + 홍염살(정욕) = 중독
+
+════════════════════════════════════════════════
+민감도 (Awareness) — 미세한 변화 감지
+════════════════════════════════════════════════
+  Base:     발달십성.식상 × 1.2                  (0~60)
+  Floor:    15
+
+  투출 보너스:
+    식신 투출                      +12
+    정인 투출                      +8
+    식신+정인 동시 투출             +8  (시너지 보너스)
+
+  신살·운성 보너스:
+    화개살 (12신살)                +15
+    음욕살 (기타신살)              +8
+    태 (십이운성)                   +6
+
+  → 예상 범위: 15~95
+  → 설계 의도: 식상(감각) + 화개살(영감) + 정인(직관) = 촉각
+
+════════════════════════════════════════════════
+지구력 (Endurance) — 체력·지속력
+════════════════════════════════════════════════
+  Base:     발달십성.비겁 × 1.2                  (0~60)
+  Floor:    18
+
+  투출 보너스:
+    비견 투출                      +10
+    겁재 투출                      +10
+    편관 투출                      +6
+    비견 2회 이상                   +5  (추가)
+
+  신살·운성 보너스:
+    건록 (십이운성)                +15
+    관대 (십이운성)                +10
+    제왕 (십이운성)                +8
+
+  사주강약 보너스:
+    극신강                         +10
+    신강                           +5
+
+  → 예상 범위: 18~97
+  → 설계 의도: 비겁(체력·경쟁심) + 건록(최적체력) + 신강(강한 자아) = 지구력
+
+════════════════════════════════════════════════
 
 총 매혹력 = 5개 합산 (최대 500)
+```
+
+**검증 — 테스트 사주 (1991-12-25 23:15 남성):**
+
+```
+발달십성: { 식상:15, 재성:45, 관성:11, 비겁:9, 인성:20 }
+십성: [편관,정재,비견,정의,상관,편재,식신,비견]
+12신살: 지살, 역마살, 도화살, 화개살
+기타신살: 음욕살 보유, 홍염살 미보유
+십이운성: 태, 제왕, 절, 관대
+양인살: ❌  괴강살: ❌  사주강약: 극신약
+
+감도 = max(15, 20×1.2) + 0 + 0 + 15(도화) + 12(음욕) + 0 = 24+27 = 51
+지배력 = max(12, 11×1.2) + 12(편관) + 0 + 0 + 0 + 10(제왕) = 13+22 = 35
+중독성 = max(15, 15×0.6+45×0.6) + 10(상관) + 8(편재) + 0 + 10(도화) + 8(음욕) = 36+36 = 72
+민감도 = max(15, 15×1.2) + 12(식신) + 0 + 0 + 15(화개) + 8(음욕) + 6(태) = 18+41 = 59
+지구력 = max(18, 9×1.2) + 10(비견×2→10+5) + 0 + 0 + 10(관대) + 0 = 18+25 = 43
+
+→ 감도 51 | 지배력 35 | 중독성 72 | 민감도 59 | 지구력 43
+→ 총 매혹력: 260 / 500
+→ 최고 능력치: 중독성 → 묘향(妙香) 체질 배정
+→ "향기형 — 떠나도 잊지 못하게 만든다"
+
+✅ 중독성이 돌출되어 재미있는 결과
+✅ 지배력 35로 시종들이 "이건 마마가 순한 편이라..." 코믹 대사 유발
+✅ 능력치 편차가 커서 대사 분기가 극적
+```
+
+**도화살·홍염살 특수 표시:**
+
+```
+도화살 보유 여부 = has12Sinsal(data['12신살'], '도화')
+홍염살 보유 여부 = hasGitaSinsal(data['기타신살'], '홍염')
+
+→ 보유 시 카드에 🔥/💀 아이콘 표시
+→ 둘 다 보유 시 "위험 체질" 특수 라벨 추가
 ```
 
 #### 1-4. 체질 유형 배정 — 최고 능력치 기반
@@ -583,4 +770,420 @@ X플레어 캐릭터 챗봇 페이지로 이동
 
 ---
 
-**최종 업데이트**: 2026-03-27
+---
+
+## 구현 상세 (Implementation Spec)
+
+### Impl 1. Edge Function — `analyze-night-manual`
+
+**배포 명령어:**
+```bash
+npx supabase functions deploy analyze-night-manual --no-verify-jwt --project-ref tdrmvbsmxcewwaeuoqdx
+```
+
+**입출력 스펙:**
+
+```typescript
+// ─── Request ───
+interface NightManualRequest {
+  birthday: string;        // "199112252315" (YYYYMMDDHHMM)
+  gender: 'male' | 'female';
+  birthTimeUnknown?: boolean;
+  calendarType?: 'solar' | 'lunar';  // default: solar
+}
+
+// ─── Response ───
+interface NightManualResponse {
+  nightManualId: string;   // UUID (Supabase 생성)
+
+  // 체질 평가표
+  constitution: {
+    type: 'simhwa' | 'noejeon' | 'myohyang' | 'seu' | 'janggang' | 'yonghwa';
+    name: string;          // "심화(心火)"
+    concept: string;       // "불꽃형 — 한 번 붙으면 재가 될 때까지"
+    grade: 'S' | 'A' | 'B' | 'C';
+  };
+  stats: {
+    sensitivity: number;   // 감도 (10~100)
+    dominance: number;     // 지배력 (10~100)
+    addiction: number;     // 중독성 (10~100)
+    awareness: number;     // 민감도 (10~100)
+    endurance: number;     // 지구력 (10~100)
+  };
+  totalCharm: number;      // 총 매혹력 (50~500)
+  doHwaSal: boolean;
+  hongYeomSal: boolean;
+
+  // 체질 서사 (하드코딩, 체질 유형별 고정)
+  constitutionNarrative: string;
+
+  // Phase 1: 엿듣기 대사 (Gemini 생성)
+  phase1Script: string;    // 시종 3명 토론 대사 (마크다운 아님, 줄바꿈 구분)
+
+  // Phase 2: 개입 반응 (하드코딩)
+  phase2Reactions: {
+    listen: string;        // "가만히 더 듣는다" 선택 시 시종 반응
+    cough: string;         // "헛기침" 선택 시 시종 반응
+    interrupt: string;     // "직접 끼어든다" 선택 시 시종 반응
+  };
+
+  // Phase 3: 최종 제안 (Gemini 생성, 유저 체질 기반)
+  phase3Proposals: {
+    beast: string;         // 강해(야수형) 제안
+    poet: string;          // 윤서(시인형) 제안
+    butler: string;        // 도겸(집사형) 제안
+  };
+
+  // 탈락 반응 (하드코딩, 시종별 고정)
+  rejectionLines: {
+    beast: string;
+    poet: string;
+    butler: string;
+  };
+
+  // 사주 하이라이트 (OG/공유용)
+  sajuHighlights: {
+    topStat: string;       // 최고 능력치명
+    topStatValue: number;  // 최고 능력치 값
+    doHwaSal: boolean;
+    hongYeomSal: boolean;
+    sajuStrength: string;  // 사주강약
+  };
+}
+```
+
+**처리 흐름:**
+
+```
+1. 입력 검증 (birthday 형식, gender 값)
+2. Stargio Saju API 호출 (3회 재시도, 브라우저 헤더)
+3. 불필요 필드 제거 (월운보기, 본사주 일부, 대운 상세)
+4. calculateNightStats(sajuData) → stats 5종 + 도화살/홍염살
+5. assignConstitution(stats) → 체질 유형 + 서사
+6. Gemini 호출 1회 (Phase 1 + Phase 3 동시 생성)
+7. 하드코딩 데이터 조립 (Phase 2 반응, 탈락 대사)
+8. Supabase INSERT → nightManualId 발급
+9. 응답 반환
+```
+
+**Gemini 호출 — 1회로 Phase 1 + Phase 3 동시 생성:**
+
+프론트에서 시종 선택 전에 모든 대사를 미리 받아둔다. 선택 후 추가 API 호출 없이 프론트에서 조립.
+
+### Impl 2. Gemini 프롬프트 설계
+
+```
+[시스템 지시]
+너는 조선시대 궁중 시종들의 대화를 작성하는 작가다.
+유저의 사주 기반 체질 평가표를 보고, 시종 3명이 "오늘 밤 마마를 어떻게 모실 것인가"를 놓고 벌이는 난상토론 대사를 생성한다.
+
+[시종 캐릭터]
+강해(야수형): 직설적, 거침없음, 본능적. "말이 필요합니까?"가 입버릇. 다른 시종을 무시하고 자신이 최적이라고 주장.
+윤서(시인형): 감성적, 비유와 은유 사용, 느리지만 깊음. 강해를 "무식하다"고 깔봄. 서사적 시중이 최고라 주장.
+도겸(집사형): 절제된 매너, 존댓말, 헌신과 순종. "마마의 편안함이 최우선"이 신념. 다른 둘의 싸움을 중재하다가 자기 어필.
+
+[유저 체질 데이터]
+체질: {constitutionName}
+감도: {sensitivity} | 지배력: {dominance} | 중독성: {addiction} | 민감도: {awareness} | 지구력: {endurance}
+도화살: {doHwaSal} | 홍염살: {hongYeomSal}
+최고 능력치: {topStat} ({topStatValue})
+최저 능력치: {lowestStat} ({lowestStatValue})
+
+[생성 규칙]
+1. 반드시 아래 JSON 형식으로 출력:
+{
+  "phase1": "강해: \"대사\"\n\n윤서: \"대사\"\n\n도겸: \"대사\"\n\n강해: \"대사\"\n\n윤서: \"대사\"\n\n도겸: \"대사\"",
+  "phase3_beast": "강해의 최종 제안 대사 (3~4문장)",
+  "phase3_poet": "윤서의 최종 제안 대사 (3~4문장)",
+  "phase3_butler": "도겸의 최종 제안 대사 (3~4문장)"
+}
+
+2. Phase 1 (엿듣기 토론):
+   - 6턴 이상 (강해→윤서→도겸→강해→윤서→도겸 순환)
+   - 유저의 구체적 능력치 숫자를 반드시 대사에 포함: "중독성 {값}이면..."
+   - 시종들이 능력치를 보고 서로 견제하는 대사
+   - 최소 1개 "맥락 없이 캡처해도 웃긴 한 줄" 포함 (예: "솔직히 지구력 96은 나도 좀 무섭다")
+   - 최고 능력치에 대해 시종들이 특히 반응
+   - 최저 능력치에 대해 시종들이 약점으로 언급하되 유머러스하게
+
+3. Phase 3 (최종 제안):
+   - 각 시종이 유저의 최고 능력치에 맞춘 밤 시중 제안
+   - 각 시종의 성격이 극명하게 드러나는 톤
+   - 각 제안 마지막 문장이 캡처 밈이 될 수 있는 임팩트 있는 한 줄
+   - 3~4문장씩
+
+4. 성인 코드 수위: "야하지 않지만 발칙하고 솔직한" 스윗 스팟. 직접적 성행위 묘사 금지, 은유와 비유로.
+5. 조선 세계관 어투 유지하되, 숫자 언급 시에만 현대적 톤 허용
+6. 출력은 순수 JSON만. 마크다운, 설명, 따옴표 감싸기 금지.
+```
+
+**Gemini 설정:**
+- Model: `gemini-2.5-flash`
+- Temperature: 0.8 (색기 배틀 0.7보다 약간 높게 → 대사 다양성)
+- Max tokens: 1500 (Phase 1 + Phase 3 합산)
+- Fallback: 체질별 하드코딩 대사 세트 (Gemini 실패 시)
+
+### Impl 3. DB 스키마 — `night_manuals` 테이블
+
+```sql
+-- supabase/migrations/002_create_night_manuals.sql
+
+CREATE TABLE night_manuals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- 입력
+  birthday TEXT NOT NULL,
+  birth_time TEXT,
+  gender TEXT NOT NULL CHECK (gender IN ('male', 'female')),
+
+  -- 체질
+  constitution_type TEXT NOT NULL,     -- simhwa/noejeon/myohyang/seu/janggang/yonghwa
+  stats JSONB NOT NULL,                -- { sensitivity, dominance, addiction, awareness, endurance }
+  total_charm INTEGER NOT NULL,
+  do_hwa_sal BOOLEAN DEFAULT false,
+  hong_yeom_sal BOOLEAN DEFAULT false,
+
+  -- 시종 선택 (프론트에서 PATCH로 업데이트)
+  selected_servant TEXT,               -- beast/poet/butler (선택 후)
+  compatibility_grade TEXT,            -- S/A/B/C (선택 후)
+
+  -- 전체 결과 payload (OG/공유용)
+  result JSONB NOT NULL,
+
+  -- 유입 추적
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 공유 링크 조회용 인덱스
+CREATE INDEX idx_night_manuals_created ON night_manuals (created_at DESC);
+
+-- RLS: 비회원이므로 anon으로 SELECT만 허용
+ALTER TABLE night_manuals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "night_manuals_select" ON night_manuals
+  FOR SELECT USING (true);
+
+CREATE POLICY "night_manuals_insert" ON night_manuals
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "night_manuals_update" ON night_manuals
+  FOR UPDATE USING (true)
+  WITH CHECK (true);
+```
+
+**시종 선택 업데이트 API** (프론트에서 호출):
+```typescript
+// 시종 선택 시 DB 업데이트 (추가 Edge Function 없이 Supabase client 직접 사용)
+await supabase
+  .from('night_manuals')
+  .update({
+    selected_servant: 'butler',
+    compatibility_grade: 'A',
+    updated_at: new Date().toISOString()
+  })
+  .eq('id', nightManualId);
+```
+
+### Impl 4. 컴포넌트 구조 — 분리형
+
+```
+src/
+├── app/
+│   └── night-manual/
+│       ├── page.tsx                    # 메인 페이지 (정적 OG)
+│       └── [nightManualId]/
+│           └── page.tsx                # 공유 페이지 (동적 OG, SSR)
+│
+├── components/night-manual/
+│   ├── NightManualClient.tsx           # 메인 상태 관리 (step 전환만)
+│   ├── NightLanding.tsx                # 랜딩 ("엿듣기" 버튼)
+│   ├── NightBirthInput.tsx             # 생년월일 입력 (색기 배틀 BirthInput 패턴 재사용)
+│   ├── NightAnalyzing.tsx              # 로딩 연출 ("밤의 장막이 내려오는 중...")
+│   ├── ConstitutionCard.tsx            # 체질 평가표 카드 (1차 캡처 포인트)
+│   ├── DebatePhase.tsx                 # 난상토론 (Phase 1~3 통합)
+│   │   ├── Phase1Eavesdrop.tsx         # 엿듣기 (대사 자동 타이핑)
+│   │   ├── Phase2Intervene.tsx         # 개입 선택지 3개
+│   │   └── Phase3Proposals.tsx         # 시종별 최종 제안
+│   ├── ServantSelection.tsx            # 시종 선택 + 탈락 반응
+│   ├── NightResultCard.tsx             # 최종 결산 카드 (toPng 캡처)
+│   └── NightShareButtons.tsx           # 공유 버튼 + "친구의 밤도 열어주기"
+│
+├── constants/
+│   └── night-manual.ts                 # 시종 프로필, 체질 유형, 궁합 매트릭스, 한 줄 서사
+│
+├── types/
+│   └── night-manual.ts                 # NightManualRequest/Response 타입
+│
+└── lib/
+    └── night-manual.ts                 # Edge Function 호출, 점수 계산 유틸
+```
+
+**상태 머신 (NightManualClient.tsx):**
+
+```typescript
+type NightManualStep =
+  | 'landing'        // 랜딩
+  | 'input'          // 생년월일 입력
+  | 'analyzing'      // 로딩 연출
+  | 'constitution'   // 체질 평가표 (1차 캡처)
+  | 'debate'         // 난상토론 (Phase 1→2→3)
+  | 'selection'      // 시종 선택 + 탈락 반응
+  | 'result';        // 결산 카드 + 공유 + CTA
+
+// debate 내부 sub-step (DebatePhase에서 관리)
+type DebateSubStep = 'eavesdrop' | 'intervene' | 'proposals';
+```
+
+**데이터 흐름:**
+```
+NightManualClient (상태 소유)
+  ├── result: NightManualResponse     ← Edge Function 응답 (analyzing 완료 시)
+  ├── interventionChoice: string      ← Phase 2 선택값
+  ├── selectedServant: string         ← 시종 선택값
+  └── compatibilityGrade: string      ← 궁합 (프론트 계산)
+
+  → constitution, debate, selection, result 컴포넌트에 props로 전달
+  → 시종 선택 시 Supabase 직접 UPDATE (DB 반영)
+```
+
+### Impl 5. 동적 OG 메타태그
+
+**`/night-manual/[nightManualId]/page.tsx`:**
+
+```typescript
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { nightManualId } = await params;
+  const supabase = createServerClient();
+
+  const { data } = await supabase
+    .from('night_manuals')
+    .select('constitution_type, stats, total_charm, selected_servant, result')
+    .eq('id', nightManualId)
+    .single();
+
+  if (!data) {
+    return {
+      title: '밤(夜) 설명서 — 시종들의 은밀한 난상토론',
+      description: '사주 기반 은밀한 체질을 진단받고, 시종 3명의 쟁탈전을 엿들어보세요.',
+    };
+  }
+
+  const constitutionName = CONSTITUTION_MAP[data.constitution_type].name;
+  const topStat = getTopStat(data.stats);
+
+  return {
+    title: `밤(夜) 설명서 — ${constitutionName} 체질 | 매혹력 ${data.total_charm}`,
+    description: data.selected_servant
+      ? `시종 3명이 쟁탈전을 벌였습니다. ${SERVANT_NAME[data.selected_servant]}을 선택했습니다. ${topStat.name} ${topStat.value}점.`
+      : `시종 3명이 마마를 두고 쟁탈전 중입니다. ${topStat.name} ${topStat.value}점.`,
+    openGraph: {
+      title: `나의 은밀한 체질: ${constitutionName}`,
+      description: `${topStat.name} ${topStat.value} | 총 매혹력 ${data.total_charm}/500`,
+    },
+  };
+}
+```
+
+### Impl 6. 프론트엔드 정적 데이터 (constants/night-manual.ts)
+
+시종 선택 후 프론트에서 처리하는 데이터:
+
+```typescript
+// 궁합 매트릭스 (PRD 3-2 기준)
+export const COMPATIBILITY_MATRIX: Record<string, Record<string, { grade: string; label: string }>> = {
+  sensitivity:  { beast: { grade: 'B', label: '과하면 부담' }, poet: { grade: 'S', label: '감각 극대화' }, butler: { grade: 'A', label: '헌신적 케어' } },
+  dominance:    { beast: { grade: 'A', label: '힘 대 힘 긴장' }, poet: { grade: 'B', label: '리드 충돌' }, butler: { grade: 'S', label: '완벽한 순종' } },
+  addiction:    { beast: { grade: 'S', label: '밤새 중독 루프' }, poet: { grade: 'A', label: '서사적 중독' }, butler: { grade: 'A', label: '돌봄 중독' } },
+  awareness:    { beast: { grade: 'C', label: '너무 거침' }, poet: { grade: 'S', label: '섬세한 터치' }, butler: { grade: 'A', label: '세심한 배려' } },
+  endurance:    { beast: { grade: 'S', label: '체력 매치' }, poet: { grade: 'B', label: '시인이 먼저 지침' }, butler: { grade: 'A', label: '교대 서빙' } },
+};
+
+// 한 줄 서사 (PRD 3-4 기준, 19개 전량 하드코딩)
+export const ONE_LINER_MAP: Record<string, Record<string, string>> = {
+  simhwa: {
+    beast: "두 개의 불이 만나면 재만 남는다. 하지만 그 밤은 눈부셨다.",
+    poet: "불꽃에 바람이 불면 꺼지거나 번진다. 오늘 밤은 번졌다.",
+    butler: "가장 강한 불은 가장 조용한 바람에 흔들린다.",
+  },
+  // ... (PRD 3-4 테이블 전체)
+  yonghwa: {
+    beast: "용이 내려왔다. 시종 셋이 달려들었다. 아침에 시종 셋이 기절해 있었다.",
+    poet: "용이 내려왔다. 시종 셋이 달려들었다. 아침에 시종 셋이 기절해 있었다.",
+    butler: "용이 내려왔다. 시종 셋이 달려들었다. 아침에 시종 셋이 기절해 있었다.",
+  },
+};
+
+// 탈락 반응 (PRD Step 3 기준)
+export const REJECTION_LINES = {
+  beast: "...알겠습니다. 하지만 마마, 그놈이 지치면 저를 부르십시오. 저는 밖에서 기다리겠습니다.",
+  poet: "오늘 밤은 양보하겠습니다. 하지만 내일 밤, 마마의 베개 밑에 시 한 편을 놓아두겠습니다.",
+  butler: "마마의 뜻이라면... (무릎 꿇으며) 대신 차와 과일은 제가 준비해놓겠습니다. 밤이 길 것 같으니.",
+};
+
+// Phase 2 개입 반응 (하드코딩)
+export const INTERVENTION_REACTIONS = {
+  listen: {
+    // 토론 더 과격 → 제안이 더 과감
+    beast: "야, 이놈아! 네가 지난번에 마마 앞에서 발이 떨리던 거 잊었냐?",
+    poet: "강해, 네 주먹보다 내 혀가 마마를 더 잘 모신다. 너도 알잖아.",
+    butler: "두 분... 마마께서 듣고 계실 수도 있습니다만... 아, 아닙니다. 저도 할 말은 있습니다.",
+  },
+  cough: {
+    // 시종들 경악 → 제안이 안절부절
+    beast: "...! 마, 마마?! 아닙니다, 저희는 그냥... 업무 회의를...",
+    poet: "(책을 뒤집어 들며) 시, 시를 읽고 있었습니다...",
+    butler: "(즉시 무릎) 마마, 얼마나 들으셨습니까... 모든 것은 마마를 위한 것이었습니다.",
+  },
+  interrupt: {
+    // 시종들 즉시 순종 → 제안이 복종적
+    beast: "(즉시 무릎) 명하십시오, 마마. 목숨을 걸겠습니다.",
+    poet: "(붓을 놓으며) 마마의 한 마디가 저의 만 마디보다 무겁습니다.",
+    butler: "(이마가 바닥에 닿을 때까지) 불찰을 용서하십시오. 무엇이든 분부하십시오.",
+  },
+};
+```
+
+### Impl 7. 등급 산정 — 총 매혹력 기반
+
+```
+총 매혹력    등급    서사 톤
+350~500      S      시종들이 기가 질림. "이런 마마는 처음입니다"
+250~349      A      시종들이 의욕적. "모실 보람이 있습니다"
+150~249      B      시종들이 여유. "차근차근 모시겠습니다"
+50~149       C      시종들이 걱정. "마마... 괜찮으십니까?"
+```
+
+→ C등급도 바이럴 가능: "시종한테 걱정 들음ㅋㅋ" 자조 밈
+
+### Impl 8. excludeKeys — API 응답 경량화
+
+색기 배틀과 동일하게 불필요 필드 제거:
+
+```typescript
+const EXCLUDE_KEYS = [
+  '월운보기',    // 월별 운세 (불필요)
+  '대운',        // 대운 상세 (불필요)
+  '대운시작나이', // 대운 시작 (불필요)
+  '오주',        // 5주 확장 (불필요)
+  '오주오행',    // 5주 오행 (불필요)
+  '오주십성',    // 5주 십성 (불필요)
+  '격용신',      // 격국 용신 (불필요)
+  '용신',        // 용신 상세 (불필요)
+];
+```
+
+단, 밤 설명서에서 추가로 필요한 필드:
+- `십이운성` ← 목욕, 건록, 관대, 제왕 판별 (색기 배틀에서는 미사용)
+- `기타신살` ← 홍염살, 음욕살 판별
+- `본사주` ← 양인살, 괴강살 판별
+- `사주강약` ← 지구력 보너스
+- `물상론` ← Gemini 프롬프트에 성격 참고용으로 전달
+
+---
+
+**최종 업데이트**: 2026-03-30
