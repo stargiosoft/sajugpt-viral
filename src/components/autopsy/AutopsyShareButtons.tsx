@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { captureCardImage, copyToClipboard, saveImage } from '@/lib/share';
+import { captureCardImage, copyToClipboard, saveImage, shareKakao } from '@/lib/share';
 import { trackEvent } from '@/lib/analytics';
 
 interface Props {
@@ -59,6 +59,19 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
     }
   }, [cardRef, causeOfDeathLabel, autopsyId, handleCopy]);
 
+  const handleKakaoShare = useCallback(() => {
+    const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/autopsy/${autopsyId}`;
+    const ok = shareKakao({
+      title: `🔬 사주 부검 결과 — "${causeOfDeathLabel}" 판정`,
+      description: '너도 전남친 부검해봐 ㅋㅋ',
+      link,
+      buttonText: '나도 부검하기',
+    });
+    if (ok) {
+      trackEvent('autopsy_share_kakao', { causeOfDeathLabel, autopsyId });
+    }
+  }, [causeOfDeathLabel, autopsyId]);
+
   const btnStyle: React.CSSProperties = {
     height: '56px',
     borderRadius: '16px',
@@ -71,18 +84,23 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
 
   return (
     <div className="flex flex-col gap-3" style={{ padding: '0 20px' }}>
-      {/* 공유 버튼 행 */}
+      {/* 메인 CTA — 카카오톡으로 도발 공유 */}
+      <button
+        onClick={handleKakaoShare}
+        style={{
+          ...btnStyle,
+          flex: 'unset',
+          width: '100%',
+          backgroundColor: '#FEE500',
+          color: '#191919',
+          fontSize: '16px',
+        }}
+      >
+        💬 친구한테 보내기
+      </button>
+
+      {/* 보조 공유 행 */}
       <div className="flex gap-3">
-        <button
-          onClick={handleCopy}
-          style={{
-            ...btnStyle,
-            backgroundColor: copied ? '#E8D5F5' : '#F7F2FA',
-            color: '#7A38D8',
-          }}
-        >
-          {copied ? '복사 완료!' : '🔗 링크 복사'}
-        </button>
         <button
           onClick={handleSave}
           style={{
@@ -93,22 +111,17 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
         >
           {saving ? '저장 중...' : '💾 이미지 저장'}
         </button>
+        <button
+          onClick={handleCopy}
+          style={{
+            ...btnStyle,
+            backgroundColor: copied ? '#E8D5F5' : '#F7F2FA',
+            color: '#7A38D8',
+          }}
+        >
+          {copied ? '복사 완료!' : '🔗 링크 복사'}
+        </button>
       </div>
-
-      {/* 도발형 공유 */}
-      <button
-        onClick={handleNativeShare}
-        style={{
-          ...btnStyle,
-          flex: 'unset',
-          width: '100%',
-          backgroundColor: '#7A38D8',
-          color: '#fff',
-          fontSize: '16px',
-        }}
-      >
-        🔬 너도 전남친 부검해봐
-      </button>
     </div>
   );
 }

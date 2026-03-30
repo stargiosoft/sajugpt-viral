@@ -13,6 +13,7 @@ import StockPlanCard from '@/components/stock/StockPlanCard';
 import StockResult from '@/components/stock/StockResult';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM, trackEvent } from '@/lib/analytics';
+import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 
 interface Props {
   stockId?: string;
@@ -33,11 +34,12 @@ function convertTo24Hour(time: string): string {
 }
 
 export default function StockClient({ stockId }: Props) {
-  // 입력 상태
-  const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
-  const [unknownTime, setUnknownTime] = useState(false);
-  const [gender, setGender] = useState<Gender>('female');
+  // 입력 상태 — 공통 캐시 복원
+  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
+  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
+  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
+  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
+  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'female');
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus>('single');
 
   // 플로우 상태
@@ -78,18 +80,21 @@ export default function StockClient({ stockId }: Props) {
     }
   }, []);
 
-  // 유효성 검증
+
+  // 입력값 변경 시 공통 캐시에 저장
+  useEffect(() => {
+    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+  }, [birthDate, birthTime, unknownTime, gender]);
+
+  // 유효성 검증 — 태어난 시간은 선택사항
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const [year, month, day] = birthDate.split('-').map(Number);
     if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
-    if (!unknownTime) {
-      if (!birthTime.includes('오전') && !birthTime.includes('오후')) return false;
-    }
     return true;
-  }, [birthDate, unknownTime, birthTime]);
+  }, [birthDate]);
 
   // 모르겠어요 토글
   const handleUnknownTimeToggle = useCallback(() => {
@@ -106,13 +111,21 @@ export default function StockClient({ stockId }: Props) {
   const handleSubmit = useCallback(async () => {
     if (!isFormValid() || submitting) return;
 
+    // 태어난 시간 미입력 시 자동으로 '모르겠어요' 처리 → 오후 12:00
+    const hasValidTime = birthTime.includes('오전') || birthTime.includes('오후');
+    const effectiveUnknownTime = unknownTime || !hasValidTime;
+    if (effectiveUnknownTime && !unknownTime) {
+      setUnknownTime(true);
+      setBirthTime('오후 12:00');
+    }
+
     trackEvent('stock_submit');
     setStep('analyzing');
     setError(null);
     setSubmitting(true);
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const hhmm = unknownTime ? '0000' : convertTo24Hour(birthTime);
+    const hhmm = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
     const birthday = `${numbers}${hhmm}`;
 
     const minDelay = new Promise(resolve => setTimeout(resolve, 2500));
@@ -122,7 +135,7 @@ export default function StockClient({ stockId }: Props) {
         callEdgeFunction<StockAnalysisResult>('analyze-saju-stock', {
           birthday,
           gender,
-          birthTimeUnknown: unknownTime,
+          birthTimeUnknown: effectiveUnknownTime,
           relationshipStatus,
         }),
         minDelay,

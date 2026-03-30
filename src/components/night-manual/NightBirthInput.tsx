@@ -73,7 +73,12 @@ export default function NightBirthInput({
           value={birthTime}
           onChange={setBirthTime}
           unknownTime={unknownTime}
-          onUnknownTimeToggle={() => setUnknownTime(!unknownTime)}
+          onUnknownTimeToggle={() => {
+            const newVal = !unknownTime;
+            setUnknownTime(newVal);
+            if (newVal) setBirthTime('오후 12:00');
+            else setBirthTime('');
+          }}
         />
       </div>
 

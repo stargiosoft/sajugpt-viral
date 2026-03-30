@@ -14,6 +14,7 @@ import CutScene from '@/components/CutScene';
 import OnboardingLanding from '@/components/OnboardingLanding';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM, trackEvent } from '@/lib/analytics';
+import { loadSelfSaju, saveSelfSaju, removeSelfSaju } from '@/lib/sajuCache';
 
 interface Props {
   battleId?: string;
@@ -35,25 +36,10 @@ function convertTo24Hour(time: string): string {
   return `${String(hour).padStart(2, '0')}${minute}`;
 }
 
-// ─── sessionStorage 캐시 ─────────────────────────────
-const CACHE_KEY = 'sexy_battle_input';
-
-function loadCache(): { birthDate: string; birthTime: string; unknownTime: boolean; gender: Gender } | null {
-  try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch { return null; }
-}
-
-function saveCache(data: { birthDate: string; birthTime: string; unknownTime: boolean; gender: Gender }) {
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* noop */ }
-}
-
 export default function SexyBattleClient({ battleId, challengerPreview }: Props) {
   const isBattleAccept = !!battleId && !!challengerPreview;
-  // 입력 상태 — sessionStorage 캐시 복원
-  const cached = typeof window !== 'undefined' ? loadCache() : null;
+  // 입력 상태 — 공통 캐시 복원
+  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
   const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
   const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
   const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
@@ -98,32 +84,21 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
     }
   }, []);
 
-  // 입력값 변경 시 sessionStorage에 캐시
+  // 입력값 변경 시 공통 캐시에 저장
   useEffect(() => {
-    saveCache({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
-  // 캐시가 있으면 landing 스킵
-  useEffect(() => {
-    if (cached?.birthDate && step === 'landing') {
-      setStep('input');
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  // 유효성 검증
+  // 유효성 검증 — 태어난 시간은 선택사항
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const [year, month, day] = birthDate.split('-').map(Number);
     if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
-    // 시간 검증
-    if (!unknownTime) {
-      if (!birthTime.includes('오전') && !birthTime.includes('오후')) return false;
-    }
     return true;
-  }, [birthDate, unknownTime, birthTime]);
+  }, [birthDate]);
 
   // 모르겠어요 토글
   const handleUnknownTimeToggle = useCallback(() => {
@@ -140,6 +115,14 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
   const handleSubmit = useCallback(async () => {
     if (!isFormValid() || submitting) return;
 
+    // 태어난 시간 미입력 시 자동으로 '모르겠어요' 처리 → 오후 12:00
+    const hasValidTime = birthTime.includes('오전') || birthTime.includes('오후');
+    const effectiveUnknownTime = unknownTime || !hasValidTime;
+    if (effectiveUnknownTime && !unknownTime) {
+      setUnknownTime(true);
+      setBirthTime('오후 12:00');
+    }
+
     trackEvent('sexy_battle_input_start');
     setStep('analyzing');
     setError(null);
@@ -147,7 +130,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
 
     // birthday를 YYYYMMDDHHMM 형식으로
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const hhmm = unknownTime ? '0000' : convertTo24Hour(birthTime);
+    const hhmm = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
     const birthday = `${numbers}${hhmm}`;
 
     const minDelay = new Promise(resolve => setTimeout(resolve, 2500));
@@ -157,7 +140,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
         callEdgeFunction<BattleResult>('analyze-sexy-battle', {
           birthday,
           gender,
-          birthTimeUnknown: unknownTime,
+          birthTimeUnknown: effectiveUnknownTime,
           battleId: battleId ?? null,
         }),
         minDelay,
@@ -195,7 +178,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
     setUnknownTime(false);
     setGender('female');
     setSubmitting(false);
-    try { sessionStorage.removeItem(CACHE_KEY); } catch { /* noop */ }
+    removeSelfSaju();
   }, []);
 
   return (

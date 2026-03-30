@@ -27,6 +27,7 @@ import GisaengShareButtons from './GisaengShareButtons';
 import GisaengCTA from './GisaengCTA';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM, trackEvent } from '@/lib/analytics';
+import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import {
   judgeChoice,
   applyEffects,
@@ -59,21 +60,8 @@ function convertTo24Hour(time: string): string {
   return `${String(hour).padStart(2, '0')}${minute}`;
 }
 
-const CACHE_KEY = 'gisaeng_input';
-
-function loadCache() {
-  try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-function saveCache(data: { birthDate: string; birthTime: string; unknownTime: boolean; gender: Gender }) {
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* noop */ }
-}
-
 export default function GisaengClient({ resultId: _resultId }: Props) {
-  const cached = typeof window !== 'undefined' ? loadCache() : null;
+  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
   const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
   const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
   const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
@@ -96,7 +84,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
 
   // 캐시 저장
   useEffect(() => {
-    saveCache({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   // UTM 자동입력
@@ -122,7 +110,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
     if (hasUTM && step === 'landing') setStep('input');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 유효성 검증
+  // 유효성 검증 — 태어난 시간은 선택사항
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
@@ -130,19 +118,27 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
     if (parts.length !== 3) return false;
     const [year, month, day] = parts.map(Number);
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
-    if (!unknownTime && !birthTime.includes('오전') && !birthTime.includes('오후')) return false;
     return true;
-  }, [birthDate, unknownTime, birthTime]);
+  }, [birthDate]);
 
   // 제출 → 기생 카드 생성
   const handleSubmit = async () => {
     if (!isFormValid()) return;
+
+    // 태어난 시간 미입력 시 자동으로 '모르겠어요' 처리 → 오후 12:00
+    const hasValidTime = birthTime.includes('오전') || birthTime.includes('오후');
+    const effectiveUnknownTime = unknownTime || !hasValidTime;
+    if (effectiveUnknownTime && !unknownTime) {
+      setUnknownTime(true);
+      setBirthTime('오후 12:00');
+    }
+
     trackEvent('gisaeng_input_start');
     setStep('analyzing');
     setError(null);
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const hhmm = unknownTime ? '0000' : convertTo24Hour(birthTime);
+    const hhmm = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
     const birthday = `${numbers}${hhmm}`;
 
     const utm = parseUTM();
@@ -153,7 +149,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
         callEdgeFunction<GisaengAnalyzeResponse>('analyze-gisaeng', {
           birthday,
           gender,
-          birthTimeUnknown: unknownTime,
+          birthTimeUnknown: effectiveUnknownTime,
           calendarType: 'solar',
           utmSource: utm.utmSource,
           utmMedium: utm.utmMedium,
@@ -336,7 +332,12 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                   value={birthTime}
                   onChange={setBirthTime}
                   unknownTime={unknownTime}
-                  onUnknownTimeToggle={() => setUnknownTime((v: boolean) => !v)}
+                  onUnknownTimeToggle={() => {
+                    const newVal = !unknownTime;
+                    setUnknownTime(newVal);
+                    if (newVal) setBirthTime('오후 12:00');
+                    else setBirthTime('');
+                  }}
                 />
               </div>
 

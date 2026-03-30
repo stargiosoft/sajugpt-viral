@@ -7,6 +7,7 @@ import type { NightManualStep, NightManualResult, ServantType, InterventionChoic
 import { getCompatibility } from '@/constants/night-manual';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { supabase } from '@/lib/supabase';
+import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import NightLanding from './NightLanding';
 import NightBirthInput from './NightBirthInput';
 import NightAnalyzing from './NightAnalyzing';
@@ -30,21 +31,8 @@ function convertTo24Hour(time: string): string {
   return `${String(hour).padStart(2, '0')}${minute}`;
 }
 
-const CACHE_KEY = 'night_manual_input';
-
-function loadCache() {
-  try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-function saveCache(data: { birthDate: string; birthTime: string; unknownTime: boolean; gender: Gender }) {
-  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* noop */ }
-}
-
 export default function NightManualClient({ nightManualId }: Props) {
-  const cached = typeof window !== 'undefined' ? loadCache() : null;
+  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
   const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
   const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
   const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
@@ -93,13 +81,22 @@ export default function NightManualClient({ nightManualId }: Props) {
 
   const handleSubmit = useCallback(async () => {
     if (submitting) return;
+
+    // 태어난 시간 미입력 시 자동으로 '모르겠어요' 처리 → 오후 12:00
+    const hasValidTime = birthTime.includes('오전') || birthTime.includes('오후');
+    const effectiveUnknownTime = unknownTime || !hasValidTime;
+    if (effectiveUnknownTime && !unknownTime) {
+      setUnknownTime(true);
+      setBirthTime('오후 12:00');
+    }
+
     setSubmitting(true);
     setError(null);
 
-    saveCache({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju({ birthDate, birthTime: effectiveUnknownTime ? '오후 12:00' : birthTime, unknownTime: effectiveUnknownTime, gender });
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const timePart = unknownTime ? '0000' : convertTo24Hour(birthTime);
+    const timePart = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
     const birthday = numbers + timePart;
 
     setStep('analyzing');
@@ -109,7 +106,7 @@ export default function NightManualClient({ nightManualId }: Props) {
         callEdgeFunction<NightManualResult>('analyze-night-manual', {
           birthday,
           gender,
-          birthTimeUnknown: unknownTime,
+          birthTimeUnknown: effectiveUnknownTime,
         }),
         new Promise(r => setTimeout(r, 3000)), // 최소 3초 로딩
       ]);
@@ -155,9 +152,9 @@ export default function NightManualClient({ nightManualId }: Props) {
     setStep('landing');
   }, []);
 
+  // 태어난 시간은 선택사항
   const isDateValid = /^\d{4}-\d{2}-\d{2}$/.test(birthDate);
-  const isTimeValid = unknownTime || (birthTime.includes('오전') || birthTime.includes('오후'));
-  const canSubmit = isDateValid && isTimeValid && !submitting;
+  const canSubmit = isDateValid && !submitting;
 
   return (
     <div

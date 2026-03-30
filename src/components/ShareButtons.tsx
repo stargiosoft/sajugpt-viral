@@ -41,11 +41,11 @@ export default function ShareButtons({ headcount, battleId, cardRef }: Props) {
 
   const handleShare = useCallback(async () => {
     if (!cardRef.current) return;
-    const shared = await shareNative(cardRef.current, headcount);
+    const shared = await shareNative(cardRef.current, headcount, battleId);
     if (!shared) {
       await handleCopy();
     }
-  }, [cardRef, headcount, handleCopy]);
+  }, [cardRef, headcount, battleId, handleCopy]);
 
   const btnStyle: React.CSSProperties = {
     height: '56px',

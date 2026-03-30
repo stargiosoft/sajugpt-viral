@@ -65,4 +65,20 @@ export type AutopsyStep =
   | 'card1'
   | 'card2'
   | 'card3'
-  | 'result';
+  | 'result'
+  | 'morgue';
+
+export interface MorgueStats {
+  targetSajuType: string;
+  victimCount: number;
+  topCauses: { cause: string; count: number }[];
+}
+
+export interface MorgueAutopsy {
+  id: string;
+  causeOfDeathLabel: string;
+  discernmentGrade: DiscernmentGrade;
+  regretProbability: number;
+  coronerId: CoronerId;
+  createdAt: string;
+}

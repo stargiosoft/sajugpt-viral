@@ -106,9 +106,31 @@ export default function StockInput({
         </p>
       </motion.div>
 
-      {/* Birth Date */}
+      {/* Gender */}
       <motion.div
         custom={1}
+        initial="hidden"
+        animate="visible"
+        variants={sectionVariants}
+        style={{ marginBottom: '20px' }}
+      >
+        <p
+          style={{
+            fontSize: '14px',
+            fontWeight: 600,
+            color: '#cccccc',
+            letterSpacing: '-0.3px',
+            marginBottom: '8px',
+          }}
+        >
+          성별
+        </p>
+        <GenderSelect value={gender} onChange={setGender} />
+      </motion.div>
+
+      {/* Birth Date */}
+      <motion.div
+        custom={2}
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
@@ -128,28 +150,6 @@ export default function StockInput({
         <div className="stock-input-wrapper">
           <BirthInput value={birthDate} onChange={setBirthDate} />
         </div>
-      </motion.div>
-
-      {/* Gender */}
-      <motion.div
-        custom={2}
-        initial="hidden"
-        animate="visible"
-        variants={sectionVariants}
-        style={{ marginBottom: '20px' }}
-      >
-        <p
-          style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#cccccc',
-            letterSpacing: '-0.3px',
-            marginBottom: '8px',
-          }}
-        >
-          성별
-        </p>
-        <GenderSelect value={gender} onChange={setGender} />
       </motion.div>
 
       {/* Birth Time */}

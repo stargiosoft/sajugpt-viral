@@ -427,55 +427,6 @@ export default function GisaengLanding({ onStart }: Props) {
         ))}
       </motion.div>
 
-      {/* ── 핵심 도발 카피 ── */}
-      <motion.div
-        className="w-full"
-        style={{ padding: '40px 24px 0' }}
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-        <div
-          className="transform-gpu"
-          style={{
-            padding: '28px 24px',
-            borderRadius: '16px',
-            backgroundColor: C.ink,
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* 배경 한자 */}
-          <span
-            style={{
-              position: 'absolute',
-              bottom: '-20px',
-              right: '-10px',
-              fontSize: '120px',
-              fontWeight: 200,
-              color: C.hanji,
-              opacity: 0.04,
-              lineHeight: 1,
-              pointerEvents: 'none',
-            }}
-          >
-            妓
-          </span>
-
-          <p style={{ fontSize: '18px', fontWeight: 600, color: C.hanji, lineHeight: 1.6, letterSpacing: '-0.36px', position: 'relative', zIndex: 1 }}>
-            &ldquo;나 3명 다 속여서
-            <br />
-            <span style={{ color: C.gold }}>S티어 나옴 월 830냥</span>
-            <br />
-            <span style={{ color: C.gold }}>(4,150만원)ㅋㅋ&rdquo;</span>
-          </p>
-          <p style={{ fontSize: '12px', fontWeight: 400, color: C.inkFaint, marginTop: '12px', position: 'relative', zIndex: 1 }}>
-            — 이 한 마디가 타임라인을 불태운다
-          </p>
-        </div>
-      </motion.div>
-
       {/* ── 면책 ── */}
       <p
         style={{

@@ -14,8 +14,11 @@ import AnalyzingAutopsy from '@/components/autopsy/AnalyzingAutopsy';
 import AutopsyCard from '@/components/autopsy/AutopsyCard';
 import DeathCertificate from '@/components/autopsy/DeathCertificate';
 import AutopsyShareButtons from '@/components/autopsy/AutopsyShareButtons';
+import MorgueView from '@/components/autopsy/MorgueView';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
+import { supabase } from '@/lib/supabase';
 import { parseUTM, trackEvent } from '@/lib/analytics';
+import { loadTargetSaju, saveTargetSaju } from '@/lib/sajuCache';
 
 interface Props {
   autopsyId?: string;
@@ -36,11 +39,12 @@ function convertTo24Hour(time: string): string {
 }
 
 export default function AutopsyClient({ autopsyId }: Props) {
-  // 입력 상태
-  const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
-  const [unknownTime, setUnknownTime] = useState(false);
-  const [gender, setGender] = useState<Gender>('female');
+  // 입력 상태 — 상대 사주 캐시 복원
+  const cached = typeof window !== 'undefined' ? loadTargetSaju() : null;
+  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
+  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
+  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
+  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'male');
   const [causeInput, setCauseInput] = useState<CauseOfDeathInput | null>(null);
   const [duration, setDuration] = useState<RelationshipDuration | null>(null);
   const [coronerId, setCoronerId] = useState<CoronerId | null>(null);
@@ -83,19 +87,21 @@ export default function AutopsyClient({ autopsyId }: Props) {
     }
   }, []);
 
-  // 유효성 검증
+  // 입력값 변경 시 상대 사주 캐시에 저장
+  useEffect(() => {
+    saveTargetSaju({ birthDate, birthTime, unknownTime, gender });
+  }, [birthDate, birthTime, unknownTime, gender]);
+
+  // 유효성 검증 — 태어난 시간은 선택사항
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const [year, month, day] = birthDate.split('-').map(Number);
     if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
-    if (!unknownTime) {
-      if (!birthTime.includes('오전') && !birthTime.includes('오후')) return false;
-    }
     if (!causeInput || !duration || !coronerId) return false;
     return true;
-  }, [birthDate, unknownTime, birthTime, causeInput, duration, coronerId]);
+  }, [birthDate, causeInput, duration, coronerId]);
 
   // 모르겠어요 토글
   const handleUnknownTimeToggle = useCallback(() => {
@@ -112,13 +118,21 @@ export default function AutopsyClient({ autopsyId }: Props) {
   const handleSubmit = useCallback(async () => {
     if (!isFormValid() || submitting) return;
 
+    // 태어난 시간 미입력 시 자동으로 '모르겠어요' 처리 → 오후 12:00
+    const hasValidTime = birthTime.includes('오전') || birthTime.includes('오후');
+    const effectiveUnknownTime = unknownTime || !hasValidTime;
+    if (effectiveUnknownTime && !unknownTime) {
+      setUnknownTime(true);
+      setBirthTime('오후 12:00');
+    }
+
     trackEvent('autopsy_submit');
     setStep('analyzing');
     setError(null);
     setSubmitting(true);
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const hhmm = unknownTime ? '0000' : convertTo24Hour(birthTime);
+    const hhmm = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
     const birthday = `${numbers}${hhmm}`;
 
     const minDelay = new Promise(resolve => setTimeout(resolve, 2500));
@@ -128,7 +142,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
         callEdgeFunction<AutopsyResult>('analyze-saju-autopsy', {
           birthday,
           gender,
-          birthTimeUnknown: unknownTime,
+          birthTimeUnknown: effectiveUnknownTime,
           causeOfDeathInput: causeInput,
           relationshipDuration: duration,
           coronerId,
@@ -159,12 +173,42 @@ export default function AutopsyClient({ autopsyId }: Props) {
     setBirthDate('');
     setBirthTime('');
     setUnknownTime(false);
-    setGender('female');
+    setGender('male');
     setCauseInput(null);
     setDuration(null);
     setCoronerId(null);
     setSubmitting(false);
   }, []);
+
+  // 전전남친 리플레이 — 입력 초기화 후 바로 input으로
+  const handleReplay = useCallback(() => {
+    trackEvent('autopsy_replay');
+    setResult(null);
+    setError(null);
+    setBirthDate('');
+    setBirthTime('');
+    setUnknownTime(false);
+    setGender('male');
+    setCauseInput(null);
+    setDuration(null);
+    setCoronerId(null);
+    setStep('input');
+  }, []);
+
+  // 영안실 안치
+  const handleArchive = useCallback(async () => {
+    if (!result) return;
+    trackEvent('autopsy_archive', { autopsyId: result.autopsyId, targetSajuType: result.targetSajuType });
+    try {
+      await supabase
+        .from('saju_autopsies')
+        .update({ is_archived: true })
+        .eq('id', result.autopsyId);
+    } catch (err) {
+      console.error('안치 실패:', err);
+    }
+    setStep('morgue');
+  }, [result]);
 
   const coronerName = coronerId ? CORONERS.find(c => c.id === coronerId)?.name ?? '' : '';
 
@@ -505,10 +549,32 @@ export default function AutopsyClient({ autopsyId }: Props) {
               <div className="flex flex-col items-center" style={{ marginBottom: '36px' }}>
                 <span style={{ fontSize: '36px', marginBottom: '8px' }}>🔬</span>
                 <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#222', textAlign: 'center', letterSpacing: '-0.5px' }}>
-                  부검 대상 정보 입력
+                  그 놈의 사주를 넣어봐
                 </h1>
-                <p style={{ fontSize: '14px', color: '#888', marginTop: '4px' }}>
-                  그 놈의 사주 정보를 입력하세요
+                <p style={{ fontSize: '14px', color: '#888', marginTop: '4px', textAlign: 'center', lineHeight: '22px' }}>
+                  너를 못 알아본 전남친/전여친의 생년월일을 입력하세요
+                </p>
+              </div>
+
+              {/* 안내 배너 */}
+              <div style={{
+                backgroundColor: '#FEF3C7',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                marginBottom: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
+                <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
+                <p style={{
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: '#92400E',
+                  lineHeight: '19px',
+                  letterSpacing: '-0.26px',
+                }}>
+                  본인이 아닌 <strong>상대방(전남친/전여친)</strong>의 정보를 입력하세요
                 </p>
               </div>
 
@@ -523,7 +589,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
                   className="flex flex-col gap-1 w-full"
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>성별</p>
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>그 놈의 성별</p>
                   <GenderSelect value={gender} onChange={setGender} />
                 </motion.div>
 
@@ -534,7 +600,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
                 >
                   <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>
-                    생년월일 (양력 기준)
+                    그 놈의 생년월일 (양력 기준)
                   </p>
                   <BirthInput
                     value={birthDate}
@@ -553,7 +619,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
                   style={{ marginTop: '28px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>태어난 시간</p>
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>그 놈이 태어난 시간</p>
                   <BirthTimeInput
                     value={birthTime}
                     onChange={setBirthTime}
@@ -714,21 +780,11 @@ export default function AutopsyClient({ autopsyId }: Props) {
                 cardRef={cardRef}
               />
 
-              {/* 다시하기 + 전전남친 */}
+              {/* 영안실 + 리플레이 + 다른 테스트 */}
               <div className="flex flex-col gap-3" style={{ padding: '0 20px', marginTop: '12px' }}>
+                {/* 영안실 안치 */}
                 <button
-                  onClick={() => {
-                    trackEvent('autopsy_replay');
-                    setResult(null);
-                    setCauseInput(null);
-                    setDuration(null);
-                    setCoronerId(null);
-                    setBirthDate('');
-                    setBirthTime('');
-                    setUnknownTime(false);
-                    setGender('female');
-                    setStep('input');
-                  }}
+                  onClick={handleArchive}
                   style={{
                     width: '100%',
                     height: '56px',
@@ -741,11 +797,34 @@ export default function AutopsyClient({ autopsyId }: Props) {
                     cursor: 'pointer',
                   }}
                 >
+                  🏥 영안실에 안치하기
+                </button>
+
+                {/* 전전남친 리플레이 */}
+                <button
+                  onClick={handleReplay}
+                  style={{
+                    width: '100%',
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: '#fff',
+                    color: '#7A38D8',
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    border: '1px solid #EDE5F7',
+                    cursor: 'pointer',
+                  }}
+                >
                   전전남친도 부검하기
                 </button>
-                <button
-                  onClick={handleReset}
+
+                {/* 다른 테스트 */}
+                <a
+                  href="/"
                   style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     width: '100%',
                     height: '48px',
                     borderRadius: '16px',
@@ -754,13 +833,24 @@ export default function AutopsyClient({ autopsyId }: Props) {
                     fontSize: '14px',
                     fontWeight: 600,
                     border: '1px solid #e7e7e7',
+                    textDecoration: 'none',
                     cursor: 'pointer',
                   }}
                 >
-                  처음으로
-                </button>
+                  다른 테스트 해보기
+                </a>
               </div>
             </motion.div>
+          )}
+          {/* ─── MORGUE ─── */}
+          {step === 'morgue' && result && (
+            <MorgueView
+              key="morgue"
+              targetSajuType={result.targetSajuType}
+              autopsyId={result.autopsyId}
+              onBack={() => setStep('result')}
+              onReplay={handleReplay}
+            />
           )}
         </AnimatePresence>
       </div>

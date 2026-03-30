@@ -42,7 +42,7 @@ const ITEMS: ViralItem[] = [
   },
   {
     title: '사주 법정',
-    description: '연애 못한 이유를 검사가 기소하고 변호사가 반박합니다',
+    description: '연애 못한 이유를 사주로 기소, 형량이 곧 매력',
     href: '/court',
     ready: true,
     tag: 'NEW',
