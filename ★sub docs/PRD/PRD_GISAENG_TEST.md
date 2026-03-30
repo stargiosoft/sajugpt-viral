@@ -560,4 +560,683 @@ X플레어 캐릭터 챗봇 페이지로 이동
 
 ---
 
-**최종 업데이트**: 2026-03-27
+## 기술 구현 명세 (Technical Spec)
+
+### T-1. 아키텍처 개요
+
+```
+[클라이언트]                        [서버]
+
+입력 → 제출 ─────────────────────→ Edge Function: analyze-gisaeng
+                                    ├─ Stargio API 호출 (사주 데이터)
+                                    ├─ 능력치 5종 산출 (calculateGisaengStats)
+                                    ├─ 기생 유형 배정 (assignGisaengType)
+                                    ├─ 선비 3명 초기 게이지 설정 (사주 상성)
+                                    ├─ Gemini: 기생 카드 서사 생성
+                                    ├─ DB 저장 (gisaeng_results)
+                                    └─ 응답 반환
+
+← 기생 카드 데이터 수신 ─────────
+
+기생 카드 표시
+  ↓
+라운드 1~3 (클라이언트 로컬 처리)   ← 선택지 판정은 능력치 기준값 비교
+  - 능력치 vs 기준값 비교            (서버 호출 불필요)
+  - 게이지 변동 계산
+  - 라운드별 상태 업데이트
+  ↓
+결산 (클라이언트 로컬 계산)
+  - 티어 판정
+  - 월 급여 산정
+  ↓
+결산 결과 DB 저장 ───────────────→ Edge Function: save-gisaeng-result
+                                    ├─ Gemini: 결산 한 줄 서사 생성
+                                    ├─ DB 업데이트 (simulation_result JSONB)
+                                    └─ 응답 반환
+
+← 최종 결과 수신 ───────────────
+결산 카드 표시 + 공유
+```
+
+**핵심 결정**: 시뮬레이션 3라운드는 **클라이언트 로컬 처리**
+- 이유: 선택지 판정이 단순 비교 (`능력치 >= 기준값`)이므로 서버 왕복 불필요
+- 장점: 라운드 전환 즉각 반응 (UX), 서버 비용 절감
+- 단점: 치트 가능 → 비경쟁 콘텐츠이므로 무관
+
+---
+
+### T-2. Edge Function 설계
+
+#### analyze-gisaeng (1차: 기생 카드 생성)
+
+```typescript
+// POST /functions/v1/analyze-gisaeng
+// Request Body:
+{
+  birthday: string;        // "199112252315" (YYYYMMDDHHMM)
+  gender: 'male' | 'female';
+  birthTimeUnknown: boolean;
+  calendarType: 'solar' | 'lunar';  // 양력/음력
+}
+
+// Response:
+{
+  success: true;
+  resultId: string;        // UUID (DB 저장 후 반환)
+  gisaengCard: {
+    gisaengName: string;   // "월향 (月香)" — Gemini 생성
+    type: GisaengType;     // 'haeeohwa' | 'hongryeon' | 'mukran' | 'chunhyang' | 'wolha' | 'hwangjini'
+    typeName: string;      // "해어화 (解語花)"
+    typeSubtitle: string;  // "말로 꽃을 피우는 여인"
+    tier: string;          // "A (잠재 S)"
+    stats: {
+      speech: number;      // 화술 0~100
+      allure: number;      // 요염 0~100
+      intellect: number;   // 지성 0~100
+      pushpull: number;    // 밀당 0~100
+      intuition: number;   // 눈치 0~100
+    };
+    totalCharm: number;    // 총 바람끼력 (5개 합산, 최대 500)
+    doHwaSal: boolean;     // 도화살 보유
+    hongYeomSal: boolean;  // 홍염살 보유
+    narrative: string;     // Gemini 생성 서사 (카드 하단 텍스트)
+    assessment: string;    // Gemini 생성 한 줄 평가 ("지성이 높아 선비의 약점을...")
+  };
+  seonbi: {
+    kwonryeok: { name: '김도윤'; loyalty: number; suspicion: number; };
+    romantic: { name: '박서진'; loyalty: number; suspicion: number; };
+    jealousy: { name: '이준혁'; loyalty: number; suspicion: number; };
+  };
+  sajuHighlights: {
+    doHwaSal: boolean;
+    hongYeomSal: boolean;
+    topSipsung: string;
+    ilju: string;          // 일주 (오행 판별용)
+    iljuElement: 'wood' | 'fire' | 'earth' | 'metal' | 'water';
+  };
+}
+```
+
+**처리 파이프라인**:
+
+1. CORS 프리플라이트 → `handleCorsPreflightRequest()`
+2. 요청 검증 (birthday 8~12자리, gender 필수)
+3. Stargio API 호출 (색기배틀과 동일 패턴, 재시도 3회)
+4. 데이터 경량화 (excludeKeys 8개 동일)
+5. `calculateGisaengStats()` — PRD 1-3 공식 그대로
+6. `assignGisaengType()` — PRD 1-4 기준
+7. `calculateSeonbiGauges()` — PRD 2-3 사주 상성 적용
+8. Gemini 호출: 기생 이름 + 서사 + 한 줄 평가 생성
+9. DB insert (`gisaeng_results`)
+10. 응답 반환
+
+#### save-gisaeng-result (2차: 시뮬 결과 저장)
+
+```typescript
+// POST /functions/v1/save-gisaeng-result
+// Request Body:
+{
+  resultId: string;           // 1차에서 받은 UUID
+  simulationResult: {
+    rounds: RoundResult[];    // 3라운드 선택·결과
+    finalSeonbi: {            // 최종 선비 상태
+      kwonryeok: { loyalty: number; suspicion: number; alive: boolean; };
+      romantic: { loyalty: number; suspicion: number; alive: boolean; };
+      jealousy: { loyalty: number; suspicion: number; alive: boolean; };
+    };
+    tier: 'S' | 'A' | 'B' | 'C' | 'D';
+    monthlySalary: number;    // 냥
+    modernValue: number;      // 원 (냥 × 50000)
+    totalCharmAfter: number;  // 시뮬 후 바람끼력 (보너스 반영)
+  };
+}
+
+// Response:
+{
+  success: true;
+  finalNarrative: string;     // Gemini 생성 최종 한 줄 서사
+  seonbiComments: {           // Gemini 생성 선비별 코멘트
+    kwonryeok: string;        // "월향 없이는 못 산다"
+    romantic: string;         // "시 100편을 바쳤으나 부족"
+    jealousy: string;         // "담을 넘다 허리를 다침"
+  };
+}
+```
+
+---
+
+### T-3. Gemini 프롬프트 설계
+
+#### 기생 카드 서사 (1차 호출)
+
+```
+당신은 조선시대 기방을 배경으로 한 사주 기반 캐릭터 서사 작가입니다.
+
+## 유저 사주 데이터
+- 기생 유형: {typeName} ({typeSubtitle})
+- 능력치: 화술 {speech}, 요염 {allure}, 지성 {intellect}, 밀당 {pushpull}, 눈치 {intuition}
+- 도화살: {doHwaSal ? '보유' : '없음'}
+- 홍염살: {hongYeomSal ? '보유' : '없음'}
+- 최고 능력치: {topStat}
+- 사주 특징: {topSipsung} 발달
+
+## 생성할 것
+1. **기생 이름** (2글자 한글 + 한자): 능력치 기반. 예: 월향(月香), 설란(雪蘭), 연화(蓮花)
+2. **서사** (3~4문장): 아래 참고 서사의 톤을 참고하되 절대 베끼지 마라
+3. **한 줄 평가** (1문장): 능력치 강점+약점 조합
+
+## 참고 서사 (톤 참고용, 베끼지 마라)
+{NARRATIVE_EXAMPLES[type]}
+
+## 규칙
+- 반말 금지. 존댓말도 금지. "~다" 체 사용 (서술체)
+- 사주 용어(도화살, 홍염살, 편관 등) 최소 1회 포함
+- 조선시대 기방 세계관 유지
+- 현대어/이모지/마크다운 사용 금지
+- 서사는 반드시 유저를 "너"로 지칭
+- 마지막 문장은 사주 근거로 마무리 ("사주에 ~이 있다", "~살이 앉았다" 등)
+```
+
+#### 결산 서사 (2차 호출)
+
+```
+당신은 조선시대 기방 역사서 저자입니다.
+
+## 시뮬레이션 결과
+- 기생 이름: {gisaengName}
+- 기생 유형: {typeName}
+- 최종 티어: {tier}
+- 생존 선비: {aliveSeonbiCount}명
+- 선비별 상태: {seonbiStates}
+- 월 급여: {salary}냥 (현대 {modernValue}원)
+
+## 생성할 것
+1. **선비별 코멘트** (각 1문장): 최종 충성도·의심도 기반. 생존 선비는 숭배/집착 톤, 이탈 선비는 미련/원망 톤
+2. **최종 한 줄 서사** (1문장): 티어에 맞는 역사서 톤
+
+## 티어별 톤 가이드
+- S: 전설 → "조선이 기억할 이름이다" 급
+- A: 위태로운 성공 → "줄타기했지만 살아남았다"
+- B: 평범한 성공 → "기방에서 중간은 가는 기생"
+- C: 아쉬운 실패 → "순정인지 무능인지는 역사가 판단할 것"
+- D: 완전 실패 → 자조적 유머 ("기방 주인이 짐을 싸놨다")
+
+## 규칙
+- "~다" 체 사용 (서술체)
+- 선비 이름(김도윤/박서진/이준혁)을 직접 사용
+- 마크다운/이모지 금지
+- D티어 코멘트는 웃겨야 함 (자조적 유머 = 공유 동기)
+```
+
+#### 폴백 텍스트
+
+Gemini 실패 시 하드코딩된 `FALLBACK_NARRATIVES`와 `FALLBACK_COMMENTS` 사용:
+
+```typescript
+const FALLBACK_NARRATIVES: Record<GisaengType, string> = {
+  haeeohwa: "네가 기방에 들어서면 선비들이 조용해진다...",
+  hongryeon: "네가 술잔을 들면 방 안의 공기가 바뀐다...",
+  // ... PRD 1-5의 서사 그대로
+};
+
+const FALLBACK_TIER_NARRATIVES: Record<Tier, string> = {
+  S: "세 남자를 동시에 돌리면서 한 명도 잃지 않은 전설. 조선이 기억할 이름이다.",
+  A: "위태롭게 줄타기했지만 결국 살아남았다. 한양 기방가에 네 이름이 오르내린다.",
+  // ... PRD 4-4 그대로
+};
+```
+
+---
+
+### T-4. DB 스키마
+
+```sql
+-- 기생 시뮬레이션 결과 테이블
+CREATE TABLE gisaeng_results (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- 입력 데이터
+  birthday TEXT NOT NULL,              -- YYYYMMDDHHMM
+  birth_time TEXT,                     -- HHMM or NULL (모름)
+  gender TEXT NOT NULL,                -- 'male' | 'female'
+  calendar_type TEXT DEFAULT 'solar',  -- 'solar' | 'lunar'
+
+  -- 기생 카드 (1차 Edge Function 결과)
+  gisaeng_name TEXT NOT NULL,          -- "월향 (月香)"
+  gisaeng_type TEXT NOT NULL,          -- 'haeeohwa' | 'hongryeon' | ...
+  tier_initial TEXT,                   -- 기생 카드 시점 예상 티어 "A (잠재 S)"
+  stats JSONB NOT NULL,                -- { speech, allure, intellect, pushpull, intuition }
+  total_charm INT NOT NULL,            -- 총 바람끼력 (0~500)
+  do_hwa_sal BOOLEAN DEFAULT FALSE,
+  hong_yeom_sal BOOLEAN DEFAULT FALSE,
+  gisaeng_card_result JSONB NOT NULL,  -- 전체 기생 카드 데이터 (narrative, assessment 포함)
+
+  -- 시뮬레이션 결과 (2차 Edge Function에서 업데이트)
+  simulation_result JSONB,             -- { rounds, finalSeonbi, tier, salary, modernValue, ... }
+  final_tier TEXT,                     -- 'S' | 'A' | 'B' | 'C' | 'D'
+  monthly_salary INT,                  -- 냥
+  modern_value INT,                    -- 원
+  final_narrative TEXT,                -- Gemini 최종 한 줄 서사
+  seonbi_comments JSONB,              -- { kwonryeok, romantic, jealousy }
+
+  -- 사주 원본 (디버깅/분석용)
+  saju_highlights JSONB,               -- { doHwaSal, hongYeomSal, topSipsung, ilju, iljuElement }
+
+  -- 메타
+  status TEXT DEFAULT 'card_generated', -- 'card_generated' | 'completed'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+
+  -- 추적
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+
+  CONSTRAINT check_gisaeng_type CHECK (
+    gisaeng_type IN ('haeeohwa', 'hongryeon', 'mukran', 'chunhyang', 'wolha', 'hwangjini')
+  ),
+  CONSTRAINT check_final_tier CHECK (
+    final_tier IS NULL OR final_tier IN ('S', 'A', 'B', 'C', 'D')
+  ),
+  CONSTRAINT check_status CHECK (
+    status IN ('card_generated', 'completed')
+  )
+);
+
+CREATE INDEX idx_gisaeng_results_created_at ON gisaeng_results(created_at DESC);
+CREATE INDEX idx_gisaeng_results_type ON gisaeng_results(gisaeng_type);
+CREATE INDEX idx_gisaeng_results_tier ON gisaeng_results(final_tier);
+
+-- RLS: 공유 링크용 읽기 허용
+ALTER TABLE gisaeng_results ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can read gisaeng results"
+  ON gisaeng_results FOR SELECT TO anon USING (true);
+```
+
+---
+
+### T-5. URL 라우팅 & 동적 OG
+
+#### 라우팅 구조
+
+```
+src/app/
+├── gisaeng/
+│   ├── page.tsx              # 메인 (정적 OG + GisaengClient 렌더)
+│   └── [resultId]/
+│       └── page.tsx          # 공유 페이지 (동적 OG + GisaengClient 렌더)
+```
+
+#### 정적 OG (`/gisaeng/page.tsx`)
+
+```typescript
+export const metadata: Metadata = {
+  title: '기생 시뮬레이션 — 조선시대 기생이었다면?',
+  description: '사주로 기생 능력치 카드를 뽑고, 선비 3명을 동시에 관리해보세요',
+  openGraph: {
+    title: '기생 시뮬레이션 — 넌 밤새 얼마를 벌었을까? 🏮',
+    description: '사주 기반 기생 능력치 + 선비 3명 관리 시뮬레이션',
+    // OG 이미지: 기생 시뮬 대표 이미지 (별도 제작)
+  },
+};
+```
+
+#### 동적 OG (`/gisaeng/[resultId]/page.tsx`)
+
+```typescript
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { resultId } = await params;
+
+  try {
+    const supabase = createClient(/* ... */);
+    const { data } = await supabase
+      .from('gisaeng_results')
+      .select('gisaeng_name, gisaeng_type, final_tier, monthly_salary, modern_value, status')
+      .eq('id', resultId)
+      .single();
+
+    if (data?.status === 'completed') {
+      // 시뮬 완료: 결산 카드 기반 OG
+      const tierLabel = TIER_LABELS[data.final_tier]; // "전설의 명기", "기방에서 쫓겨남" 등
+      const salary = data.monthly_salary?.toLocaleString();
+      const modern = data.modern_value ? `약 ${(data.modern_value / 10000).toLocaleString()}만원` : '';
+
+      return {
+        title: `기생 시뮬 — ${data.final_tier}티어 ${tierLabel} 🏮`,
+        description: `${data.gisaeng_name} | 월 ${salary}냥 (${modern}) | 넌 몇 냥이야?`,
+        openGraph: {
+          title: `기생 시뮬 — ${data.final_tier}티어 월 ${salary}냥 🏮`,
+          description: `${data.gisaeng_name} ${tierLabel} | 넌 몇 냥이야? ㅋㅋ`,
+        },
+      };
+    } else if (data) {
+      // 기생 카드만 생성 (시뮬 미완료): 카드 기반 OG
+      const typeName = GISAENG_TYPE_NAMES[data.gisaeng_type];
+      return {
+        title: `기생 시뮬 — 나의 기생 유형: ${typeName} 🏮`,
+        description: `${data.gisaeng_name} | 선비 3명이 기다리고 있다`,
+      };
+    }
+  } catch { /* 폴백 */ }
+
+  return {
+    title: '기생 시뮬레이션 — 사주GPT',
+    description: '조선시대 기생이었다면, 넌 밤새 얼마를 벌었을까?',
+  };
+}
+```
+
+**OG 공유 시 바이럴 포인트**:
+- 카카오톡 프리뷰: "기생 시뮬 — S티어 월 1,095냥 🏮" + "월향 (月香) 전설의 명기 | 넌 몇 냥이야? ㅋㅋ"
+- 숫자(냥 + 만원)가 프리뷰에 노출 → 비교 욕구 자극 → 링크 클릭
+
+---
+
+### T-6. 상태 머신 (State Machine)
+
+```typescript
+type GisaengStep =
+  | 'landing'        // 랜딩 (헤드카피 + 시작 버튼)
+  | 'input'          // 입력 (성별, 생년월일, 시간, 양음력)
+  | 'analyzing'      // 기생 카드 생성 중 ("기방 문 여는 중...")
+  | 'gisaeng-card'   // 기생 능력치 카드 표시 (1차 캡처 포인트)
+  | 'round1'         // 라운드 1: "오늘 밤, 셋 다 왔다"
+  | 'round2'         // 라운드 2: "의심의 밤"
+  | 'round3'         // 라운드 3: "최후의 밤"
+  | 'calculating'    // 결산 계산 + DB 저장 중 ("성적표 작성 중...")
+  | 'result';        // 최종 결산 카드 (2차 캡처 포인트)
+```
+
+#### 전이 다이어그램
+
+```
+landing
+  ↓ [시작 클릭]
+  ↓ [캐시/UTM 있으면 스킵 가능]
+input
+  ↓ [유효성 통과 & 제출]
+analyzing ← Edge Function: analyze-gisaeng 호출
+  ↓       (최소 3초 딜레이 — "기방 문 여는 중..." 연출)
+gisaeng-card ← 1차 캡처 포인트 (공유 버튼 노출)
+  ↓ [선비 만나기 클릭]
+round1 ← 선택지 A/B/C → 판정 → 게이지 변동 → 결과 텍스트
+  ↓ [다음 라운드]
+round2 ← 👁 최고 선비 기준 동적 분기 → 선택지 → 판정
+  ↓ [다음 라운드]
+round3 ← 최후의 밤 → 선택지 → 판정
+  ↓ [자동 전환]
+calculating ← Edge Function: save-gisaeng-result 호출
+  ↓          (최소 2초 딜레이 — "성적표 작성 중..." 연출)
+result ← 2차 캡처 포인트 (공유 + CTA)
+  ↓ [다시 도전] → landing으로 리셋
+  ↓ [이 선비와 대화하기] → 외부 챗봇 URL
+```
+
+#### 이탈/뒤로가기 처리
+
+| 상황 | 처리 |
+|------|------|
+| analyzing 중 뒤로가기 | input으로 복귀 (입력값 캐시 유지) |
+| round1~3 중 뒤로가기 | **막지 않음** — 뒤로가면 이전 라운드로 (선택 초기화) |
+| round1~3 중 브라우저 이탈 | 시뮬 데이터 소실 (기생 카드는 DB에 저장되어 있으므로 resultId로 재시작 가능하나 MVP에서는 미구현) |
+| result에서 뒤로가기 | result 유지 (히스토리 푸시 안 함) |
+
+#### 세션 캐싱
+
+```typescript
+const CACHE_KEY = 'gisaeng_input';
+// 색기배틀과 동일 패턴: sessionStorage에 입력값 저장
+// 캐시 존재 시 landing 스킵 → input 직행
+```
+
+---
+
+### T-7. 캐릭터 에셋
+
+#### 필요 이미지 목록
+
+| 카테고리 | 파일명 | 사양 | 용도 |
+|----------|--------|------|------|
+| 기생 유형 | `haeeohwa.webp` | 400×400, 투명 배경 | 기생 카드 일러스트 |
+| 기생 유형 | `hongryeon.webp` | 〃 | 〃 |
+| 기생 유형 | `mukran.webp` | 〃 | 〃 |
+| 기생 유형 | `chunhyang.webp` | 〃 | 〃 |
+| 기생 유형 | `wolha.webp` | 〃 | 〃 |
+| 기생 유형 | `hwangjini.webp` | 〃 | 〃 (히든 유형) |
+| 선비 | `kim-doyun.webp` | 120×120, 원형 크롭 가능 | 라운드 아바타 |
+| 선비 | `park-seojin.webp` | 〃 | 〃 |
+| 선비 | `lee-junhyuk.webp` | 〃 | 〃 |
+
+**총 9장** — `public/characters/gisaeng/` 디렉토리
+
+#### 에셋 없을 때 (MVP 초기)
+
+이미지 미완성 시 **이모지 + 그라디언트 원형**으로 대체:
+
+```
+기생 유형: 배경 그라디언트 원 + 유형 한자 (解語花, 紅蓮 등)
+선비: 배경색 원 + 이모지 (🫅 👨‍🎨 ⚔️)
+```
+
+→ 에셋 완성 시 이미지로 교체 (컴포넌트 prop으로 분리)
+
+---
+
+### T-8. 타입 정의
+
+```typescript
+// src/types/gisaeng.ts
+
+export type GisaengType = 'haeeohwa' | 'hongryeon' | 'mukran' | 'chunhyang' | 'wolha' | 'hwangjini';
+export type GisaengTier = 'S' | 'A' | 'B' | 'C' | 'D';
+export type SeonbiType = 'kwonryeok' | 'romantic' | 'jealousy';
+export type GisaengStep = 'landing' | 'input' | 'analyzing' | 'gisaeng-card' | 'round1' | 'round2' | 'round3' | 'calculating' | 'result';
+
+export interface GisaengStats {
+  speech: number;      // 화술 0~100
+  allure: number;      // 요염 0~100
+  intellect: number;   // 지성 0~100
+  pushpull: number;    // 밀당 0~100
+  intuition: number;   // 눈치 0~100
+}
+
+export interface GisaengCard {
+  gisaengName: string;
+  type: GisaengType;
+  typeName: string;
+  typeSubtitle: string;
+  tier: string;
+  stats: GisaengStats;
+  totalCharm: number;
+  doHwaSal: boolean;
+  hongYeomSal: boolean;
+  narrative: string;
+  assessment: string;
+}
+
+export interface SeonbiState {
+  name: string;
+  type: SeonbiType;
+  loyalty: number;     // ♥ 충성도 0~100
+  suspicion: number;   // 👁 의심도 0~100
+  alive: boolean;      // 이탈 여부
+}
+
+export interface RoundChoice {
+  id: 'A' | 'B' | 'C';
+  label: string;
+  requiredStat: keyof GisaengStats;
+  threshold: number;
+  successEffect: GaugeEffect;
+  failEffect: GaugeEffect;
+}
+
+export interface GaugeEffect {
+  target: SeonbiType | 'all';
+  loyaltyDelta: number;
+  suspicionDelta: number;
+}
+
+export interface RoundResult {
+  round: 1 | 2 | 3;
+  choiceId: 'A' | 'B' | 'C';
+  success: boolean;
+  seonbiAfter: Record<SeonbiType, { loyalty: number; suspicion: number; alive: boolean }>;
+}
+
+export interface SimulationResult {
+  rounds: RoundResult[];
+  finalSeonbi: Record<SeonbiType, SeonbiState>;
+  tier: GisaengTier;
+  tierLabel: string;
+  monthlySalary: number;
+  modernValue: number;
+  totalCharmAfter: number;
+  finalNarrative: string;
+  seonbiComments: Record<SeonbiType, string>;
+}
+
+export interface GisaengResult {
+  resultId: string;
+  gisaengCard: GisaengCard;
+  seonbi: Record<SeonbiType, SeonbiState>;
+  sajuHighlights: {
+    doHwaSal: boolean;
+    hongYeomSal: boolean;
+    topSipsung: string;
+    ilju: string;
+    iljuElement: 'wood' | 'fire' | 'earth' | 'metal' | 'water';
+  };
+  simulation?: SimulationResult;  // 시뮬 완료 후 추가
+}
+```
+
+---
+
+### T-9. 컴포넌트 구조
+
+```
+src/components/gisaeng/
+├── GisaengClient.tsx          # 메인 상태머신 (색기배틀의 SexyBattleClient 대응)
+├── GisaengLanding.tsx         # 랜딩 화면 ("조선시대 기생이었다면...")
+├── GisaengAnalyzing.tsx       # 분석 중 ("기방 문 여는 중...")
+├── GisaengCard.tsx            # 기생 능력치 카드 (1차 캡처 포인트)
+├── StatBar.tsx                # 능력치 바 (████░░ 78)
+├── RoundScreen.tsx            # 라운드 공통 프레임 (상황 + 선택지 3개 + 게이지)
+├── SeonbiGauge.tsx            # 선비별 ♥·👁 게이지 표시
+├── SeonbiAvatar.tsx           # 선비 아바타 + 이름 + 유형 태그
+├── ChoiceButton.tsx           # 선택지 버튼 (선택 후 성공/실패 애니메이션)
+├── RoundResultPopup.tsx       # 선택 결과 팝업 (성공/실패 + 게이지 변동 표시)
+├── GisaengCalculating.tsx     # 결산 중 ("성적표 작성 중...")
+├── GisaengResultCard.tsx      # 최종 결산 카드 (2차 캡처 포인트, toPng 대상)
+├── GisaengCTA.tsx             # 유료 전환 CTA ("이 선비와 대화하기")
+└── GisaengShareButtons.tsx    # 공유 버튼 (색기배틀 ShareButtons 패턴 동일)
+```
+
+#### 기존 컴포넌트 재사용
+
+| 기존 | 재사용 방식 |
+|------|------------|
+| `BirthInput.tsx` | 그대로 import (YYYY-MM-DD 자동포맷) |
+| `GenderSelect.tsx` | 그대로 import |
+| `BirthTimeInput.tsx` | 그대로 import |
+| `ShareButtons.tsx` | 로직 재사용, 카피만 변경 ("친구도 기생 시켜보기") |
+
+→ 입력 폼 컴포넌트 3개는 **공용화** (새로 만들지 않음)
+
+---
+
+### T-10. 라운드 2 동적 분기 상세
+
+PRD Step 3에서 "👁가 가장 높은 선비가 의심 이벤트 발동"이라고 명시되어 있으나, 구현 시 엣지 케이스 정리:
+
+```typescript
+function getRound2Scenario(seonbi: Record<SeonbiType, SeonbiState>): SeonbiType {
+  // 살아있는 선비 중 👁 최고값 선택
+  const alive = Object.entries(seonbi)
+    .filter(([_, s]) => s.alive)
+    .sort(([_, a], [__, b]) => b.suspicion - a.suspicion);
+
+  if (alive.length === 0) {
+    // 라운드 1에서 전원 이탈 → 라운드 2 스킵 → 바로 결산
+    return 'skip';
+  }
+
+  const [topType] = alive[0];
+
+  // 동률 시 우선순위: 질투형 > 권력형 > 로맨틱형
+  // (질투형이 가장 극적인 시나리오 제공)
+  if (alive.length >= 2) {
+    const [first, second] = alive;
+    if (first[1].suspicion === second[1].suspicion) {
+      const priority: SeonbiType[] = ['jealousy', 'kwonryeok', 'romantic'];
+      return priority.find(t => alive.some(([type]) => type === t)) ?? topType;
+    }
+  }
+
+  return topType as SeonbiType;
+}
+```
+
+#### 라운드 중간 이탈 처리
+
+| 이벤트 | 조건 | 처리 |
+|--------|------|------|
+| 선비 이탈 | ♥ ≤ 50 | 해당 선비 `alive = false`, 퇴장 연출 텍스트 |
+| 의심 폭발 | 👁 ≥ 80 | 강제 의심 이벤트 (해당 선비가 직접 확인하러 옴) |
+| 난장 이벤트 | 이준혁 👁 ≥ 70 & 다른 선비 마주침 | 2명 동시 이탈 가능 |
+| 전원 이탈 | 3명 모두 alive=false | 남은 라운드 스킵 → 바로 결산 (D티어) |
+
+---
+
+### T-11. 분석 화면 메시지 시퀀스
+
+```typescript
+const ANALYZING_MESSAGES = [
+  { text: '사주 원국 펼치는 중...', delay: 0 },
+  { text: '도화살 검사 중... 🔥', delay: 800 },
+  { text: '기생 등급 산정 중...', delay: 1600 },
+  { text: '선비 3명 배정 중...', delay: 2400 },
+];
+
+const CALCULATING_MESSAGES = [
+  { text: '선비별 충성도 집계 중...', delay: 0 },
+  { text: '월 급여 결산 중... 💰', delay: 800 },
+  { text: '현대 환산가 계산 중...', delay: 1600 },
+];
+```
+
+---
+
+### T-12. 에러 처리
+
+| 실패 지점 | 처리 |
+|-----------|------|
+| Stargio API 3회 실패 | "사주 데이터를 불러올 수 없어요. 잠시 후 다시 시도해주세요." → input 복귀 |
+| Gemini 실패 | 폴백 텍스트 사용 (FALLBACK_NARRATIVES) → 정상 진행 |
+| DB insert 실패 | 결과는 클라이언트에 있으므로 표시는 정상 → 공유 링크만 비활성 ("공유 링크를 생성할 수 없어요") |
+| save-gisaeng-result 실패 | 클라이언트에서 계산한 결산 데이터로 카드 표시 → 폴백 서사 사용 → 공유 링크 비활성 |
+| 네트워크 단절 (라운드 중) | 라운드는 로컬이므로 영향 없음. 결산 저장 시점에만 재시도 |
+
+---
+
+### T-13. 배포 명령어
+
+```bash
+# Edge Function 배포
+npx supabase functions deploy analyze-gisaeng --no-verify-jwt --project-ref tdrmvbsmxcewwaeuoqdx
+npx supabase functions deploy save-gisaeng-result --no-verify-jwt --project-ref tdrmvbsmxcewwaeuoqdx
+
+# Secrets (기존과 동일 — 이미 설정됨)
+# SAJU_API_KEY, GOOGLE_API_KEY
+
+# DB 마이그레이션
+npx supabase db push --project-ref tdrmvbsmxcewwaeuoqdx
+
+# 프론트 빌드 & 배포
+npx next build  # Vercel 자동 배포 (main 브랜치 push 시)
+```
+
+---
+
+**최종 업데이트**: 2026-03-30
