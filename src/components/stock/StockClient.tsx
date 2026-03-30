@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Gender, StockStep, StockAnalysisResult, RelationshipStatus, UserChoice, UserChoices } from '@/types/stock';
+import StockLanding from '@/components/stock/StockLanding';
 import StockInput from '@/components/stock/StockInput';
 import StockAnalyzing from '@/components/stock/StockAnalyzing';
 import StockReportCard from '@/components/stock/StockReportCard';
@@ -40,7 +41,7 @@ export default function StockClient({ stockId }: Props) {
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus>('single');
 
   // 플로우 상태
-  const [step, setStep] = useState<StockStep>('input');
+  const [step, setStep] = useState<StockStep>('landing');
   const [result, setResult] = useState<StockAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -70,6 +71,7 @@ export default function StockClient({ stockId }: Props) {
         setUnknownTime(false);
       }
       trackEvent('stock_land_utm');
+      setStep('input');
     }
     if (utm.gender) {
       setGender(utm.gender === 'male' ? 'male' : 'female');
@@ -157,7 +159,7 @@ export default function StockClient({ stockId }: Props) {
 
   // 다시하기
   const handleReset = useCallback(() => {
-    setStep('input');
+    setStep('landing');
     setResult(null);
     setError(null);
     setBirthDate('');
@@ -173,6 +175,19 @@ export default function StockClient({ stockId }: Props) {
     <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#0a0a14' }}>
       <div style={{ width: '100%', maxWidth: '440px' }}>
         <AnimatePresence mode="wait">
+
+          {/* ─── LANDING ─── */}
+          {step === 'landing' && (
+            <motion.div
+              key="landing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <StockLanding onStart={() => setStep('input')} />
+            </motion.div>
+          )}
 
           {/* ─── INPUT ─── */}
           {step === 'input' && (

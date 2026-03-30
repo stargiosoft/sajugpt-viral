@@ -15,6 +15,7 @@ export type CrewMemberId = 'kang' | 'yoon' | 'cha';
 export type UserChoice = 'A' | 'B' | 'C';
 
 export type StockStep =
+  | 'landing'
   | 'input'
   | 'analyzing'
   | 'report'
