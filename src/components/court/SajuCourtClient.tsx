@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Gender } from '@/types/battle';
 import type { CourtStep, CourtResult, PeriodInput } from '@/types/court';
 import BirthInput from '@/components/BirthInput';
@@ -189,22 +189,377 @@ export default function SajuCourtClient() {
 
         {/* ─── LANDING ──────────────────────────── */}
         {step === 'landing' && (
-          <div className="flex flex-col items-center justify-center w-full" style={{ minHeight: '80vh', padding: '0 24px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '24px' }}>⚖️</div>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#151515', textAlign: 'center', lineHeight: '1.4', marginBottom: '12px' }}>
-              당신이 연애 못한 이유,{'\n'}사주로 기소합니다
-            </h1>
-            <p style={{ fontSize: '15px', color: '#888', textAlign: 'center', marginBottom: '40px', lineHeight: '1.6' }}>
-              검사가 팩폭하고, 변호사가 뒤집어줍니다.{'\n'}
-              형량이 높을수록 매력이 높다는 뜻이에요.
-            </p>
-            <button
-              onClick={() => setStep('input')}
-              style={{ ...btnStyle, backgroundColor: '#7A38D8', color: '#fff' }}
+          <motion.div
+            key="landing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col w-full"
+            style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '120px' }}
+          >
+            {/* 상단 여백 */}
+            <div style={{ height: '64px' }} />
+
+            {/* ── 감정 훅 헤드라인 ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+              style={{ marginBottom: '8px' }}
             >
-              내 형량 확인하기
-            </button>
-          </div>
+              <p style={{
+                fontSize: '14px',
+                fontWeight: 500,
+                color: '#7A38D8',
+                letterSpacing: '-0.28px',
+                marginBottom: '12px',
+              }}>
+                사주 법정
+              </p>
+              <h1 style={{
+                fontSize: '26px',
+                fontWeight: 700,
+                color: '#151515',
+                lineHeight: '38px',
+                letterSpacing: '-0.52px',
+              }}>
+                연애 못한 진짜 이유,<br />
+                사주로 기소합니다
+              </h1>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+              style={{
+                fontSize: '15px',
+                fontWeight: 400,
+                color: '#6d6d6d',
+                lineHeight: '24px',
+                letterSpacing: '-0.45px',
+                marginBottom: '32px',
+              }}
+            >
+              검사가 팩폭하고, 변호사가 뒤집어줍니다.
+            </motion.p>
+
+            {/* ── 히어로 비주얼 — 기소장 미리보기 ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35, duration: 0.7, ease: [0.32, 0.72, 0, 1] }}
+              style={{ position: 'relative', marginBottom: '28px' }}
+            >
+              {/* 뒤 그림자 카드 */}
+              <div className="transform-gpu" style={{
+                position: 'absolute',
+                top: '8px',
+                left: '12px',
+                right: '12px',
+                bottom: '-4px',
+                borderRadius: '16px',
+                backgroundColor: '#EDE5F7',
+                transform: 'rotate(1.5deg)',
+              }} />
+
+              {/* 메인 기소장 카드 */}
+              <div className="relative transform-gpu" style={{
+                backgroundColor: '#FFFDF7',
+                borderRadius: '16px',
+                border: '1px solid #E8E0D0',
+                padding: '24px 20px 20px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+              }}>
+                {/* 문서 헤더 */}
+                <div className="flex items-center justify-between" style={{ marginBottom: '16px' }}>
+                  <div>
+                    <p style={{ fontSize: '10px', fontWeight: 500, color: '#C4B896', letterSpacing: '1px' }}>
+                      사주 법정
+                    </p>
+                    <p style={{ fontSize: '16px', fontWeight: 700, color: '#151515', letterSpacing: '-0.32px', marginTop: '2px' }}>
+                      기소장
+                    </p>
+                  </div>
+                  <div style={{ fontSize: '10px', fontWeight: 500, color: '#b7b7b7' }}>
+                    제2026-0330호
+                  </div>
+                </div>
+
+                {/* 구분선 */}
+                <div style={{ height: '1px', background: 'linear-gradient(90deg, #E8E0D0, transparent)', marginBottom: '16px' }} />
+
+                {/* 죄목 — 강조 */}
+                <div style={{
+                  backgroundColor: '#FAF8FC',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  marginBottom: '12px',
+                }}>
+                  <p style={{ fontSize: '11px', fontWeight: 500, color: '#848484', marginBottom: '4px' }}>죄목</p>
+                  <p style={{ fontSize: '20px', fontWeight: 700, color: '#151515', letterSpacing: '-0.4px' }}>짝사랑만 3년 죄</p>
+                </div>
+
+                {/* 수치 3개 */}
+                <div className="flex gap-2" style={{ marginBottom: '14px' }}>
+                  <div style={{ flex: 1, backgroundColor: '#f9f9f9', borderRadius: '12px', padding: '12px 10px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 500, color: '#848484', marginBottom: '4px' }}>형량</p>
+                    <p style={{ fontSize: '20px', fontWeight: 800, color: '#151515', letterSpacing: '-0.4px' }}>9<span style={{ fontSize: '12px', fontWeight: 500, color: '#6d6d6d' }}>년</span></p>
+                  </div>
+                  <div style={{ flex: 1, backgroundColor: '#f9f9f9', borderRadius: '12px', padding: '12px 10px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 500, color: '#848484', marginBottom: '4px' }}>현상금</p>
+                    <p style={{ fontSize: '20px', fontWeight: 800, color: '#7A38D8', letterSpacing: '-0.4px' }}>4,500<span style={{ fontSize: '10px', fontWeight: 500, color: '#7A38D8' }}>만원</span></p>
+                  </div>
+                  <div style={{ flex: 1, backgroundColor: '#f9f9f9', borderRadius: '12px', padding: '12px 10px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 500, color: '#848484', marginBottom: '4px' }}>피고인</p>
+                    <p style={{ fontSize: '20px', fontWeight: 800, color: '#DC2626', letterSpacing: '-0.4px' }}>7<span style={{ fontSize: '12px', fontWeight: 500, color: '#DC2626' }}>%</span></p>
+                  </div>
+                </div>
+
+                {/* 검사 vs 변호사 한 줄 */}
+                <div style={{ borderTop: '1px dashed #E8E0D0', paddingTop: '12px' }}>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start gap-2">
+                      <div style={{
+                        width: '6px', height: '6px', borderRadius: '50%',
+                        backgroundColor: '#FF4444', marginTop: '6px', flexShrink: 0,
+                      }} />
+                      <p style={{ fontSize: '13px', fontWeight: 500, color: '#525252', lineHeight: '20px', letterSpacing: '-0.26px' }}>
+                        &ldquo;3년이면 사랑이 아니라 습관입니다.&rdquo;
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <div style={{
+                        width: '6px', height: '6px', borderRadius: '50%',
+                        backgroundColor: '#4488FF', marginTop: '6px', flexShrink: 0,
+                      }} />
+                      <p style={{ fontSize: '13px', fontWeight: 500, color: '#525252', lineHeight: '20px', letterSpacing: '-0.26px' }}>
+                        &ldquo;3년을 버틴 건 습관이 아니라 진심입니다.&rdquo;
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 유죄 도장 */}
+                <div style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '56px',
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '4px',
+                  border: '2.5px solid #DC2626',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transform: 'rotate(-15deg)',
+                  opacity: 0.6,
+                }}>
+                  <p style={{ fontSize: '16px', fontWeight: 900, color: '#DC2626' }}>유죄</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ── 검사 vs 변호사 캐릭터 ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+              className="flex gap-3"
+              style={{ marginBottom: '32px' }}
+            >
+              {[
+                { name: '윤태산', role: '검사', tone: '팩폭형', quote: '못생겨서 못 만나는 거 아닙니다', color: '#FF4444', img: '/characters/yoon-taesan.webp' },
+                { name: '서휘윤', role: '변호사', tone: '위로형', quote: '당신의 잘못이 아닙니다', color: '#4488FF', img: '/characters/seo-hwiyoon.webp' },
+              ].map((c) => (
+                <div
+                  key={c.name}
+                  className="flex-1"
+                  style={{
+                    backgroundColor: '#fff',
+                    borderRadius: '14px',
+                    border: '1px solid #f0f0f0',
+                    padding: '14px',
+                    boxShadow: '4px 4px 14px rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <div className="flex items-center gap-2" style={{ marginBottom: '8px' }}>
+                    <div className="overflow-hidden transform-gpu" style={{
+                      width: '32px', height: '32px', borderRadius: '50%',
+                      border: '1px solid #f0f0f0',
+                    }}>
+                      <img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '13px', fontWeight: 600, color: '#151515', letterSpacing: '-0.26px' }}>{c.name}</p>
+                      <p style={{ fontSize: '11px', fontWeight: 500, color: c.color }}>{c.role} · {c.tone}</p>
+                    </div>
+                  </div>
+                  <p style={{
+                    fontSize: '12px', fontWeight: 400, color: '#848484',
+                    lineHeight: '17px', letterSpacing: '-0.24px',
+                  }}>
+                    &ldquo;{c.quote}&rdquo;
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* ── 죄목 프리뷰 (호기심 유발) ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+              style={{ marginBottom: '32px' }}
+            >
+              <p style={{
+                fontSize: '12px', fontWeight: 600, color: '#b7b7b7',
+                letterSpacing: '0.5px', marginBottom: '12px',
+              }}>
+                10가지 죄목
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  '짝사랑만 3년 죄', '좋아한다는 말 못 한 죄', '혼자 이별한 죄',
+                  '"나 같은 게 뭐" 죄', '읽씹당하고 괜찮은 척한 죄',
+                  '맨날 친구로만 남은 죄', '거울 보고 한숨 쉰 죄',
+                ].map((crime) => (
+                  <div key={crime} style={{
+                    padding: '7px 12px',
+                    borderRadius: '20px',
+                    backgroundColor: '#FAF8FC',
+                    border: '1px solid #EDE5F7',
+                  }}>
+                    <p style={{ fontSize: '12px', fontWeight: 500, color: '#7A38D8', letterSpacing: '-0.24px', whiteSpace: 'nowrap' }}>
+                      {crime}
+                    </p>
+                  </div>
+                ))}
+                <div style={{
+                  padding: '7px 12px',
+                  borderRadius: '20px',
+                  backgroundColor: '#f9f9f9',
+                  border: '1px solid #f0f0f0',
+                }}>
+                  <p style={{ fontSize: '12px', fontWeight: 500, color: '#b7b7b7', letterSpacing: '-0.24px' }}>
+                    +3개 더
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* ── 진행 방식 ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.85, duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+              style={{ marginBottom: '32px' }}
+            >
+              <p style={{
+                fontSize: '12px', fontWeight: 600, color: '#b7b7b7',
+                letterSpacing: '0.5px', marginBottom: '14px',
+              }}>
+                진행 방식
+              </p>
+              <div className="flex flex-col gap-3">
+                {[
+                  { num: '01', title: '생년월일만 입력', desc: '3초면 기소장이 나와요' },
+                  { num: '02', title: '검사가 팩폭, 변호사가 변론', desc: '4턴 재판에 직접 참여해요' },
+                  { num: '03', title: '판결문 + 석방 예정일', desc: '형량이 높을수록 매력이 높다는 뜻' },
+                ].map((item) => (
+                  <div key={item.num} className="flex gap-3 items-start">
+                    <div style={{
+                      width: '28px', height: '28px', borderRadius: '8px',
+                      backgroundColor: '#FAF8FC',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <p style={{ fontSize: '12px', fontWeight: 700, color: '#7A38D8' }}>{item.num}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '14px', fontWeight: 600, color: '#151515', letterSpacing: '-0.28px', marginBottom: '2px' }}>
+                        {item.title}
+                      </p>
+                      <p style={{ fontSize: '13px', fontWeight: 400, color: '#848484', letterSpacing: '-0.26px' }}>
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* ── 면책 안내 ── */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              style={{
+                fontSize: '12px', fontWeight: 400, color: '#b7b7b7',
+                lineHeight: '18px', letterSpacing: '-0.24px', textAlign: 'center',
+              }}
+            >
+              재미로 보는 사주 콘텐츠이며, 실제 심리 진단이 아닙니다
+            </motion.p>
+
+            {/* ── 하단 고정 CTA ── */}
+            <div
+              className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10 pointer-events-auto"
+              style={{
+                maxWidth: '440px',
+                backgroundColor: '#fff',
+                boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
+                paddingBottom: 'env(safe-area-inset-bottom)',
+              }}
+            >
+              <div style={{ padding: '12px 20px' }}>
+                <div
+                  onClick={() => {
+                    trackEvent('saju_court_land');
+                    setStep('input');
+                  }}
+                  className="transform-gpu cursor-pointer"
+                  style={{
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: '#7A38D8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = 'scale(0.98)';
+                    e.currentTarget.style.backgroundColor = '#5E28AB';
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.backgroundColor = '#7A38D8';
+                  }}
+                  onTouchStart={(e) => {
+                    e.currentTarget.style.transform = 'scale(0.98)';
+                    e.currentTarget.style.backgroundColor = '#5E28AB';
+                  }}
+                  onTouchEnd={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.backgroundColor = '#7A38D8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.backgroundColor = '#7A38D8';
+                  }}
+                >
+                  <p style={{
+                    fontSize: '16px', fontWeight: 500, lineHeight: '25px',
+                    letterSpacing: '-0.32px', color: '#fff',
+                  }}>
+                    내 형량 확인하기
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         )}
 
         {/* ─── INPUT ────────────────────────────── */}
