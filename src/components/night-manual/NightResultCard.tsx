@@ -199,7 +199,7 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
 
         {/* 워터마크 */}
         <p className="text-center" style={{ fontSize: '11px', color: '#3d3055', marginTop: '16px' }}>
-          nadaunse.com
+          sajugpt.co.kr
         </p>
       </motion.div>
 

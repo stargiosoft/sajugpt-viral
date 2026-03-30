@@ -145,7 +145,7 @@ const GisaengResultCard = forwardRef<HTMLDivElement, Props>(
 
         {/* 워터마크 */}
         <p className="text-center mt-4" style={{ fontSize: '11px', color: '#4B5563' }}>
-          ── nadaunse.com/gisaeng ──
+          ── sajugpt.co.kr ──
         </p>
       </div>
     );

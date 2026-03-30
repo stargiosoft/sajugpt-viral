@@ -148,7 +148,7 @@ const VerdictCard = forwardRef<HTMLDivElement, Props>(
 
         {/* 워터마크 */}
         <p style={{ fontSize: '11px', color: '#555', textAlign: 'center', marginTop: '12px' }}>
-          nadaunse.com/court
+          sajugpt.co.kr
         </p>
       </div>
     );

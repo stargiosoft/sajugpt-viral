@@ -72,8 +72,10 @@ const ITEMS: ViralItem[] = [
   {
     title: '데이트 시뮬레이션',
     description: '사주 궁합 기반 AI 캐릭터와 5턴 데이트 대화',
-    href: '#',
-    ready: false,
+    href: '/dating-sim',
+    ready: true,
+    tag: 'NEW',
+    tagColor: '#F59E0B',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />

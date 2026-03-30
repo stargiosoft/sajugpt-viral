@@ -248,7 +248,7 @@ const StockPlanCard = React.forwardRef<HTMLDivElement, Props>(
               letterSpacing: '0.5px',
             }}
           >
-            nadaunse.com/stock
+            sajugpt.co.kr
           </p>
         </div>
       </div>

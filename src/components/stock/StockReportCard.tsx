@@ -157,7 +157,7 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
               textTransform: 'uppercase',
             }}
           >
-            사주증권 리서치센터
+            연애 시장가 리포트
           </div>
           <div className="flex items-center gap-2">
             <span
@@ -200,7 +200,7 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
               marginBottom: '4px',
             }}
           >
-            현재 시장가
+            내 연애 시장가
           </span>
           <span
             style={{
@@ -405,7 +405,7 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
               letterSpacing: '0.04em',
             }}
           >
-            nadaunse.com/stock
+            sajugpt.co.kr
           </span>
         </div>
       </div>
