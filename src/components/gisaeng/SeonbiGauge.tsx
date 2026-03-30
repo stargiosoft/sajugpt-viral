@@ -22,29 +22,30 @@ export default function SeonbiGauge({ seonbi }: Props) {
             key={type}
             className="rounded-xl p-3"
             style={{
-              backgroundColor: state.alive ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
+              backgroundColor: state.alive ? '#f9f9f9' : '#f9f9f9',
+              border: '1px solid #e7e7e7',
               opacity: state.alive ? 1 : 0.4,
             }}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span style={{ fontSize: '16px' }}>{info.emoji}</span>
-                <span style={{ fontSize: '13px', color: '#FFFFFF', fontWeight: 600 }}>
+                <span style={{ fontSize: '13px', color: '#151515', fontWeight: 600, letterSpacing: '-0.26px' }}>
                   {info.name}
                 </span>
-                <span style={{ fontSize: '11px', color: '#9CA3AF' }}>
+                <span style={{ fontSize: '11px', color: '#848484', letterSpacing: '-0.22px' }}>
                   {info.title}
                 </span>
               </div>
               {!state.alive && (
-                <span style={{ fontSize: '11px', color: '#EF4444', fontWeight: 600 }}>이탈</span>
+                <span style={{ fontSize: '11px', color: '#d4183d', fontWeight: 600 }}>이탈</span>
               )}
             </div>
 
             {/* 충성도 */}
             <div className="flex items-center gap-2 mb-1.5">
               <span style={{ fontSize: '11px', width: '16px' }}>♥</span>
-              <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+              <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#e7e7e7' }}>
                 <motion.div
                   className="h-full rounded-full"
                   animate={{ width: `${state.loyalty}%` }}
@@ -60,15 +61,15 @@ export default function SeonbiGauge({ seonbi }: Props) {
             {/* 의심도 */}
             <div className="flex items-center gap-2">
               <span style={{ fontSize: '11px', width: '16px' }}>👁</span>
-              <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+              <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#e7e7e7' }}>
                 <motion.div
                   className="h-full rounded-full"
                   animate={{ width: `${state.suspicion}%` }}
                   transition={{ duration: 0.5 }}
-                  style={{ backgroundColor: state.suspicion >= 70 ? '#EF4444' : '#F59E0B' }}
+                  style={{ backgroundColor: state.suspicion >= 70 ? '#d4183d' : '#F59E0B' }}
                 />
               </div>
-              <span style={{ fontSize: '11px', color: state.suspicion >= 70 ? '#EF4444' : '#F59E0B', fontWeight: 600, width: '24px', textAlign: 'right' }}>
+              <span style={{ fontSize: '11px', color: state.suspicion >= 70 ? '#d4183d' : '#F59E0B', fontWeight: 600, width: '24px', textAlign: 'right' }}>
                 {state.suspicion}
               </span>
             </div>

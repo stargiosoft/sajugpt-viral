@@ -49,24 +49,68 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
     <div className="flex flex-col gap-3">
       <button
         onClick={handleNativeShare}
-        className="w-full py-3.5 rounded-xl active:scale-[0.98] transition-transform"
-        style={{ backgroundColor: '#7A38D8', color: '#FFFFFF', fontSize: '15px', fontWeight: 700 }}
+        className="w-full flex items-center justify-center"
+        style={{
+          height: '56px',
+          borderRadius: '16px',
+          backgroundColor: '#7A38D8',
+          border: 'none',
+          transition: 'all 0.15s ease',
+        }}
+        onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
+        onPointerUp={e => { e.currentTarget.style.transform = ''; }}
+        onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
       >
-        🏮 친구도 기생 시켜보기
+        <span style={{
+          fontFamily: 'Pretendard Variable, sans-serif',
+          fontSize: '16px',
+          fontWeight: 500,
+          lineHeight: '25px',
+          letterSpacing: '-0.32px',
+          color: '#ffffff',
+        }}>
+          🏮 친구도 기생 시켜보기
+        </span>
       </button>
 
       <div className="flex gap-3">
         <button
           onClick={handleCopy}
-          className="flex-1 py-3 rounded-xl"
-          style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: '#D1D5DB', fontSize: '13px', fontWeight: 600 }}
+          className="flex-1 flex items-center justify-center"
+          style={{
+            height: '48px',
+            borderRadius: '16px',
+            backgroundColor: '#F7F2FA',
+            border: 'none',
+            fontSize: '13px',
+            fontWeight: 600,
+            color: '#7A38D8',
+            letterSpacing: '-0.26px',
+            transition: 'all 0.15s ease',
+          }}
+          onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
+          onPointerUp={e => { e.currentTarget.style.transform = ''; }}
+          onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
         >
           {copied ? '복사됨!' : '🔗 링크 복사'}
         </button>
         <button
           onClick={handleSave}
-          className="flex-1 py-3 rounded-xl"
-          style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: '#D1D5DB', fontSize: '13px', fontWeight: 600 }}
+          className="flex-1 flex items-center justify-center"
+          style={{
+            height: '48px',
+            borderRadius: '16px',
+            backgroundColor: '#F7F2FA',
+            border: 'none',
+            fontSize: '13px',
+            fontWeight: 600,
+            color: '#7A38D8',
+            letterSpacing: '-0.26px',
+            transition: 'all 0.15s ease',
+          }}
+          onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
+          onPointerUp={e => { e.currentTarget.style.transform = ''; }}
+          onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
         >
           💾 이미지 저장
         </button>

@@ -41,7 +41,7 @@ export default function GisaengAnalyzing({ type }: Props) {
         key={currentIdx}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{ fontSize: '16px', color: '#E5E7EB', fontWeight: 500 }}
+        style={{ fontSize: '16px', color: '#151515', fontWeight: 500, letterSpacing: '-0.32px' }}
       >
         {messages[currentIdx].text}
       </motion.p>
@@ -55,7 +55,7 @@ export default function GisaengAnalyzing({ type }: Props) {
             style={{
               width: i <= currentIdx ? '24px' : '8px',
               height: '8px',
-              backgroundColor: i <= currentIdx ? '#7A38D8' : '#374151',
+              backgroundColor: i <= currentIdx ? '#7A38D8' : '#e7e7e7',
             }}
           />
         ))}

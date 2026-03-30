@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import type {
   Gender,
   DatingStep,
@@ -236,17 +236,21 @@ export default function DatingSimClient({ sharedResultId }: Props) {
 
   // ─── 렌더링 ────────────────────────────────────────
   return (
-    <div
-      className="min-h-dvh flex flex-col items-center"
-      style={{ backgroundColor: '#FAF8FC' }}
-    >
-      <div className="w-full max-w-[440px] min-h-dvh flex flex-col">
+    <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#fff' }}>
+      <div style={{ width: '100%', maxWidth: '440px' }}>
         <AnimatePresence mode="wait">
           {step === 'landing' && (
-            <DatingLanding
+            <motion.div
               key="landing"
-              onStart={() => setStep('input')}
-            />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <DatingLanding
+                onStart={() => setStep('input')}
+              />
+            </motion.div>
           )}
 
           {step === 'input' && (

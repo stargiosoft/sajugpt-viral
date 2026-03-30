@@ -7,6 +7,33 @@ interface Props {
   onStart: () => void;
 }
 
+// ── Design Tokens ──
+const C = {
+  // Brand purple
+  primary: '#7A38D8',
+  primaryDark: '#6B2FC2',
+  primaryPressed: '#5E28AB',
+  primaryLight: '#F7F2FA',
+  primaryTint: '#EDE5F7',
+  primarySurface: '#FAF8FC',
+  // Sub-color: Prosecution (warm rose)
+  prosecute: '#D4556B',
+  prosecuteLight: '#FDF2F4',
+  prosecuteTint: '#FAE8EB',
+  // Sub-color: Defense (cool teal-blue)
+  defend: '#3A8C89',
+  defendLight: '#EEF7F7',
+  defendTint: '#E0F0F0',
+  // Neutrals
+  textPrimary: '#151515',
+  textTertiary: '#6d6d6d',
+  textCaption: '#848484',
+  textDisabled: '#b7b7b7',
+  surface: '#ffffff',
+  surfaceSecondary: '#f9f9f9',
+  borderDivider: '#f0f0f0',
+} as const;
+
 const ROTATING_CRIMES = [
   '짝사랑만 3년 죄',
   '"나 같은 게 뭐" 죄',
@@ -18,52 +45,61 @@ const ROTATING_CRIMES = [
 ];
 
 const SENTENCE_GRADES = [
-  { grade: '극형', label: '도화살 낭비죄', range: '13년 이상', color: '#FFD700' },
-  { grade: '강력범', label: '매력 은닉죄', range: '8~12년', color: '#FF4444' },
-  { grade: '중범죄', label: '연애 태만죄', range: '4~7년', color: '#7A38D8' },
-  { grade: '경범죄', label: '초범', range: '~3년', color: '#666' },
+  { grade: '극형', label: '도화살 낭비죄', range: '13년+', color: C.prosecute, bg: C.prosecuteLight },
+  { grade: '강력범', label: '매력 은닉죄', range: '8~12년', color: C.primaryDark, bg: C.primaryLight },
+  { grade: '중범죄', label: '연애 태만죄', range: '4~7년', color: C.primary, bg: C.primarySurface },
+  { grade: '경범죄', label: '초범', range: '~3년', color: C.textCaption, bg: C.surfaceSecondary },
 ];
 
-const CHARACTERS = [
+const COURT_CHARACTERS = [
   {
     id: 'yoon-taesan',
     name: '윤태산',
     role: '검사',
-    roleColor: '#FF4444',
+    desc: '팩폭 기소',
     thumbnail: '/characters/yoon-taesan.webp',
-    line: '"못생겨서 못 만나는 거 아닙니다.\n못생겼다고 믿어서 못 만나는 겁니다."',
+    accent: C.prosecute,
+    accentBg: C.prosecuteLight,
+    accentTint: C.prosecuteTint,
+    quote: '당신보다 못생긴 사람도\n지금 연애하고 있습니다.',
+    quoteHighlight: '연애하고 있습니다.',
   },
   {
     id: 'seo-hwiyoon',
     name: '서휘윤',
     role: '변호사',
-    roleColor: '#4488FF',
+    desc: '다정한 변론',
     thumbnail: '/characters/seo-hwiyoon.webp',
-    line: '"그 믿음을 만든 건 피고인이 아닙니다.\n세상이 심어놓은 겁니다."',
+    accent: C.defend,
+    accentBg: C.defendLight,
+    accentTint: C.defendTint,
+    quote: '거울이 보여주지 못하는 매력이\n사주에는 있습니다.',
+    quoteHighlight: '사주에는 있습니다.',
   },
 ];
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const } },
 };
 
+// ── Crime Rotator ──
 function CrimeRotator() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % ROTATING_CRIMES.length);
-    }, 2000);
+    }, 2200);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div style={{ height: '28px', overflow: 'hidden', position: 'relative' }}>
+    <div style={{ height: '30px', overflow: 'hidden', position: 'relative' }}>
       <AnimatePresence mode="wait">
         <motion.span
           key={ROTATING_CRIMES[index]}
@@ -72,11 +108,12 @@ function CrimeRotator() {
           exit={{ opacity: 0, y: -16 }}
           transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           style={{
-            fontSize: '22px',
-            fontWeight: 800,
-            color: '#FF4444',
-            letterSpacing: '-0.44px',
+            fontSize: '21px',
+            fontWeight: 700,
+            color: C.primary,
+            letterSpacing: '-0.42px',
             display: 'block',
+            textAlign: 'center',
           }}
         >
           {ROTATING_CRIMES[index]}
@@ -86,61 +123,220 @@ function CrimeRotator() {
   );
 }
 
+// ── Character Card ──
+function CharacterCard({ char, index }: { char: typeof COURT_CHARACTERS[number]; index: number }) {
+  const quoteParts = char.quote.split(char.quoteHighlight);
+
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 24 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1], delay: index * 0.1 } },
+      }}
+      style={{
+        backgroundColor: char.accentBg,
+        borderRadius: '20px',
+        padding: '20px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* 상단: 캐릭터 정보 */}
+      <div className="flex items-center gap-3">
+        <div
+          className="overflow-hidden transform-gpu shrink-0"
+          style={{
+            width: '52px',
+            height: '52px',
+            borderRadius: '16px',
+            border: `2px solid ${char.accent}20`,
+          }}
+        >
+          <img
+            src={char.thumbnail}
+            alt={char.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            loading="eager"
+          />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span style={{
+              fontSize: '15px',
+              fontWeight: 700,
+              color: C.textPrimary,
+              letterSpacing: '-0.3px',
+            }}>
+              {char.name}
+            </span>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 600,
+              color: char.accent,
+              letterSpacing: '-0.22px',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              backgroundColor: `${char.accent}15`,
+            }}>
+              {char.role}
+            </span>
+          </div>
+          <span style={{
+            fontSize: '12px',
+            fontWeight: 400,
+            color: C.textCaption,
+            letterSpacing: '-0.24px',
+            marginTop: '2px',
+            display: 'block',
+          }}>
+            {char.desc}
+          </span>
+        </div>
+      </div>
+
+      {/* 대사 */}
+      <div style={{
+        marginTop: '14px',
+        padding: '14px 16px',
+        borderRadius: '14px',
+        backgroundColor: C.surface,
+      }}>
+        <p style={{
+          fontSize: '14px',
+          fontWeight: 500,
+          color: C.textTertiary,
+          lineHeight: '22px',
+          letterSpacing: '-0.28px',
+          whiteSpace: 'pre-line',
+        }}>
+          &ldquo;{quoteParts[0]}
+          <span style={{ fontWeight: 700, color: char.accent }}>{char.quoteHighlight}</span>
+          {quoteParts[1]}&rdquo;
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Step Item ──
+function StepItem({ step, index }: {
+  step: { title: string; desc: string };
+  index: number;
+}) {
+  return (
+    <motion.div
+      className="flex gap-3 items-start"
+      variants={fadeUp}
+    >
+      <div
+        className="flex items-center justify-center shrink-0"
+        style={{
+          width: '28px',
+          height: '28px',
+          borderRadius: '50%',
+          backgroundColor: C.primaryTint,
+        }}
+      >
+        <span style={{
+          fontSize: '13px',
+          fontWeight: 700,
+          color: C.primary,
+          letterSpacing: '-0.26px',
+        }}>
+          {index + 1}
+        </span>
+      </div>
+      <div style={{ paddingTop: '2px' }}>
+        <p style={{
+          fontSize: '14px',
+          fontWeight: 600,
+          color: C.textPrimary,
+          letterSpacing: '-0.28px',
+          marginBottom: '4px',
+        }}>
+          {step.title}
+        </p>
+        <p style={{
+          fontSize: '13px',
+          fontWeight: 400,
+          color: C.textCaption,
+          lineHeight: '19px',
+          letterSpacing: '-0.26px',
+        }}>
+          {step.desc}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Main ──
 export default function CourtLanding({ onStart }: Props) {
   return (
     <div
       className="relative flex flex-col items-center overflow-x-hidden"
       style={{
         minHeight: '100dvh',
-        background: 'linear-gradient(180deg, #0a0a14 0%, #111128 40%, #1a1040 70%, #111128 100%)',
+        backgroundColor: C.surface,
         paddingBottom: '100px',
       }}
     >
-      {/* ── Hero Section ── */}
+      {/* ── Hero ── */}
       <motion.div
         className="flex flex-col items-center w-full"
-        style={{ paddingTop: '72px', paddingBottom: '8px' }}
+        style={{ paddingTop: '52px', paddingBottom: '28px', paddingLeft: '20px', paddingRight: '20px' }}
         initial="hidden"
         animate="visible"
         variants={stagger}
       >
-        <motion.p
+        {/* 카테고리 뱃지 */}
+        <motion.div
           variants={fadeUp}
           style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#FF6B6B',
-            letterSpacing: '2px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            padding: '5px 12px',
+            borderRadius: '20px',
+            backgroundColor: C.primaryLight,
             marginBottom: '16px',
-            textTransform: 'uppercase',
           }}
         >
-          사주 연애 법정
-        </motion.p>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.primary} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3v18" /><path d="M2 7l4-4 4 4" /><path d="M14 7l4-4 4 4" /><path d="M2 7h8" /><path d="M14 7h8" />
+            <circle cx="6" cy="19" r="2" /><circle cx="18" cy="19" r="2" />
+          </svg>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: C.primary, letterSpacing: '-0.24px' }}>
+            사주 연애 법정
+          </span>
+        </motion.div>
 
+        {/* 헤드라인 */}
         <motion.h1
           variants={fadeUp}
           style={{
-            fontSize: '30px',
+            fontSize: '26px',
             fontWeight: 800,
-            color: '#ffffff',
+            color: C.textPrimary,
             textAlign: 'center',
-            lineHeight: '1.35',
-            letterSpacing: '-0.6px',
+            lineHeight: '36px',
+            letterSpacing: '-0.52px',
           }}
         >
           연애 못한 죄,<br />
-          <span style={{ color: '#FF4444' }}>징역 몇 년</span>?
+          징역 몇 년?
         </motion.h1>
 
+        {/* 서브카피 */}
         <motion.p
           variants={fadeUp}
           style={{
             fontSize: '14px',
-            color: 'rgba(255,255,255,0.5)',
+            fontWeight: 400,
+            color: C.textCaption,
             textAlign: 'center',
-            marginTop: '16px',
-            lineHeight: '1.7',
+            marginTop: '12px',
+            lineHeight: '22px',
             letterSpacing: '-0.28px',
           }}
         >
@@ -149,289 +345,95 @@ export default function CourtLanding({ onStart }: Props) {
         </motion.p>
       </motion.div>
 
-      {/* ── Rotating Crime Preview ── */}
+      {/* ── 죄목 롤링 카드 ── */}
       <motion.div
-        className="flex flex-col items-center w-full"
-        style={{ padding: '28px 28px 0' }}
+        className="w-full"
+        style={{ padding: '0 20px 24px' }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
+        transition={{ delay: 0.45, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
       >
-        <div
-          style={{
-            width: '100%',
-            backgroundColor: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '16px',
-            padding: '16px 20px',
-            textAlign: 'center',
-          }}
-        >
-          <p style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.35)', marginBottom: '8px', letterSpacing: '1px' }}>
+        <div style={{
+          width: '100%',
+          borderRadius: '16px',
+          border: `1.5px dashed ${C.primary}40`,
+          backgroundColor: C.primaryLight,
+          padding: '18px 20px',
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontSize: '11px',
+            fontWeight: 500,
+            color: C.textCaption,
+            marginBottom: '8px',
+            letterSpacing: '-0.22px',
+          }}>
             당신의 죄목은?
           </p>
           <CrimeRotator />
         </div>
       </motion.div>
 
-      {/* ── Character Showcase: 검사 vs 변호사 ── */}
+      {/* ── 캐릭터 카드 ── */}
       <motion.div
-        className="flex items-center justify-center w-full"
-        style={{ padding: '32px 20px 16px', gap: '16px' }}
+        className="w-full flex flex-col"
+        style={{ padding: '0 20px', gap: '10px' }}
         initial="hidden"
         animate="visible"
-        variants={{ visible: { transition: { staggerChildren: 0.15, delayChildren: 0.7 } } }}
+        variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.6 } } }}
       >
-        {CHARACTERS.map((char, i) => (
-          <motion.div
-            key={char.id}
-            className="flex flex-col items-center"
-            style={{ flex: 1 }}
-            variants={{
-              hidden: { opacity: 0, y: 30, scale: 0.7 },
-              visible: {
-                opacity: 1, y: 0, scale: 1,
-                transition: { type: 'spring', bounce: 0.35, duration: 0.6 },
-              },
-            }}
-          >
-            <div
-              className="overflow-hidden transform-gpu"
-              style={{
-                width: '72px',
-                height: '72px',
-                borderRadius: '50%',
-                border: `3px solid ${char.roleColor}`,
-                boxShadow: `0 0 20px ${char.roleColor}33`,
-              }}
-            >
-              <img
-                src={char.thumbnail}
-                alt={char.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                loading="eager"
-              />
-            </div>
-            <p style={{
-              fontSize: '10px', fontWeight: 600,
-              color: char.roleColor, marginTop: '8px',
-              letterSpacing: '0.5px',
-            }}>
-              {char.role}
-            </p>
-            <p style={{
-              fontSize: '13px', fontWeight: 700,
-              color: '#ffffff', marginTop: '2px',
-              letterSpacing: '-0.26px',
-            }}>
-              {char.name}
-            </p>
-            {i === 0 && (
-              <p style={{
-                fontSize: '11px', fontWeight: 400,
-                color: 'rgba(255,255,255,0.35)', marginTop: '4px',
-                letterSpacing: '-0.22px',
-              }}>
-                팩폭 기소
-              </p>
-            )}
-            {i === 1 && (
-              <p style={{
-                fontSize: '11px', fontWeight: 400,
-                color: 'rgba(255,255,255,0.35)', marginTop: '4px',
-                letterSpacing: '-0.22px',
-              }}>
-                다정한 변론
-              </p>
-            )}
-          </motion.div>
+        {COURT_CHARACTERS.map((char, i) => (
+          <CharacterCard key={char.id} char={char} index={i} />
         ))}
       </motion.div>
 
-      {/* ── VS Badge ── */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1, type: 'spring', bounce: 0.5 }}
-        style={{
-          position: 'relative',
-          marginTop: '-90px',
-          marginBottom: '24px',
-          zIndex: 2,
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          backgroundColor: '#1a1040',
-          border: '2px solid rgba(255,255,255,0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <span style={{ fontSize: '12px', fontWeight: 800, color: '#FFD700', letterSpacing: '1px' }}>VS</span>
-      </motion.div>
-
-      {/* ── Sample Lines ── */}
+      {/* ── 진행 방식 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '0 24px', gap: '8px' }}
+        style={{ padding: '36px 20px 0', gap: '16px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
-        variants={{ visible: { transition: { staggerChildren: 0.15, delayChildren: 0.1 } } }}
-      >
-        {/* 검사 대사 */}
-        <motion.div
-          variants={fadeUp}
-          className="flex items-start gap-2"
-        >
-          <div
-            className="overflow-hidden transform-gpu shrink-0"
-            style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1.5px solid #FF4444' }}
-          >
-            <img src="/characters/yoon-taesan.webp" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div style={{
-            backgroundColor: 'rgba(255,68,68,0.08)',
-            borderRadius: '4px 14px 14px 14px',
-            padding: '10px 14px',
-            flex: 1,
-          }}>
-            <p style={{ fontSize: '12px', fontWeight: 500, color: 'rgba(255,255,255,0.55)', lineHeight: '1.6', letterSpacing: '-0.24px' }}>
-              &ldquo;당신보다 못생긴 사람도 지금<br />
-              <span style={{ fontWeight: 700, color: '#FF6B6B' }}>연애하고 있습니다.</span>&rdquo;
-            </p>
-          </div>
-        </motion.div>
-
-        {/* 변호사 대사 */}
-        <motion.div
-          variants={fadeUp}
-          className="flex items-start gap-2"
-          style={{ flexDirection: 'row-reverse' }}
-        >
-          <div
-            className="overflow-hidden transform-gpu shrink-0"
-            style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1.5px solid #4488FF' }}
-          >
-            <img src="/characters/seo-hwiyoon.webp" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div style={{
-            backgroundColor: 'rgba(68,136,255,0.08)',
-            borderRadius: '14px 4px 14px 14px',
-            padding: '10px 14px',
-            flex: 1,
-          }}>
-            <p style={{ fontSize: '12px', fontWeight: 500, color: 'rgba(255,255,255,0.55)', lineHeight: '1.6', letterSpacing: '-0.24px', textAlign: 'right' }}>
-              &ldquo;거울이 보여주지 못하는 매력이<br />
-              <span style={{ fontWeight: 700, color: '#6BA3FF' }}>사주에는 있습니다.</span>&rdquo;
-            </p>
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* ── Divider ── */}
-      <div
-        style={{
-          width: '40px',
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          margin: '32px auto',
-        }}
-      />
-
-      {/* ── How it works ── */}
-      <motion.div
-        className="w-full flex flex-col"
-        style={{ padding: '0 28px', gap: '20px' }}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-40px' }}
-        variants={{ visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } } }}
+        variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}
       >
         <motion.p
           variants={fadeUp}
           style={{
             fontSize: '12px',
             fontWeight: 600,
-            color: 'rgba(255,255,255,0.3)',
-            letterSpacing: '1.5px',
-            marginBottom: '4px',
+            color: C.textCaption,
+            letterSpacing: '-0.24px',
           }}
         >
           진행 방식
         </motion.p>
 
         {[
-          {
-            emoji: '📋',
-            title: '생년월일만 입력',
-            desc: '이름도 필요 없어요. 3초면 끝.',
-          },
-          {
-            emoji: '⚖️',
-            title: '사주로 죄목 확정',
-            desc: '도화살, 편관, 식신... 연애 운세를 정밀 분석해 죄목을 기소.',
-          },
-          {
-            emoji: '🔨',
-            title: '검사 vs 변호사 실시간 재판',
-            desc: '팩폭 검사의 기소 vs 다정한 변호사의 변론. 최종 형량 확정.',
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            className="flex gap-3 items-start"
-            variants={fadeUp}
-          >
-            <div
-              className="flex items-center justify-center shrink-0"
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '10px',
-                backgroundColor: 'rgba(255,68,68,0.1)',
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>{item.emoji}</span>
-            </div>
-            <div>
-              <p style={{
-                fontSize: '14px', fontWeight: 600,
-                color: 'rgba(255,255,255,0.85)',
-                letterSpacing: '-0.28px', marginBottom: '4px',
-              }}>
-                {item.title}
-              </p>
-              <p style={{
-                fontSize: '13px', fontWeight: 400,
-                color: 'rgba(255,255,255,0.4)',
-                lineHeight: '1.5', letterSpacing: '-0.26px',
-              }}>
-                {item.desc}
-              </p>
-            </div>
-          </motion.div>
+          { title: '생년월일만 입력', desc: '이름도 필요 없어요. 3초면 끝.' },
+          { title: '사주로 죄목 확정', desc: '도화살, 편관, 식신 분석 후 기소장 발부.' },
+          { title: '검사 vs 변호사 재판', desc: '팩폭 기소와 다정한 변론. 최종 형량 선고.' },
+        ].map((step, i) => (
+          <StepItem key={i} step={step} index={i} />
         ))}
       </motion.div>
 
-      {/* ── Sentence Grade Preview ── */}
+      {/* ── 형량 체계 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '40px 28px 0', gap: '10px' }}
+        style={{ padding: '36px 20px 0', gap: '8px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
-        variants={{ visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
+        variants={{ visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } }}
       >
         <motion.p
           variants={fadeUp}
           style={{
             fontSize: '12px',
             fontWeight: 600,
-            color: 'rgba(255,255,255,0.3)',
-            letterSpacing: '1.5px',
-            marginBottom: '8px',
+            color: C.textCaption,
+            letterSpacing: '-0.24px',
+            marginBottom: '4px',
           }}
         >
           형량 체계
@@ -444,29 +446,32 @@ export default function CourtLanding({ onStart }: Props) {
             variants={fadeUp}
             style={{
               padding: '12px 16px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '14px',
+              backgroundColor: g.bg,
             }}
           >
             <div className="flex items-center gap-3">
               <span style={{
-                fontSize: '13px', fontWeight: 800,
-                color: g.color, width: '52px',
+                fontSize: '13px',
+                fontWeight: 800,
+                color: g.color,
+                width: '48px',
                 letterSpacing: '-0.26px',
               }}>
                 {g.grade}
               </span>
               <span style={{
-                fontSize: '13px', fontWeight: 500,
-                color: 'rgba(255,255,255,0.6)',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: C.textTertiary,
                 letterSpacing: '-0.26px',
               }}>
                 {g.label}
               </span>
             </div>
             <span style={{
-              fontSize: '13px', fontWeight: 600,
+              fontSize: '13px',
+              fontWeight: 600,
               color: g.color,
               letterSpacing: '-0.26px',
             }}>
@@ -476,50 +481,53 @@ export default function CourtLanding({ onStart }: Props) {
         ))}
       </motion.div>
 
-      {/* ── Paradox Card ── */}
+      {/* ── 역설 인사이트 (밝은 톤) ── */}
       <motion.div
         className="w-full"
-        style={{ padding: '28px 28px 0' }}
+        style={{ padding: '20px 20px 0' }}
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
       >
         <div style={{
           padding: '16px 20px',
           borderRadius: '16px',
-          backgroundColor: 'rgba(255,215,0,0.06)',
-          border: '1px solid rgba(255,215,0,0.15)',
+          backgroundColor: C.primaryLight,
           textAlign: 'center',
         }}>
           <p style={{
-            fontSize: '15px', fontWeight: 700,
-            color: '#FFD700', lineHeight: '24px',
+            fontSize: '15px',
+            fontWeight: 700,
+            color: C.primaryDark,
+            lineHeight: '24px',
             letterSpacing: '-0.3px',
           }}>
             형량이 높을수록 = 매력이 높다는 뜻
           </p>
           <p style={{
-            fontSize: '12px', fontWeight: 400,
-            color: 'rgba(255,255,255,0.35)',
-            marginTop: '4px', letterSpacing: '-0.24px',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: C.textCaption,
+            marginTop: '4px',
+            letterSpacing: '-0.24px',
           }}>
             도화살 2개에 5년 썩히면 가중처벌
           </p>
         </div>
       </motion.div>
 
-      {/* ── Social Proof ── */}
+      {/* ── 소셜 프루프 ── */}
       <motion.div
         className="flex items-center justify-center gap-2 w-full"
-        style={{ padding: '36px 28px 24px' }}
+        style={{ padding: '28px 20px 16px' }}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <div className="flex" style={{ marginRight: '4px' }}>
-          {CHARACTERS.map((char, i) => (
+          {COURT_CHARACTERS.map((char, i) => (
             <div
               key={char.id}
               className="overflow-hidden transform-gpu"
@@ -527,79 +535,85 @@ export default function CourtLanding({ onStart }: Props) {
                 width: '24px',
                 height: '24px',
                 borderRadius: '50%',
-                border: '2px solid #111128',
+                border: `2px solid ${C.surface}`,
                 marginLeft: i > 0 ? '-8px' : '0',
                 zIndex: 2 - i,
               }}
             >
-              <img
-                src={char.thumbnail}
-                alt=""
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              <img src={char.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           ))}
         </div>
-        <p style={{
-          fontSize: '13px',
-          color: 'rgba(255,255,255,0.4)',
-          letterSpacing: '-0.26px',
-        }}>
-          <span style={{ color: '#FF6B6B', fontWeight: 600 }}>87,342</span>명
-          기소 완료
+        <p style={{ fontSize: '13px', color: C.textCaption, letterSpacing: '-0.26px' }}>
+          <span style={{ color: C.primary, fontWeight: 600 }}>87,342</span>명 기소 완료
         </p>
       </motion.div>
 
-      {/* ── Disclaimer ── */}
+      {/* ── 면책 ── */}
       <p style={{
         fontSize: '11px',
-        color: 'rgba(255,255,255,0.2)',
+        color: C.textDisabled,
         textAlign: 'center',
-        padding: '0 28px 32px',
-        lineHeight: '1.5',
+        padding: '0 20px 32px',
+        lineHeight: '16px',
+        letterSpacing: '-0.22px',
       }}>
-        재미로 보는 사주 콘텐츠이며,<br />
-        실제 심리 진단이 아닙니다.
+        재미로 보는 사주 콘텐츠이며, 실제 심리 진단이 아닙니다.
       </p>
 
-      {/* ── Fixed Bottom CTA ── */}
+      {/* ── 하단 고정 CTA ── */}
       <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] pointer-events-auto"
         style={{
-          maxWidth: '440px',
+          backgroundColor: C.surface,
+          boxShadow: '0px -8px 16px 0px rgba(255, 255, 255, 0.76)',
           paddingBottom: 'env(safe-area-inset-bottom)',
-          background:
-            'linear-gradient(to top, #0a0a14 50%, rgba(10,10,20,0.8) 80%, transparent 100%)',
         }}
       >
-        <div style={{ padding: '12px 20px 24px' }}>
-          <motion.div
+        <div style={{ padding: '12px 20px' }}>
+          <div
             onClick={onStart}
-            className="transform-gpu"
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ duration: 0.1, ease: 'easeInOut' }}
+            className="transform-gpu cursor-pointer"
             style={{
               height: '56px',
               borderRadius: '16px',
-              backgroundColor: '#7A38D8',
-              cursor: 'pointer',
+              backgroundColor: C.primary,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 24px rgba(122,56,216,0.4)',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'scale(0.99)';
+              e.currentTarget.style.backgroundColor = C.primaryPressed;
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.backgroundColor = C.primary;
+            }}
+            onTouchStart={(e) => {
+              e.currentTarget.style.transform = 'scale(0.99)';
+              e.currentTarget.style.backgroundColor = C.primaryPressed;
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.backgroundColor = C.primary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.backgroundColor = C.primary;
             }}
           >
             <p style={{
               fontSize: '16px',
-              fontWeight: 600,
+              fontWeight: 500,
               color: '#ffffff',
               letterSpacing: '-0.32px',
               lineHeight: '25px',
             }}>
               출석하기
             </p>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

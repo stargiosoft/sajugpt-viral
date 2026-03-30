@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { Gender } from '@/types/battle';
 import type {
   GisaengStep,
@@ -309,7 +309,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center" style={{ backgroundColor: '#0D0B1A', fontFamily: 'Pretendard Variable, sans-serif' }}>
+    <div className="min-h-dvh flex flex-col items-center" style={{ backgroundColor: '#ffffff', fontFamily: 'Pretendard Variable, sans-serif' }}>
       <div className="w-full max-w-[440px] min-h-dvh flex flex-col">
         <AnimatePresence mode="wait">
           {step === 'landing' && (
@@ -317,48 +317,135 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
           )}
 
           {step === 'input' && (
-            <div key="input" className="flex-1 flex flex-col px-5 pt-12 pb-8">
-              <div className="text-center mb-8">
-                <p style={{ fontSize: '14px', color: '#A78BFA', fontWeight: 500 }}>🏮 기생 시뮬레이션</p>
-                <h1 style={{ fontSize: '22px', color: '#FFFFFF', fontWeight: 700, marginTop: '8px', lineHeight: 1.4 }}>
-                  조선시대 기생이었다면,<br />넌 밤새 얼마를 벌었을까?
+            <motion.div
+              key="input"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              style={{ padding: '48px 20px 120px' }}
+            >
+              {/* 헤더 — 색기 배틀 동일 패턴 */}
+              <div className="flex flex-col items-center" style={{ marginBottom: '40px' }}>
+                <span style={{ fontSize: '40px', marginBottom: '8px' }}>🏮</span>
+                <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#151515', marginBottom: '8px', textAlign: 'center', letterSpacing: '-0.56px' }}>
+                  기생 시뮬레이션
                 </h1>
+                <p style={{ fontSize: '15px', color: '#666', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
+                  조선시대 기생이었다면<br />넌 밤새 얼마를 벌었을까?
+                </p>
               </div>
 
-              <div className="flex flex-col gap-5 flex-1">
-                <GenderSelect value={gender} onChange={setGender} />
-                <BirthInput value={birthDate} onChange={setBirthDate} />
-                <BirthTimeInput
-                  value={birthTime}
-                  onChange={setBirthTime}
-                  unknownTime={unknownTime}
-                  onUnknownTimeToggle={() => {
-                    const newVal = !unknownTime;
-                    setUnknownTime(newVal);
-                    if (newVal) setBirthTime('오후 12:00');
-                    else setBirthTime('');
-                  }}
-                />
-              </div>
+              {/* 입력 폼 — 색기 배틀 동일 패턴 */}
+              <motion.div
+                className="flex flex-col"
+                initial="hidden"
+                animate="visible"
+                variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+              >
+                {/* 성별 */}
+                <motion.div
+                  className="flex flex-col gap-1 w-full"
+                  variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
+                >
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
+                    성별
+                  </p>
+                  <GenderSelect value={gender} onChange={setGender} />
+                </motion.div>
 
-              {error && (
-                <p className="text-center mt-4" style={{ fontSize: '13px', color: '#FF6B6B' }}>{error}</p>
-              )}
+                {/* 생년월일 */}
+                <motion.div
+                  className="flex flex-col gap-1 w-full"
+                  style={{ marginTop: '36px' }}
+                  variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
+                >
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
+                    생년월일 (양력 기준으로 입력해 주세요)
+                  </p>
+                  <BirthInput value={birthDate} onChange={setBirthDate} />
+                </motion.div>
 
-              <button
-                onClick={handleSubmit}
-                disabled={!isFormValid()}
-                className="w-full py-4 rounded-2xl mt-6 transition-opacity disabled:opacity-40"
+                {/* 태어난 시간 */}
+                <motion.div
+                  className="flex flex-col gap-1 w-full"
+                  style={{ marginTop: '36px' }}
+                  variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
+                >
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
+                    태어난 시간
+                  </p>
+                  <BirthTimeInput
+                    value={birthTime}
+                    onChange={setBirthTime}
+                    unknownTime={unknownTime}
+                    onUnknownTimeToggle={() => {
+                      const newVal = !unknownTime;
+                      setUnknownTime(newVal);
+                      if (newVal) setBirthTime('오후 12:00');
+                      else setBirthTime('');
+                    }}
+                  />
+                </motion.div>
+
+                {/* 에러 — 색기 배틀 동일 패턴 */}
+                {error && (
+                  <motion.div
+                    className="flex gap-1 items-center"
+                    style={{
+                      marginTop: '24px',
+                      borderRadius: '10px',
+                      padding: '12px 16px',
+                      backgroundColor: '#fef2f2',
+                      border: '1px solid #fecaca',
+                    }}
+                    variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
+                  >
+                    <p style={{ color: '#dc2626', fontSize: '13px' }}>{error}</p>
+                  </motion.div>
+                )}
+              </motion.div>
+
+              {/* 하단 고정 CTA — 색기 배틀 동일 패턴 */}
+              <div
+                className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
                 style={{
-                  backgroundColor: '#7A38D8',
-                  color: '#FFFFFF',
-                  fontSize: '16px',
-                  fontWeight: 700,
+                  maxWidth: '440px',
+                  backgroundColor: '#fff',
+                  boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
+                  paddingBottom: 'env(safe-area-inset-bottom)',
                 }}
               >
-                기방 문 열기 🏮
-              </button>
-            </div>
+                <div style={{ padding: '12px 20px', width: '100%' }}>
+                  <motion.div
+                    onClick={handleSubmit}
+                    className="transform-gpu"
+                    whileTap={isFormValid() ? { scale: 0.96 } : {}}
+                    transition={{ duration: 0.1, ease: 'easeInOut' }}
+                    style={{
+                      height: '56px',
+                      borderRadius: '16px',
+                      backgroundColor: isFormValid() ? '#7A38D8' : '#f8f8f8',
+                      cursor: isFormValid() ? 'pointer' : 'not-allowed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'background-color 0.2s',
+                    }}
+                  >
+                    <p style={{
+                      fontSize: '16px',
+                      fontWeight: 500,
+                      lineHeight: '25px',
+                      letterSpacing: '-0.32px',
+                      color: isFormValid() ? '#fff' : '#b7b7b7',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      기방 문 열기 🏮
+                    </p>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
           )}
 
           {step === 'analyzing' && (
@@ -420,7 +507,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
           )}
 
           {step === 'result' && simulationResult && analyzeData && (
-            <div key="result" className="flex-1 flex flex-col px-5 pt-8 pb-8 gap-6">
+            <div key="result" className="flex-1 flex flex-col px-5 pt-8 gap-6" style={{ paddingBottom: '140px' }}>
               <GisaengResultCard
                 ref={resultCardRef}
                 gisaengCard={analyzeData.gisaengCard}
@@ -439,8 +526,22 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
               />
               <button
                 onClick={handleReset}
-                className="w-full py-3 rounded-xl"
-                style={{ backgroundColor: 'rgba(122, 56, 216, 0.15)', color: '#A78BFA', fontSize: '14px', fontWeight: 600 }}
+                className="w-full flex items-center justify-center"
+                style={{
+                  height: '56px',
+                  borderRadius: '16px',
+                  backgroundColor: '#F7F2FA',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#7A38D8',
+                  letterSpacing: '-0.32px',
+                  lineHeight: '25px',
+                  border: 'none',
+                  transition: 'all 0.15s ease',
+                }}
+                onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
+                onPointerUp={e => { e.currentTarget.style.transform = ''; }}
+                onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
               >
                 다시 도전하기
               </button>

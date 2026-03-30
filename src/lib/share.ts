@@ -97,8 +97,15 @@ export function getShareText(headcount: number, battleId: string): string {
   return `🔥 색기 배틀 — 나한테 꼬인 남자 ${headcount}명\n넌 몇 명이나 꼬이나 해봐 ㅋㅋ\n👉 ${baseUrl}/sexy-battle/${battleId}`;
 }
 
+/** 모바일 여부 판별 — PC에서는 네이티브 공유 사용하지 않음 */
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || ('ontouchstart' in window && navigator.maxTouchPoints > 1);
+}
+
 export async function shareNative(element: HTMLElement, headcount: number, battleId?: string): Promise<boolean> {
-  if (!navigator.share) return false;
+  if (!navigator.share || !isMobileDevice()) return false;
 
   try {
     const blob = await captureCardImage(element);
