@@ -263,7 +263,7 @@ export default function GisaengLanding({ onStart }: Props) {
                   border: `1px solid ${s.color}1A`,
                 }}
               >
-                <span style={{ fontSize: '10px', fontWeight: 500, color: s.color }}>
+                <span style={{ fontSize: '10px', fontWeight: 500, color: s.color, lineHeight: 1 }}>
                   {s.trait}
                 </span>
               </div>
