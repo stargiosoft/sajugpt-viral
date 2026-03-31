@@ -76,10 +76,10 @@ export default function ViralHub() {
   const router = useRouter();
 
   return (
-    <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#fff', overscrollBehaviorY: 'none' }}>
-      <div className="w-full" style={{ maxWidth: '440px' }}>
-        {/* 헤더 */}
-        <div style={{ padding: '60px 20px 0' }}>
+    <div className="bg-white fixed inset-0 flex justify-center">
+      <div className="w-full max-w-[440px] h-full flex flex-col bg-white">
+        {/* 헤더 — shrink-0 고정 */}
+        <div className="shrink-0" style={{ padding: '60px 20px 0' }}>
           <h1 style={{
             fontSize: '22px',
             fontWeight: 700,
@@ -101,9 +101,10 @@ export default function ViralHub() {
           </p>
         </div>
 
-        {/* 리스트 */}
-        <div className="flex flex-col" style={{ padding: '24px 20px 40px', gap: '12px' }}>
-          {ITEMS.map((item) => (
+        {/* 리스트 — flex-1 overflow-auto 스크롤 영역 */}
+        <div className="flex-1 overflow-auto w-full">
+          <div className="flex flex-col" style={{ padding: '24px 20px 40px', gap: '12px' }}>
+            {ITEMS.map((item) => (
             <div
               key={item.title}
               onClick={() => {
@@ -198,7 +199,8 @@ export default function ViralHub() {
                 </div>
               )}
             </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
