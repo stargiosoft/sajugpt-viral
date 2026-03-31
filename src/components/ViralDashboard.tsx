@@ -530,24 +530,24 @@ export default function ViralDashboard() {
                   {daily.length === 0 ? <EmptyState /> : (
                     <div style={{ backgroundColor: S.card, borderRadius: '16px', overflow: 'hidden' }}>
                       <div style={{
-                        display: 'grid', gridTemplateColumns: '1fr 60px 60px 60px',
+                        display: 'grid', gridTemplateColumns: '1fr 50px 50px 50px',
                         padding: '10px 12px', borderBottom: `1px solid ${S.border}`,
                         fontFamily: S.font, fontSize: '11px', fontWeight: 500, letterSpacing: '-0.22px', color: S.label,
                       }}>
-                        <span>기능 / 날짜</span>
+                        <span>기능</span>
                         <span style={{ textAlign: 'right' }}>공유</span>
                         <span style={{ textAlign: 'right' }}>GPT</span>
                         <span style={{ textAlign: 'right' }}>레퍼럴</span>
                       </div>
                       {daily.slice(0, 30).map((r, i) => (
                         <div key={i} style={{
-                          display: 'grid', gridTemplateColumns: '1fr 60px 60px 60px',
+                          display: 'grid', gridTemplateColumns: '1fr 50px 50px 50px',
                           padding: '10px 12px',
                           borderBottom: i < Math.min(daily.length, 30) - 1 ? `1px solid ${S.border}` : 'none',
                           fontFamily: S.font, fontSize: '13px',
                         }}>
                           <span style={{ color: S.text, fontWeight: 500 }}>
-                            {FEATURE_EMOJI[r.feature_type]} {r.event_date.slice(5)}
+                            {FEATURE_EMOJI[r.feature_type]} {FEATURE_LABELS[r.feature_type]} <span style={{ color: S.label, fontWeight: 400 }}>{r.event_date.slice(5)}</span>
                           </span>
                           <span style={{ textAlign: 'right', color: S.text, fontWeight: 600 }}>{r.share_clicks}</span>
                           <span style={{ textAlign: 'right', color: S.primary, fontWeight: 600 }}>{r.sajugpt_link_clicks}</span>
