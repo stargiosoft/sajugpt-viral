@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import AutopsyClient from '@/components/autopsy/AutopsyClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '사주 부검실 — 사주GPT',
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function AutopsyPage() {
-  return <AutopsyClient />;
+  return (<><LandingTracker featureType="saju_autopsy" /><AutopsyClient /></>);
 }

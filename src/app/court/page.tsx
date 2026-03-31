@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import SajuCourtClient from '@/components/court/SajuCourtClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '사주 법정 — 사주GPT',
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function CourtPage() {
-  return <SajuCourtClient />;
+  return (<><LandingTracker featureType="saju_court" /><SajuCourtClient /></>);
 }

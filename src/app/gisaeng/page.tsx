@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import GisaengClient from '@/components/gisaeng/GisaengClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '기생 시뮬레이션 — 조선시대 기생이었다면?',
@@ -13,5 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default function GisaengPage() {
-  return <GisaengClient />;
+  return (<><LandingTracker featureType="gisaeng" /><GisaengClient /></>);
 }

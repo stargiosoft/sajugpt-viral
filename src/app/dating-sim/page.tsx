@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import DatingSimClient from '@/components/dating-sim/DatingSimClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '데이트 시뮬레이션 — 사주GPT',
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function DatingSimPage() {
-  return <DatingSimClient />;
+  return (<><LandingTracker featureType="dating" /><DatingSimClient /></>);
 }

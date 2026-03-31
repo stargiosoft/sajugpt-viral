@@ -38,7 +38,7 @@ export type FeatureType =
   | 'dating'
   | 'saju_stock';
 
-export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit';
+export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 
 export type ShareMethod = 'kakao' | 'clipboard' | 'native' | 'image_save';
 
@@ -109,5 +109,15 @@ export function trackReferralVisit(featureType: FeatureType, referrerId: string)
     featureType,
     eventType: 'referral_visit',
     referrerId,
+  });
+}
+
+/**
+ * 랜딩 페이지 유입 트래킹 헬퍼
+ */
+export function trackLandingVisit(featureType: FeatureType): void {
+  trackViralEvent({
+    featureType,
+    eventType: 'landing_visit',
   });
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import NightManualClient from '@/components/night-manual/NightManualClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '밤(夜) 설명서 — 사주GPT',
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function NightManualPage() {
-  return <NightManualClient />;
+  return (<><LandingTracker featureType="night_manual" /><NightManualClient /></>);
 }

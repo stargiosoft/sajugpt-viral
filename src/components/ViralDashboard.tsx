@@ -11,6 +11,7 @@ import {
 
 interface SummaryRow {
   feature_type: string;
+  landing_visits: number;
   share_clicks: number;
   sajugpt_link_clicks: number;
   referral_unique_users: number;
@@ -23,6 +24,7 @@ interface SummaryRow {
 interface DailyRow {
   feature_type: string;
   event_date: string;
+  landing_visits: number;
   share_clicks: number;
   sajugpt_link_clicks: number;
   referral_unique_users: number;
@@ -36,6 +38,7 @@ interface TodayRow {
 }
 
 interface TotalRow {
+  total_landings: number;
   total_shares: number;
   total_sajugpt_clicks: number;
   total_referral_users: number;
@@ -67,6 +70,7 @@ const FEATURE_EMOJI: Record<string, string> = {
 const COLORS = ['#7A38D8', '#E8507B', '#F59E0B', '#10B981', '#3B82F6', '#EC4899', '#6366F1'];
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
+  landing_visit: '랜딩 유입',
   share_click: '공유',
   sajugpt_link_click: '사주GPT 클릭',
   referral_visit: '레퍼럴 유입',
@@ -173,7 +177,7 @@ export default function ViralDashboard() {
   const [summary, setSummary] = useState<SummaryRow[]>([]);
   const [daily, setDaily] = useState<DailyRow[]>([]);
   const [today, setToday] = useState<TodayRow[]>([]);
-  const [total, setTotal] = useState<TotalRow>({ total_shares: 0, total_sajugpt_clicks: 0, total_referral_users: 0, total_unique_users: 0 });
+  const [total, setTotal] = useState<TotalRow>({ total_landings: 0, total_shares: 0, total_sajugpt_clicks: 0, total_referral_users: 0, total_unique_users: 0 });
 
   // 인증 체크
   useEffect(() => {
@@ -238,6 +242,10 @@ export default function ViralDashboard() {
     if (totalRes.data && Array.isArray(totalRes.data) && totalRes.data.length > 0) {
       setTotal(totalRes.data[0] as TotalRow);
     } else {
+      const { count: landingCount } = await supabase
+        .from('viral_events')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_type', 'landing_visit');
       const { count: shareCount } = await supabase
         .from('viral_events')
         .select('*', { count: 'exact', head: true })
@@ -255,6 +263,7 @@ export default function ViralDashboard() {
         .select('fingerprint');
 
       setTotal({
+        total_landings: landingCount ?? 0,
         total_shares: shareCount ?? 0,
         total_sajugpt_clicks: gptCount ?? 0,
         total_referral_users: refData ? new Set(refData.map(r => r.fingerprint)).size : 0,
@@ -331,6 +340,7 @@ export default function ViralDashboard() {
       const dayRows = daily.filter(r => r.event_date === date);
       return {
         date: date.slice(5), // MM-DD
+        landings: dayRows.reduce((s, r) => s + r.landing_visits, 0),
         shares: dayRows.reduce((s, r) => s + r.share_clicks, 0),
         gptClicks: dayRows.reduce((s, r) => s + r.sajugpt_link_clicks, 0),
         referrals: dayRows.reduce((s, r) => s + r.referral_unique_users, 0),
@@ -342,12 +352,14 @@ export default function ViralDashboard() {
   const conversionData = summary.map(r => ({
     name: FEATURE_LABELS[r.feature_type] ?? r.feature_type,
     emoji: FEATURE_EMOJI[r.feature_type] ?? '',
+    landings: r.landing_visits,
     shareClicks: r.share_clicks,
     referralUsers: r.referral_unique_users,
     gptClicks: r.sajugpt_link_clicks,
+    shareRate: r.landing_visits > 0 ? Math.round(r.share_clicks * 1000 / r.landing_visits) / 10 : 0,
     referralRate: r.share_clicks > 0 ? Math.round(r.referral_unique_users * 1000 / r.share_clicks) / 10 : 0,
     gptCtr: r.referral_unique_users > 0 ? Math.round(r.sajugpt_link_clicks * 1000 / r.referral_unique_users) / 10 : 0,
-  })).sort((a, b) => b.shareClicks - a.shareClicks);
+  })).sort((a, b) => b.landings - a.landings);
 
   // 공유 방법 차트 데이터
   const shareMethodData = summary.map(r => ({
@@ -432,12 +444,12 @@ export default function ViralDashboard() {
                   {/* 종합 요약 */}
                   <SectionTitle>종합 요약</SectionTitle>
                   <div style={{ display: 'flex', gap: '8px' }}>
+                    <StatCard label="랜딩 유입" value={total.total_landings} />
                     <StatCard label="총 공유 클릭" value={total.total_shares} />
-                    <StatCard label="사주GPT 클릭" value={total.total_sajugpt_clicks} />
                   </div>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                    <StatCard label="사주GPT 클릭" value={total.total_sajugpt_clicks} />
                     <StatCard label="레퍼럴 유저" value={total.total_referral_users} />
-                    <StatCard label="전체 유니크" value={total.total_unique_users} />
                   </div>
 
                   {/* 기능별 */}
@@ -462,11 +474,15 @@ export default function ViralDashboard() {
                       </div>
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div style={{ flex: 1 }}>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>랜딩</p>
+                          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, letterSpacing: '-0.36px', color: S.info }}>{r.landing_visits.toLocaleString()}</p>
+                        </div>
+                        <div style={{ flex: 1 }}>
                           <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>공유</p>
                           <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, letterSpacing: '-0.36px', color: S.text }}>{r.share_clicks.toLocaleString()}</p>
                         </div>
                         <div style={{ flex: 1 }}>
-                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>GPT 클릭</p>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>GPT</p>
                           <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, letterSpacing: '-0.36px', color: S.primary }}>{r.sajugpt_link_clicks.toLocaleString()}</p>
                         </div>
                         <div style={{ flex: 1 }}>
@@ -518,6 +534,7 @@ export default function ViralDashboard() {
                         <YAxis tick={{ fontSize: 11, fontFamily: S.font }} />
                         <Tooltip contentStyle={{ fontFamily: S.font, fontSize: '13px', borderRadius: '8px' }} />
                         <Legend wrapperStyle={{ fontFamily: S.font, fontSize: '12px' }} />
+                        <Line type="monotone" dataKey="landings" name="랜딩 유입" stroke={S.info} strokeWidth={2} dot={{ r: 4 }} />
                         <Line type="monotone" dataKey="shares" name="공유 클릭" stroke={S.primary} strokeWidth={2} dot={{ r: 4 }} />
                         <Line type="monotone" dataKey="gptClicks" name="GPT 클릭" stroke={S.amber} strokeWidth={2} dot={{ r: 4 }} />
                         <Line type="monotone" dataKey="referrals" name="레퍼럴" stroke={S.green} strokeWidth={2} dot={{ r: 4 }} />
@@ -530,18 +547,19 @@ export default function ViralDashboard() {
                   {daily.length === 0 ? <EmptyState /> : (
                     <div style={{ backgroundColor: S.card, borderRadius: '16px', overflow: 'hidden' }}>
                       <div style={{
-                        display: 'grid', gridTemplateColumns: '1fr 50px 50px 50px',
+                        display: 'grid', gridTemplateColumns: '1fr 44px 44px 44px 44px',
                         padding: '10px 12px', borderBottom: `1px solid ${S.border}`,
                         fontFamily: S.font, fontSize: '11px', fontWeight: 500, letterSpacing: '-0.22px', color: S.label,
                       }}>
                         <span>기능</span>
+                        <span style={{ textAlign: 'right' }}>랜딩</span>
                         <span style={{ textAlign: 'right' }}>공유</span>
                         <span style={{ textAlign: 'right' }}>GPT</span>
                         <span style={{ textAlign: 'right' }}>레퍼럴</span>
                       </div>
                       {daily.slice(0, 30).map((r, i) => (
                         <div key={i} style={{
-                          display: 'grid', gridTemplateColumns: '1fr 50px 50px 50px',
+                          display: 'grid', gridTemplateColumns: '1fr 44px 44px 44px 44px',
                           padding: '10px 12px',
                           borderBottom: i < Math.min(daily.length, 30) - 1 ? `1px solid ${S.border}` : 'none',
                           fontFamily: S.font, fontSize: '13px',
@@ -549,6 +567,7 @@ export default function ViralDashboard() {
                           <span style={{ color: S.text, fontWeight: 500 }}>
                             {FEATURE_EMOJI[r.feature_type]} {FEATURE_LABELS[r.feature_type]} <span style={{ color: S.label, fontWeight: 400 }}>{r.event_date.slice(5)}</span>
                           </span>
+                          <span style={{ textAlign: 'right', color: S.info, fontWeight: 600 }}>{r.landing_visits}</span>
                           <span style={{ textAlign: 'right', color: S.text, fontWeight: 600 }}>{r.share_clicks}</span>
                           <span style={{ textAlign: 'right', color: S.primary, fontWeight: 600 }}>{r.sajugpt_link_clicks}</span>
                           <span style={{ textAlign: 'right', color: S.green, fontWeight: 600 }}>{r.referral_unique_users}</span>
@@ -630,34 +649,48 @@ export default function ViralDashboard() {
                       </p>
 
                       {/* 퍼널 바 */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginBottom: '12px' }}>
                         <div style={{
-                          flex: Math.max(r.shareClicks, 1), height: '28px', borderRadius: '6px',
+                          flex: Math.max(r.landings, 1), height: '28px', borderRadius: '6px',
+                          backgroundColor: S.info, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          minWidth: '36px',
+                        }}>
+                          <span style={{ fontFamily: S.font, fontSize: '11px', fontWeight: 700, color: '#fff' }}>{r.landings}</span>
+                        </div>
+                        <span style={{ fontFamily: S.font, fontSize: '10px', color: S.label }}>→</span>
+                        <div style={{
+                          flex: Math.max(r.shareClicks, 0.5), height: '28px', borderRadius: '6px',
                           backgroundColor: S.primary, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          minWidth: '40px',
+                          minWidth: '36px',
                         }}>
                           <span style={{ fontFamily: S.font, fontSize: '11px', fontWeight: 700, color: '#fff' }}>{r.shareClicks}</span>
                         </div>
-                        <span style={{ fontFamily: S.font, fontSize: '12px', color: S.label }}>→</span>
+                        <span style={{ fontFamily: S.font, fontSize: '10px', color: S.label }}>→</span>
                         <div style={{
-                          flex: Math.max(r.referralUsers, 0.3), height: '28px', borderRadius: '6px',
+                          flex: Math.max(r.referralUsers, 0.2), height: '28px', borderRadius: '6px',
                           backgroundColor: S.green, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          minWidth: '40px',
+                          minWidth: '36px',
                         }}>
                           <span style={{ fontFamily: S.font, fontSize: '11px', fontWeight: 700, color: '#fff' }}>{r.referralUsers}</span>
                         </div>
-                        <span style={{ fontFamily: S.font, fontSize: '12px', color: S.label }}>→</span>
+                        <span style={{ fontFamily: S.font, fontSize: '10px', color: S.label }}>→</span>
                         <div style={{
                           flex: Math.max(r.gptClicks, 0.1), height: '28px', borderRadius: '6px',
                           backgroundColor: S.amber, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          minWidth: '40px',
+                          minWidth: '36px',
                         }}>
                           <span style={{ fontFamily: S.font, fontSize: '11px', fontWeight: 700, color: '#fff' }}>{r.gptClicks}</span>
                         </div>
                       </div>
 
                       {/* 전환율 수치 */}
-                      <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <div>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>랜딩→공유</p>
+                          <p style={{ fontFamily: S.font, fontSize: '16px', fontWeight: 600, letterSpacing: '-0.32px', color: r.shareRate > 10 ? S.green : S.text }}>
+                            {r.shareRate}%
+                          </p>
+                        </div>
                         <div>
                           <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>공유→레퍼럴</p>
                           <p style={{ fontFamily: S.font, fontSize: '16px', fontWeight: 600, letterSpacing: '-0.32px', color: r.referralRate > 10 ? S.green : S.text }}>

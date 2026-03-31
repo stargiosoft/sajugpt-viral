@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import SexyBattleClient from '@/components/SexyBattleClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '색기 배틀 — 사주GPT',
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function SexyBattlePage() {
-  return <SexyBattleClient />;
+  return (<><LandingTracker featureType="sexy_battle" /><SexyBattleClient /></>);
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import StockClient from '@/components/stock/StockClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '주가 조작단 — 사주GPT',
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function StockPage() {
-  return <StockClient />;
+  return (<><LandingTracker featureType="saju_stock" /><StockClient /></>);
 }
