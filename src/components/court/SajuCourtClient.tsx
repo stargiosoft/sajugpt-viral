@@ -489,6 +489,12 @@ export default function SajuCourtClient() {
               >
                 다른 사주로 해보기
               </button>
+              <a
+                href="/"
+                style={{ color: '#6B5C85', fontSize: '14px', textAlign: 'center', marginTop: '8px', textDecoration: 'underline', textUnderlineOffset: '3px', opacity: 0.7 }}
+              >
+                다른 테스트도 해보기
+              </a>
             </div>
           </div>
         )}
