@@ -59,21 +59,21 @@ export interface ServantMeta {
 export const SERVANTS: Record<ServantType, ServantMeta> = {
   beast: {
     type: 'beast',
-    name: '강해',
+    name: '윤태산',
     emoji: '\uD83D\uDD25',
     label: '야수형',
     personality: '직설적, 거침없음. 몸으로 증명하는 타입',
   },
   poet: {
     type: 'poet',
-    name: '윤서',
+    name: '서휘윤',
     emoji: '\uD83C\uDFAD',
     label: '시인형',
     personality: '감성적, 말이 무기. 분위기를 만드는 타입',
   },
   butler: {
     type: 'butler',
-    name: '도겸',
+    name: '도해결',
     emoji: '\uD83E\uDEC5',
     label: '집사형',
     personality: '절제된 매너, 완벽한 준비. 복종하는 타입',
@@ -91,7 +91,7 @@ export const REJECTION_LINES: Record<ServantType, string> = {
 export const INTERVENTION_REACTIONS = {
   listen: {
     beast: '야, 이놈아! 네가 지난번에 마마 앞에서 발이 떨리던 거 잊었냐?',
-    poet: '강해, 네 주먹보다 내 혀가 마마를 더 잘 모신다. 너도 알잖아.',
+    poet: '윤태산, 네 주먹보다 내 혀가 마마를 더 잘 모신다. 너도 알잖아.',
     butler: '두 분... 마마께서 듣고 계실 수도 있습니다만... 아, 아닙니다. 저도 할 말은 있습니다.',
   },
   cough: {

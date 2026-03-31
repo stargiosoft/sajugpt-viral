@@ -17,9 +17,9 @@ const CONSTITUTION_NAMES: Record<string, string> = {
 };
 
 const SERVANT_NAMES: Record<string, string> = {
-  beast: '강해(야수형)',
-  poet: '윤서(시인형)',
-  butler: '도겸(집사형)',
+  beast: '윤태산(야수형)',
+  poet: '서휘윤(시인형)',
+  butler: '도해결(집사형)',
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

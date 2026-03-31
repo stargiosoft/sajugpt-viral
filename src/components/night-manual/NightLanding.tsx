@@ -9,9 +9,9 @@ interface Props {
 
 // ─── 시종 프로필 ───
 const SERVANTS = [
-  { name: '강해', label: '야수형', color: '#e05252', quote: '"말이 필요합니까?"', personality: '직설적, 거침없음. 몸으로 증명하는 타입', thumbnail: '/characters/yoon-taesan.webp' },
-  { name: '윤서', label: '시인형', color: '#5b9bd5', quote: '"천천히 불을 지펴야..."', personality: '감성적, 말이 무기. 분위기를 만드는 타입', thumbnail: '/characters/seo-hwiyoon.webp' },
-  { name: '도겸', label: '집사형', color: '#6bb87a', quote: '"마마의 편안함이 최우선"', personality: '절제된 매너, 완벽한 준비. 복종하는 타입', thumbnail: '/characters/choi-seolgye.webp' },
+  { name: '윤태산', label: '야수형', color: '#e05252', quote: '"말이 필요합니까?"', personality: '직설적, 거침없음. 몸으로 증명하는 타입', thumbnail: '/characters/yoon-taesan.webp' },
+  { name: '서휘윤', label: '시인형', color: '#5b9bd5', quote: '"천천히 불을 지펴야..."', personality: '감성적, 말이 무기. 분위기를 만드는 타입', thumbnail: '/characters/seo-hwiyoon.webp' },
+  { name: '도해결', label: '집사형', color: '#6bb87a', quote: '"마마의 편안함이 최우선"', personality: '절제된 매너, 완벽한 준비. 복종하는 타입', thumbnail: '/characters/choi-seolgye.webp' },
 ];
 
 // ─── 체질 유형 프리뷰 ───

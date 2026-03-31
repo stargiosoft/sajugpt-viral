@@ -29,9 +29,9 @@ function parseDialogue(script: string): DialogueLine[] {
     const text = part.slice(colonIdx + 1).trim().replace(/^[""]|[""]$/g, '');
 
     let type: ServantType | 'system' = 'system';
-    if (speaker.includes('강해')) type = 'beast';
-    else if (speaker.includes('윤서')) type = 'poet';
-    else if (speaker.includes('도겸')) type = 'butler';
+    if (speaker.includes('윤태산')) type = 'beast';
+    else if (speaker.includes('서휘윤')) type = 'poet';
+    else if (speaker.includes('도해결')) type = 'butler';
 
     lines.push({ speaker, type, text });
   }
