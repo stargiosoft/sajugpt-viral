@@ -30,16 +30,28 @@ export function getAdjustedChoices(
   const anyPass = choices.some(c => judgeChoice(c, stats));
   if (anyPass) return choices;
 
-  // 전부 실패하면 → 유저의 최고 능력치에 가장 가까운 선택지 1개의 threshold를 낮춰서 성공 보장
+  // 전부 실패하면 → 총 gap(1차+2차)이 가장 작은 선택지 1개의 threshold를 낮춰서 성공 보장
   const sorted = [...choices].sort((a, b) => {
-    const gapA = a.threshold - stats[a.requiredStat];
-    const gapB = b.threshold - stats[b.requiredStat];
-    return gapA - gapB; // gap이 가장 작은 게 첫번째
+    const gapA = Math.max(0, a.threshold - stats[a.requiredStat])
+      + (a.secondaryStat && a.secondaryThreshold
+        ? Math.max(0, a.secondaryThreshold - stats[a.secondaryStat])
+        : 0);
+    const gapB = Math.max(0, b.threshold - stats[b.requiredStat])
+      + (b.secondaryStat && b.secondaryThreshold
+        ? Math.max(0, b.secondaryThreshold - stats[b.secondaryStat])
+        : 0);
+    return gapA - gapB;
   });
 
   return choices.map(c =>
     c.id === sorted[0].id
-      ? { ...c, threshold: stats[c.requiredStat] } // 정확히 맞춰서 성공 보장
+      ? {
+          ...c,
+          threshold: stats[c.requiredStat], // 1차 스탯 맞춤
+          ...(c.secondaryStat && c.secondaryThreshold
+            ? { secondaryThreshold: stats[c.secondaryStat] } // 2차 스탯도 맞춤
+            : {}),
+        }
       : c
   );
 }

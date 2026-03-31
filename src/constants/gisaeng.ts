@@ -417,7 +417,7 @@ export const ROUND3_SCENARIO: RoundScenario = {
         { target: 'all', loyaltyDelta: 10, suspicionDelta: -10 },
       ],
       failEffects: [
-        { target: 'all', loyaltyDelta: -50, suspicionDelta: 50 },
+        { target: 'all', loyaltyDelta: -25, suspicionDelta: 30 },
       ],
     },
   ],
