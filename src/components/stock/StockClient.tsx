@@ -12,8 +12,66 @@ import StockTurn from '@/components/stock/StockTurn';
 import StockPlanCard from '@/components/stock/StockPlanCard';
 import StockResult from '@/components/stock/StockResult';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
-import { parseUTM, trackEvent, trackSajuGPTClick } from '@/lib/analytics';
+import { parseUTM, trackEvent, trackShare, trackSajuGPTClick } from '@/lib/analytics';
+import { copyToClipboard, saveImage } from '@/lib/share';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
+
+// ─── 공유 버튼 (plan 단계용) ──────────────────────────────
+function PlanShareButton({ type, stockId, currentPrice, cardRef }: {
+  type: 'copy' | 'save';
+  stockId: string;
+  currentPrice?: number;
+  cardRef?: React.RefObject<HTMLDivElement | null>;
+}) {
+  const [active, setActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const handleCopy = async () => {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const text = `📈 내 연애 주가: ${(currentPrice ?? 0).toLocaleString()}원\n주가 조작단이 분석한 내 작전 계획서\n👉 ${baseUrl}/stock/${stockId}`;
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setActive(true);
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setActive(false), 2000);
+      trackShare('saju_stock', 'clipboard', stockId);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!cardRef?.current || active) return;
+    setActive(true);
+    try {
+      await saveImage(cardRef.current, '주가조작단_작전계획서.png');
+      trackShare('saju_stock', 'image_save', stockId);
+    } catch { /* noop */ }
+    setActive(false);
+  };
+
+  const isCopy = type === 'copy';
+  return (
+    <button
+      onClick={isCopy ? handleCopy : handleSave}
+      disabled={!isCopy && active}
+      style={{
+        flex: 1,
+        height: '52px',
+        borderRadius: '14px',
+        fontSize: '14px',
+        fontWeight: 600,
+        cursor: 'pointer',
+        backgroundColor: isCopy && active ? '#1a3a1a' : '#1a1a2e',
+        color: isCopy && active ? '#4ADE80' : '#ccc',
+        border: isCopy && active ? '1px solid #4ADE80' : '1px solid #2a2a3e',
+        opacity: !isCopy && active ? 0.6 : 1,
+      }}
+    >
+      {isCopy
+        ? (active ? '✅ 복사됨' : '📋 링크 복사')
+        : (active ? '저장 중...' : '📸 이미지 저장')}
+    </button>
+  );
+}
 
 interface Props {
   stockId?: string;
@@ -372,22 +430,12 @@ export default function StockClient({ stockId }: Props) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
               className="flex flex-col"
-              style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '120px' }}
+              style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '40px' }}
             >
               <div style={{ height: '48px' }} />
               <StockPlanCard ref={planCardRef} plan={result.operationPlan} />
 
-              <div style={{
-                position: 'fixed',
-                bottom: 0,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '100%',
-                maxWidth: '440px',
-                padding: '16px 20px',
-                paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-                background: 'linear-gradient(transparent, #0a0a14 30%)',
-              }}>
+              <div className="flex flex-col gap-3" style={{ marginTop: '32px' }}>
                 <a
                   href="https://www.sajugpt.co.kr/"
                   target="_blank"
@@ -411,17 +459,46 @@ export default function StockClient({ stockId }: Props) {
                 >
                   3단계 작전 실행하기
                 </a>
+
+                <div className="flex gap-3">
+                  <PlanShareButton
+                    type="copy"
+                    stockId={result.id}
+                    currentPrice={result.stockReport.currentPrice}
+                  />
+                  <PlanShareButton
+                    type="save"
+                    cardRef={planCardRef}
+                    stockId={result.id}
+                  />
+                </div>
+
+                <button
+                  onClick={handleReset}
+                  style={{
+                    width: '100%',
+                    height: '52px',
+                    borderRadius: '14px',
+                    backgroundColor: '#1a1a2e',
+                    color: '#999',
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    border: '1px solid #2a2a3e',
+                    cursor: 'pointer',
+                  }}
+                >
+                  다시 해보기
+                </button>
+
                 <a
                   href="/"
                   style={{
-                    display: 'block',
-                    width: '100%',
                     color: '#555',
                     fontSize: '13px',
                     fontWeight: 500,
-                    textDecoration: 'none',
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '3px',
                     textAlign: 'center',
-                    lineHeight: '44px',
                     marginTop: '4px',
                   }}
                 >
