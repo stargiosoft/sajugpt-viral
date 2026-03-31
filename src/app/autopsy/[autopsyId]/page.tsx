@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import AutopsyClient from '@/components/autopsy/AutopsyClient';
+import ReferralTracker from '@/components/ReferralTracker';
 
 interface Props {
   params: Promise<{ autopsyId: string }>;
@@ -45,5 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AutopsyResultPage({ params }: Props) {
   const { autopsyId } = await params;
-  return <AutopsyClient autopsyId={autopsyId} />;
+  return (
+    <>
+      <ReferralTracker featureType="saju_autopsy" referrerId={autopsyId} />
+      <AutopsyClient autopsyId={autopsyId} />
+    </>
+  );
 }

@@ -1,44 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { captureCardImage, copyToClipboard, saveImage } from '@/lib/share';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, trackShare } from '@/lib/analytics';
 
 interface Props {
-  label: string;
+  label?: string;
   cardRef: React.RefObject<HTMLDivElement | null>;
   courtId: string;
   crimeLabel: string;
   sentence: number;
 }
 
-export default function CourtShareButtons({ label, cardRef, courtId, crimeLabel, sentence }: Props) {
-  const [copying, setCopying] = useState(false);
+export default function CourtShareButtons({ cardRef, courtId, crimeLabel, sentence }: Props) {
+  const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const getShareText = () => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     return `⚖️ 사주 법정 — ${crimeLabel}\n징역 ${sentence}년 선고 💰\n넌 뭐 나올지 해봐 ㅋㅋ\n👉 ${baseUrl}/court`;
   };
 
-  const handleCopy = async () => {
-    setCopying(true);
-    await copyToClipboard(getShareText());
-    trackEvent('saju_court_share_clipboard');
-    setTimeout(() => setCopying(false), 2000);
-  };
+  const handleCopy = useCallback(async () => {
+    const ok = await copyToClipboard(getShareText());
+    if (ok) {
+      setCopied(true);
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
+      trackEvent('saju_court_share_clipboard');
+      trackShare('saju_court', 'clipboard', courtId, { crimeLabel, sentence });
+    }
+  }, [crimeLabel, sentence]);
 
-  const handleSave = async () => {
-    if (!cardRef.current) return;
+  const handleSave = useCallback(async () => {
+    if (!cardRef.current || saving) return;
     setSaving(true);
     try {
       await saveImage(cardRef.current, `사주법정_${crimeLabel}.png`);
       trackEvent('saju_court_share_image');
+      trackShare('saju_court', 'image_save', courtId);
     } catch { /* noop */ }
     setSaving(false);
-  };
+  }, [cardRef, crimeLabel, saving]);
 
-  const handleNative = async () => {
+  const handleNative = useCallback(async () => {
     if (!navigator.share || !cardRef.current) {
       await handleCopy();
       return;
@@ -52,35 +58,47 @@ export default function CourtShareButtons({ label, cardRef, courtId, crimeLabel,
         files: [file],
       });
       trackEvent('saju_court_share_native');
+      trackShare('saju_court', 'native', courtId);
     } catch {
       await handleCopy();
     }
-  };
+  }, [cardRef, crimeLabel, sentence, handleCopy]);
 
   const btnStyle: React.CSSProperties = {
-    flex: 1,
-    padding: '12px 8px',
-    borderRadius: '10px',
-    border: '1px solid #E8DCF5',
-    backgroundColor: '#F7F2FA',
+    height: '56px',
+    borderRadius: '16px',
+    fontSize: '15px',
+    fontWeight: 700,
     cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#7A38D8',
-    textAlign: 'center',
+    border: 'none',
+    flex: 1,
   };
 
   return (
-    <div className="flex gap-2">
-      <button onClick={handleNative} style={btnStyle}>
-        📱 {label}
-      </button>
-      <button onClick={handleCopy} style={btnStyle}>
-        {copying ? '✅ 복사됨' : '🔗 링크 복사'}
-      </button>
-      <button onClick={handleSave} style={btnStyle}>
-        {saving ? '저장 중...' : '💾 저장'}
-      </button>
+    <div className="flex gap-3">
+        <button
+          onClick={handleCopy}
+          style={{
+            ...btnStyle,
+            backgroundColor: copied ? '#44BB44' : '#f0f0f0',
+            color: copied ? '#fff' : '#333',
+          }}
+        >
+          {copied ? '복사 완료!' : '📋 링크 복사'}
+        </button>
+
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{
+            ...btnStyle,
+            backgroundColor: '#f0f0f0',
+            color: '#333',
+            opacity: saving ? 0.6 : 1,
+          }}
+        >
+          {saving ? '저장 중...' : '📸 이미지 저장'}
+        </button>
     </div>
   );
 }

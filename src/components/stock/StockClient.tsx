@@ -12,7 +12,7 @@ import StockTurn from '@/components/stock/StockTurn';
 import StockPlanCard from '@/components/stock/StockPlanCard';
 import StockResult from '@/components/stock/StockResult';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
-import { parseUTM, trackEvent } from '@/lib/analytics';
+import { parseUTM, trackEvent, trackSajuGPTClick } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 
 interface Props {
@@ -50,7 +50,7 @@ export default function StockClient({ stockId }: Props) {
 
   // 턴제 유저 선택
   const [userChoices, setUserChoices] = useState<UserChoices>({
-    turn1: null, turn2: null, turn3: null, turn4: null,
+    turn1: null, turn2: null, turn3: null,
   });
 
   const reportCardRef = useRef<HTMLDivElement>(null);
@@ -163,8 +163,7 @@ export default function StockClient({ stockId }: Props) {
     const nextSteps: Record<string, StockStep> = {
       turn1: 'turn2',
       turn2: 'turn3',
-      turn3: 'turn4',
-      turn4: 'plan',
+      turn3: 'plan',
     };
     // 약간의 딜레이 후 다음 턴으로
     setTimeout(() => setStep(nextSteps[turn] as StockStep), 600);
@@ -181,7 +180,7 @@ export default function StockClient({ stockId }: Props) {
     setGender('female');
     setRelationshipStatus('single');
     setSubmitting(false);
-    setUserChoices({ turn1: null, turn2: null, turn3: null, turn4: null });
+    setUserChoices({ turn1: null, turn2: null, turn3: null });
   }, []);
 
   return (
@@ -354,22 +353,6 @@ export default function StockClient({ stockId }: Props) {
             </motion.div>
           )}
 
-          {/* ─── TURN 4 ─── */}
-          {step === 'turn4' && result && (
-            <motion.div
-              key="turn4"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.35 }}
-            >
-              <StockTurn
-                turnData={result.discussion.turn4}
-                onChoice={(choice) => handleTurnChoice('turn4', choice)}
-              />
-            </motion.div>
-          )}
-
           {/* ─── PLAN ─── */}
           {step === 'plan' && result && (
             <motion.div
@@ -399,6 +382,7 @@ export default function StockClient({ stockId }: Props) {
                   href="https://www.sajugpt.co.kr/"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackSajuGPTClick('saju_stock')}
                   style={{
                     display: 'block',
                     width: '100%',
@@ -416,6 +400,22 @@ export default function StockClient({ stockId }: Props) {
                   }}
                 >
                   3단계 작전 실행하기
+                </a>
+                <a
+                  href="/"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    color: '#555',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    lineHeight: '44px',
+                    marginTop: '4px',
+                  }}
+                >
+                  다른 테스트도 해보기
                 </a>
               </div>
             </motion.div>

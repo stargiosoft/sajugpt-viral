@@ -126,6 +126,7 @@ async function generateVerdict(
             maxOutputTokens: 800,
             temperature: 0.7,
             responseMimeType: 'application/json',
+            thinkingConfig: { thinkingBudget: 0 },
           },
         }),
       }

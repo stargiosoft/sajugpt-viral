@@ -368,6 +368,7 @@ ${coronerProfile}
             maxOutputTokens: 500,
             temperature: 0.85,
             responseMimeType: 'application/json',
+            thinkingConfig: { thinkingBudget: 0 },
           },
         }),
       }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import StockClient from '@/components/stock/StockClient';
+import ReferralTracker from '@/components/ReferralTracker';
 
 interface Props {
   params: Promise<{ stockId: string }>;
@@ -52,5 +53,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function StockResultPage({ params }: Props) {
   const { stockId } = await params;
-  return <StockClient stockId={stockId} />;
+  return (
+    <>
+      <ReferralTracker featureType="saju_stock" referrerId={stockId} />
+      <StockClient stockId={stockId} />
+    </>
+  );
 }

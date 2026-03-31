@@ -317,7 +317,8 @@ async function generateServantDialogue(
 {"phase1":"강해: \\"대사\\"\\n\\n윤서: \\"대사\\"\\n\\n도겸: \\"대사\\"\\n\\n강해: \\"대사\\"\\n\\n윤서: \\"대사\\"\\n\\n도겸: \\"대사\\"","phase3_beast":"강해의 최종 제안 3~4문장","phase3_poet":"윤서의 최종 제안 3~4문장","phase3_butler":"도겸의 최종 제안 3~4문장"}
 
 2. Phase 1 (엿듣기 토론):
-   - 6턴 이상 (강해→윤서→도겸→강해→윤서→도겸 순환)
+   - 6턴 (강해→윤서→도겸→강해→윤서→도겸 순환)
+   - **각 대사는 반드시 2~4줄(50~120자) 이내.** 길면 재미 없다. 짧고 임팩트 있게.
    - 유저의 구체적 능력치 숫자를 반드시 대사에 포함: "${topStat.name} ${topStat.value}이면..."
    - 시종들이 능력치를 보고 서로 견제하는 대사
    - 최소 1개 "맥락 없이 캡처해도 웃긴 한 줄" 포함
@@ -328,7 +329,7 @@ async function generateServantDialogue(
    - 각 시종이 유저의 최고 능력치(${topStat.name})에 맞춘 밤 시중 제안
    - 각 시종의 성격이 극명하게 드러나는 톤
    - 각 제안 마지막 문장이 캡처 밈이 될 수 있는 임팩트 있는 한 줄
-   - 3~4문장씩
+   - **2~3문장씩. 길면 안 읽는다.**
 
 4. 성인 코드 수위: "야하지 않지만 발칙하고 솔직한" 스윗 스팟. 직접적 성행위 묘사 금지, 은유와 비유로.
 5. 조선 세계관 어투 유지하되, 숫자 언급 시에만 현대적 톤 허용.
@@ -342,7 +343,7 @@ async function generateServantDialogue(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 1500, temperature: 0.8 },
+          generationConfig: { maxOutputTokens: 1500, temperature: 0.8, thinkingConfig: { thinkingBudget: 0 } },
         }),
       }
     );

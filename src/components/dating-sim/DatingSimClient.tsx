@@ -16,6 +16,7 @@ import type {
 } from '@/types/dating';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM } from '@/lib/analytics';
+import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { EARLY_EXIT_THRESHOLD } from '@/constants/dating-characters';
 import DatingLanding from './DatingLanding';
 import DatingInput from './DatingInput';
@@ -29,11 +30,12 @@ interface Props {
 }
 
 export default function DatingSimClient({ sharedResultId }: Props) {
-  // ─── 입력 상태 ──────────────────────────────────────
-  const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
-  const [unknownTime, setUnknownTime] = useState(false);
-  const [gender, setGender] = useState<Gender>('female');
+  // ─── 입력 상태 — 공통 캐시 복원 ──────────────────────
+  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
+  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
+  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
+  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
+  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'female');
 
   // ─── 플로우 상태 ────────────────────────────────────
   const [step, setStep] = useState<DatingStep>('landing');
@@ -58,6 +60,11 @@ export default function DatingSimClient({ sharedResultId }: Props) {
   // ─── 결과 상태 ──────────────────────────────────────
   const [finalResult, setFinalResult] = useState<FinalizeDatingResultResponse | null>(null);
   const [attemptNumber, setAttemptNumber] = useState(1);
+
+  // 입력값 변경 시 공통 캐시에 저장
+  useEffect(() => {
+    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+  }, [birthDate, birthTime, unknownTime, gender]);
 
   // ─── UTM 자동입력 ──────────────────────────────────
   useEffect(() => {
@@ -99,7 +106,6 @@ export default function DatingSimClient({ sharedResultId }: Props) {
     if (!birthDate || submitting) return;
     setError(null);
     setSubmitting(true);
-    setStep('analyzing');
 
     try {
       const utm = parseUTM();
@@ -270,7 +276,7 @@ export default function DatingSimClient({ sharedResultId }: Props) {
             />
           )}
 
-          {(step === 'analyzing' || step === 'preparing' || step === 'calculating') && (
+          {(step === 'preparing' || step === 'calculating') && (
             <DatingAnalyzing
               key="analyzing"
               phase={step}

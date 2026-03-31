@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { NightManualResult, InterventionChoice, DebateSubStep, ServantType } from '@/types/night-manual';
 import { SERVANTS, INTERVENTION_REACTIONS } from '@/constants/night-manual';
@@ -44,7 +44,13 @@ const SERVANT_COLORS: Record<ServantType, string> = {
   butler: '#7ce08a',
 };
 
-function ChatBubble({ line, index }: { line: DialogueLine; index: number }) {
+const SERVANT_THUMBNAILS: Record<ServantType, string> = {
+  beast: '/characters/yoon-taesan.webp',
+  poet: '/characters/seo-hwiyoon.webp',
+  butler: '/characters/choi-seolgye.webp',
+};
+
+function ChatBubble({ line }: { line: DialogueLine }) {
   const color = line.type !== 'system' ? SERVANT_COLORS[line.type] : '#888';
   const servant = line.type !== 'system' ? SERVANTS[line.type] : null;
 
@@ -52,15 +58,29 @@ function ChatBubble({ line, index }: { line: DialogueLine; index: number }) {
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.8, duration: 0.4 }}
+      transition={{ duration: 0.3 }}
       style={{ marginBottom: '16px' }}
     >
       <div className="flex items-center gap-2" style={{ marginBottom: '6px' }}>
-        {servant && (
-          <span style={{ fontSize: '14px' }}>{servant.emoji}</span>
+        {line.type !== 'system' && (
+          <div
+            className="overflow-hidden transform-gpu shrink-0"
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '8px',
+              border: `1.5px solid ${color}40`,
+            }}
+          >
+            <img
+              src={SERVANT_THUMBNAILS[line.type]}
+              alt={servant?.name ?? ''}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
         )}
         <span style={{ fontSize: '13px', fontWeight: 700, color }}>
-          {line.speaker}
+          {servant ? servant.name : line.speaker}
         </span>
         {servant && (
           <span style={{ fontSize: '11px', color: '#6b6080' }}>
@@ -91,42 +111,70 @@ function ChatBubble({ line, index }: { line: DialogueLine; index: number }) {
 
 export default function DebatePhase({ result, interventionChoice, onIntervene, onComplete }: Props) {
   const [subStep, setSubStep] = useState<DebateSubStep>('eavesdrop');
+  const [visibleCount, setVisibleCount] = useState(1);
   const [showInterventionButtons, setShowInterventionButtons] = useState(false);
 
   const phase1Lines = parseDialogue(result.phase1Script);
+  const allPhase1Shown = visibleCount >= phase1Lines.length;
 
-  // 엿듣기 대사 다 나오면 개입 선택지 표시
-  useEffect(() => {
+  // 터치/클릭으로 다음 말풍선 표시
+  const handleTap = useCallback(() => {
     if (subStep === 'eavesdrop') {
-      const timer = setTimeout(() => {
+      if (visibleCount < phase1Lines.length) {
+        setVisibleCount(prev => prev + 1);
+      } else if (!showInterventionButtons) {
         setShowInterventionButtons(true);
-      }, phase1Lines.length * 800 + 1000);
-      return () => clearTimeout(timer);
+      }
     }
-  }, [subStep, phase1Lines.length]);
+  }, [subStep, visibleCount, phase1Lines.length, showInterventionButtons]);
+
+  // Phase 2: 개입 반응도 탭으로 진행
+  const [phase2Visible, setPhase2Visible] = useState(1);
+  const interventionReactions = interventionChoice
+    ? parseDialogue(result.phase2Reactions[interventionChoice])
+    : [];
+  const allPhase2Shown = phase2Visible >= interventionReactions.length;
+
+  const handleTapPhase2 = useCallback(() => {
+    if (phase2Visible < interventionReactions.length) {
+      setPhase2Visible(prev => prev + 1);
+    }
+  }, [phase2Visible, interventionReactions.length]);
 
   const handleIntervene = useCallback((choice: InterventionChoice) => {
     onIntervene(choice);
     setSubStep('intervene');
+    setPhase2Visible(1);
   }, [onIntervene]);
 
-  const interventionReactions = interventionChoice
-    ? parseDialogue(result.phase2Reactions[interventionChoice])
-    : [];
-
   const phase3Lines = [
-    { speaker: `${SERVANTS.beast.emoji} ${SERVANTS.beast.name}`, type: 'beast' as ServantType, text: result.phase3Proposals.beast },
-    { speaker: `${SERVANTS.poet.emoji} ${SERVANTS.poet.name}`, type: 'poet' as ServantType, text: result.phase3Proposals.poet },
-    { speaker: `${SERVANTS.butler.emoji} ${SERVANTS.butler.name}`, type: 'butler' as ServantType, text: result.phase3Proposals.butler },
+    { speaker: SERVANTS.beast.name, type: 'beast' as ServantType, text: result.phase3Proposals.beast },
+    { speaker: SERVANTS.poet.name, type: 'poet' as ServantType, text: result.phase3Proposals.poet },
+    { speaker: SERVANTS.butler.name, type: 'butler' as ServantType, text: result.phase3Proposals.butler },
   ];
+
+  // Phase 3도 탭으로 진행
+  const [phase3Visible, setPhase3Visible] = useState(1);
+  const allPhase3Shown = phase3Visible >= phase3Lines.length;
+
+  const handleTapPhase3 = useCallback(() => {
+    if (phase3Visible < phase3Lines.length) {
+      setPhase3Visible(prev => prev + 1);
+    }
+  }, [phase3Visible, phase3Lines.length]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '40px 24px 120px', minHeight: '100dvh' }}
+      style={{ minHeight: '100dvh' }}
+      onClick={() => {
+        if (subStep === 'eavesdrop') handleTap();
+        else if (subStep === 'intervene') handleTapPhase2();
+      }}
     >
+      <div style={{ padding: '40px 24px 120px' }}>
       {/* 헤더 */}
       <div className="text-center" style={{ marginBottom: '24px' }}>
         <p style={{ fontSize: '13px', color: '#8b7aaa', letterSpacing: '2px' }}>
@@ -142,12 +190,26 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
       </div>
 
       <AnimatePresence mode="wait">
-        {/* Phase 1: 엿듣기 */}
+        {/* Phase 1: 엿듣기 — 터치로 진행 */}
         {subStep === 'eavesdrop' && (
-          <motion.div key="eavesdrop" exit={{ opacity: 0 }}>
-            {phase1Lines.map((line, i) => (
-              <ChatBubble key={i} line={line} index={i} />
+          <motion.div
+            key="eavesdrop"
+            exit={{ opacity: 0 }}
+          >
+            {phase1Lines.slice(0, visibleCount).map((line, i) => (
+              <ChatBubble key={i} line={line} />
             ))}
+
+            {/* 터치 안내 */}
+            {!allPhase1Shown && (
+              <motion.p
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                style={{ textAlign: 'center', fontSize: '13px', color: '#6b6080', marginTop: '16px' }}
+              >
+                화면을 터치하면 다음 대사가 나옵니다
+              </motion.p>
+            )}
 
             {/* 개입 선택지 */}
             {showInterventionButtons && (
@@ -173,7 +235,7 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
                   <motion.button
                     key={choice}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => handleIntervene(choice)}
+                    onClick={(e) => { e.stopPropagation(); handleIntervene(choice); }}
                     className="w-full text-left"
                     style={{
                       padding: '14px 16px',
@@ -193,7 +255,7 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
           </motion.div>
         )}
 
-        {/* Phase 2: 개입 반응 → Phase 3 자동 전환 */}
+        {/* Phase 2: 개입 반응 — 터치로 진행 */}
         {subStep === 'intervene' && (
           <motion.div
             key="intervene"
@@ -201,35 +263,46 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {interventionReactions.map((line, i) => (
-              <ChatBubble key={`r-${i}`} line={line} index={i} />
+            {interventionReactions.slice(0, phase2Visible).map((line, i) => (
+              <ChatBubble key={`r-${i}`} line={line} />
             ))}
 
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: interventionReactions.length * 0.8 + 0.5 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => setSubStep('proposals')}
-              className="w-full"
-              style={{
-                marginTop: '24px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: '#7A38D8',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '15px',
-                fontWeight: 700,
-                color: '#fff',
-              }}
-            >
-              시종들의 최종 제안 듣기
-            </motion.button>
+            {!allPhase2Shown && (
+              <motion.p
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                style={{ textAlign: 'center', fontSize: '13px', color: '#6b6080', marginTop: '16px' }}
+              >
+                화면을 터치하면 다음 대사가 나옵니다
+              </motion.p>
+            )}
+
+            {allPhase2Shown && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={(e) => { e.stopPropagation(); setSubStep('proposals'); }}
+                className="w-full"
+                style={{
+                  marginTop: '24px',
+                  height: '48px',
+                  borderRadius: '12px',
+                  backgroundColor: '#7A38D8',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  color: '#fff',
+                }}
+              >
+                시종들의 최종 제안 듣기
+              </motion.button>
+            )}
           </motion.div>
         )}
 
-        {/* Phase 3: 최종 제안 */}
+        {/* Phase 3: 최종 제안 — 터치로 진행 */}
         {subStep === 'proposals' && (
           <motion.div
             key="proposals"
@@ -242,7 +315,7 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 1.2, duration: 0.5 }}
+                transition={{ delay: i * 0.5, duration: 0.4 }}
                 style={{
                   marginBottom: '16px',
                   padding: '20px',
@@ -252,7 +325,21 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
                 }}
               >
                 <div className="flex items-center gap-2" style={{ marginBottom: '10px' }}>
-                  <span style={{ fontSize: '16px' }}>{SERVANTS[line.type].emoji}</span>
+                  <div
+                    className="overflow-hidden transform-gpu shrink-0"
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '9px',
+                      border: `1.5px solid ${SERVANT_COLORS[line.type]}40`,
+                    }}
+                  >
+                    <img
+                      src={SERVANT_THUMBNAILS[line.type]}
+                      alt={SERVANTS[line.type].name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
                   <span style={{ fontSize: '15px', fontWeight: 700, color: SERVANT_COLORS[line.type] }}>
                     {SERVANTS[line.type].name}
                   </span>
@@ -279,29 +366,30 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 3.8 }}
+                transition={{ delay: 1.8 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={onComplete}
-                style={{
-                  width: '100%',
-                  maxWidth: '440px',
-                  height: '56px',
-                  borderRadius: '16px',
-                  backgroundColor: '#7A38D8',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '17px',
-                  fontWeight: 700,
-                  color: '#fff',
-                  boxShadow: '0 4px 24px rgba(122, 56, 216, 0.4)',
-                }}
-              >
-                오늘 밤, 시종을 선택하기
-              </motion.button>
+                  style={{
+                    width: '100%',
+                    maxWidth: '440px',
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: '#7A38D8',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '17px',
+                    fontWeight: 700,
+                    color: '#fff',
+                    boxShadow: '0 4px 24px rgba(122, 56, 216, 0.4)',
+                  }}
+                >
+                  오늘밤, 시종 선택하기
+                </motion.button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </motion.div>
   );
 }

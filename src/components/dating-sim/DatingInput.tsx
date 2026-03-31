@@ -63,9 +63,9 @@ export default function DatingInput({
   return (
     <motion.div
       key="input"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       style={{ padding: '48px 20px 120px' }}
     >
       {/* 헤더 — 색기 배틀 동일 패턴 */}
@@ -141,6 +141,7 @@ export default function DatingInput({
           <BirthInput
             value={birthDate}
             onChange={setBirthDate}
+            onEnter={onSubmit}
             onComplete={() => {
               const timeInput = birthTimeRef.current?.querySelector('input');
               if (timeInput) setTimeout(() => timeInput.focus(), 100);
@@ -171,6 +172,7 @@ export default function DatingInput({
             onChange={setBirthTime}
             unknownTime={unknownTime}
             onUnknownTimeToggle={handleUnknownTimeToggle}
+            onEnter={onSubmit}
           />
         </motion.div>
 

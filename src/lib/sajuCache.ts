@@ -15,17 +15,17 @@ const TARGET_KEY = 'saju_input_target';
 
 function load(key: string): SajuCacheData | null {
   try {
-    const raw = sessionStorage.getItem(key);
+    const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 }
 
 function save(key: string, data: SajuCacheData) {
-  try { sessionStorage.setItem(key, JSON.stringify(data)); } catch { /* noop */ }
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* noop */ }
 }
 
 function remove(key: string) {
-  try { sessionStorage.removeItem(key); } catch { /* noop */ }
+  try { localStorage.removeItem(key); } catch { /* noop */ }
 }
 
 // ─── 본인 사주 ─────────────────────────────

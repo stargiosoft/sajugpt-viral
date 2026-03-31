@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { copyToClipboard, getShareText, saveImage, shareNative } from '@/lib/share';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, trackShare } from '@/lib/analytics';
 
 interface Props {
   headcount: number;
@@ -23,6 +23,7 @@ export default function ShareButtons({ headcount, battleId, cardRef }: Props) {
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setCopied(false), 2000);
       trackEvent('sexy_battle_share_clipboard', { headcount, battleId });
+      trackShare('sexy_battle', 'clipboard', battleId, { headcount });
     }
   }, [headcount, battleId]);
 
@@ -32,6 +33,7 @@ export default function ShareButtons({ headcount, battleId, cardRef }: Props) {
     try {
       await saveImage(cardRef.current);
       trackEvent('sexy_battle_share_instagram', { headcount, battleId });
+      trackShare('sexy_battle', 'image_save', battleId, { headcount });
     } catch (err) {
       console.error('이미지 저장 실패:', err);
     } finally {
@@ -42,7 +44,9 @@ export default function ShareButtons({ headcount, battleId, cardRef }: Props) {
   const handleShare = useCallback(async () => {
     if (!cardRef.current) return;
     const shared = await shareNative(cardRef.current, headcount, battleId);
-    if (!shared) {
+    if (shared) {
+      trackShare('sexy_battle', 'native', battleId, { headcount });
+    } else {
       await handleCopy();
     }
   }, [cardRef, headcount, battleId, handleCopy]);

@@ -15,6 +15,12 @@ const SERVANT_COLORS: Record<ServantType, string> = {
   butler: '#7ce08a',
 };
 
+const SERVANT_THUMBNAILS: Record<ServantType, string> = {
+  beast: '/characters/yoon-taesan.webp',
+  poet: '/characters/seo-hwiyoon.webp',
+  butler: '/characters/choi-seolgye.webp',
+};
+
 export default function ServantSelection({ result, onSelect }: Props) {
   const servantTypes: ServantType[] = ['beast', 'poet', 'butler'];
 
@@ -65,7 +71,21 @@ export default function ServantSelection({ result, onSelect }: Props) {
             >
               <div className="flex items-center justify-between" style={{ marginBottom: '8px' }}>
                 <div className="flex items-center gap-2">
-                  <span style={{ fontSize: '20px' }}>{servant.emoji}</span>
+                  <div
+                    className="overflow-hidden transform-gpu shrink-0"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '10px',
+                      border: `2px solid ${color}40`,
+                    }}
+                  >
+                    <img
+                      src={SERVANT_THUMBNAILS[type]}
+                      alt={servant.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
                   <span style={{ fontSize: '17px', fontWeight: 700, color }}>{servant.name}</span>
                   <span style={{ fontSize: '12px', color: '#6b6080' }}>{servant.label}</span>
                 </div>

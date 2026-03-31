@@ -4,62 +4,84 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ANALYZING_MESSAGES, CALCULATING_MESSAGES } from '@/constants/gisaeng';
 
+const C = {
+  hanji: '#F5F0E8',
+  inkMuted: '#6B5F56',
+  inkFaded: '#B0A89E',
+  vermillion: '#B8423A',
+};
+
 interface Props {
   type: 'analyzing' | 'calculating';
 }
 
 export default function GisaengAnalyzing({ type }: Props) {
   const messages = type === 'analyzing' ? ANALYZING_MESSAGES : CALCULATING_MESSAGES;
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(1);
 
   useEffect(() => {
+    setVisibleCount(1);
     const timers = messages.map((msg, i) => {
       if (i === 0) return null;
-      return setTimeout(() => setCurrentIdx(i), msg.delay);
+      return setTimeout(() => setVisibleCount(i + 1), msg.delay);
     });
     return () => timers.forEach(t => t && clearTimeout(t));
   }, [messages]);
 
   return (
-    <motion.div
-      className="flex-1 flex flex-col items-center justify-center px-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <div
+      className="relative flex flex-col items-center"
+      style={{ minHeight: '100dvh', backgroundColor: C.hanji }}
     >
-      {/* 회전 아이콘 */}
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-        style={{ fontSize: '40px', marginBottom: '24px' }}
+      {/* Pulsing ring — 화면 중앙 고정 */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{ top: '35%' }}
       >
-        🏮
-      </motion.div>
-
-      {/* 메시지 */}
-      <motion.p
-        key={currentIdx}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{ fontSize: '16px', color: '#151515', fontWeight: 500, letterSpacing: '-0.32px' }}
-      >
-        {messages[currentIdx].text}
-      </motion.p>
-
-      {/* 프로그레스 도트 */}
-      <div className="flex gap-2 mt-6">
-        {messages.map((_, i) => (
-          <div
-            key={i}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: i <= currentIdx ? '24px' : '8px',
-              height: '8px',
-              backgroundColor: i <= currentIdx ? '#7A38D8' : '#e7e7e7',
-            }}
-          />
-        ))}
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0.2, 0.6] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            width: '120px',
+            height: '120px',
+            borderRadius: '50%',
+            border: `3px solid ${C.vermillion}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '40px',
+          }}
+        >
+          🏮
+        </motion.div>
       </div>
-    </motion.div>
+
+      {/* 메시지 — 링 아래 고정 위치에서 쌓임 */}
+      <div
+        className="absolute left-0 right-0 flex flex-col items-center"
+        style={{ top: 'calc(35% + 152px)', padding: '0 24px' }}
+      >
+        {messages.slice(0, visibleCount).map((msg, i) => {
+          const isCurrent = i === visibleCount - 1;
+          return (
+            <motion.p
+              key={`${type}-${i}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: isCurrent ? 1 : 0.4, y: 0 }}
+              transition={{ duration: 0.4 }}
+              style={{
+                fontSize: '15px',
+                fontWeight: 500,
+                color: isCurrent ? C.inkMuted : C.inkFaded,
+                marginBottom: '8px',
+                textAlign: 'center',
+              }}
+            >
+              {msg.text}
+            </motion.p>
+          );
+        })}
+      </div>
+    </div>
   );
 }

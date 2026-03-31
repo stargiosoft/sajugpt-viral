@@ -4,7 +4,7 @@ import { useState, type RefObject } from 'react';
 import type { GisaengTier } from '@/types/gisaeng';
 import { TIER_INFO } from '@/constants/gisaeng';
 import { captureCardImage, saveImage, copyToClipboard, shareNative } from '@/lib/share';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, trackShare } from '@/lib/analytics';
 
 interface Props {
   cardRef: RefObject<HTMLDivElement | null>;
@@ -27,6 +27,7 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
     await copyToClipboard(shareText);
     setCopied(true);
     trackEvent('gisaeng_share_copy');
+    trackShare('gisaeng', 'clipboard', resultId, { tier, monthlySalary });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -34,6 +35,7 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
     if (!cardRef.current) return;
     await saveImage(cardRef.current, `기생시뮬_${tier}티어.png`);
     trackEvent('gisaeng_share_save');
+    trackShare('gisaeng', 'image_save', resultId, { tier });
   };
 
   const handleNativeShare = async () => {
@@ -43,6 +45,7 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
       handleCopy();
     }
     trackEvent('gisaeng_share_native');
+    trackShare('gisaeng', 'native', resultId, { tier });
   };
 
   return (
@@ -53,7 +56,7 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
         style={{
           height: '56px',
           borderRadius: '16px',
-          backgroundColor: '#7A38D8',
+          backgroundColor: '#B8423A',
           border: 'none',
           transition: 'all 0.15s ease',
         }}
@@ -80,11 +83,11 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
           style={{
             height: '48px',
             borderRadius: '16px',
-            backgroundColor: '#F7F2FA',
-            border: 'none',
+            backgroundColor: '#fff',
+            border: '1px solid #DDD5C8',
             fontSize: '13px',
             fontWeight: 600,
-            color: '#7A38D8',
+            color: '#3D3530',
             letterSpacing: '-0.26px',
             transition: 'all 0.15s ease',
           }}
@@ -100,11 +103,11 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
           style={{
             height: '48px',
             borderRadius: '16px',
-            backgroundColor: '#F7F2FA',
-            border: 'none',
+            backgroundColor: '#fff',
+            border: '1px solid #DDD5C8',
             fontSize: '13px',
             fontWeight: 600,
-            color: '#7A38D8',
+            color: '#3D3530',
             letterSpacing: '-0.26px',
             transition: 'all 0.15s ease',
           }}

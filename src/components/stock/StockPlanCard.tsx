@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { OperationPlan } from '@/types/stock';
+import { trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   plan: OperationPlan;
@@ -240,16 +241,22 @@ const StockPlanCard = React.forwardRef<HTMLDivElement, Props>(
 
         {/* Footer watermark */}
         <div style={{ padding: '12px 20px 16px', textAlign: 'center' }}>
-          <p
+          <a
+            href="https://www.sajugpt.co.kr/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackSajuGPTClick('saju_stock')}
             style={{
-              fontSize: '11px',
-              fontWeight: 500,
-              color: '#444',
-              letterSpacing: '0.5px',
+              fontSize: '13px',
+              fontWeight: 700,
+              color: '#7A38D8',
+              letterSpacing: '-0.26px',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
             }}
           >
             sajugpt.co.kr
-          </p>
+          </a>
         </div>
       </div>
     );

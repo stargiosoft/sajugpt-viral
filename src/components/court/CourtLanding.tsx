@@ -7,31 +7,38 @@ interface Props {
   onStart: () => void;
 }
 
-// ── Design Tokens ──
+// ── Design Tokens (Dark Court Theme) ──
 const C = {
+  // Dark base
+  bgDeep: '#0C0914',
+  bgCard: '#160F24',
+  bgCardHover: '#1C1430',
+  bgSurface: '#1E1632',
+  bgGlow: 'rgba(122, 56, 216, 0.06)',
   // Brand purple
   primary: '#7A38D8',
   primaryDark: '#6B2FC2',
   primaryPressed: '#5E28AB',
-  primaryLight: '#F7F2FA',
-  primaryTint: '#EDE5F7',
-  primarySurface: '#FAF8FC',
-  // Sub-color: Prosecution (warm rose)
-  prosecute: '#D4556B',
-  prosecuteLight: '#FDF2F4',
-  prosecuteTint: '#FAE8EB',
-  // Sub-color: Defense (cool teal-blue)
-  defend: '#3A8C89',
-  defendLight: '#EEF7F7',
-  defendTint: '#E0F0F0',
-  // Neutrals
-  textPrimary: '#151515',
-  textTertiary: '#6d6d6d',
-  textCaption: '#848484',
-  textDisabled: '#b7b7b7',
+  primaryLight: '#7A38D8',
+  primaryMuted: 'rgba(122, 56, 216, 0.15)',
+  primaryGlow: 'rgba(122, 56, 216, 0.25)',
+  // Prosecution (warm rose)
+  prosecute: '#E8627A',
+  prosecuteBg: 'rgba(232, 98, 122, 0.08)',
+  prosecuteGlow: 'rgba(232, 98, 122, 0.20)',
+  // Defense (cool teal-blue)
+  defend: '#4ECDC4',
+  defendBg: 'rgba(78, 205, 196, 0.08)',
+  defendGlow: 'rgba(78, 205, 196, 0.20)',
+  // Text
+  textBright: '#F5F0FF',
+  textPrimary: '#E8E0F5',
+  textSecondary: '#A99BC4',
+  textMuted: '#6B5C85',
+  textDim: '#4A3D64',
+  // Misc
   surface: '#ffffff',
-  surfaceSecondary: '#f9f9f9',
-  borderDivider: '#f0f0f0',
+  divider: 'rgba(122, 56, 216, 0.10)',
 } as const;
 
 const ROTATING_CRIMES = [
@@ -45,10 +52,10 @@ const ROTATING_CRIMES = [
 ];
 
 const SENTENCE_GRADES = [
-  { grade: '극형', label: '도화살 낭비죄', range: '13년+', color: C.prosecute, bg: C.prosecuteLight },
-  { grade: '강력범', label: '매력 은닉죄', range: '8~12년', color: C.primaryDark, bg: C.primaryLight },
-  { grade: '중범죄', label: '연애 태만죄', range: '4~7년', color: C.primary, bg: C.primarySurface },
-  { grade: '경범죄', label: '초범', range: '~3년', color: C.textCaption, bg: C.surfaceSecondary },
+  { grade: '극형', label: '도화살 낭비죄', range: '13년+', color: C.prosecute, bg: C.prosecuteBg },
+  { grade: '강력범', label: '매력 은닉죄', range: '8~12년', color: '#B07AFF', bg: 'rgba(176, 122, 255, 0.08)' },
+  { grade: '중범죄', label: '연애 태만죄', range: '4~7년', color: C.primary, bg: C.primaryMuted },
+  { grade: '경범죄', label: '초범', range: '~3년', color: C.textMuted, bg: 'rgba(107, 92, 133, 0.10)' },
 ];
 
 const COURT_CHARACTERS = [
@@ -59,8 +66,8 @@ const COURT_CHARACTERS = [
     desc: '팩폭 기소',
     thumbnail: '/characters/yoon-taesan.webp',
     accent: C.prosecute,
-    accentBg: C.prosecuteLight,
-    accentTint: C.prosecuteTint,
+    accentBg: C.prosecuteBg,
+    accentGlow: C.prosecuteGlow,
     quote: '당신보다 못생긴 사람도\n지금 연애하고 있습니다.',
     quoteHighlight: '연애하고 있습니다.',
   },
@@ -71,8 +78,8 @@ const COURT_CHARACTERS = [
     desc: '다정한 변론',
     thumbnail: '/characters/seo-hwiyoon.webp',
     accent: C.defend,
-    accentBg: C.defendLight,
-    accentTint: C.defendTint,
+    accentBg: C.defendBg,
+    accentGlow: C.defendGlow,
     quote: '거울이 보여주지 못하는 매력이\n사주에는 있습니다.',
     quoteHighlight: '사주에는 있습니다.',
   },
@@ -99,7 +106,7 @@ function CrimeRotator() {
   }, []);
 
   return (
-    <div style={{ height: '30px', overflow: 'hidden', position: 'relative' }}>
+    <div style={{ height: '32px', overflow: 'hidden', position: 'relative' }}>
       <AnimatePresence mode="wait">
         <motion.span
           key={ROTATING_CRIMES[index]}
@@ -108,10 +115,10 @@ function CrimeRotator() {
           exit={{ opacity: 0, y: -16 }}
           transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
           style={{
-            fontSize: '21px',
+            fontSize: '20px',
             fontWeight: 700,
-            color: C.primary,
-            letterSpacing: '-0.42px',
+            color: C.textBright,
+            letterSpacing: '-0.4px',
             display: 'block',
             textAlign: 'center',
           }}
@@ -119,6 +126,33 @@ function CrimeRotator() {
           {ROTATING_CRIMES[index]}
         </motion.span>
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ── VS Divider ──
+function VsDivider() {
+  return (
+    <div className="flex items-center justify-center" style={{ margin: '-4px 0', position: 'relative', zIndex: 2 }}>
+      <div style={{
+        width: '36px',
+        height: '36px',
+        borderRadius: '50%',
+        background: `linear-gradient(135deg, ${C.prosecute}, ${C.primary}, ${C.defend})`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: `0 0 20px ${C.primaryGlow}`,
+      }}>
+        <span style={{
+          fontSize: '11px',
+          fontWeight: 800,
+          color: '#ffffff',
+          letterSpacing: '1px',
+        }}>
+          VS
+        </span>
+      </div>
     </div>
   );
 }
@@ -131,16 +165,29 @@ function CharacterCard({ char, index }: { char: typeof COURT_CHARACTERS[number];
     <motion.div
       variants={{
         hidden: { opacity: 0, y: 24 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1], delay: index * 0.1 } },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1], delay: index * 0.12 } },
       }}
       style={{
-        backgroundColor: char.accentBg,
+        backgroundColor: C.bgCard,
         borderRadius: '20px',
         padding: '20px',
         position: 'relative',
         overflow: 'hidden',
+        border: `1px solid ${char.accent}15`,
       }}
     >
+      {/* 좌측 액센트 라인 */}
+      <div style={{
+        position: 'absolute',
+        left: 0,
+        top: '16px',
+        bottom: '16px',
+        width: '3px',
+        borderRadius: '0 3px 3px 0',
+        background: char.accent,
+        opacity: 0.6,
+      }} />
+
       {/* 상단: 캐릭터 정보 */}
       <div className="flex items-center gap-3">
         <div
@@ -149,7 +196,8 @@ function CharacterCard({ char, index }: { char: typeof COURT_CHARACTERS[number];
             width: '52px',
             height: '52px',
             borderRadius: '16px',
-            border: `2px solid ${char.accent}20`,
+            border: `2px solid ${char.accent}30`,
+            boxShadow: `0 0 16px ${char.accentGlow}`,
           }}
         >
           <img
@@ -164,7 +212,7 @@ function CharacterCard({ char, index }: { char: typeof COURT_CHARACTERS[number];
             <span style={{
               fontSize: '15px',
               fontWeight: 700,
-              color: C.textPrimary,
+              color: C.textBright,
               letterSpacing: '-0.3px',
             }}>
               {char.name}
@@ -176,7 +224,8 @@ function CharacterCard({ char, index }: { char: typeof COURT_CHARACTERS[number];
               letterSpacing: '-0.22px',
               padding: '2px 8px',
               borderRadius: '20px',
-              backgroundColor: `${char.accent}15`,
+              backgroundColor: `${char.accent}18`,
+              border: `1px solid ${char.accent}25`,
             }}>
               {char.role}
             </span>
@@ -184,7 +233,7 @@ function CharacterCard({ char, index }: { char: typeof COURT_CHARACTERS[number];
           <span style={{
             fontSize: '12px',
             fontWeight: 400,
-            color: C.textCaption,
+            color: C.textMuted,
             letterSpacing: '-0.24px',
             marginTop: '2px',
             display: 'block',
@@ -199,12 +248,13 @@ function CharacterCard({ char, index }: { char: typeof COURT_CHARACTERS[number];
         marginTop: '14px',
         padding: '14px 16px',
         borderRadius: '14px',
-        backgroundColor: C.surface,
+        backgroundColor: `${char.accent}08`,
+        border: `1px solid ${char.accent}12`,
       }}>
         <p style={{
           fontSize: '14px',
           fontWeight: 500,
-          color: C.textTertiary,
+          color: C.textSecondary,
           lineHeight: '22px',
           letterSpacing: '-0.28px',
           whiteSpace: 'pre-line',
@@ -234,13 +284,14 @@ function StepItem({ step, index }: {
           width: '28px',
           height: '28px',
           borderRadius: '50%',
-          backgroundColor: C.primaryTint,
+          backgroundColor: C.primaryMuted,
+          border: `1px solid ${C.primary}30`,
         }}
       >
         <span style={{
           fontSize: '13px',
           fontWeight: 700,
-          color: C.primary,
+          color: C.primaryLight,
           letterSpacing: '-0.26px',
         }}>
           {index + 1}
@@ -259,7 +310,7 @@ function StepItem({ step, index }: {
         <p style={{
           fontSize: '13px',
           fontWeight: 400,
-          color: C.textCaption,
+          color: C.textMuted,
           lineHeight: '19px',
           letterSpacing: '-0.26px',
         }}>
@@ -270,6 +321,21 @@ function StepItem({ step, index }: {
   );
 }
 
+// ── Scale Icon ──
+function ScaleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.primaryLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v18" />
+      <path d="m4 7 4-4 4 4" />
+      <path d="m12 7 4-4 4 4" />
+      <path d="M4 7h8" />
+      <path d="M12 7h8" />
+      <circle cx="6" cy="19" r="2" />
+      <circle cx="18" cy="19" r="2" />
+    </svg>
+  );
+}
+
 // ── Main ──
 export default function CourtLanding({ onStart }: Props) {
   return (
@@ -277,14 +343,20 @@ export default function CourtLanding({ onStart }: Props) {
       className="relative flex flex-col items-center overflow-x-hidden"
       style={{
         minHeight: '100dvh',
-        backgroundColor: C.surface,
+        backgroundColor: C.bgDeep,
         paddingBottom: '100px',
       }}
     >
       {/* ── Hero ── */}
       <motion.div
         className="flex flex-col items-center w-full"
-        style={{ paddingTop: '52px', paddingBottom: '28px', paddingLeft: '20px', paddingRight: '20px' }}
+        style={{
+          paddingTop: '52px',
+          paddingBottom: '32px',
+          paddingLeft: '20px',
+          paddingRight: '20px',
+          background: `radial-gradient(ellipse 80% 50% at 50% 0%, ${C.primaryGlow} 0%, transparent 70%)`,
+        }}
         initial="hidden"
         animate="visible"
         variants={stagger}
@@ -295,18 +367,16 @@ export default function CourtLanding({ onStart }: Props) {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '5px',
-            padding: '5px 12px',
+            gap: '6px',
+            padding: '6px 14px',
             borderRadius: '20px',
-            backgroundColor: C.primaryLight,
-            marginBottom: '16px',
+            backgroundColor: C.primaryMuted,
+            border: `1px solid ${C.primary}25`,
+            marginBottom: '20px',
           }}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.primary} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3v18" /><path d="M2 7l4-4 4 4" /><path d="M14 7l4-4 4 4" /><path d="M2 7h8" /><path d="M14 7h8" />
-            <circle cx="6" cy="19" r="2" /><circle cx="18" cy="19" r="2" />
-          </svg>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: C.primary, letterSpacing: '-0.24px' }}>
+          <ScaleIcon />
+          <span style={{ fontSize: '12px', fontWeight: 600, color: C.primaryLight, letterSpacing: '-0.24px' }}>
             사주 연애 법정
           </span>
         </motion.div>
@@ -315,16 +385,22 @@ export default function CourtLanding({ onStart }: Props) {
         <motion.h1
           variants={fadeUp}
           style={{
-            fontSize: '26px',
+            fontSize: '28px',
             fontWeight: 800,
-            color: C.textPrimary,
+            color: C.textBright,
             textAlign: 'center',
-            lineHeight: '36px',
-            letterSpacing: '-0.52px',
+            lineHeight: '38px',
+            letterSpacing: '-0.56px',
           }}
         >
           연애 못한 죄,<br />
-          징역 몇 년?
+          <span style={{
+            background: `linear-gradient(135deg, ${C.prosecute}, ${C.primary}, ${C.defend})`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>
+            징역 몇 년?
+          </span>
         </motion.h1>
 
         {/* 서브카피 */}
@@ -333,9 +409,9 @@ export default function CourtLanding({ onStart }: Props) {
           style={{
             fontSize: '14px',
             fontWeight: 400,
-            color: C.textCaption,
+            color: C.textMuted,
             textAlign: 'center',
-            marginTop: '12px',
+            marginTop: '14px',
             lineHeight: '22px',
             letterSpacing: '-0.28px',
           }}
@@ -345,10 +421,10 @@ export default function CourtLanding({ onStart }: Props) {
         </motion.p>
       </motion.div>
 
-      {/* ── 죄목 롤링 카드 ── */}
+      {/* ── 죄목 롤링 ── */}
       <motion.div
         className="w-full"
-        style={{ padding: '0 20px 24px' }}
+        style={{ padding: '0 20px 28px' }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.45, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
@@ -356,17 +432,18 @@ export default function CourtLanding({ onStart }: Props) {
         <div style={{
           width: '100%',
           borderRadius: '16px',
-          border: `1.5px dashed ${C.primary}40`,
-          backgroundColor: C.primaryLight,
+          backgroundColor: C.bgCard,
+          border: `1px solid ${C.primary}18`,
           padding: '18px 20px',
           textAlign: 'center',
         }}>
           <p style={{
             fontSize: '11px',
             fontWeight: 500,
-            color: C.textCaption,
+            color: C.textMuted,
             marginBottom: '8px',
-            letterSpacing: '-0.22px',
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
           }}>
             당신의 죄목은?
           </p>
@@ -374,23 +451,23 @@ export default function CourtLanding({ onStart }: Props) {
         </div>
       </motion.div>
 
-      {/* ── 캐릭터 카드 ── */}
+      {/* ── 캐릭터 카드 (VS 구도) ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '0 20px', gap: '10px' }}
+        style={{ padding: '0 20px' }}
         initial="hidden"
         animate="visible"
         variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.6 } } }}
       >
-        {COURT_CHARACTERS.map((char, i) => (
-          <CharacterCard key={char.id} char={char} index={i} />
-        ))}
+        <CharacterCard char={COURT_CHARACTERS[0]} index={0} />
+        <VsDivider />
+        <CharacterCard char={COURT_CHARACTERS[1]} index={1} />
       </motion.div>
 
       {/* ── 진행 방식 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '36px 20px 0', gap: '16px' }}
+        style={{ padding: '40px 20px 0', gap: '16px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -401,8 +478,9 @@ export default function CourtLanding({ onStart }: Props) {
           style={{
             fontSize: '12px',
             fontWeight: 600,
-            color: C.textCaption,
-            letterSpacing: '-0.24px',
+            color: C.textMuted,
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
           }}
         >
           진행 방식
@@ -420,7 +498,7 @@ export default function CourtLanding({ onStart }: Props) {
       {/* ── 형량 체계 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '36px 20px 0', gap: '8px' }}
+        style={{ padding: '36px 20px 0', gap: '6px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -431,9 +509,10 @@ export default function CourtLanding({ onStart }: Props) {
           style={{
             fontSize: '12px',
             fontWeight: 600,
-            color: C.textCaption,
-            letterSpacing: '-0.24px',
-            marginBottom: '4px',
+            color: C.textMuted,
+            letterSpacing: '1px',
+            textTransform: 'uppercase',
+            marginBottom: '6px',
           }}
         >
           형량 체계
@@ -446,8 +525,9 @@ export default function CourtLanding({ onStart }: Props) {
             variants={fadeUp}
             style={{
               padding: '12px 16px',
-              borderRadius: '14px',
+              borderRadius: '12px',
               backgroundColor: g.bg,
+              border: `1px solid ${g.color}12`,
             }}
           >
             <div className="flex items-center gap-3">
@@ -463,7 +543,7 @@ export default function CourtLanding({ onStart }: Props) {
               <span style={{
                 fontSize: '13px',
                 fontWeight: 500,
-                color: C.textTertiary,
+                color: C.textSecondary,
                 letterSpacing: '-0.26px',
               }}>
                 {g.label}
@@ -481,7 +561,7 @@ export default function CourtLanding({ onStart }: Props) {
         ))}
       </motion.div>
 
-      {/* ── 역설 인사이트 (밝은 톤) ── */}
+      {/* ── 역설 인사이트 ── */}
       <motion.div
         className="w-full"
         style={{ padding: '20px 20px 0' }}
@@ -493,13 +573,14 @@ export default function CourtLanding({ onStart }: Props) {
         <div style={{
           padding: '16px 20px',
           borderRadius: '16px',
-          backgroundColor: C.primaryLight,
+          backgroundColor: C.primaryMuted,
+          border: `1px solid ${C.primary}20`,
           textAlign: 'center',
         }}>
           <p style={{
             fontSize: '15px',
             fontWeight: 700,
-            color: C.primaryDark,
+            color: C.textBright,
             lineHeight: '24px',
             letterSpacing: '-0.3px',
           }}>
@@ -508,7 +589,7 @@ export default function CourtLanding({ onStart }: Props) {
           <p style={{
             fontSize: '12px',
             fontWeight: 400,
-            color: C.textCaption,
+            color: C.textMuted,
             marginTop: '4px',
             letterSpacing: '-0.24px',
           }}>
@@ -535,7 +616,7 @@ export default function CourtLanding({ onStart }: Props) {
                 width: '24px',
                 height: '24px',
                 borderRadius: '50%',
-                border: `2px solid ${C.surface}`,
+                border: `2px solid ${C.bgDeep}`,
                 marginLeft: i > 0 ? '-8px' : '0',
                 zIndex: 2 - i,
               }}
@@ -544,15 +625,15 @@ export default function CourtLanding({ onStart }: Props) {
             </div>
           ))}
         </div>
-        <p style={{ fontSize: '13px', color: C.textCaption, letterSpacing: '-0.26px' }}>
-          <span style={{ color: C.primary, fontWeight: 600 }}>87,342</span>명 기소 완료
+        <p style={{ fontSize: '13px', color: C.textMuted, letterSpacing: '-0.26px' }}>
+          <span style={{ color: C.primaryLight, fontWeight: 600 }}>87,342</span>명 기소 완료
         </p>
       </motion.div>
 
       {/* ── 면책 ── */}
       <p style={{
         fontSize: '11px',
-        color: C.textDisabled,
+        color: C.textDim,
         textAlign: 'center',
         padding: '0 20px 32px',
         lineHeight: '16px',
@@ -565,8 +646,7 @@ export default function CourtLanding({ onStart }: Props) {
       <div
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] pointer-events-auto"
         style={{
-          backgroundColor: C.surface,
-          boxShadow: '0px -8px 16px 0px rgba(255, 255, 255, 0.76)',
+          background: `linear-gradient(to top, ${C.bgDeep} 60%, transparent)`,
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
@@ -577,36 +657,37 @@ export default function CourtLanding({ onStart }: Props) {
             style={{
               height: '56px',
               borderRadius: '16px',
-              backgroundColor: C.primary,
+              background: `linear-gradient(135deg, ${C.primary}, ${C.primaryDark})`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.15s ease',
+              boxShadow: `0 4px 24px ${C.primaryGlow}`,
             }}
             onMouseDown={(e) => {
               e.currentTarget.style.transform = 'scale(0.99)';
-              e.currentTarget.style.backgroundColor = C.primaryPressed;
+              e.currentTarget.style.opacity = '0.9';
             }}
             onMouseUp={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.backgroundColor = C.primary;
+              e.currentTarget.style.opacity = '1';
             }}
             onTouchStart={(e) => {
               e.currentTarget.style.transform = 'scale(0.99)';
-              e.currentTarget.style.backgroundColor = C.primaryPressed;
+              e.currentTarget.style.opacity = '0.9';
             }}
             onTouchEnd={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.backgroundColor = C.primary;
+              e.currentTarget.style.opacity = '1';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.backgroundColor = C.primary;
+              e.currentTarget.style.opacity = '1';
             }}
           >
             <p style={{
               fontSize: '16px',
-              fontWeight: 500,
+              fontWeight: 600,
               color: '#ffffff',
               letterSpacing: '-0.32px',
               lineHeight: '25px',

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import GisaengClient from '@/components/gisaeng/GisaengClient';
+import ReferralTracker from '@/components/ReferralTracker';
 
 interface Props {
   params: Promise<{ resultId: string }>;
@@ -72,5 +73,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function GisaengResultPage({ params }: Props) {
   const { resultId } = await params;
-  return <GisaengClient resultId={resultId} />;
+  return (
+    <>
+      <ReferralTracker featureType="gisaeng" referrerId={resultId} />
+      <GisaengClient resultId={resultId} />
+    </>
+  );
 }

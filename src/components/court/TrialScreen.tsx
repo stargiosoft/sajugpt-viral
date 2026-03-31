@@ -24,13 +24,29 @@ const msgAnim = {
   transition: { duration: 0.4 },
 };
 
+const BUBBLE_CONFIG = {
+  prosecutor: {
+    bg: 'rgba(232, 98, 122, 0.08)',
+    labelColor: '#E8627A',
+    label: '검사 윤태산',
+    thumbnail: '/characters/yoon-taesan.webp',
+  },
+  defender: {
+    bg: 'rgba(78, 205, 196, 0.08)',
+    labelColor: '#4ECDC4',
+    label: '변호사 서휘윤',
+    thumbnail: '/characters/seo-hwiyoon.webp',
+  },
+  system: {
+    bg: 'rgba(122, 56, 216, 0.08)',
+    labelColor: '#7A38D8',
+    label: '재판장',
+    thumbnail: '',
+  },
+} as const;
+
 function Bubble({ children, who, delay = 0 }: { children: React.ReactNode; who: 'prosecutor' | 'defender' | 'system'; delay?: number }) {
-  const colors = {
-    prosecutor: { bg: 'rgba(255, 68, 68, 0.08)', border: '#FF4444', label: '🔴 검사 윤태산', labelColor: '#FF4444' },
-    defender: { bg: 'rgba(68, 136, 255, 0.08)', border: '#4488FF', label: '🔵 변호사 서휘윤', labelColor: '#4488FF' },
-    system: { bg: 'rgba(122, 56, 216, 0.06)', border: '#7A38D8', label: '⚖️ 재판장', labelColor: '#7A38D8' },
-  };
-  const c = colors[who];
+  const c = BUBBLE_CONFIG[who];
 
   return (
     <motion.div
@@ -39,14 +55,32 @@ function Bubble({ children, who, delay = 0 }: { children: React.ReactNode; who: 
       transition={{ delay, duration: 0.4 }}
       style={{
         padding: '14px 16px',
-        borderRadius: '12px',
+        borderRadius: '14px',
         backgroundColor: c.bg,
-        borderLeft: `3px solid ${c.border}`,
         marginBottom: '12px',
       }}
     >
-      <p style={{ fontSize: '11px', color: c.labelColor, fontWeight: 600, marginBottom: '6px' }}>{c.label}</p>
-      <div style={{ fontSize: '15px', color: '#333', lineHeight: '1.6', fontWeight: 500 }}>{children}</div>
+      <div className="flex items-center gap-2" style={{ marginBottom: '8px' }}>
+        {c.thumbnail ? (
+          <div
+            className="overflow-hidden transform-gpu shrink-0"
+            style={{
+              width: '24px',
+              height: '24px',
+              borderRadius: '8px',
+              border: `1.5px solid ${c.labelColor}30`,
+            }}
+          >
+            <img src={c.thumbnail} alt={c.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        ) : (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c.labelColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3v18" /><path d="m4 7 4-4 4 4" /><path d="m12 7 4-4 4 4" /><path d="M4 7h8" /><path d="M12 7h8" /><circle cx="6" cy="19" r="2" /><circle cx="18" cy="19" r="2" />
+          </svg>
+        )}
+        <span style={{ fontSize: '12px', color: c.labelColor, fontWeight: 600, letterSpacing: '-0.24px' }}>{c.label}</span>
+      </div>
+      <div style={{ fontSize: '15px', color: '#E8E0F5', lineHeight: '1.6', fontWeight: 500 }}>{children}</div>
     </motion.div>
   );
 }
@@ -68,13 +102,13 @@ function ChoiceButtons({ choices, onSelect, delay = 0 }: { choices: { id: number
             width: '100%',
             padding: '14px 16px',
             borderRadius: '12px',
-            border: '1px solid #E8DCF5',
-            backgroundColor: '#F7F2FA',
+            border: '1px solid rgba(122, 56, 216, 0.20)',
+            backgroundColor: 'rgba(122, 56, 216, 0.08)',
             cursor: 'pointer',
             textAlign: 'left',
             fontSize: '14px',
             fontWeight: 500,
-            color: '#7A38D8',
+            color: '#B07AFF',
             transition: 'background-color 0.15s',
           }}
         >
@@ -111,9 +145,11 @@ export default function TrialScreen({
   return (
     <div className="w-full" style={{ padding: '24px', minHeight: '60vh' }}>
       <div className="flex items-center gap-2" style={{ marginBottom: '20px' }}>
-        <span style={{ fontSize: '18px' }}>⚖️</span>
-        <span style={{ fontSize: '16px', fontWeight: 700, color: '#151515' }}>재판 진행 중</span>
-        <span style={{ fontSize: '12px', color: '#999', marginLeft: 'auto' }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A38D8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3v18" /><path d="m4 7 4-4 4 4" /><path d="m12 7 4-4 4 4" /><path d="M4 7h8" /><path d="M12 7h8" /><circle cx="6" cy="19" r="2" /><circle cx="18" cy="19" r="2" />
+        </svg>
+        <span style={{ fontSize: '16px', fontWeight: 700, color: '#E8E0F5' }}>재판 진행 중</span>
+        <span style={{ fontSize: '12px', color: '#6B5C85', marginLeft: 'auto' }}>
           {step === 'trial_1' ? '1/4' : step === 'trial_2' ? '2/4' : step === 'trial_3' ? '3/4' : '4/4'}
         </span>
       </div>
@@ -147,7 +183,7 @@ export default function TrialScreen({
 
             <Bubble who="prosecutor" delay={0.5}>
               <p>얼마나 됐습니까?</p>
-              <p style={{ fontSize: '13px', color: '#999', marginTop: '4px' }}>(좋아한 기간 / 솔로인 기간)</p>
+              <p style={{ fontSize: '13px', color: '#6B5C85', marginTop: '4px' }}>(좋아한 기간 / 솔로인 기간)</p>
             </Bubble>
 
             <motion.div
@@ -165,13 +201,13 @@ export default function TrialScreen({
                     width: '100%',
                     padding: '14px 16px',
                     borderRadius: '12px',
-                    border: '1px solid #E8DCF5',
-                    backgroundColor: '#F7F2FA',
+                    border: '1px solid rgba(122, 56, 216, 0.20)',
+                    backgroundColor: 'rgba(122, 56, 216, 0.08)',
                     cursor: 'pointer',
                     textAlign: 'left',
                     fontSize: '14px',
                     fontWeight: 500,
-                    color: '#7A38D8',
+                    color: '#B07AFF',
                   }}
                 >
                   {p.label}
@@ -236,6 +272,7 @@ export default function TrialScreen({
                 backgroundColor: '#7A38D8',
                 color: '#fff',
                 marginTop: '16px',
+                boxShadow: '0 4px 24px rgba(122, 56, 216, 0.25)',
               }}
             >
               판결문 확인하기

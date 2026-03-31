@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import DatingSimClient from '@/components/dating-sim/DatingSimClient';
+import ReferralTracker from '@/components/ReferralTracker';
 
 const CHARACTER_NAMES: Record<string, string> = {
   'yoon-taesan': '윤태산',
@@ -58,5 +59,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function DatingSimResultPage({ params }: PageProps) {
   const { resultId } = await params;
-  return <DatingSimClient sharedResultId={resultId} />;
+  return (
+    <>
+      <ReferralTracker featureType="dating" referrerId={resultId} />
+      <DatingSimClient sharedResultId={resultId} />
+    </>
+  );
 }

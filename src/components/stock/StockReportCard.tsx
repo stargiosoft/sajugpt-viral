@@ -3,6 +3,7 @@
 import React from 'react';
 import type { StockReport } from '@/types/stock';
 import { INVESTMENT_OPINIONS, getPriceGrade, FAIR_VALUE_GRADES } from '@/constants/stock';
+import { trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   report: StockReport;
@@ -110,7 +111,7 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
           border: `1px solid ${isPenny ? '#3a1a1a' : isWarning ? '#2a2a2a' : '#2a2a3e'}`,
           borderRadius: '16px',
           padding: '28px 24px 20px',
-          aspectRatio: '9 / 16',
+          minHeight: '600px',
           maxWidth: '400px',
           position: 'relative',
           overflow: 'hidden',
@@ -397,16 +398,22 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
             borderTop: '1px solid rgba(255,255,255,0.06)',
           }}
         >
-          <span
+          <a
+            href="https://www.sajugpt.co.kr/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackSajuGPTClick('saju_stock')}
             style={{
-              fontSize: '11px',
-              fontWeight: 500,
-              color: '#444444',
-              letterSpacing: '0.04em',
+              fontSize: '13px',
+              fontWeight: 700,
+              color: '#7A38D8',
+              letterSpacing: '-0.26px',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
             }}
           >
             sajugpt.co.kr
-          </span>
+          </a>
         </div>
       </div>
     );

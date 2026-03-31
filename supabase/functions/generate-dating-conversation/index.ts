@@ -138,6 +138,13 @@ async function generateConversationTree(
 - 궁합 점수: ${compatibility}점/100점
 - 성별: ${genderLabel}
 
+## 핵심 원칙 (반드시 지켜야 함)
+- 이것은 **로맨틱 데이트 시뮬레이션**입니다. 모든 대화는 **연애, 설렘, 끌림, 감정**에 대한 것이어야 합니다.
+- 캐릭터의 말투(${profile.speechPattern})는 **연애 대화를 표현하는 방식**이지, 대화 주제 자체가 아닙니다.
+- 예시: 최설계는 "투자 가치"라고 말하지만 실제로는 **상대의 매력**을 뜻합니다. 도해결은 "데이터"로 분석하지만 **상대에 대한 호감**을 분석합니다.
+- 대화 내용: 첫인상, 취향, 연애 스타일, 설레는 순간, 좋아하는 데이트, 가치관, 고백 등 **실제 소개팅에서 하는 대화**
+- 유저 선택지도 **연애적 맥락**이어야 합니다 (플러팅, 솔직한 감정 표현, 가벼운 스킨십 제안 등)
+
 ## 규칙
 1. 5턴의 데이트 대화를 JSON으로 생성하세요.
 2. 각 턴은 situation(상황 설명, 15자 이내), characterLine(캐릭터 대사, 50자 이내), choices(3개), characterReactions(choiceId별 캐릭터 반응 대사, 각 50자 이내)로 구성됩니다.
@@ -169,6 +176,9 @@ async function generateConversationTree(
 
 {"turns":[{"turnNumber":1,"situation":"카페에서 첫 만남","characterLine":"캐릭터 대사","choices":[{"id":"t1_c1","text":"선택지 텍스트","type":"bold","affectionDelta":15,"scoreImpact":{"charm":2,"conversation":0,"sense":1,"addiction":2}},{"id":"t1_c2","text":"선택지","type":"witty","affectionDelta":10,"scoreImpact":{"charm":1,"conversation":1,"sense":3,"addiction":0}},{"id":"t1_c3","text":"선택지","type":"safe","affectionDelta":5,"scoreImpact":{"charm":0,"conversation":1,"sense":0,"addiction":0}}],"characterReactions":{"t1_c1":"반응1","t1_c2":"반응2","t1_c3":"반응3"}}]}`;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000);
+
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
     {
@@ -177,13 +187,17 @@ async function generateConversationTree(
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          maxOutputTokens: 4000,
+          maxOutputTokens: 3000,
           temperature: 0.8,
           responseMimeType: 'application/json',
+          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
+      signal: controller.signal,
     }
   );
+
+  clearTimeout(timeoutId);
 
   if (!response.ok) {
     const errText = await response.text();
@@ -233,22 +247,18 @@ Deno.serve(async (req: Request) => {
     let conversationTree: unknown;
     let lastError: Error | null = null;
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        conversationTree = await generateConversationTree(
-          profile,
-          sajuIndicators,
-          ilganDescription,
-          compatibility,
-          gender,
-          successThreshold,
-        );
-        break;
-      } catch (err) {
-        lastError = err instanceof Error ? err : new Error(String(err));
-        console.error(`대화 생성 시도 ${attempt}/2 실패:`, lastError.message);
-        if (attempt < 2) await new Promise(r => setTimeout(r, 2000));
-      }
+    try {
+      conversationTree = await generateConversationTree(
+        profile,
+        sajuIndicators,
+        ilganDescription,
+        compatibility,
+        gender,
+        successThreshold,
+      );
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      console.error('대화 생성 실패:', lastError.message);
     }
 
     if (!conversationTree) {

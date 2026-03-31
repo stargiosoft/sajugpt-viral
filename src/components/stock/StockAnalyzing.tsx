@@ -26,6 +26,24 @@ export default function StockAnalyzing() {
         padding: '0 24px',
       }}
     >
+      {/* Pulsing ring + emoji */}
+      <motion.div
+        animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0.2, 0.6] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          width: '120px',
+          height: '120px',
+          borderRadius: '50%',
+          border: '2px solid rgba(122, 56, 216, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '24px',
+        }}
+      >
+        <span style={{ fontSize: '40px' }}>📈</span>
+      </motion.div>
+
       {/* Label */}
       <motion.p
         initial={{ opacity: 0 }}

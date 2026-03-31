@@ -23,7 +23,6 @@ export type StockStep =
   | 'turn1'
   | 'turn2'
   | 'turn3'
-  | 'turn4'
   | 'plan'
   | 'result';
 
@@ -53,7 +52,6 @@ export interface UserChoices {
   turn1: UserChoice | null;
   turn2: UserChoice | null;
   turn3: UserChoice | null;
-  turn4: UserChoice | null;
 }
 
 // ─── 종목 리포트 ─────────────────────────────────────
@@ -104,7 +102,6 @@ export interface StockAnalysisResult {
     turn1: TurnData;
     turn2: Record<UserChoice, TurnData>;
     turn3: TurnData;
-    turn4: TurnData;
   };
   operationPlan: OperationPlan;
   sajuSummary: {

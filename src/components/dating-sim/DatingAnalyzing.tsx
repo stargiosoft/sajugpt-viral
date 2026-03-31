@@ -42,7 +42,7 @@ export default function DatingAnalyzing({ phase }: Props) {
       className="flex flex-col items-center justify-center"
       style={{ minHeight: '60vh', padding: '0 24px' }}
     >
-      {/* 펄싱 링 — 색기 배틀 AnalyzingScreen 동일 패턴 */}
+      {/* 펄싱 링 + 하트 아이콘 */}
       <motion.div
         animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0.2, 0.6] }}
         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -50,10 +50,15 @@ export default function DatingAnalyzing({ phase }: Props) {
           width: '120px',
           height: '120px',
           borderRadius: '50%',
-          border: '3px solid #7A38D8',
+          border: '2px solid rgba(122, 56, 216, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           marginBottom: '32px',
         }}
-      />
+      >
+        <span style={{ fontSize: '48px', lineHeight: 1 }}>💘</span>
+      </motion.div>
 
       {/* 순차 등장 메시지 */}
       {config.messages.map((msg, i) => (

@@ -7,9 +7,11 @@ interface Props {
   onChange: (value: string) => void;
   unknownTime: boolean;
   onUnknownTimeToggle: () => void;
+  onEnter?: () => void;    // 엔터 키 시 폼 제출
+  accentColor?: string;
 }
 
-export default function BirthTimeInput({ value, onChange, unknownTime, onUnknownTimeToggle }: Props) {
+export default function BirthTimeInput({ value, onChange, unknownTime, onUnknownTimeToggle, onEnter, accentColor = '#7A38D8' }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
 
@@ -55,7 +57,7 @@ export default function BirthTimeInput({ value, onChange, unknownTime, onUnknown
               : error
                 ? '1.5px solid #FF0000'
                 : hasValidTime
-                  ? '1.5px solid #7A38D8'
+                  ? `1.5px solid ${accentColor}`
                   : '1.5px solid #e7e7e7',
             backgroundColor: unknownTime ? '#f5f5f5' : '#fff',
             transition: 'border-color 0.2s, background-color 0.2s',
@@ -68,6 +70,7 @@ export default function BirthTimeInput({ value, onChange, unknownTime, onUnknown
               inputMode="numeric"
               value={value}
               onChange={e => handleChange(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onEnter?.(); } }}
               placeholder="예: 21:00"
               disabled={unknownTime}
               autoComplete="off"
@@ -107,7 +110,7 @@ export default function BirthTimeInput({ value, onChange, unknownTime, onUnknown
               width: '28px',
               height: '28px',
               borderRadius: '8px',
-              backgroundColor: unknownTime ? '#7A38D8' : '#fff',
+              backgroundColor: unknownTime ? accentColor : '#fff',
               border: unknownTime ? 'none' : '1px solid #e7e7e7',
               transition: 'background-color 0.2s',
             }}

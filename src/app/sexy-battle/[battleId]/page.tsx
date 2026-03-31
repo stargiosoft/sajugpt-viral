@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import SexyBattleClient from '@/components/SexyBattleClient';
+import ReferralTracker from '@/components/ReferralTracker';
 import type { ChallengerPreview, Grade } from '@/types/battle';
 
 interface Props {
@@ -67,9 +68,12 @@ export default async function BattlePage({ params }: Props) {
   const { preview, isCompleted } = await fetchChallengerData(battleId);
 
   return (
-    <SexyBattleClient
-      battleId={battleId}
-      challengerPreview={isCompleted ? null : preview}
-    />
+    <>
+      <ReferralTracker featureType="sexy_battle" referrerId={battleId} />
+      <SexyBattleClient
+        battleId={battleId}
+        challengerPreview={isCompleted ? null : preview}
+      />
+    </>
   );
 }

@@ -176,7 +176,7 @@ export default function SajuCourtClient() {
   return (
     <div
       className="flex flex-col items-center"
-      style={{ maxWidth: '440px', margin: '0 auto', minHeight: '100dvh' }}
+      style={{ maxWidth: '440px', margin: '0 auto', minHeight: '100dvh', backgroundColor: step === 'verdict' || step === 'indictment' ? '#fff' : '#0C0914' }}
     >
       <AnimatePresence mode="wait">
 
@@ -199,29 +199,30 @@ export default function SajuCourtClient() {
 
         {/* ─── INPUT ────────────────────────────── */}
         {step === 'input' && (
-          <div className="w-full" style={{ padding: '32px 24px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#151515', marginBottom: '8px' }}>
-              ⚖️ 사주 법정
+          <div className="w-full" style={{ padding: '32px 24px 120px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#E8E0F5', marginBottom: '8px' }}>
+              사주 법정
             </h2>
-            <p style={{ fontSize: '14px', color: '#888', marginBottom: '28px' }}>
+            <p style={{ fontSize: '14px', color: '#6B5C85', marginBottom: '28px' }}>
               사주로 당신의 죄목과 형량을 판결합니다
             </p>
 
             <div className="flex flex-col gap-5">
               <div>
-                <label style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', display: 'block' }}>성별</label>
+                <label style={{ fontSize: '14px', fontWeight: 600, color: '#A99BC4', marginBottom: '8px', display: 'block' }}>성별</label>
                 <GenderSelect value={gender} onChange={setGender} />
               </div>
               <div>
-                <label style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', display: 'block' }}>생년월일</label>
-                <BirthInput value={birthDate} onChange={setBirthDate} />
+                <label style={{ fontSize: '14px', fontWeight: 600, color: '#A99BC4', marginBottom: '8px', display: 'block' }}>생년월일</label>
+                <BirthInput value={birthDate} onChange={setBirthDate} onEnter={handleSubmit} />
               </div>
               <div>
-                <label style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', display: 'block' }}>태어난 시간</label>
+                <label style={{ fontSize: '14px', fontWeight: 600, color: '#A99BC4', marginBottom: '8px', display: 'block' }}>태어난 시간</label>
                 <BirthTimeInput
                   value={birthTime}
                   onChange={setBirthTime}
                   unknownTime={unknownTime}
+                  onEnter={handleSubmit}
                   onUnknownTimeToggle={() => {
                     const newVal = !unknownTime;
                     setUnknownTime(newVal);
@@ -236,19 +237,46 @@ export default function SajuCourtClient() {
               <p style={{ fontSize: '13px', color: '#e53e3e', marginTop: '12px', textAlign: 'center' }}>{error}</p>
             )}
 
-            <button
-              onClick={handleSubmit}
-              disabled={!isFormValid() || submitting}
+            {/* 하단 고정 CTA 버튼 */}
+            <div
+              className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
               style={{
-                ...btnStyle,
-                marginTop: '28px',
-                backgroundColor: isFormValid() ? '#7A38D8' : '#ddd',
-                color: isFormValid() ? '#fff' : '#aaa',
-                transition: 'background-color 0.2s',
+                maxWidth: '440px',
+                background: 'linear-gradient(to top, #0C0914 60%, transparent)',
+                paddingBottom: 'env(safe-area-inset-bottom)',
               }}
             >
-              {submitting ? '분석 중...' : '기소장 받기'}
-            </button>
+              <div style={{ padding: '12px 20px', width: '100%' }}>
+                <motion.div
+                  onClick={handleSubmit}
+                  className="transform-gpu"
+                  whileTap={isFormValid() && !submitting ? { scale: 0.96 } : {}}
+                  transition={{ duration: 0.1, ease: 'easeInOut' }}
+                  style={{
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: isFormValid() && !submitting ? '#7A38D8' : 'rgba(122, 56, 216, 0.08)',
+                    boxShadow: isFormValid() && !submitting ? '0 4px 24px rgba(122, 56, 216, 0.25)' : 'none',
+                    cursor: isFormValid() && !submitting ? 'pointer' : 'not-allowed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  <p style={{
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    lineHeight: '25px',
+                    letterSpacing: '-0.32px',
+                    color: isFormValid() && !submitting ? '#fff' : '#4A3D64',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {submitting ? '분석 중...' : '기소장 받기'}
+                  </p>
+                </motion.div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -257,29 +285,56 @@ export default function SajuCourtClient() {
 
         {/* ─── INDICTMENT (기소장) ──────────────── */}
         {step === 'indictment' && courtResult && (
-          <div className="w-full" style={{ padding: '24px' }}>
-            <IndictmentCard
-              ref={indictmentRef}
-              result={courtResult}
-              sentence={sentence}
-              bounty={bounty}
-              percentile={percentile}
-              sentenceGrade={sentenceGrade}
-            />
-            <div className="flex flex-col gap-3" style={{ marginTop: '20px' }}>
-              <button
-                onClick={() => setStep('trial_1')}
-                style={{ ...btnStyle, backgroundColor: '#7A38D8', color: '#fff' }}
-              >
-                ⚖️ 재판 참여하기
-              </button>
-              <CourtShareButtons
-                label="내 기소장 보내기"
-                cardRef={indictmentRef}
-                courtId={courtResult.courtId}
-                crimeLabel={courtResult.crimeLabel}
+          <div className="w-full" style={{ padding: '24px 20px 120px' }}>
+            <div className="flex justify-center">
+              <IndictmentCard
+                ref={indictmentRef}
+                result={courtResult}
                 sentence={sentence}
+                bounty={bounty}
+                percentile={percentile}
+                sentenceGrade={sentenceGrade}
               />
+            </div>
+
+            {/* 하단 고정 CTA */}
+            <div
+              className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
+              style={{
+                maxWidth: '440px',
+                backgroundColor: '#fff',
+                boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
+                paddingBottom: 'env(safe-area-inset-bottom)',
+              }}
+            >
+              <div style={{ padding: '12px 20px', width: '100%' }}>
+                <motion.div
+                  onClick={() => setStep('trial_1')}
+                  className="transform-gpu"
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ duration: 0.1, ease: 'easeInOut' }}
+                  style={{
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: '#7A38D8',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <p style={{
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    lineHeight: '25px',
+                    letterSpacing: '-0.32px',
+                    color: '#fff',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    재판 참여하기
+                  </p>
+                </motion.div>
+              </div>
             </div>
           </div>
         )}
@@ -302,22 +357,34 @@ export default function SajuCourtClient() {
 
         {/* ─── VERDICT (판결문) ─────────────────── */}
         {step === 'verdict' && courtResult && (
-          <div className="w-full" style={{ padding: '24px' }}>
-            <VerdictCard
-              ref={verdictRef}
-              result={courtResult}
-              sentence={sentence}
-              bounty={bounty}
-              percentile={percentile}
-              sentenceGrade={sentenceGrade}
-              judgeComment={judgeComment}
-            />
-            <div className="flex flex-col gap-3" style={{ marginTop: '20px' }}>
+          <div className="w-full" style={{ padding: '24px 20px 48px' }}>
+            <div className="flex justify-center" style={{ marginBottom: '24px' }}>
+              <VerdictCard
+                ref={verdictRef}
+                result={courtResult}
+                sentence={sentence}
+                bounty={bounty}
+                percentile={percentile}
+                sentenceGrade={sentenceGrade}
+                judgeComment={judgeComment}
+              />
+            </div>
+            <div className="flex flex-col gap-3" style={{ padding: '0 20px' }}>
               <button
                 onClick={() => setStep('accomplice')}
-                style={{ ...btnStyle, backgroundColor: '#7A38D8', color: '#fff' }}
+                style={{
+                  height: '56px',
+                  borderRadius: '16px',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: 'none',
+                  width: '100%',
+                  backgroundColor: '#7A38D8',
+                  color: '#fff',
+                }}
               >
-                🔗 공범 지목하기
+                공범 지목하기
               </button>
               <CourtShareButtons
                 label="판결문 공유하기"
@@ -326,6 +393,42 @@ export default function SajuCourtClient() {
                 crimeLabel={courtResult.crimeLabel}
                 sentence={sentence}
               />
+              <button
+                onClick={handleReset}
+                style={{
+                  width: '100%',
+                  height: '56px',
+                  borderRadius: '16px',
+                  backgroundColor: 'transparent',
+                  color: '#999',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  border: '1px solid #e7e7e7',
+                  cursor: 'pointer',
+                }}
+              >
+                다시 해보기
+              </button>
+              <a
+                href="/"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  height: '56px',
+                  borderRadius: '16px',
+                  backgroundColor: 'transparent',
+                  color: '#999',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  lineHeight: '56px',
+                  textAlign: 'center',
+                }}
+              >
+                다른 테스트도 해보기
+              </a>
             </div>
           </div>
         )}
@@ -343,32 +446,34 @@ export default function SajuCourtClient() {
         {/* ─── CONVERSION (항소 → 챗봇) ────────── */}
         {step === 'conversion' && courtResult && (
           <div className="flex flex-col items-center w-full" style={{ padding: '40px 24px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚖️</div>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#151515', textAlign: 'center', marginBottom: '8px' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7A38D8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px', opacity: 0.8 }}>
+              <path d="M12 3v18" /><path d="m4 7 4-4 4 4" /><path d="m12 7 4-4 4 4" /><path d="M4 7h8" /><path d="M12 7h8" /><circle cx="6" cy="19" r="2" /><circle cx="18" cy="19" r="2" />
+            </svg>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#E8E0F5', textAlign: 'center', marginBottom: '8px' }}>
               석방까지 어떻게 준비하시겠습니까?
             </h2>
-            <p style={{ fontSize: '14px', color: '#888', textAlign: 'center', marginBottom: '32px', lineHeight: '1.6' }}>
+            <p style={{ fontSize: '14px', color: '#6B5C85', textAlign: 'center', marginBottom: '32px', lineHeight: '1.6' }}>
               석방 예정일: {courtResult.releaseDate.year}년 {courtResult.releaseDate.month}월
             </p>
 
             <div className="flex flex-col gap-3 w-full">
               <a
                 href={`/chat/yoon-taesan?birthday=${encodeURIComponent(birthDate.replace(/[^\d]/g, ''))}${unknownTime ? '0000' : convertTo24Hour(birthTime)}&gender=${gender}`}
-                style={{ ...btnStyle, backgroundColor: '#1a1a2e', color: '#fff', textAlign: 'center', textDecoration: 'none', display: 'block' }}
+                style={{ ...btnStyle, backgroundColor: 'rgba(232, 98, 122, 0.10)', border: '1px solid rgba(232, 98, 122, 0.25)', color: '#E8627A', textAlign: 'center', textDecoration: 'none', display: 'block' }}
               >
-                🔴 윤태산에게 항소하기
+                윤태산에게 항소하기
               </a>
               <a
                 href={`/chat/seo-hwiyoon?birthday=${encodeURIComponent(birthDate.replace(/[^\d]/g, ''))}${unknownTime ? '0000' : convertTo24Hour(birthTime)}&gender=${gender}`}
-                style={{ ...btnStyle, backgroundColor: '#F7F2FA', color: '#7A38D8', textAlign: 'center', textDecoration: 'none', display: 'block', border: '1px solid #E8DCF5' }}
+                style={{ ...btnStyle, backgroundColor: 'rgba(78, 205, 196, 0.10)', border: '1px solid rgba(78, 205, 196, 0.25)', color: '#4ECDC4', textAlign: 'center', textDecoration: 'none', display: 'block' }}
               >
-                🔵 서휘윤에게 상담받기
+                서휘윤에게 상담받기
               </a>
               <button
                 onClick={handleReset}
-                style={{ ...btnStyle, backgroundColor: '#f5f5f5', color: '#666' }}
+                style={{ ...btnStyle, backgroundColor: 'rgba(122, 56, 216, 0.08)', border: '1px solid rgba(122, 56, 216, 0.15)', color: '#6B5C85' }}
               >
-                🔄 다른 사주로 해보기
+                다른 사주로 해보기
               </button>
             </div>
           </div>

@@ -2,7 +2,13 @@
 
 import type { SeonbiState, SeonbiType, GisaengTier } from '@/types/gisaeng';
 import { SEONBI_INFO } from '@/constants/gisaeng';
-import { trackEvent } from '@/lib/analytics';
+
+const SEONBI_HANJA: Record<SeonbiType, { hanja: string; color: string }> = {
+  kwonryeok: { hanja: '權', color: '#C9A96E' },
+  romantic:  { hanja: '情', color: '#B8423A' },
+  jealousy:  { hanja: '怒', color: '#3D3530' },
+};
+import { trackEvent, trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   seonbi: Record<SeonbiType, SeonbiState>;
@@ -23,34 +29,33 @@ export default function GisaengCTA({ seonbi, tier }: Props) {
   if (tier === 'D') {
     return (
       <div
-        className="rounded-2xl p-5"
-        style={{ backgroundColor: '#FAF8FC', border: '1px solid #e7e7e7' }}
+        className="rounded-2xl overflow-hidden"
+        style={{ backgroundColor: '#fff', border: '1px solid #DDD5C8', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: '20px' }}
       >
-        <p style={{ fontSize: '14px', color: '#7A38D8', fontWeight: 600, lineHeight: 1.6, textAlign: 'center', letterSpacing: '-0.28px' }}>
+        <p style={{ fontSize: '14px', color: '#B8423A', fontWeight: 600, lineHeight: 1.6, textAlign: 'center', letterSpacing: '-0.28px' }}>
           &ldquo;{D_TIER_CTA}&rdquo;
         </p>
-        <button
-          onClick={() => {
-            trackEvent('gisaeng_cta_click', { tier, target: 'fortune' });
-          }}
+        <a
+          href="https://www.sajugpt.co.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => { trackEvent('gisaeng_cta_click', { tier, target: 'fortune' }); trackSajuGPTClick('gisaeng'); }}
           className="w-full flex items-center justify-center mt-4"
           style={{
             height: '48px',
-            borderRadius: '16px',
-            backgroundColor: '#7A38D8',
+            borderRadius: '12px',
+            backgroundColor: '#B8423A',
             border: 'none',
             fontSize: '15px',
             fontWeight: 600,
             color: '#ffffff',
             letterSpacing: '-0.3px',
+            textDecoration: 'none',
             transition: 'all 0.15s ease',
           }}
-          onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
-          onPointerUp={e => { e.currentTarget.style.transform = ''; }}
-          onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
         >
           운명 상담받기 →
-        </button>
+        </a>
       </div>
     );
   }
@@ -68,57 +73,62 @@ export default function GisaengCTA({ seonbi, tier }: Props) {
 
   return (
     <div
-      className="rounded-2xl p-5"
-      style={{ backgroundColor: '#FAF8FC', border: '1px solid #e7e7e7' }}
+      className="rounded-2xl overflow-hidden"
+      style={{ backgroundColor: '#fff', border: '1px solid #DDD5C8', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: '20px' }}
     >
-      <p className="text-center" style={{ fontSize: '13px', color: '#848484', marginBottom: '12px', letterSpacing: '-0.26px' }}>
+      <p className="text-center" style={{ fontSize: '13px', color: '#A69A8E', marginBottom: '12px', letterSpacing: '-0.26px' }}>
         네가 홀린 선비 중 한 명이 진짜로 널 기다리고 있다
       </p>
 
       <div className="flex items-center gap-3 mb-3">
-        <div
-          className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: '#EDE5F7', fontSize: '20px' }}
-        >
-          {info.emoji}
-        </div>
+        <img
+          src={info.thumbnail}
+          alt={info.name}
+          className="flex-shrink-0"
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: `2px solid ${SEONBI_HANJA[topType].color}`,
+          }}
+        />
         <div>
-          <p style={{ fontSize: '15px', color: '#151515', fontWeight: 700, letterSpacing: '-0.3px' }}>{info.name}</p>
-          <p style={{ fontSize: '12px', color: '#848484', letterSpacing: '-0.24px' }}>{info.title}</p>
+          <p style={{ fontSize: '15px', color: '#1A1715', fontWeight: 700, letterSpacing: '-0.3px' }}>{info.name}</p>
+          <p style={{ fontSize: '12px', color: '#A69A8E', letterSpacing: '-0.24px' }}>{info.title}</p>
         </div>
       </div>
 
-      <p style={{ fontSize: '14px', color: '#7A38D8', fontWeight: 500, lineHeight: 1.6, textAlign: 'center', letterSpacing: '-0.28px' }}>
+      <p style={{ fontSize: '14px', color: '#B8423A', fontWeight: 500, lineHeight: 1.6, textAlign: 'center', letterSpacing: '-0.28px' }}>
         &ldquo;{CTA_COPY[topType]}&rdquo;
       </p>
 
-      <button
-        onClick={() => {
-          trackEvent('gisaeng_cta_click', { tier, target: topType });
-        }}
+      <a
+        href="https://www.sajugpt.co.kr/"
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => { trackEvent('gisaeng_cta_click', { tier, target: topType }); trackSajuGPTClick('gisaeng'); }}
         className="w-full flex items-center justify-center mt-4"
         style={{
           height: '48px',
-          borderRadius: '16px',
-          backgroundColor: '#7A38D8',
+          borderRadius: '12px',
+          backgroundColor: '#B8423A',
           border: 'none',
           fontSize: '15px',
           fontWeight: 600,
           color: '#ffffff',
           letterSpacing: '-0.3px',
+          textDecoration: 'none',
           transition: 'all 0.15s ease',
         }}
-        onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
-        onPointerUp={e => { e.currentTarget.style.transform = ''; }}
-        onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
       >
         이 선비와 대화하기 →
-      </button>
+      </a>
 
       <button
         onClick={() => trackEvent('gisaeng_cta_browse')}
         className="w-full mt-2 flex items-center justify-center"
-        style={{ height: '36px', color: '#848484', fontSize: '13px', letterSpacing: '-0.26px', border: 'none', backgroundColor: 'transparent' }}
+        style={{ height: '36px', color: '#A69A8E', fontSize: '13px', letterSpacing: '-0.26px', border: 'none', backgroundColor: 'transparent' }}
       >
         다른 선비 둘러보기 &gt;
       </button>

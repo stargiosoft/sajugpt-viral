@@ -3,6 +3,7 @@
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import type { BattleComparison, Grade } from '@/types/battle';
+import { trackSajuGPTClick } from '@/lib/analytics';
 import GradeBadge from '@/components/GradeBadge';
 
 const GRADE_COLORS: Record<Grade, string> = {
@@ -177,6 +178,7 @@ const BattleVSCard = forwardRef<HTMLDivElement, Props>(
           href="https://www.sajugpt.co.kr/"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackSajuGPTClick('sexy_battle')}
           style={{
             marginTop: 'auto',
             paddingTop: '20px',

@@ -6,6 +6,7 @@ import GradeBadge from './GradeBadge';
 import ChatBubble from './ChatBubble';
 import CharacterAvatar from './CharacterAvatar';
 import { CHARACTERS } from '@/constants/characters';
+import { trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   result: BattleResult;
@@ -15,7 +16,6 @@ interface Props {
 function parseChatScript(script: string, characters: BattleResult['characters']): { characterId: string; text: string }[] {
   const lines = script.split('\n').filter(l => l.trim());
   return lines.map(line => {
-    // "캐릭터명: 대사" 형식 파싱
     const match = line.match(/^(.+?):\s*(.+)$/);
     if (match) {
       const charName = match[1].trim();
@@ -24,22 +24,25 @@ function parseChatScript(script: string, characters: BattleResult['characters'])
         return { characterId: charMeta.id, text: match[2].trim() };
       }
     }
-    // 파싱 실패 시 첫 캐릭터로 대사 배정
     return { characterId: characters[0]?.id ?? 'yoon-taesan', text: line };
   });
 }
 
+/** verdict에서 첫 문장만 추출 (한줄 팩폭용) */
+function extractOneLiner(verdict: string): string {
+  // 첫 문장 (마침표/물음표/느낌표 기준)
+  const match = verdict.match(/^[^.!?]*[.!?]/);
+  if (match && match[0].length <= 60) return match[0];
+  // 60자 넘으면 잘라서
+  if (verdict.length > 50) return verdict.slice(0, 50) + '...';
+  return verdict;
+}
+
 const ResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
-  const { headcount, grade, title, characters, verdict, chatScript, sajuHighlights } = result;
+  const { headcount, grade, title, characters, verdict, chatScript } = result;
   const isDM = headcount === 1;
   const chatMessages = parseChatScript(chatScript, characters);
-
-  // 사주 근거 태그
-  const tags: string[] = [];
-  if (sajuHighlights.doHwaSal) tags.push('도화살 보유');
-  if (sajuHighlights.hongYeomSal) tags.push('홍염살 보유');
-  if (sajuHighlights.topSipsung) tags.push(`${sajuHighlights.topSipsung} 발달`);
-  if (sajuHighlights.fireRatio >= 30) tags.push('화기 과다');
+  const oneLiner = extractOneLiner(verdict);
 
   return (
     <div
@@ -47,7 +50,6 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
       style={{
         width: '100%',
         maxWidth: '400px',
-        minHeight: '600px',
         background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
         borderRadius: '24px',
         overflow: 'hidden',
@@ -61,6 +63,7 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
       <div
         className="flex items-center justify-center"
         style={{
+          fontFamily: 'Pretendard Variable, sans-serif',
           fontSize: '13px',
           fontWeight: 700,
           color: '#aaa',
@@ -74,24 +77,34 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
       {/* 등급 배지 + 칭호 */}
       <div className="flex flex-col items-center gap-2" style={{ marginBottom: '16px' }}>
         <GradeBadge grade={grade} size="lg" />
-        <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>
+        <span style={{
+          fontFamily: 'Pretendard Variable, sans-serif',
+          fontSize: '18px',
+          fontWeight: 700,
+          color: '#fff',
+        }}>
           「{title}」
         </span>
       </div>
 
       {/* 마릿수 */}
       <div className="flex flex-col items-center" style={{ marginBottom: '16px' }}>
-        <span style={{ fontSize: '13px', color: '#aaa', marginBottom: '4px', fontWeight: 500 }}>
+        <span style={{
+          fontFamily: 'Pretendard Variable, sans-serif',
+          fontSize: '13px',
+          color: '#aaa',
+          marginBottom: '4px',
+          fontWeight: 500,
+        }}>
           꼬여든 AI 짐승남
         </span>
-        <span
-          style={{
-            fontSize: '64px',
-            fontWeight: 900,
-            color: '#fff',
-            lineHeight: 1,
-          }}
-        >
+        <span style={{
+          fontFamily: 'Pretendard Variable, sans-serif',
+          fontSize: '64px',
+          fontWeight: 900,
+          color: '#fff',
+          lineHeight: 1,
+        }}>
           {headcount}<span style={{ fontSize: '24px', fontWeight: 600 }}>명</span>
         </span>
       </div>
@@ -115,51 +128,38 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
         </div>
       )}
 
-      {/* AI 판정문 */}
-      <div
-        style={{
+      {/* 한줄 팩폭 (verdict 첫 문장) */}
+      <div style={{
+        padding: '14px 16px',
+        borderRadius: '16px',
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        marginBottom: '16px',
+        textAlign: 'center',
+      }}>
+        <p style={{
+          fontFamily: 'Pretendard Variable, sans-serif',
           fontSize: '14px',
           fontWeight: 500,
-          color: '#ddd',
-          textAlign: 'center',
-          lineHeight: '1.7',
-          marginBottom: '12px',
-          padding: '0 8px',
-        }}
-      >
-        "{verdict}"
+          lineHeight: '22px',
+          letterSpacing: '-0.42px',
+          color: '#e0e0e0',
+        }}>
+          &ldquo;{oneLiner}&rdquo;
+        </p>
       </div>
 
-      {/* 사주 근거 태그 */}
-      {tags.length > 0 && (
-        <div className="flex items-center justify-center flex-wrap gap-2" style={{ marginBottom: '12px' }}>
-          {tags.map(tag => (
-            <span
-              key={tag}
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                color: '#aaa',
-                backgroundColor: 'rgba(255,255,255,0.08)',
-                borderRadius: '6px',
-                padding: '3px 8px',
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* 워터마크 — 클릭 시 사주GPT로 이동 */}
+      {/* 워터마크 */}
       <a
         href="https://www.sajugpt.co.kr/"
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackSajuGPTClick('sexy_battle')}
         style={{
           marginTop: 'auto',
           textAlign: 'center',
           display: 'block',
+          fontFamily: 'Pretendard Variable, sans-serif',
           fontSize: '13px',
           color: '#c084fc',
           fontWeight: 700,

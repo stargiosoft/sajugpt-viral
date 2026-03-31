@@ -148,7 +148,7 @@ export default function StockInput({
           생년월일
         </p>
         <div className="stock-input-wrapper">
-          <BirthInput value={birthDate} onChange={setBirthDate} />
+          <BirthInput value={birthDate} onChange={setBirthDate} onEnter={onSubmit} />
         </div>
       </motion.div>
 
@@ -176,6 +176,7 @@ export default function StockInput({
           onChange={setBirthTime}
           unknownTime={unknownTime}
           onUnknownTimeToggle={onUnknownTimeToggle}
+          onEnter={onSubmit}
         />
       </motion.div>
 

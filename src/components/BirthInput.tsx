@@ -6,9 +6,11 @@ interface Props {
   value: string;           // "YYYY-MM-DD" 또는 중간 입력 상태
   onChange: (value: string) => void;
   onComplete?: () => void; // 8자리 완성 시 다음 필드로 포커스
+  onEnter?: () => void;    // 엔터 키 시 폼 제출
+  accentColor?: string;
 }
 
-export default function BirthInput({ value, onChange, onComplete }: Props) {
+export default function BirthInput({ value, onChange, onComplete, onEnter, accentColor = '#7A38D8' }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
 
@@ -53,7 +55,7 @@ export default function BirthInput({ value, onChange, onComplete }: Props) {
         style={{
           height: '56px',
           borderRadius: '16px',
-          border: error ? '1.5px solid #FF0000' : valid ? '1.5px solid #7A38D8' : '1.5px solid #e7e7e7',
+          border: error ? '1.5px solid #FF0000' : valid ? `1.5px solid ${accentColor}` : '1.5px solid #e7e7e7',
           backgroundColor: '#fff',
           transition: 'border-color 0.2s',
         }}
@@ -65,6 +67,7 @@ export default function BirthInput({ value, onChange, onComplete }: Props) {
             inputMode="numeric"
             value={valid ? `${value} (양력)` : value}
             onChange={e => handleChange(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onEnter?.(); } }}
             placeholder="예: 1992-07-15"
             autoComplete="off"
             autoFocus

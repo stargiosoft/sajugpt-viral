@@ -314,7 +314,6 @@ async function generateDiscussion(
   turn2_B: TurnData;
   turn2_C: TurnData;
   turn3: TurnData;
-  turn4: TurnData;
   crewComment: string;
 } | null> {
 
@@ -336,14 +335,15 @@ async function generateDiscussion(
 - 차민혁 (cha): 반존대, "~요", "~겠습니다", 계산적이고 데이터 중심. 타이밍을 강조. 차트 전략가 (타이밍파).
 
 ## 규칙
-1. 각 캐릭터의 대사는 4~7문장. 증권 용어를 자연스럽게 섞되 설명 없이 사용.
-2. 사주 용어(偏印, 正官, 桃花殺 등)를 대화 속에 녹여서 사용 — 유저가 몰라도 맥락으로 이해되게.
-3. 캐릭터끼리 의견이 충돌해야 함 — 동의하지 마세요.
-4. 턴3에서 3명이 같은 핵심 원인으로 수렴 — "이것 때문"이라는 한 지점. 찔리지만 위로가 되는 톤.
-5. 핵심 원인은 반드시 사주 데이터에서 도출.
+1. 각 캐릭터의 대사는 반드시 2~3문장, 80자 이내. 짧고 임팩트 있게. 이 제한을 절대 초과하지 마세요.
+2. 사주 용어는 "한글(한자)" 형식 — 예: 편인(偏印), 도화살(桃花殺). 한자만 단독 사용 금지.
+3. 캐릭터끼리 의견 충돌 필수. 동의 금지.
+4. 턴3에서 3명이 같은 핵심 원인으로 수렴 — 찔리지만 위로가 되는 톤.
+5. 핵심 원인은 사주 데이터에서 도출.
 6. 유저를 직접 공격하지 마세요 — 캐릭터끼리 싸우되 유저는 "심판".
-7. 연애 상태: ${frameLabel}. 이에 맞는 프레이밍 사용.
-8. analystComment는 15~25자, 찌르거나 웃기거나 위로가 되는 증권 리포트 톤. crewComment도 동일.`;
+7. 연애 상태: ${frameLabel}.
+8. analystComment는 15~25자. crewComment도 동일.
+9. 총 3턴만 생성. turn4는 없음.`;
 
   const userPrompt = `## 분석 대상
 - 일주: ${h.ilJuKey}
@@ -375,8 +375,7 @@ async function generateDiscussion(
   "turn2_A": { "title":"2턴: 작전 충돌", "dialogs":[...3명], "question":"...", "choices":[...3개] },
   "turn2_B": { "title":"2턴: 작전 충돌", "dialogs":[...3명], "question":"...", "choices":[...3개] },
   "turn2_C": { "title":"2턴: 작전 충돌", "dialogs":[...3명], "question":"...", "choices":[...3개] },
-  "turn3": { "title":"3턴: 핵심 찌르기", "dialogs":[...3명], "question":"...", "choices":[...3개] },
-  "turn4": { "title":"4턴: 작전 설계", "dialogs":[...3명], "question":"주가가 올랐을 때, 어떤 모습이길 원하세요?", "choices":[...3개] },
+  "turn3": { "title":"3턴: 핵심 찌르기", "dialogs":[...3명], "question":"주가가 올랐을 때, 어떤 모습이길 원하세요?", "choices":[...3개] },
   "crewComment": "작전 계획서 한줄 코멘트"
 }`;
 
@@ -391,7 +390,7 @@ async function generateDiscussion(
             { role: 'user', parts: [{ text: systemPrompt + '\n\n' + userPrompt }] },
           ],
           generationConfig: {
-            maxOutputTokens: 4000,
+            maxOutputTokens: 3000,
             temperature: 0.85,
             responseMimeType: 'application/json',
           },
@@ -428,7 +427,6 @@ function generateFallbackDiscussion(
   turn1: TurnData;
   turn2: Record<UserChoice, TurnData>;
   turn3: TurnData;
-  turn4: TurnData;
   crewComment: string;
 } {
   const comment = FALLBACK_COMMENTS[opinion];
@@ -451,20 +449,20 @@ function generateFallbackDiscussion(
 
   const turn1 = makeTurn(
     '1턴: 현황 진단',
-    `원인은 간단해. 비상장이야. 도화살이 ${h.doHwaSalCount}개나 있는데 시장에 나가질 않으니까 아무도 이 종목을 모르는 거야. 비상장 종목을 누가 사냐고.`,
-    `본부장님, 그게 아닙니다. 이 종목의 적정가를 보세요. ${fairValue.toLocaleString()}원. 근데 시장가는 ${currentPrice.toLocaleString()}원. 偏印이 일간을 누르고 있어요. 자기 평가가 시장가를 바닥으로 끌어내린 겁니다.`,
-    `둘 다 틀렸어요. 차트를 보세요. 지금은 타이밍이 안 맞는 겁니다. ${surgeMonthLabel}에 운이 들어오면 모멘텀이 살아나요. 지금 아무리 작전 짜봤자 타이밍 아니면 소용없습니다.`,
+    `야, 도화살(桃花殺) ${h.doHwaSalCount}개인데 비상장이야. 매력 있는데 시장에 안 나가니 누가 알아.`,
+    `적정가 ${fairValue.toLocaleString()}원인데 시장가 ${currentPrice.toLocaleString()}원. 편인(偏印)이 자기 평가를 바닥으로 끌어내린 겁니다.`,
+    `둘 다 틀렸어요. ${surgeMonthLabel}에 모멘텀 들어옵니다. 지금은 타이밍이 아닌 거예요.`,
     '누구 말이 맞다고 생각하세요?',
     '맞아, 나가봐야 알지',
-    '솔직히 자신감이 문제인 건 맞아...',
+    '자신감이 문제인 건 맞아...',
     '타이밍이 안 맞았던 건가',
   );
 
   const turn2Base = makeTurn(
     '2턴: 작전 충돌',
-    `적정가가 높으면 뭐해? 시장에 나가서 반응을 받아봐야 '아 내가 괜찮구나'를 아는 거지. 당장 이번 주 실전 매매가 답이야.`,
-    `본부장님, 시장가 ${currentPrice.toLocaleString()}원인 상태에서 시장에 나가면 어떻게 되는지 아세요? '역시 안 되는구나.' 이 한마디가 시장가를 더 끌어내립니다.`,
-    `그래서 제가 타이밍이라고 한 거예요. 절충안 하나 내겠습니다. 자기 가치 인식 기간 → 시장 노출 시작 → ${surgeMonthLabel}에 풀베팅. 시간표가 있어야 작전이지, 아무 때나 하면 도박이에요.`,
+    `적정가 높으면 뭐해? 시장에서 반응 받아봐야 아는 거야. 실전이 답이지.`,
+    `${currentPrice.toLocaleString()}원짜리가 시장 나가면요? "역시 안 돼"가 시장가를 더 끌어내립니다.`,
+    `절충안 내겠습니다. 가치 인식 → 시장 노출 → ${surgeMonthLabel} 풀베팅. 시간표 없으면 도박이에요.`,
     '당신의 작전은?',
     '바로 시장에 나간다',
     '내 값어치부터 알아야지',
@@ -473,20 +471,9 @@ function generateFallbackDiscussion(
 
   const turn3 = makeTurn(
     '3턴: 핵심 찌르기',
-    `잠깐. 하나 물어볼게. 혹시 좋아하는 사람한테 먼저 연락한 적 있어? ...그게 비상장이라는 거야. 종목을 상장을 안 했는데 누가 사.`,
-    `연락 못 한 게 아니라 안 한 거죠? '내가 연락하면 부담일까봐.' 偏印이 행동 직전에 브레이크를 거는 거예요. 매력이 없는 게 아니라 매력을 꺼놓은 겁니다.`,
-    `원국을 다시 보겠습니다. 이 구조는 한번 마음을 주면 전부를 주는 사람이에요. 근데 그걸 막고 있으니까 시장에는 '관심 없는 사람'으로 보이는 겁니다. 이런 종목이 제일 아까운 거예요.`,
-    '솔직히 말해볼까요?',
-    '...없어',
-    '했는데 안 됐어',
-    '좋아하는 사람이 없어',
-  );
-
-  const turn4 = makeTurn(
-    '4턴: 작전 설계',
-    `좋아. 원인은 파악됐어. 이제 작전 짜자. 나는 3단계 담당할게. 시장 진출 작전.`,
-    `저는 1단계요. 자기 가치 인식부터. ${currentPrice.toLocaleString()}원을 적정가까지 올리는 거, 같이 해봅시다.`,
-    `2단계는 제가. 모멘텀 확보 — 타이밍 세팅. ${surgeMonthLabel}까지의 로드맵을 짜겠습니다. 마지막으로 하나만 여쭤볼게요.`,
+    `좋아하는 사람한테 먼저 연락한 적 있어? ...그게 비상장이라는 거야.`,
+    `못 한 게 아니라 안 한 거죠. 편인(偏印)이 브레이크 거는 겁니다. 매력을 꺼놓은 거예요.`,
+    `이 구조는 마음 주면 전부 주는 사람인데, 막고 있으니 시장에선 관심 없는 사람으로 보이는 거예요.`,
     '주가가 올랐을 때, 어떤 모습이길 원하세요?',
     '좋아하는 사람에게 먼저 말 거는 사람',
     '내 가치를 아는 사람이 찾아오는 것',
@@ -498,8 +485,7 @@ function generateFallbackDiscussion(
     turn1,
     turn2: { A: turn2Base, B: turn2Base, C: turn2Base },
     turn3,
-    turn4,
-    crewComment: `적정가 ${fairValue.toLocaleString()}원짜리가 ${currentPrice.toLocaleString()}원에 팔리고 있다. 이건 시장의 실수다.`,
+    crewComment: `적정가 ${fairValue.toLocaleString()}원짜리가 ${currentPrice.toLocaleString()}원. 시장의 실수다.`,
   };
 }
 
@@ -578,7 +564,7 @@ Deno.serve(async (req: Request) => {
     );
 
     let analystComment: string;
-    let discussionData: { turn1: TurnData; turn2: Record<UserChoice, TurnData>; turn3: TurnData; turn4: TurnData };
+    let discussionData: { turn1: TurnData; turn2: Record<UserChoice, TurnData>; turn3: TurnData };
     let crewComment: string;
 
     if (geminiResult) {
@@ -591,7 +577,6 @@ Deno.serve(async (req: Request) => {
           C: geminiResult.turn2_C,
         },
         turn3: geminiResult.turn3,
-        turn4: geminiResult.turn4,
       };
       crewComment = geminiResult.crewComment;
     } else {
@@ -601,7 +586,6 @@ Deno.serve(async (req: Request) => {
         turn1: fallback.turn1,
         turn2: fallback.turn2,
         turn3: fallback.turn3,
-        turn4: fallback.turn4,
       };
       crewComment = fallback.crewComment;
     }

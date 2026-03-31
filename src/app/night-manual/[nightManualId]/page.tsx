@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import NightManualClient from '@/components/night-manual/NightManualClient';
+import ReferralTracker from '@/components/ReferralTracker';
 
 interface Props {
   params: Promise<{ nightManualId: string }>;
@@ -72,5 +73,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function NightManualSharePage({ params }: Props) {
   const { nightManualId } = await params;
-  return <NightManualClient nightManualId={nightManualId} />;
+  return (
+    <>
+      <ReferralTracker featureType="night_manual" referrerId={nightManualId} />
+      <NightManualClient nightManualId={nightManualId} />
+    </>
+  );
 }

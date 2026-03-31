@@ -30,6 +30,7 @@ import { parseUTM, trackEvent } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import {
   judgeChoice,
+  getAdjustedChoices,
   applyEffects,
   getMostSuspiciousSeonbi,
   isAllDead,
@@ -187,7 +188,8 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
       scenario = ROUND3_SCENARIO;
     }
 
-    const choice = scenario.choices[choiceIdx];
+    const adjustedChoices = getAdjustedChoices(scenario.choices, stats);
+    const choice = adjustedChoices[choiceIdx];
     const success = judgeChoice(choice, stats);
     const effects = success ? choice.successEffects : choice.failEffects;
     const nextSeonbi = applyEffects(seonbi, effects);
@@ -228,10 +230,12 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
     setStep('calculating');
 
     const tier = judgeTier(seonbi);
+    const successCount = roundResults.filter(r => r.success).length;
     const { monthlySalary, modernValue } = calculateSalary(
       analyzeData.gisaengCard.totalCharm,
       seonbi,
       tier,
+      successCount,
     );
 
     // 라운드 3 C 선택 성공 시 바람끼력 +50 보너스
@@ -309,7 +313,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center" style={{ backgroundColor: '#ffffff', fontFamily: 'Pretendard Variable, sans-serif' }}>
+    <div className="min-h-dvh flex flex-col items-center" style={{ backgroundColor: '#F5F0E8', fontFamily: 'Pretendard Variable, sans-serif' }}>
       <div className="w-full max-w-[440px] min-h-dvh flex flex-col">
         <AnimatePresence mode="wait">
           {step === 'landing' && (
@@ -319,18 +323,18 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
           {step === 'input' && (
             <motion.div
               key="input"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               style={{ padding: '48px 20px 120px' }}
             >
               {/* 헤더 — 색기 배틀 동일 패턴 */}
               <div className="flex flex-col items-center" style={{ marginBottom: '40px' }}>
                 <span style={{ fontSize: '40px', marginBottom: '8px' }}>🏮</span>
-                <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#151515', marginBottom: '8px', textAlign: 'center', letterSpacing: '-0.56px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#1A1715', marginBottom: '8px', textAlign: 'center', letterSpacing: '-0.56px' }}>
                   기생 시뮬레이션
                 </h1>
-                <p style={{ fontSize: '15px', color: '#666', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
+                <p style={{ fontSize: '15px', color: '#6B5F56', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
                   조선시대 기생이었다면<br />넌 밤새 얼마를 벌었을까?
                 </p>
               </div>
@@ -347,10 +351,10 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                   className="flex flex-col gap-1 w-full"
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#A69A8E', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
                     성별
                   </p>
-                  <GenderSelect value={gender} onChange={setGender} />
+                  <GenderSelect value={gender} onChange={setGender} accentColor="#B8423A" />
                 </motion.div>
 
                 {/* 생년월일 */}
@@ -359,10 +363,10 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                   style={{ marginTop: '36px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#A69A8E', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
                     생년월일 (양력 기준으로 입력해 주세요)
                   </p>
-                  <BirthInput value={birthDate} onChange={setBirthDate} />
+                  <BirthInput value={birthDate} onChange={setBirthDate} accentColor="#B8423A" onEnter={handleSubmit} />
                 </motion.div>
 
                 {/* 태어난 시간 */}
@@ -371,13 +375,15 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                   style={{ marginTop: '36px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#A69A8E', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
                     태어난 시간
                   </p>
                   <BirthTimeInput
                     value={birthTime}
                     onChange={setBirthTime}
                     unknownTime={unknownTime}
+                    accentColor="#B8423A"
+                    onEnter={handleSubmit}
                     onUnknownTimeToggle={() => {
                       const newVal = !unknownTime;
                       setUnknownTime(newVal);
@@ -410,8 +416,8 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                 className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
                 style={{
                   maxWidth: '440px',
-                  backgroundColor: '#fff',
-                  boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
+                  backgroundColor: '#F5F0E8',
+                  boxShadow: '0px -8px 16px 0px rgba(245,240,232,0.76)',
                   paddingBottom: 'env(safe-area-inset-bottom)',
                 }}
               >
@@ -424,7 +430,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                     style={{
                       height: '56px',
                       borderRadius: '16px',
-                      backgroundColor: isFormValid() ? '#7A38D8' : '#f8f8f8',
+                      backgroundColor: isFormValid() ? '#B8423A' : '#EDE6D8',
                       cursor: isFormValid() ? 'pointer' : 'not-allowed',
                       display: 'flex',
                       alignItems: 'center',
@@ -437,7 +443,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                       fontWeight: 500,
                       lineHeight: '25px',
                       letterSpacing: '-0.32px',
-                      color: isFormValid() ? '#fff' : '#b7b7b7',
+                      color: isFormValid() ? '#fff' : '#A69A8E',
                       whiteSpace: 'nowrap',
                     }}>
                       기방 문 열기 🏮
@@ -507,7 +513,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
           )}
 
           {step === 'result' && simulationResult && analyzeData && (
-            <div key="result" className="flex-1 flex flex-col px-5 pt-8 gap-6" style={{ paddingBottom: '140px' }}>
+            <div key="result" className="flex-1 flex flex-col gap-5" style={{ padding: '32px 20px 48px' }}>
               <GisaengResultCard
                 ref={resultCardRef}
                 gisaengCard={analyzeData.gisaengCard}
@@ -530,10 +536,10 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                 style={{
                   height: '56px',
                   borderRadius: '16px',
-                  backgroundColor: '#F7F2FA',
+                  backgroundColor: 'transparent',
                   fontSize: '16px',
                   fontWeight: 500,
-                  color: '#7A38D8',
+                  color: '#6B5F56',
                   letterSpacing: '-0.32px',
                   lineHeight: '25px',
                   border: 'none',
@@ -545,6 +551,26 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
               >
                 다시 도전하기
               </button>
+              <a
+                href="/"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  height: '56px',
+                  borderRadius: '16px',
+                  backgroundColor: 'transparent',
+                  color: '#999',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  lineHeight: '56px',
+                  textAlign: 'center',
+                }}
+              >
+                다른 테스트도 해보기
+              </a>
             </div>
           )}
         </AnimatePresence>

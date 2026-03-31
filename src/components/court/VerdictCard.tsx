@@ -2,6 +2,7 @@
 
 import { forwardRef } from 'react';
 import type { CourtResult, SentenceGrade } from '@/types/court';
+import { trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   result: CourtResult;
@@ -27,12 +28,12 @@ const VerdictCard = forwardRef<HTMLDivElement, Props>(
           color: '#fff',
           position: 'relative',
           overflow: 'hidden',
-          border: `2px solid ${sentenceGrade.borderColor}`,
+          border: 'none',
         }}
       >
         {/* 헤더 */}
         <div className="flex flex-col items-center" style={{ marginBottom: '20px' }}>
-          <p style={{ fontSize: '13px', color: '#999', letterSpacing: '2px', marginBottom: '4px' }}>
+          <p style={{ fontSize: '13px', color: '#999', letterSpacing: '0.5px', marginBottom: '4px' }}>
             ⚖️ 사주 판결문
           </p>
           <p style={{ fontSize: '11px', color: '#666' }}>{caseNumber}</p>
@@ -55,7 +56,7 @@ const VerdictCard = forwardRef<HTMLDivElement, Props>(
           <div style={{
             padding: '4px 20px',
             borderRadius: '6px',
-            backgroundColor: '#FF4444',
+            backgroundColor: '#9B59F0',
           }}>
             <p style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>유죄</p>
           </div>
@@ -147,9 +148,24 @@ const VerdictCard = forwardRef<HTMLDivElement, Props>(
         </div>
 
         {/* 워터마크 */}
-        <p style={{ fontSize: '11px', color: '#555', textAlign: 'center', marginTop: '12px' }}>
+        <a
+          href="https://www.sajugpt.co.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackSajuGPTClick('saju_court')}
+          style={{
+            display: 'block',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: '#7A38D8',
+            textAlign: 'center',
+            marginTop: '12px',
+            textDecoration: 'underline',
+            textUnderlineOffset: '3px',
+          }}
+        >
           sajugpt.co.kr
-        </p>
+        </a>
       </div>
     );
   }

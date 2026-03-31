@@ -32,9 +32,9 @@ export default function NightBirthInput({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       style={{ padding: '60px 24px 120px', minHeight: '100dvh' }}
     >
       <h2
@@ -62,6 +62,7 @@ export default function NightBirthInput({
         <BirthInput
           value={birthDate}
           onChange={setBirthDate}
+          onEnter={onSubmit}
           onComplete={() => birthTimeRef.current?.scrollIntoView({ behavior: 'smooth' })}
         />
       </div>
@@ -73,6 +74,7 @@ export default function NightBirthInput({
           value={birthTime}
           onChange={setBirthTime}
           unknownTime={unknownTime}
+          onEnter={onSubmit}
           onUnknownTimeToggle={() => {
             const newVal = !unknownTime;
             setUnknownTime(newVal);

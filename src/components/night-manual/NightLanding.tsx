@@ -9,9 +9,9 @@ interface Props {
 
 // ─── 시종 프로필 ───
 const SERVANTS = [
-  { name: '강해', label: '야수형', color: '#e05252', quote: '"말이 필요합니까?"' },
-  { name: '윤서', label: '시인형', color: '#5b9bd5', quote: '"천천히 불을 지펴야..."' },
-  { name: '도겸', label: '집사형', color: '#6bb87a', quote: '"마마의 편안함이 최우선"' },
+  { name: '강해', label: '야수형', color: '#e05252', quote: '"말이 필요합니까?"', personality: '직설적, 거침없음. 몸으로 증명하는 타입', thumbnail: '/characters/yoon-taesan.webp' },
+  { name: '윤서', label: '시인형', color: '#5b9bd5', quote: '"천천히 불을 지펴야..."', personality: '감성적, 말이 무기. 분위기를 만드는 타입', thumbnail: '/characters/seo-hwiyoon.webp' },
+  { name: '도겸', label: '집사형', color: '#6bb87a', quote: '"마마의 편안함이 최우선"', personality: '절제된 매너, 완벽한 준비. 복종하는 타입', thumbnail: '/characters/choi-seolgye.webp' },
 ];
 
 // ─── 체질 유형 프리뷰 ───
@@ -304,19 +304,18 @@ export default function NightLanding({ onStart }: Props) {
             >
               {/* 시종 아바타 */}
               <div
-                className="shrink-0 flex items-center justify-center"
+                className="shrink-0 overflow-hidden transform-gpu"
                 style={{
-                  width: '44px', height: '44px', borderRadius: '12px',
-                  backgroundColor: `${s.color}15`,
-                  border: `1px solid ${s.color}30`,
+                  width: '48px', height: '48px', borderRadius: '14px',
+                  border: `2px solid ${s.color}40`,
+                  boxShadow: `0 0 12px ${s.color}20`,
                 }}
               >
-                <div
-                  style={{
-                    width: '24px', height: '24px', borderRadius: '50%',
-                    backgroundColor: `${s.color}30`,
-                    border: `1.5px solid ${s.color}60`,
-                  }}
+                <img
+                  src={s.thumbnail}
+                  alt={s.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  loading="eager"
                 />
               </div>
 
@@ -331,12 +330,16 @@ export default function NightLanding({ onStart }: Props) {
                       fontSize: '10px', fontWeight: 600, color: s.color,
                       padding: '2px 6px', borderRadius: '6px',
                       backgroundColor: `${s.color}12`,
+                      border: `1px solid ${s.color}20`,
                     }}
                   >
                     {s.label}
                   </span>
                 </div>
-                <p style={{ fontSize: '13px', color: '#8b7aaa', marginTop: '2px', letterSpacing: '-0.26px' }}>
+                <p style={{ fontSize: '12px', color: '#8b7aaa', marginTop: '3px', letterSpacing: '-0.24px' }}>
+                  {s.personality}
+                </p>
+                <p style={{ fontSize: '13px', color: '#c9a96e', marginTop: '4px', letterSpacing: '-0.26px', fontWeight: 500 }}>
                   {s.quote}
                 </p>
               </div>

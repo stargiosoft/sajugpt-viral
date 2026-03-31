@@ -16,15 +16,14 @@ export default function CourtAnalyzing() {
           width: '120px',
           height: '120px',
           borderRadius: '50%',
-          border: '3px solid #7A38D8',
+          border: '2px solid rgba(122, 56, 216, 0.4)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: '32px',
-          fontSize: '40px',
         }}
       >
-        ⚖️
+        <span style={{ fontSize: '40px' }}>⚖️</span>
       </motion.div>
 
       {ANALYZING_MESSAGES.map((msg, i) => (
@@ -36,7 +35,7 @@ export default function CourtAnalyzing() {
           style={{
             fontSize: '15px',
             fontWeight: 500,
-            color: '#666',
+            color: '#6B5C85',
             marginBottom: '8px',
             textAlign: 'center',
           }}

@@ -8,6 +8,7 @@ import {
   STAT_LABELS, getCompatibility,
 } from '@/constants/night-manual';
 import { saveImage, copyToClipboard } from '@/lib/share';
+import { trackShare, trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   result: NightManualResult;
@@ -21,6 +22,12 @@ const SERVANT_COLORS: Record<ServantType, string> = {
   beast: '#ff6b6b',
   poet: '#6bb5ff',
   butler: '#7ce08a',
+};
+
+const SERVANT_THUMBNAILS: Record<ServantType, string> = {
+  beast: '/characters/yoon-taesan.webp',
+  poet: '/characters/seo-hwiyoon.webp',
+  butler: '/characters/choi-seolgye.webp',
 };
 
 export default function NightResultCard({ result, selectedServant, cardRef, onReset }: Props) {
@@ -39,6 +46,7 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
     const ok = await copyToClipboard(shareText);
     if (ok) {
       setCopied(true);
+      trackShare('night_manual', 'clipboard', result.nightManualId);
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -46,6 +54,7 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
   const handleSaveImage = async () => {
     if (cardRef.current) {
       await saveImage(cardRef.current, `밤설명서_${result.constitution.name}.png`);
+      trackShare('night_manual', 'image_save', result.nightManualId);
     }
   };
 
@@ -53,6 +62,7 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
     if (navigator.share) {
       try {
         await navigator.share({ title: `밤(夜) 설명서 — ${result.constitution.name}`, text: shareText });
+        trackShare('night_manual', 'native', result.nightManualId);
       } catch { /* user cancelled */ }
     } else {
       handleCopy();
@@ -84,7 +94,22 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
             }}
           >
             <div className="flex items-center gap-2" style={{ marginBottom: '6px' }}>
-              <span style={{ fontSize: '14px' }}>{SERVANTS[type].emoji}</span>
+              <div
+                className="overflow-hidden transform-gpu shrink-0"
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '8px',
+                  border: `1.5px solid ${SERVANT_COLORS[type]}30`,
+                  opacity: 0.6,
+                }}
+              >
+                <img
+                  src={SERVANT_THUMBNAILS[type]}
+                  alt={SERVANTS[type].name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
               <span style={{ fontSize: '13px', fontWeight: 700, color: SERVANT_COLORS[type] }}>
                 {SERVANTS[type].name}
               </span>
@@ -133,12 +158,30 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
           </span>
         </div>
 
-        <div className="flex items-center gap-2" style={{ marginBottom: '16px' }}>
-          <p style={{ fontSize: '14px', color: '#9990ad' }}>
-            선택한 시종: <span style={{ color: SERVANT_COLORS[selectedServant], fontWeight: 700 }}>
-              {servant.name} ({servant.label})
-            </span>
-          </p>
+        <div className="flex items-center gap-3" style={{ marginBottom: '16px' }}>
+          <div
+            className="overflow-hidden transform-gpu shrink-0"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '11px',
+              border: `2px solid ${SERVANT_COLORS[selectedServant]}50`,
+              boxShadow: `0 0 12px ${SERVANT_COLORS[selectedServant]}20`,
+            }}
+          >
+            <img
+              src={SERVANT_THUMBNAILS[selectedServant]}
+              alt={servant.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+          <div>
+            <p style={{ fontSize: '14px', color: '#9990ad' }}>
+              선택한 시종: <span style={{ color: SERVANT_COLORS[selectedServant], fontWeight: 700 }}>
+                {servant.name} ({servant.label})
+              </span>
+            </p>
+          </div>
           <span style={{
             fontSize: '12px', fontWeight: 700,
             color: compatibility.grade === 'S' ? '#FFD700' : '#c4b5d9',
@@ -198,9 +241,24 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
         </div>
 
         {/* 워터마크 */}
-        <p className="text-center" style={{ fontSize: '11px', color: '#3d3055', marginTop: '16px' }}>
+        <a
+          href="https://www.sajugpt.co.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackSajuGPTClick('night_manual', result.nightManualId)}
+          className="text-center"
+          style={{
+            display: 'block',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: '#7A38D8',
+            marginTop: '16px',
+            textDecoration: 'underline',
+            textUnderlineOffset: '3px',
+          }}
+        >
           sajugpt.co.kr
-        </p>
+        </a>
       </motion.div>
 
       {/* 공유 버튼 */}
@@ -260,6 +318,27 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
         >
           다시 진단받기
         </button>
+        <a
+          href="/"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '44px',
+            borderRadius: '12px',
+            backgroundColor: 'transparent',
+            color: '#6b6080',
+            fontSize: '13px',
+            fontWeight: 500,
+            border: 'none',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            lineHeight: '44px',
+            textAlign: 'center',
+            marginTop: '4px',
+          }}
+        >
+          다른 테스트도 해보기
+        </a>
       </motion.div>
     </motion.div>
   );

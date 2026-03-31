@@ -3,6 +3,7 @@
 import { forwardRef } from 'react';
 import type { AutopsyResult } from '@/types/autopsy';
 import { CAUSES_OF_DEATH, DISCERNMENT_GRADES, CORONERS } from '@/constants/autopsy';
+import { trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   result: AutopsyResult;
@@ -31,7 +32,7 @@ const DeathCertificate = forwardRef<HTMLDivElement, Props>(({ result }, ref) => 
       style={{
         width: '100%',
         maxWidth: '360px',
-        aspectRatio: '9 / 16',
+        minHeight: '600px',
         backgroundColor: '#FFFDF7',
         borderRadius: '16px',
         border: '2px solid #D4C5A0',
@@ -160,6 +161,7 @@ const DeathCertificate = forwardRef<HTMLDivElement, Props>(({ result }, ref) => 
         href="https://sajugpt.co.kr"
         target="_blank"
         rel="noopener noreferrer"
+        onClick={() => trackSajuGPTClick('saju_autopsy')}
         style={{
           fontSize: '11px',
           fontWeight: 600,

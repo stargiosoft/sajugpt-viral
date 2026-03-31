@@ -8,6 +8,7 @@ import GenderSelect from '@/components/GenderSelect';
 import BirthTimeInput from '@/components/BirthTimeInput';
 import AnalyzingScreen from '@/components/AnalyzingScreen';
 import ResultCard from '@/components/ResultCard';
+import SajuAnalysisCard from '@/components/SajuAnalysisCard';
 import ShareButtons from '@/components/ShareButtons';
 import BattleVSCard from '@/components/BattleVSCard';
 import CutScene from '@/components/CutScene';
@@ -207,9 +208,9 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
           {step === 'input' && (
             <motion.div
               key="input"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               style={{ padding: '48px 20px 120px' }}
             >
               {/* 헤더 */}
@@ -273,6 +274,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                   <BirthInput
                     value={birthDate}
                     onChange={setBirthDate}
+                    onEnter={handleSubmit}
                     onComplete={() => {
                       // 시간 입력으로 포커스 이동
                       const timeInput = birthTimeRef.current?.querySelector('input');
@@ -296,6 +298,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                     onChange={setBirthTime}
                     unknownTime={unknownTime}
                     onUnknownTimeToggle={handleUnknownTimeToggle}
+                    onEnter={handleSubmit}
                   />
                 </motion.div>
 
@@ -386,8 +389,11 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                 <CutScene onComplete={() => setShowCutScene(false)} />
               ) : (
                 <>
-                  <div className="flex justify-center" style={{ marginBottom: '24px' }}>
+                  <div className="flex justify-center" style={{ marginBottom: '20px' }}>
                     <ResultCard ref={cardRef} result={result} />
+                  </div>
+                  <div className="flex justify-center" style={{ marginBottom: '24px' }}>
+                    <SajuAnalysisCard result={result} />
                   </div>
                   <ShareButtons headcount={result.headcount} battleId={result.battleId} cardRef={cardRef} />
                   <div style={{ padding: '0 20px', marginTop: '12px' }}>
@@ -407,6 +413,27 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                     >
                       다시 해보기
                     </button>
+                    <a
+                      href="/"
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        height: '56px',
+                        borderRadius: '16px',
+                        backgroundColor: 'transparent',
+                        color: '#999',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        border: 'none',
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        lineHeight: '56px',
+                        textAlign: 'center',
+                        marginTop: '8px',
+                      }}
+                    >
+                      다른 테스트도 해보기
+                    </a>
                   </div>
                 </>
               )}
@@ -428,8 +455,13 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
               </div>
 
               {/* 내 개인 결과 카드 */}
-              <div className="flex justify-center" style={{ marginBottom: '24px' }}>
+              <div className="flex justify-center" style={{ marginBottom: '20px' }}>
                 <ResultCard ref={cardRef} result={result} />
+              </div>
+
+              {/* 사주 풀이 카드 */}
+              <div className="flex justify-center" style={{ marginBottom: '24px' }}>
+                <SajuAnalysisCard result={result} />
               </div>
 
               {/* 공유 버튼 */}
@@ -452,6 +484,27 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                 >
                   다시 해보기
                 </button>
+                <a
+                  href="/"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    height: '56px',
+                    borderRadius: '16px',
+                    backgroundColor: 'transparent',
+                    color: '#999',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    border: 'none',
+                    cursor: 'pointer',
+                    textDecoration: 'none',
+                    lineHeight: '56px',
+                    textAlign: 'center',
+                    marginTop: '8px',
+                  }}
+                >
+                  다른 테스트도 해보기
+                </a>
               </div>
             </motion.div>
           )}

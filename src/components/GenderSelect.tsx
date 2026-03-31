@@ -6,9 +6,10 @@ import type { Gender } from '@/types/battle';
 interface Props {
   value: Gender;
   onChange: (value: Gender) => void;
+  accentColor?: string;
 }
 
-export default function GenderSelect({ value, onChange }: Props) {
+export default function GenderSelect({ value, onChange, accentColor = '#7A38D8' }: Props) {
   return (
     <div
       className="overflow-hidden isolate"
@@ -35,7 +36,7 @@ export default function GenderSelect({ value, onChange }: Props) {
                 layoutId="sexy-gender-indicator"
                 className="absolute inset-0"
                 style={{
-                  backgroundColor: '#7A38D8',
+                  backgroundColor: accentColor,
                   borderRadius: '12px',
                   boxShadow: '0px 2px 7px 0px rgba(0,0,0,0.12)',
                 }}

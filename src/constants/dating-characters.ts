@@ -276,14 +276,19 @@ export function getScoreLabel(key: string): string {
 
 // ── 퍼센타일 뱃지 ──
 
-export function getPercentileBadge(percentile: number): PercentileBadgeInfo {
+export function getPercentileBadge(percentile: number, totalCount?: number): PercentileBadgeInfo {
+  // 유저 수가 적으면 퍼센타일이 의미 없으므로 뱃지 미표시
+  if (totalCount !== undefined && totalCount < 10) {
+    return { label: '데이터 수집 중', color: '#848484' };
+  }
   if (percentile <= 1) return { label: '전설의 작업남/녀', color: '#FFD700' };
   if (percentile <= 5) return { label: '타고난 연애 천재', color: '#FF4444' };
   if (percentile <= 10) return { label: '희귀한 재능', color: '#7A38D8' };
   if (percentile <= 30) return { label: '평균 이상', color: '#4488FF' };
   if (percentile <= 50) return { label: '노력형', color: '#44BB44' };
-  if (percentile >= 90) return { label: '읽씹 전문가', color: '#FF4444' };
-  return { label: '수련이 필요합니다', color: '#888888' };
+  if (percentile <= 70) return { label: '수련이 필요합니다', color: '#888888' };
+  if (percentile <= 90) return { label: '연애 초보', color: '#FF8844' };
+  return { label: '읽씹 전문가', color: '#FF4444' };
 }
 
 // ── 조기 종료 ──

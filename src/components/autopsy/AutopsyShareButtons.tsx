@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { captureCardImage, copyToClipboard, saveImage, shareKakao } from '@/lib/share';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, trackShare } from '@/lib/analytics';
 
 interface Props {
   causeOfDeathLabel: string;
@@ -24,6 +24,7 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setCopied(false), 2000);
       trackEvent('autopsy_share_clipboard', { causeOfDeathLabel, autopsyId });
+      trackShare('saju_autopsy', 'clipboard', autopsyId);
     }
   }, [shareText, causeOfDeathLabel, autopsyId]);
 
@@ -33,6 +34,7 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
     try {
       await saveImage(cardRef.current, '사주부검_사망진단서.png');
       trackEvent('autopsy_share_save', { causeOfDeathLabel, autopsyId });
+      trackShare('saju_autopsy', 'image_save', autopsyId);
     } catch (err) {
       console.error('이미지 저장 실패:', err);
     } finally {
@@ -54,6 +56,7 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
         files: [file],
       });
       trackEvent('autopsy_share_native', { causeOfDeathLabel, autopsyId });
+      trackShare('saju_autopsy', 'native', autopsyId);
     } catch {
       await handleCopy();
     }
@@ -69,6 +72,7 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
     });
     if (ok) {
       trackEvent('autopsy_share_kakao', { causeOfDeathLabel, autopsyId });
+      trackShare('saju_autopsy', 'kakao', autopsyId);
     }
   }, [causeOfDeathLabel, autopsyId]);
 

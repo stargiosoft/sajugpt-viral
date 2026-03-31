@@ -24,9 +24,15 @@ export default function AnalyzingScreen() {
           height: '120px',
           borderRadius: '50%',
           border: '3px solid #7A38D8',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           marginBottom: '32px',
+          fontSize: '40px',
         }}
-      />
+      >
+        🔥
+      </motion.div>
 
       {/* Sequential text */}
       {messages.map((msg, i) => (

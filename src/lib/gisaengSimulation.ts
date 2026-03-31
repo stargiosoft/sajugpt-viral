@@ -22,6 +22,28 @@ export function judgeChoice(
   return true;
 }
 
+// ─── 라운드 내 최소 1개 성공 보장 (threshold 동적 하향) ────
+export function getAdjustedChoices(
+  choices: RoundChoice[],
+  stats: GisaengStats,
+): RoundChoice[] {
+  const anyPass = choices.some(c => judgeChoice(c, stats));
+  if (anyPass) return choices;
+
+  // 전부 실패하면 → 유저의 최고 능력치에 가장 가까운 선택지 1개의 threshold를 낮춰서 성공 보장
+  const sorted = [...choices].sort((a, b) => {
+    const gapA = a.threshold - stats[a.requiredStat];
+    const gapB = b.threshold - stats[b.requiredStat];
+    return gapA - gapB; // gap이 가장 작은 게 첫번째
+  });
+
+  return choices.map(c =>
+    c.id === sorted[0].id
+      ? { ...c, threshold: stats[c.requiredStat] } // 정확히 맞춰서 성공 보장
+      : c
+  );
+}
+
 // ─── 게이지 적용 ─────────────────────────────────────────
 export function applyEffects(
   seonbi: Record<SeonbiType, SeonbiState>,
@@ -41,9 +63,9 @@ export function applyEffects(
     }
   }
 
-  // 이탈 판정: ♥ ≤ 50 → 이탈
+  // 이탈 판정: ♥ ≤ 50 또는 의심 ≥ 90 → 이탈
   for (const key of ['kwonryeok', 'romantic', 'jealousy'] as SeonbiType[]) {
-    if (next[key].alive && next[key].loyalty <= 50) {
+    if (next[key].alive && (next[key].loyalty <= 50 || next[key].suspicion >= 90)) {
       next[key].alive = false;
     }
   }
@@ -72,17 +94,27 @@ export function aliveCount(seonbi: Record<SeonbiType, SeonbiState>): number {
   return [seonbi.kwonryeok, seonbi.romantic, seonbi.jealousy].filter(s => s.alive).length;
 }
 
+// ─── 안정적으로 관리 중인 선비 수 (의심 < 70) ─────────────
+export function stableCount(seonbi: Record<SeonbiType, SeonbiState>): number {
+  return (['kwonryeok', 'romantic', 'jealousy'] as SeonbiType[])
+    .filter(t => seonbi[t].alive && seonbi[t].suspicion < 70).length;
+}
+
 // ─── 티어 판정 (PRD 4-1) ─────────────────────────────────
 export function judgeTier(seonbi: Record<SeonbiType, SeonbiState>): GisaengTier {
   const alive = aliveCount(seonbi);
+  const stable = stableCount(seonbi);
 
   if (alive === 3) {
     const allHigh = (['kwonryeok', 'romantic', 'jealousy'] as SeonbiType[]).every(
       t => seonbi[t].loyalty >= 80 && seonbi[t].suspicion <= 30
     );
-    return allHigh ? 'S' : 'A';
+    if (allHigh) return 'S';
+    // 의심 ≥ 70인 선비가 있으면 안정적 관리 수 기준으로 하향
+    if (stable < 3) return stable === 2 ? 'B' : stable === 1 ? 'C' : 'D';
+    return 'A';
   }
-  if (alive === 2) return 'B';
+  if (alive === 2) return stable >= 2 ? 'B' : 'C';
   if (alive === 1) return 'C';
   return 'D';
 }
@@ -92,6 +124,7 @@ export function calculateSalary(
   totalCharm: number,
   seonbi: Record<SeonbiType, SeonbiState>,
   tier: GisaengTier,
+  successCount?: number,
 ): { monthlySalary: number; modernValue: number } {
   if (tier === 'D') return { monthlySalary: 0, modernValue: 0 };
 
@@ -100,12 +133,19 @@ export function calculateSalary(
   let seonbiSalary = 0;
   for (const key of ['kwonryeok', 'romantic', 'jealousy'] as SeonbiType[]) {
     if (seonbi[key].alive) {
-      seonbiSalary += seonbi[key].loyalty * SEONBI_INFO[key].salaryMultiplier;
+      // 의심 높은 선비는 급여 기여 감소
+      const suspicionPenalty = seonbi[key].suspicion >= 70 ? 0.3 : seonbi[key].suspicion >= 50 ? 0.7 : 1;
+      seonbiSalary += seonbi[key].loyalty * SEONBI_INFO[key].salaryMultiplier * suspicionPenalty;
     }
   }
 
+  // 라운드 성공 횟수 보너스 (0성공: 0.5x, 1성공: 0.7x, 2성공: 0.9x, 3성공: 1.0x)
+  const roundBonus = successCount !== undefined
+    ? [0.5, 0.7, 0.9, 1.0][Math.min(successCount, 3)]
+    : 1.0;
+
   const bonus = TIER_INFO[tier].bonusMultiplier;
-  const monthlySalary = Math.round((baseSalary + seonbiSalary) * bonus);
+  const monthlySalary = Math.round((baseSalary + seonbiSalary) * bonus * roundBonus);
   const modernValue = monthlySalary * 50000;
 
   return { monthlySalary, modernValue };

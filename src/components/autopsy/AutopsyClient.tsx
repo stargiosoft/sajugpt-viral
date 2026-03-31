@@ -540,9 +540,9 @@ export default function AutopsyClient({ autopsyId }: Props) {
           {step === 'input' && (
             <motion.div
               key="input"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               style={{ padding: '48px 20px 120px' }}
             >
               {/* 헤더 */}
@@ -605,6 +605,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
                   <BirthInput
                     value={birthDate}
                     onChange={setBirthDate}
+                    onEnter={handleSubmit}
                     onComplete={() => {
                       const timeInput = birthTimeRef.current?.querySelector('input');
                       if (timeInput) setTimeout(() => timeInput.focus(), 100);
@@ -625,6 +626,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
                     onChange={setBirthTime}
                     unknownTime={unknownTime}
                     onUnknownTimeToggle={handleUnknownTimeToggle}
+                    onEnter={handleSubmit}
                   />
                 </motion.div>
 

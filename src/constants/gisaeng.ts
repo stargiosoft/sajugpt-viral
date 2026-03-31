@@ -83,6 +83,7 @@ export interface SeonbiInfo {
   name: string;
   title: string;
   emoji: string;
+  thumbnail: string;
   personality: string;
   danger: string;
   baseLoyalty: number;
@@ -96,6 +97,7 @@ export const SEONBI_INFO: Record<SeonbiType, SeonbiInfo> = {
     name: '김도윤',
     title: '권력형',
     emoji: '🫅',
+    thumbnail: '/characters/yoon-taesan.webp',
     personality: '돈 넘치지만 의심 많음',
     danger: '의심 게이지 빠름',
     baseLoyalty: 60,
@@ -107,6 +109,7 @@ export const SEONBI_INFO: Record<SeonbiType, SeonbiInfo> = {
     name: '박서진',
     title: '로맨틱형',
     emoji: '🎭',
+    thumbnail: '/characters/seo-hwiyoon.webp',
     personality: '순정파. 진심만 원함',
     danger: '거짓 감지 시 즉시 이탈',
     baseLoyalty: 70,
@@ -118,6 +121,7 @@ export const SEONBI_INFO: Record<SeonbiType, SeonbiInfo> = {
     name: '이준혁',
     title: '질투형',
     emoji: '⚔️',
+    thumbnail: '/characters/do-haegyeol.webp',
     personality: '독점욕 강하고 행동파',
     danger: '폭발형 — 흔적 발견 시 난장',
     baseLoyalty: 65,
@@ -319,7 +323,7 @@ export const ROUND2_SCENARIOS: Record<SeonbiType, RoundScenario> = {
           { target: 'romantic', loyaltyDelta: 10, suspicionDelta: -10 },
         ],
         failEffects: [
-          { target: 'romantic', loyaltyDelta: 5, suspicionDelta: -5 },
+          { target: 'romantic', loyaltyDelta: -10, suspicionDelta: 15 },
         ],
       },
     ],

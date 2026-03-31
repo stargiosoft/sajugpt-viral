@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import type { StockAnalysisResult } from '@/types/stock';
 import { CREW_MEMBERS } from '@/constants/stock';
 import { copyToClipboard, saveImage, captureCardImage } from '@/lib/share';
-import { trackEvent } from '@/lib/analytics';
+import { trackEvent, trackShare, trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   result: StockAnalysisResult;
@@ -55,6 +55,7 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setCopied(false), 2000);
       trackEvent('stock_share_clipboard', { stockId: result.id });
+      trackShare('saju_stock', 'clipboard', result.id);
     }
   }, [shareText, result.id]);
 
@@ -64,6 +65,7 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
     try {
       await saveImage(reportCardRef.current, '사주증권_종목리포트.png');
       trackEvent('stock_share_save', { stockId: result.id });
+      trackShare('saju_stock', 'image_save', result.id);
     } catch (err) {
       console.error('이미지 저장 실패:', err);
     } finally {
@@ -85,6 +87,7 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
         files: [file],
       });
       trackEvent('stock_share_native', { stockId: result.id });
+      trackShare('saju_stock', 'native', result.id);
     } catch {
       await handleCopy();
     }
@@ -303,6 +306,27 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
         >
           처음으로
         </button>
+
+        <a
+          href="/"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '44px',
+            borderRadius: '12px',
+            backgroundColor: 'transparent',
+            color: '#555',
+            fontSize: '13px',
+            fontWeight: 500,
+            border: 'none',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            lineHeight: '44px',
+            textAlign: 'center',
+          }}
+        >
+          다른 테스트도 해보기
+        </a>
       </div>
     </div>
   );
