@@ -256,14 +256,15 @@ export default function GisaengLanding({ onStart }: Props) {
 
               {/* 특성 태그 */}
               <div
+                className="flex items-center justify-center"
                 style={{
-                  padding: '3px 10px',
+                  padding: '4px 10px',
                   borderRadius: '8px',
                   backgroundColor: `${s.color}0D`,
                   border: `1px solid ${s.color}1A`,
                 }}
               >
-                <span style={{ fontSize: '10px', fontWeight: 500, color: s.color, lineHeight: 1 }}>
+                <span style={{ fontSize: '10px', fontWeight: 500, color: s.color, lineHeight: '10px' }}>
                   {s.trait}
                 </span>
               </div>
