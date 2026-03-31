@@ -76,7 +76,7 @@ export default function ViralHub() {
   const router = useRouter();
 
   return (
-    <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#fff' }}>
+    <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#fff', overscrollBehaviorY: 'none' }}>
       <div className="w-full" style={{ maxWidth: '440px' }}>
         {/* 헤더 */}
         <div style={{ padding: '60px 20px 0' }}>
