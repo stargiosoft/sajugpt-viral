@@ -86,7 +86,7 @@ export default function NightLanding({ onStart }: Props) {
       ref={scrollRef}
       className="relative flex flex-col items-center overflow-x-hidden"
       style={{
-        minHeight: '100dvh',
+        minHeight: '100%',
         background: 'linear-gradient(180deg, #0d0d1a 0%, #12101f 30%, #16132a 60%, #0d0d1a 100%)',
         paddingBottom: '100px',
       }}

@@ -80,7 +80,7 @@ export default function GisaengLanding({ onStart }: Props) {
       ref={scrollRef}
       className="relative flex flex-col items-center overflow-x-hidden"
       style={{
-        minHeight: '100dvh',
+        minHeight: '100%',
         backgroundColor: C.hanji,
         paddingBottom: '120px',
         fontFamily: 'Pretendard Variable, sans-serif',

@@ -193,8 +193,9 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
   }, []);
 
   return (
-    <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#fff' }}>
-      <div style={{ width: '100%', maxWidth: '440px' }}>
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#fff' }}>
+      <div className="w-full max-w-[440px] h-full flex flex-col">
+        <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
           {/* ─── LANDING STEP ─── */}
           {step === 'landing' && (
@@ -519,6 +520,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );

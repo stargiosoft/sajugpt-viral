@@ -168,10 +168,11 @@ export default function NightManualClient({ nightManualId }: Props) {
 
   return (
     <div
-      className="flex flex-col items-center min-h-dvh"
+      className="fixed inset-0 flex justify-center"
       style={{ backgroundColor: '#0d0d1a' }}
     >
-      <div className="w-full" style={{ maxWidth: '440px' }}>
+      <div className="w-full max-w-[440px] h-full flex flex-col">
+        <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <NightLanding key="landing" onStart={() => setStep('input')} />
@@ -235,6 +236,7 @@ export default function NightManualClient({ nightManualId }: Props) {
             />
           )}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );

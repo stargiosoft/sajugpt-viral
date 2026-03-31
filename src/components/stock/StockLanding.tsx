@@ -134,7 +134,7 @@ const sectionEase: [number, number, number, number] = [0.32, 0.72, 0, 1];
 export default function StockLanding({ onStart }: Props) {
   return (
     <div className="flex flex-col" style={{
-      minHeight: '100dvh',
+      minHeight: '100%',
       backgroundColor: '#0a0a14',
     }}>
       {/* ─── 틱커 테이프 ─── */}

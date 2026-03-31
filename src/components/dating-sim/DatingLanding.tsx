@@ -123,7 +123,7 @@ export default function DatingLanding({ onStart }: Props) {
     <div
       className="relative flex flex-col items-center overflow-x-hidden"
       style={{
-        minHeight: '100dvh',
+        minHeight: '100%',
         background: 'linear-gradient(180deg, #0f0a1a 0%, #1a1038 35%, #251545 65%, #1a1038 100%)',
         paddingBottom: '100px',
       }}

@@ -342,7 +342,7 @@ export default function CourtLanding({ onStart }: Props) {
     <div
       className="relative flex flex-col items-center overflow-x-hidden"
       style={{
-        minHeight: '100dvh',
+        minHeight: '100%',
         backgroundColor: C.bgDeep,
         paddingBottom: '100px',
       }}

@@ -252,8 +252,9 @@ export default function StockClient({ stockId }: Props) {
   }, []);
 
   return (
-    <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#0a0a14' }}>
-      <div style={{ width: '100%', maxWidth: '440px' }}>
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#0a0a14' }}>
+      <div className="w-full max-w-[440px] h-full flex flex-col">
+        <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
 
           {/* ─── LANDING ─── */}
@@ -526,6 +527,7 @@ export default function StockClient({ stockId }: Props) {
           )}
 
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );

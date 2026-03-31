@@ -323,8 +323,9 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center" style={{ backgroundColor: '#F5F0E8', fontFamily: 'Pretendard Variable, sans-serif' }}>
-      <div className="w-full max-w-[440px] min-h-dvh flex flex-col">
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#F5F0E8', fontFamily: 'Pretendard Variable, sans-serif' }}>
+      <div className="w-full max-w-[440px] h-full flex flex-col">
+        <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <GisaengLanding key="landing" onStart={() => setStep('input')} />
@@ -584,6 +585,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
             </div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );
