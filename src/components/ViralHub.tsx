@@ -120,22 +120,14 @@ export default function ViralHub() {
                 cursor: item.ready ? 'pointer' : 'default',
                 transition: 'all 0.15s ease',
               }}
-              onMouseDown={(e) => {
+              onPointerDown={(e) => {
                 if (!item.ready) return;
-                e.currentTarget.style.transform = 'scale(0.98)';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-              onTouchStart={(e) => {
-                if (!item.ready) return;
-                e.currentTarget.style.transform = 'scale(0.98)';
-              }}
-              onTouchEnd={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
+                const el = e.currentTarget;
+                el.style.transform = 'scale(0.98)';
+                const reset = () => { el.style.transform = 'scale(1)'; };
+                el.addEventListener('pointerup', reset, { once: true });
+                el.addEventListener('pointercancel', reset, { once: true });
+                el.addEventListener('pointerleave', reset, { once: true });
               }}
             >
               {/* 이모지 아이콘 */}

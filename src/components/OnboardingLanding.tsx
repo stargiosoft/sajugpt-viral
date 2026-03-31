@@ -35,6 +35,7 @@ export default function OnboardingLanding({ onStart }: Props) {
       className="relative flex flex-col items-center overflow-x-hidden"
       style={{
         minHeight: '100dvh',
+        overscrollBehaviorY: 'none',
         background: 'linear-gradient(180deg, #0f0a1a 0%, #1c1035 40%, #2a1548 70%, #1c1035 100%)',
         paddingBottom: '100px',
       }}
