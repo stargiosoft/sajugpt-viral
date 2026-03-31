@@ -212,7 +212,7 @@ export default function GisaengLanding({ onStart }: Props) {
                 backgroundColor: C.cardBg,
                 border: `1px solid ${C.border}`,
                 borderRadius: '16px',
-                padding: '20px 8px 16px',
+                padding: '16px 8px 14px',
                 position: 'relative',
                 overflow: 'hidden',
               }}
@@ -247,7 +247,7 @@ export default function GisaengLanding({ onStart }: Props) {
                 <img src={s.thumbnail} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
 
-              <p style={{ fontSize: '14px', fontWeight: 600, color: C.ink, marginTop: '10px', letterSpacing: '-0.28px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: C.ink, marginTop: '8px', letterSpacing: '-0.28px' }}>
                 {s.name}
               </p>
               <p style={{ fontSize: '11px', fontWeight: 400, color: C.inkMuted, marginTop: '2px', letterSpacing: '-0.22px' }}>
