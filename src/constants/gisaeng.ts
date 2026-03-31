@@ -94,7 +94,7 @@ export interface SeonbiInfo {
 export const SEONBI_INFO: Record<SeonbiType, SeonbiInfo> = {
   kwonryeok: {
     type: 'kwonryeok',
-    name: '김도윤',
+    name: '윤태산',
     title: '권력형',
     emoji: '🫅',
     thumbnail: '/characters/yoon-taesan.webp',
@@ -106,7 +106,7 @@ export const SEONBI_INFO: Record<SeonbiType, SeonbiInfo> = {
   },
   romantic: {
     type: 'romantic',
-    name: '박서진',
+    name: '서휘윤',
     title: '로맨틱형',
     emoji: '🎭',
     thumbnail: '/characters/seo-hwiyoon.webp',
@@ -118,7 +118,7 @@ export const SEONBI_INFO: Record<SeonbiType, SeonbiInfo> = {
   },
   jealousy: {
     type: 'jealousy',
-    name: '이준혁',
+    name: '도해결',
     title: '질투형',
     emoji: '⚔️',
     thumbnail: '/characters/do-haegyeol.webp',
@@ -245,7 +245,7 @@ export const ROUND2_SCENARIOS: Record<SeonbiType, RoundScenario> = {
   kwonryeok: {
     round: 2,
     title: '의심의 밤 — 권력형',
-    narration: '김도윤이 네 방에서 박서진의 시 한 편을 발견했다. "이게 뭐냐?"',
+    narration: '윤태산이 네 방에서 서휘윤의 시 한 편을 발견했다. "이게 뭐냐?"',
     choices: [
       {
         id: 'A',
@@ -288,7 +288,7 @@ export const ROUND2_SCENARIOS: Record<SeonbiType, RoundScenario> = {
   romantic: {
     round: 2,
     title: '의심의 밤 — 로맨틱형',
-    narration: '박서진이 네게 보낸 시에 답장이 없었다. "혹시... 다른 분이 계신 건 아니지요?"',
+    narration: '서휘윤이 네게 보낸 시에 답장이 없었다. "혹시... 다른 분이 계신 건 아니지요?"',
     choices: [
       {
         id: 'A',
@@ -331,7 +331,7 @@ export const ROUND2_SCENARIOS: Record<SeonbiType, RoundScenario> = {
   jealousy: {
     round: 2,
     title: '의심의 밤 — 질투형',
-    narration: '이준혁이 기방 주인에게 "월향이 나 말고 다른 선비도 만나냐?"고 직접 물었다.',
+    narration: '도해결이 기방 주인에게 "월향이 나 말고 다른 선비도 만나냐?"고 직접 물었다.',
     choices: [
       {
         id: 'A',
@@ -347,7 +347,7 @@ export const ROUND2_SCENARIOS: Record<SeonbiType, RoundScenario> = {
       },
       {
         id: 'B',
-        label: '이준혁을 찾아가 "내가 그대만 보는 줄도 모르시오?" (역공)',
+        label: '도해결을 찾아가 "내가 그대만 보는 줄도 모르시오?" (역공)',
         requiredStat: 'pushpull',
         threshold: 80,
         successEffects: [
@@ -359,7 +359,7 @@ export const ROUND2_SCENARIOS: Record<SeonbiType, RoundScenario> = {
       },
       {
         id: 'C',
-        label: '그날 밤 이준혁만 만나며 독점 시간 제공',
+        label: '그날 밤 도해결만 만나며 독점 시간 제공',
         requiredStat: 'allure',
         threshold: 75,
         successEffects: [
@@ -379,7 +379,7 @@ export const ROUND2_SCENARIOS: Record<SeonbiType, RoundScenario> = {
 export const ROUND3_SCENARIO: RoundScenario = {
   round: 3,
   title: '최후의 밤',
-  narration: '자시(밤 11시). 김도윤이 정문으로, 박서진이 후원으로, 이준혁이 담을 넘어 온다. 30분 안에 셋 다 처리해야 한다.',
+  narration: '자시(밤 11시). 윤태산이 정문으로, 서휘윤이 후원으로, 도해결이 담을 넘어 온다. 30분 안에 셋 다 처리해야 한다.',
   choices: [
     {
       id: 'A',

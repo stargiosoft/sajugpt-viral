@@ -25,9 +25,9 @@ const C = {
 
 // ─── 선비 데이터 ───────────────────────────────────────
 const SEONBI = [
-  { name: '김도윤', title: '좌의정의 아들', trait: '의심 많음', hanja: '權', color: C.gold },
-  { name: '박서진', title: '한양 최고 시인', trait: '진심만 원함', hanja: '情', color: C.vermillion },
-  { name: '이준혁', title: '무관 출신 장수', trait: '독점욕 강함', hanja: '怒', color: C.inkSoft },
+  { name: '윤태산', title: '좌의정의 아들', trait: '의심 많음', hanja: '權', color: C.gold },
+  { name: '서휘윤', title: '한양 최고 시인', trait: '진심만 원함', hanja: '情', color: C.vermillion },
+  { name: '도해결', title: '무관 출신 장수', trait: '독점욕 강함', hanja: '怒', color: C.inkSoft },
 ];
 
 const TIERS = [

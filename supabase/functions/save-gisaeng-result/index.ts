@@ -62,7 +62,7 @@ async function generateSettlement(
 
   const seonbiStates = Object.entries(finalSeonbi)
     .map(([key, s]) => {
-      const names: Record<string, string> = { kwonryeok: '김도윤', romantic: '박서진', jealousy: '이준혁' };
+      const names: Record<string, string> = { kwonryeok: '윤태산', romantic: '서휘윤', jealousy: '도해결' };
       const types: Record<string, string> = { kwonryeok: '권력형', romantic: '로맨틱형', jealousy: '질투형' };
       return `${names[key]}(${types[key]}): ♥${s.loyalty} 👁${s.suspicion} ${s.alive ? '생존' : '이탈'}`;
     })
@@ -87,14 +87,14 @@ ${seonbiStates}
 ## 생성할 것 (JSON으로 출력)
 {
   "finalNarrative": "1문장, 티어에 맞는 역사서 톤",
-  "kwonryeok": "김도윤 1문장 코멘트",
-  "romantic": "박서진 1문장 코멘트",
-  "jealousy": "이준혁 1문장 코멘트"
+  "kwonryeok": "윤태산 1문장 코멘트",
+  "romantic": "서휘윤 1문장 코멘트",
+  "jealousy": "도해결 1문장 코멘트"
 }
 
 ## 규칙
 - "~다" 체 사용 (서술체)
-- 선비 이름(김도윤/박서진/이준혁)을 직접 사용
+- 선비 이름(윤태산/서휘윤/도해결)을 직접 사용
 - 생존 선비: 숭배/집착 톤 + 충성도 기반
 - 이탈 선비: 미련/원망 톤 + 의심도 기반
 - D티어: 코멘트가 웃겨야 함 (자조적 유머 = 공유 동기)

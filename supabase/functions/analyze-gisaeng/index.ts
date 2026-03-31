@@ -196,9 +196,9 @@ function assignGisaengType(stats: GisaengStats): GisaengType {
 // ─── 선비 초기 게이지 (사주 상성 반영) ────────────────────
 function calculateSeonbiGauges(iljuElement: string) {
   const seonbi = {
-    kwonryeok: { name: '김도윤', type: 'kwonryeok' as const, loyalty: 60, suspicion: 30, alive: true },
-    romantic: { name: '박서진', type: 'romantic' as const, loyalty: 70, suspicion: 10, alive: true },
-    jealousy: { name: '이준혁', type: 'jealousy' as const, loyalty: 65, suspicion: 20, alive: true },
+    kwonryeok: { name: '윤태산', type: 'kwonryeok' as const, loyalty: 60, suspicion: 30, alive: true },
+    romantic: { name: '서휘윤', type: 'romantic' as const, loyalty: 70, suspicion: 10, alive: true },
+    jealousy: { name: '도해결', type: 'jealousy' as const, loyalty: 65, suspicion: 20, alive: true },
   };
 
   // 오행 상성 보너스
