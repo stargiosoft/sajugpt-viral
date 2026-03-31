@@ -212,7 +212,7 @@ export default function GisaengLanding({ onStart }: Props) {
                 backgroundColor: C.cardBg,
                 border: `1px solid ${C.border}`,
                 borderRadius: '16px',
-                padding: '16px 8px 14px',
+                padding: '16px 8px 10px',
                 position: 'relative',
                 overflow: 'hidden',
               }}
@@ -257,8 +257,7 @@ export default function GisaengLanding({ onStart }: Props) {
               {/* 특성 태그 */}
               <div
                 style={{
-                  marginTop: 'auto',
-                  paddingTop: '6px',
+                  marginTop: '6px',
                   padding: '3px 10px',
                   borderRadius: '8px',
                   backgroundColor: `${s.color}0D`,
