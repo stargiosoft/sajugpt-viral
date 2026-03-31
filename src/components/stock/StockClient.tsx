@@ -34,12 +34,11 @@ function convertTo24Hour(time: string): string {
 }
 
 export default function StockClient({ stockId }: Props) {
-  // 입력 상태 — 공통 캐시 복원
-  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
-  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
-  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
-  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
-  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'female');
+  // 입력 상태
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [gender, setGender] = useState<Gender>('female');
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus>('single');
 
   // 플로우 상태
@@ -55,6 +54,17 @@ export default function StockClient({ stockId }: Props) {
 
   const reportCardRef = useRef<HTMLDivElement>(null);
   const planCardRef = useRef<HTMLDivElement>(null);
+
+  // 캐시 복원 (클라이언트 마운트 후)
+  useEffect(() => {
+    const cached = loadSelfSaju();
+    if (cached) {
+      if (cached.birthDate) setBirthDate(cached.birthDate);
+      if (cached.birthTime) setBirthTime(cached.birthTime);
+      if (cached.unknownTime !== undefined) setUnknownTime(cached.unknownTime);
+      if (cached.gender) setGender(cached.gender);
+    }
+  }, []);
 
   // UTM 자동입력
   useEffect(() => {

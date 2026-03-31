@@ -39,12 +39,11 @@ function convertTo24Hour(time: string): string {
 
 export default function SexyBattleClient({ battleId, challengerPreview }: Props) {
   const isBattleAccept = !!battleId && !!challengerPreview;
-  // 입력 상태 — 공통 캐시 복원
-  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
-  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
-  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
-  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
-  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'female');
+  // 입력 상태
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [gender, setGender] = useState<Gender>('female');
 
   // 플로우 상태 — UTM이나 배틀 수락이면 입력 폼으로 바로 진입
   const [step, setStep] = useState<Step>(battleId ? 'input' : 'landing');
@@ -56,6 +55,17 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
   const cardRef = useRef<HTMLDivElement>(null);
   const vsCardRef = useRef<HTMLDivElement>(null);
   const birthTimeRef = useRef<HTMLDivElement>(null);
+
+  // 캐시 복원 (클라이언트 마운트 후)
+  useEffect(() => {
+    const cached = loadSelfSaju();
+    if (cached) {
+      if (cached.birthDate) setBirthDate(cached.birthDate);
+      if (cached.birthTime) setBirthTime(cached.birthTime);
+      if (cached.unknownTime !== undefined) setUnknownTime(cached.unknownTime);
+      if (cached.gender) setGender(cached.gender);
+    }
+  }, []);
 
   // UTM 자동입력 — 파라미터 있으면 landing 스킵하고 입력폼 직행
   useEffect(() => {

@@ -39,11 +39,10 @@ function convertTo24Hour(time: string): string {
 
 
 export default function SajuCourtClient() {
-  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
-  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
-  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
-  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
-  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'female');
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [gender, setGender] = useState<Gender>('female');
 
   const [step, setStep] = useState<CourtStep>('landing');
   const [courtResult, setCourtResult] = useState<CourtResult | null>(null);
@@ -60,6 +59,17 @@ export default function SajuCourtClient() {
 
   const indictmentRef = useRef<HTMLDivElement>(null);
   const verdictRef = useRef<HTMLDivElement>(null);
+
+  // 캐시 복원 (클라이언트 마운트 후)
+  useEffect(() => {
+    const cached = loadSelfSaju();
+    if (cached) {
+      if (cached.birthDate) setBirthDate(cached.birthDate);
+      if (cached.birthTime) setBirthTime(cached.birthTime);
+      if (cached.unknownTime !== undefined) setUnknownTime(cached.unknownTime);
+      if (cached.gender) setGender(cached.gender);
+    }
+  }, []);
 
   // UTM 자동입력
   useEffect(() => {

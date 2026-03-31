@@ -30,12 +30,11 @@ interface Props {
 }
 
 export default function DatingSimClient({ sharedResultId }: Props) {
-  // ─── 입력 상태 — 공통 캐시 복원 ──────────────────────
-  const cached = typeof window !== 'undefined' ? loadSelfSaju() : null;
-  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
-  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
-  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
-  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'female');
+  // ─── 입력 상태 ──────────────────────────────────────
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [gender, setGender] = useState<Gender>('female');
 
   // ─── 플로우 상태 ────────────────────────────────────
   const [step, setStep] = useState<DatingStep>('landing');
@@ -60,6 +59,17 @@ export default function DatingSimClient({ sharedResultId }: Props) {
   // ─── 결과 상태 ──────────────────────────────────────
   const [finalResult, setFinalResult] = useState<FinalizeDatingResultResponse | null>(null);
   const [attemptNumber, setAttemptNumber] = useState(1);
+
+  // 캐시 복원 (클라이언트 마운트 후)
+  useEffect(() => {
+    const cached = loadSelfSaju();
+    if (cached) {
+      if (cached.birthDate) setBirthDate(cached.birthDate);
+      if (cached.birthTime) setBirthTime(cached.birthTime);
+      if (cached.unknownTime !== undefined) setUnknownTime(cached.unknownTime);
+      if (cached.gender) setGender(cached.gender);
+    }
+  }, []);
 
   // 입력값 변경 시 공통 캐시에 저장
   useEffect(() => {

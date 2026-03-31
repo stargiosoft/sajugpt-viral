@@ -39,12 +39,11 @@ function convertTo24Hour(time: string): string {
 }
 
 export default function AutopsyClient({ autopsyId }: Props) {
-  // 입력 상태 — 상대 사주 캐시 복원
-  const cached = typeof window !== 'undefined' ? loadTargetSaju() : null;
-  const [birthDate, setBirthDate] = useState(cached?.birthDate ?? '');
-  const [birthTime, setBirthTime] = useState(cached?.birthTime ?? '');
-  const [unknownTime, setUnknownTime] = useState(cached?.unknownTime ?? false);
-  const [gender, setGender] = useState<Gender>(cached?.gender ?? 'male');
+  // 입력 상태
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [gender, setGender] = useState<Gender>('male');
   const [causeInput, setCauseInput] = useState<CauseOfDeathInput | null>(null);
   const [duration, setDuration] = useState<RelationshipDuration | null>(null);
   const [coronerId, setCoronerId] = useState<CoronerId | null>(null);
@@ -57,6 +56,17 @@ export default function AutopsyClient({ autopsyId }: Props) {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const birthTimeRef = useRef<HTMLDivElement>(null);
+
+  // 캐시 복원 (클라이언트 마운트 후)
+  useEffect(() => {
+    const cached = loadTargetSaju();
+    if (cached) {
+      if (cached.birthDate) setBirthDate(cached.birthDate);
+      if (cached.birthTime) setBirthTime(cached.birthTime);
+      if (cached.unknownTime !== undefined) setUnknownTime(cached.unknownTime);
+      if (cached.gender) setGender(cached.gender);
+    }
+  }, []);
 
   // UTM 자동입력
   useEffect(() => {
