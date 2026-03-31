@@ -258,6 +258,8 @@ export default function GisaengLanding({ onStart }: Props) {
               <div
                 className="flex items-center justify-center"
                 style={{
+                  marginTop: '6px',
+                  marginBottom: '2px',
                   padding: '4px 10px',
                   borderRadius: '8px',
                   backgroundColor: `${s.color}0D`,
