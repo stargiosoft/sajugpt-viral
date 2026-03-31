@@ -25,9 +25,9 @@ const C = {
 
 // ─── 선비 데이터 ───────────────────────────────────────
 const SEONBI = [
-  { name: '윤태산', title: '좌의정의 아들', trait: '의심 많음', hanja: '權', color: C.gold },
-  { name: '서휘윤', title: '한양 최고 시인', trait: '진심만 원함', hanja: '情', color: C.vermillion },
-  { name: '도해결', title: '무관 출신 장수', trait: '독점욕 강함', hanja: '怒', color: C.inkSoft },
+  { name: '윤태산', title: '좌의정의 아들', trait: '의심 많음', hanja: '權', color: C.gold, thumbnail: '/characters/yoon-taesan.webp' },
+  { name: '서휘윤', title: '한양 최고 시인', trait: '진심만 원함', hanja: '情', color: C.vermillion, thumbnail: '/characters/seo-hwiyoon.webp' },
+  { name: '도해결', title: '무관 출신 장수', trait: '독점욕 강함', hanja: '怒', color: C.inkSoft, thumbnail: '/characters/do-haegyeol.webp' },
 ];
 
 const TIERS = [
@@ -236,20 +236,15 @@ export default function GisaengLanding({ onStart }: Props) {
 
               {/* 아바타 */}
               <div
+                className="overflow-hidden transform-gpu"
                 style={{
                   width: '48px',
                   height: '48px',
                   borderRadius: '50%',
-                  backgroundColor: C.hanjiDark,
                   border: `2px solid ${s.color}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                 }}
               >
-                <span style={{ fontSize: '20px', fontWeight: 700, color: s.color }}>
-                  {s.hanja}
-                </span>
+                <img src={s.thumbnail} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
 
               <p style={{ fontSize: '14px', fontWeight: 600, color: C.ink, marginTop: '10px', letterSpacing: '-0.28px' }}>
@@ -262,7 +257,7 @@ export default function GisaengLanding({ onStart }: Props) {
               {/* 특성 태그 */}
               <div
                 style={{
-                  marginTop: '10px',
+                  marginTop: '6px',
                   padding: '3px 10px',
                   borderRadius: '8px',
                   backgroundColor: `${s.color}0D`,
