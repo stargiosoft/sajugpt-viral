@@ -257,7 +257,8 @@ export default function GisaengLanding({ onStart }: Props) {
               {/* 특성 태그 */}
               <div
                 style={{
-                  marginTop: '6px',
+                  marginTop: 'auto',
+                  paddingTop: '6px',
                   padding: '3px 10px',
                   borderRadius: '8px',
                   backgroundColor: `${s.color}0D`,
