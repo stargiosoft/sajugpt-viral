@@ -19,7 +19,7 @@ export default function CourtShareButtons({ cardRef, courtId, crimeLabel, senten
 
   const getShareText = () => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    return `⚖️ 사주 법정 — ${crimeLabel}\n징역 ${sentence}년 선고 💰\n넌 뭐 나올지 해봐 ㅋㅋ\n👉 ${baseUrl}/court`;
+    return `⚖️ 사주 법정 — ${crimeLabel}\n징역 ${sentence}년 선고 💰\n넌 뭐 나올지 해봐 ㅋㅋ\n👉 ${baseUrl}/court/${courtId}`;
   };
 
   const handleCopy = useCallback(async () => {
