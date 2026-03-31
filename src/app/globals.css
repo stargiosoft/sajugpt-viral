@@ -24,17 +24,9 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
+html, body {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-body {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  min-height: 100dvh;
   overscroll-behavior-y: none;
   font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
     system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo',
