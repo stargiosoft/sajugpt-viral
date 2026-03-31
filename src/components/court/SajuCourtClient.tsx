@@ -468,13 +468,17 @@ export default function SajuCourtClient() {
 
             <div className="flex flex-col gap-3 w-full">
               <a
-                href={`/chat/yoon-taesan?birthday=${encodeURIComponent(birthDate.replace(/[^\d]/g, ''))}${unknownTime ? '0000' : convertTo24Hour(birthTime)}&gender=${gender}`}
+                href="https://www.sajugpt.co.kr/"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{ ...btnStyle, backgroundColor: 'rgba(232, 98, 122, 0.10)', border: '1px solid rgba(232, 98, 122, 0.25)', color: '#E8627A', textAlign: 'center', textDecoration: 'none', display: 'block' }}
               >
                 윤태산에게 항소하기
               </a>
               <a
-                href={`/chat/seo-hwiyoon?birthday=${encodeURIComponent(birthDate.replace(/[^\d]/g, ''))}${unknownTime ? '0000' : convertTo24Hour(birthTime)}&gender=${gender}`}
+                href="https://www.sajugpt.co.kr/"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{ ...btnStyle, backgroundColor: 'rgba(78, 205, 196, 0.10)', border: '1px solid rgba(78, 205, 196, 0.25)', color: '#4ECDC4', textAlign: 'center', textDecoration: 'none', display: 'block' }}
               >
                 서휘윤에게 상담받기
