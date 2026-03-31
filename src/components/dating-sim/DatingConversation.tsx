@@ -51,7 +51,7 @@ export default function DatingConversation({
       rawAddiction += c.choice.scoreImpact.addiction;
     }
     const normalize = (raw: number) => {
-      const score = Math.round(((raw + 10) / 28 * 9 + 1) * 10) / 10;
+      const score = Math.round(((raw + 10) / 22 * 9 + 1) * 10) / 10;
       return Math.max(1, Math.min(10, score));
     };
     const charm = normalize(rawCharm);
