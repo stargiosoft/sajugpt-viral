@@ -93,16 +93,24 @@ const TABS: { key: Tab; label: string; emoji: string }[] = [
 
 const S = {
   font: 'Pretendard Variable, sans-serif',
-  bg: '#f5f5f5',
-  card: '#ffffff',
-  primary: '#7A38D8',
-  primaryLight: '#F7F2FA',
-  text: '#1a1a1a',
-  label: '#666666',
-  border: '#e7e7e7',
+  bg: '#f9f9f9',           // Surface Secondary
+  card: '#ffffff',          // Surface
+  primary: '#7A38D8',      // Brand Primary
+  primaryDark: '#6B2FC2',  // Brand Primary Dark
+  primaryLight: '#F7F2FA', // Brand Primary Light
+  primaryTint: '#EDE5F7',  // Brand Primary Tint
+  primarySurface: '#FAF8FC', // Brand Primary Surface
+  text: '#151515',         // Text Primary
+  textSecondary: '#525252', // Text Secondary
+  textTertiary: '#6d6d6d', // Text Tertiary
+  label: '#848484',        // Text Caption
+  disabled: '#b7b7b7',     // Text Disabled
+  border: '#e7e7e7',       // Border Default
+  borderLight: '#f3f3f3',  // Border Divider
   green: '#10B981',
-  red: '#EF4444',
+  red: '#d4183d',          // Destructive
   amber: '#F59E0B',
+  info: '#3B82F6',         // Info
 };
 
 // ─── 헬퍼 ───
@@ -120,11 +128,11 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
       flex: 1,
       minWidth: 0,
     }}>
-      <p style={{ fontFamily: S.font, fontSize: '12px', color: S.label, marginBottom: '4px' }}>{label}</p>
-      <p style={{ fontFamily: S.font, fontSize: '24px', fontWeight: 700, color: S.text, letterSpacing: '-0.5px' }}>
+      <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label, marginBottom: '4px' }}>{label}</p>
+      <p style={{ fontFamily: S.font, fontSize: '24px', fontWeight: 600, lineHeight: '35.5px', letterSpacing: '-0.48px', color: S.text }}>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </p>
-      {sub && <p style={{ fontFamily: S.font, fontSize: '11px', color: S.label, marginTop: '2px' }}>{sub}</p>}
+      {sub && <p style={{ fontFamily: S.font, fontSize: '11px', fontWeight: 400, color: S.label, marginTop: '2px' }}>{sub}</p>}
     </div>
   );
 }
@@ -132,8 +140,8 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h3 style={{
-      fontFamily: S.font, fontSize: '15px', fontWeight: 700, color: S.text,
-      margin: '24px 0 12px', letterSpacing: '-0.3px',
+      fontFamily: S.font, fontSize: '16px', fontWeight: 600, lineHeight: '25px', letterSpacing: '-0.32px',
+      color: S.text, margin: '24px 0 12px',
     }}>
       {children}
     </h3>
@@ -144,7 +152,8 @@ function EmptyState() {
   return (
     <div style={{
       textAlign: 'center', padding: '60px 20px',
-      fontFamily: S.font, color: S.label, fontSize: '14px',
+      fontFamily: S.font, fontSize: '15px', fontWeight: 400, lineHeight: '20px',
+      letterSpacing: '-0.45px', color: S.textTertiary,
     }}>
       아직 데이터가 없습니다.<br />
       유저가 공유/클릭하면 여기에 집계됩니다.
@@ -273,7 +282,7 @@ export default function ViralDashboard() {
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
         }}>
           <p style={{ fontSize: '32px', marginBottom: '8px' }}>📊</p>
-          <p style={{ fontSize: '18px', fontWeight: 700, color: S.text, marginBottom: '24px' }}>
+          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, lineHeight: '25.5px', letterSpacing: '-0.36px', color: S.text, marginBottom: '24px' }}>
             바이럴 애널리틱스
           </p>
           <input
@@ -283,19 +292,22 @@ export default function ViralDashboard() {
             onChange={e => setPwInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleLogin()}
             style={{
-              width: '100%', height: '48px', borderRadius: '12px',
+              width: '100%', height: '48px', borderRadius: '16px',
               border: `1px solid ${S.border}`, padding: '0 16px',
-              fontSize: '15px', fontFamily: S.font, outline: 'none',
-              boxSizing: 'border-box',
+              fontFamily: S.font, fontSize: '15px', fontWeight: 400,
+              lineHeight: '20px', letterSpacing: '-0.45px', color: S.text,
+              outline: 'none', boxSizing: 'border-box',
+              backgroundColor: '#f3f3f5',
             }}
           />
           <button
             onClick={handleLogin}
             style={{
-              width: '100%', height: '48px', borderRadius: '12px',
+              width: '100%', height: '48px', borderRadius: '16px',
               backgroundColor: S.primary, color: '#fff', border: 'none',
-              fontSize: '15px', fontWeight: 600, cursor: 'pointer',
-              marginTop: '12px', fontFamily: S.font,
+              fontFamily: S.font, fontSize: '16px', fontWeight: 500,
+              lineHeight: '25px', letterSpacing: '-0.32px',
+              cursor: 'pointer', marginTop: '12px',
             }}
           >
             로그인
@@ -365,15 +377,16 @@ export default function ViralDashboard() {
           padding: '16px 20px 12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-            <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 700, color: S.text, letterSpacing: '-0.36px' }}>
+            <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, lineHeight: '25.5px', letterSpacing: '-0.36px', color: S.text }}>
               📊 바이럴 애널리틱스
             </p>
             <button
               onClick={loadData}
               style={{
-                backgroundColor: S.primaryLight, border: 'none', borderRadius: '8px',
-                padding: '6px 12px', fontSize: '13px', fontWeight: 600,
-                color: S.primary, cursor: 'pointer', fontFamily: S.font,
+                backgroundColor: S.primaryLight, border: 'none', borderRadius: '12px',
+                padding: '6px 12px', fontFamily: S.font, fontSize: '13px',
+                fontWeight: 500, letterSpacing: '-0.26px',
+                color: S.primary, cursor: 'pointer',
               }}
             >
               🔄 새로고침
@@ -387,11 +400,12 @@ export default function ViralDashboard() {
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 style={{
-                  padding: '6px 12px', borderRadius: '20px', border: 'none',
-                  fontSize: '13px', fontWeight: tab === t.key ? 700 : 500,
+                  padding: '6px 12px', borderRadius: '9999px', border: 'none',
+                  fontFamily: S.font, fontSize: '13px', fontWeight: tab === t.key ? 600 : 400,
+                  letterSpacing: '-0.26px',
                   backgroundColor: tab === t.key ? S.primary : 'transparent',
                   color: tab === t.key ? '#fff' : S.label,
-                  cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: S.font,
+                  cursor: 'pointer', whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -405,7 +419,7 @@ export default function ViralDashboard() {
         <div style={{ padding: '0 16px 32px' }}>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '80px 0', fontFamily: S.font, color: S.label }}>
+            <div style={{ textAlign: 'center', padding: '80px 0', fontFamily: S.font, fontSize: '15px', fontWeight: 400, lineHeight: '20px', letterSpacing: '-0.45px', color: S.textTertiary }}>
               데이터 불러오는 중...
             </div>
           ) : !hasData && tab !== 'today' ? (
@@ -434,7 +448,7 @@ export default function ViralDashboard() {
                       marginBottom: '8px',
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontFamily: S.font, fontSize: '14px', fontWeight: 700, color: S.text }}>
+                        <span style={{ fontFamily: S.font, fontSize: '15px', fontWeight: 600, letterSpacing: '-0.3px', color: S.text }}>
                           {featureLabel(r.feature_type)}
                         </span>
                         <span style={{
@@ -448,16 +462,16 @@ export default function ViralDashboard() {
                       </div>
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div style={{ flex: 1 }}>
-                          <p style={{ fontFamily: S.font, fontSize: '11px', color: S.label }}>공유</p>
-                          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 700, color: S.text }}>{r.share_clicks.toLocaleString()}</p>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>공유</p>
+                          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, letterSpacing: '-0.36px', color: S.text }}>{r.share_clicks.toLocaleString()}</p>
                         </div>
                         <div style={{ flex: 1 }}>
-                          <p style={{ fontFamily: S.font, fontSize: '11px', color: S.label }}>GPT 클릭</p>
-                          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 700, color: S.primary }}>{r.sajugpt_link_clicks.toLocaleString()}</p>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>GPT 클릭</p>
+                          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, letterSpacing: '-0.36px', color: S.primary }}>{r.sajugpt_link_clicks.toLocaleString()}</p>
                         </div>
                         <div style={{ flex: 1 }}>
-                          <p style={{ fontFamily: S.font, fontSize: '11px', color: S.label }}>레퍼럴</p>
-                          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 700, color: S.green }}>{r.referral_unique_users.toLocaleString()}</p>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>레퍼럴</p>
+                          <p style={{ fontFamily: S.font, fontSize: '18px', fontWeight: 600, letterSpacing: '-0.36px', color: S.green }}>{r.referral_unique_users.toLocaleString()}</p>
                         </div>
                       </div>
                     </div>
@@ -518,7 +532,7 @@ export default function ViralDashboard() {
                       <div style={{
                         display: 'grid', gridTemplateColumns: '1fr 60px 60px 60px',
                         padding: '10px 12px', borderBottom: `1px solid ${S.border}`,
-                        fontFamily: S.font, fontSize: '11px', fontWeight: 600, color: S.label,
+                        fontFamily: S.font, fontSize: '11px', fontWeight: 500, letterSpacing: '-0.22px', color: S.label,
                       }}>
                         <span>기능 / 날짜</span>
                         <span style={{ textAlign: 'right' }}>공유</span>
@@ -611,7 +625,7 @@ export default function ViralDashboard() {
                       backgroundColor: S.card, borderRadius: '16px', padding: '16px',
                       marginBottom: '8px',
                     }}>
-                      <p style={{ fontFamily: S.font, fontSize: '14px', fontWeight: 700, color: S.text, marginBottom: '12px' }}>
+                      <p style={{ fontFamily: S.font, fontSize: '15px', fontWeight: 600, letterSpacing: '-0.3px', color: S.text, marginBottom: '12px' }}>
                         {r.emoji} {r.name}
                       </p>
 
@@ -645,14 +659,14 @@ export default function ViralDashboard() {
                       {/* 전환율 수치 */}
                       <div style={{ display: 'flex', gap: '16px' }}>
                         <div>
-                          <p style={{ fontFamily: S.font, fontSize: '11px', color: S.label }}>공유→레퍼럴</p>
-                          <p style={{ fontFamily: S.font, fontSize: '16px', fontWeight: 700, color: r.referralRate > 10 ? S.green : S.text }}>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>공유→레퍼럴</p>
+                          <p style={{ fontFamily: S.font, fontSize: '16px', fontWeight: 600, letterSpacing: '-0.32px', color: r.referralRate > 10 ? S.green : S.text }}>
                             {r.referralRate}%
                           </p>
                         </div>
                         <div>
-                          <p style={{ fontFamily: S.font, fontSize: '11px', color: S.label }}>레퍼럴→GPT</p>
-                          <p style={{ fontFamily: S.font, fontSize: '16px', fontWeight: 700, color: r.gptCtr > 5 ? S.green : S.text }}>
+                          <p style={{ fontFamily: S.font, fontSize: '12px', fontWeight: 400, lineHeight: '16px', letterSpacing: '-0.24px', color: S.label }}>레퍼럴→GPT</p>
+                          <p style={{ fontFamily: S.font, fontSize: '16px', fontWeight: 600, letterSpacing: '-0.32px', color: r.gptCtr > 5 ? S.green : S.text }}>
                             {r.gptCtr}%
                           </p>
                         </div>
@@ -669,7 +683,8 @@ export default function ViralDashboard() {
                   {today.length === 0 ? (
                     <div style={{
                       textAlign: 'center', padding: '60px 20px', fontFamily: S.font,
-                      color: S.label, fontSize: '14px',
+                      fontSize: '15px', fontWeight: 400, lineHeight: '20px',
+                      letterSpacing: '-0.45px', color: S.textTertiary,
                     }}>
                       오늘은 아직 이벤트가 없습니다.
                     </div>
@@ -678,7 +693,7 @@ export default function ViralDashboard() {
                       <div style={{
                         display: 'grid', gridTemplateColumns: '1fr 80px 80px 50px',
                         padding: '10px 12px', borderBottom: `1px solid ${S.border}`,
-                        fontFamily: S.font, fontSize: '11px', fontWeight: 600, color: S.label,
+                        fontFamily: S.font, fontSize: '11px', fontWeight: 500, letterSpacing: '-0.22px', color: S.label,
                       }}>
                         <span>기능</span>
                         <span>이벤트</span>
