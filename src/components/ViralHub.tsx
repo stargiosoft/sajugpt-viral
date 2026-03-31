@@ -31,14 +31,6 @@ const ITEMS: ViralItem[] = [
     ready: true,
   },
   {
-    title: '사주 법정',
-    description: '연애 못한 이유를 사주로 기소, 형량이 곧 매력',
-    href: '/court',
-    emoji: '⚖️',
-    bgColor: '#EFF6FF',
-    ready: true,
-  },
-  {
     title: '주가 조작단',
     description: '저평가된 연애운, 주가 조작 작전을 세워드립니다',
     href: '/stock',
@@ -47,11 +39,11 @@ const ITEMS: ViralItem[] = [
     ready: true,
   },
   {
-    title: '데이트 시뮬레이션',
-    description: '사주 궁합 기반 AI 캐릭터와 5턴 데이트 대화',
-    href: '/dating-sim',
-    emoji: '💘',
-    bgColor: '#FFFBEB',
+    title: '사주 법정',
+    description: '연애 못한 이유를 사주로 기소, 형량이 곧 매력',
+    href: '/court',
+    emoji: '⚖️',
+    bgColor: '#EFF6FF',
     ready: true,
   },
   {
@@ -68,6 +60,14 @@ const ITEMS: ViralItem[] = [
     href: '/night-manual',
     emoji: '🌙',
     bgColor: '#F5F3FF',
+    ready: true,
+  },
+  {
+    title: '데이트 시뮬레이션',
+    description: '사주 궁합 기반 AI 캐릭터와 5턴 데이트 대화',
+    href: '/dating-sim',
+    emoji: '💘',
+    bgColor: '#FFFBEB',
     ready: true,
   },
 ];
