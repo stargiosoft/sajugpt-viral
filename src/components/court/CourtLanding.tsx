@@ -644,7 +644,7 @@ export default function CourtLanding({ onStart }: Props) {
 
       {/* ── 하단 고정 CTA ── */}
       <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] pointer-events-auto"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[768px] pointer-events-auto"
         style={{
           background: `linear-gradient(to top, ${C.bgDeep} 60%, transparent)`,
           paddingBottom: 'env(safe-area-inset-bottom)',

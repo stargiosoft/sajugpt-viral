@@ -33,3 +33,6 @@ next-env.d.ts
 # Claude Code — personal/local session state (not shared project config)
 .claude/settings.local.json
 .claude/projects/
+
+# Playwright MCP debug artifacts
+.playwright-mcp/

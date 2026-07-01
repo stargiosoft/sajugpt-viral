@@ -442,7 +442,7 @@ export default function GisaengLanding({ onStart }: Props) {
       <div
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10 pointer-events-auto"
         style={{
-          maxWidth: '440px',
+          maxWidth: '768px',
           paddingBottom: 'env(safe-area-inset-bottom)',
           background: `linear-gradient(to top, ${C.hanji} 60%, ${C.hanji}CC 80%, transparent 100%)`,
         }}

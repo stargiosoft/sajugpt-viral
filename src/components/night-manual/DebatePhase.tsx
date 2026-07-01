@@ -371,7 +371,7 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
                 onClick={onComplete}
                   style={{
                     width: '100%',
-                    maxWidth: '440px',
+                    maxWidth: '768px',
                     height: '56px',
                     borderRadius: '16px',
                     backgroundColor: '#7A38D8',

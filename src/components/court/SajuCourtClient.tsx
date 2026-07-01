@@ -188,7 +188,7 @@ export default function SajuCourtClient() {
       className="fixed inset-0 flex justify-center"
       style={{ backgroundColor: step === 'verdict' || step === 'indictment' ? '#fff' : '#0C0914' }}
     >
-      <div className="w-full max-w-[440px] h-full flex flex-col">
+      <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full flex flex-col items-center">
       <AnimatePresence mode="wait">
 
@@ -253,7 +253,7 @@ export default function SajuCourtClient() {
             <div
               className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
               style={{
-                maxWidth: '440px',
+                maxWidth: '768px',
                 background: 'linear-gradient(to top, #0C0914 60%, transparent)',
                 paddingBottom: 'env(safe-area-inset-bottom)',
               }}
@@ -313,7 +313,7 @@ export default function SajuCourtClient() {
             <div
               className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
               style={{
-                maxWidth: '440px',
+                maxWidth: '768px',
                 backgroundColor: '#fff',
                 boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
                 paddingBottom: 'env(safe-area-inset-bottom)',

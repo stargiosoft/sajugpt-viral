@@ -488,7 +488,7 @@ export default function NightLanding({ onStart }: Props) {
         <div
           className="w-full"
           style={{
-            maxWidth: '440px',
+            maxWidth: '768px',
             padding: '0 24px',
             paddingTop: '16px',
             background: 'linear-gradient(to top, #0d0d1a 60%, transparent)',

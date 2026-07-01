@@ -1,205 +1,100 @@
 'use client';
 
+import { useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import MoaMoaHeader from './home/MoaMoaHeader';
+import HeroBanner from './home/HeroBanner';
+import RankingPanel from './home/RankingPanel';
+import AdBannerStrip from './home/AdBannerStrip';
+import EditorPickSection from './home/EditorPickSection';
+import NewTestsSection from './home/NewTestsSection';
+import Footer from './home/Footer';
+import { TEST_CATALOG } from '@/constants/testCatalog';
+import type { TestCatalogItem } from '@/types/testCatalog';
 
-interface ViralItem {
-  title: string;
-  description: string;
-  href: string;
-  emoji: string;
-  bgColor: string;
-  ready: boolean;
-  tag?: string;
-  tagColor?: string;
-}
+const SAJUGPT_URL = 'https://www.sajugpt.co.kr/';
 
-const ITEMS: ViralItem[] = [
-  {
-    title: '색기 배틀',
-    description: '사주로 페로몬 등급 판정, 나한테 꼬인 남자는 몇 명?',
-    href: '/sexy-battle',
-    emoji: '🔥',
-    bgColor: '#FFF0F3',
-    ready: true,
-  },
-  {
-    title: '사주 부검실',
-    description: '전남친 사주를 부검하고 사망진단서를 발급합니다',
-    href: '/autopsy',
-    emoji: '🔬',
-    bgColor: '#FFF5F5',
-    ready: true,
-  },
-  {
-    title: '주가 조작단',
-    description: '저평가된 연애운, 주가 조작 작전을 세워드립니다',
-    href: '/stock',
-    emoji: '📈',
-    bgColor: '#ECFDF5',
-    ready: true,
-  },
-  {
-    title: '사주 법정',
-    description: '연애 못한 이유를 사주로 기소, 형량이 곧 매력',
-    href: '/court',
-    emoji: '⚖️',
-    bgColor: '#EFF6FF',
-    ready: true,
-  },
-  {
-    title: '기생 시뮬레이션',
-    description: '사주 기반 기생 능력치로 선비 3명을 몰래 관리',
-    href: '/gisaeng',
-    emoji: '🏮',
-    bgColor: '#FDF2F8',
-    ready: true,
-  },
-  {
-    title: '밤 설명서',
-    description: '사주 기반 체질 평가와 시종들의 난상토론',
-    href: '/night-manual',
-    emoji: '🌙',
-    bgColor: '#F5F3FF',
-    ready: true,
-  },
-  {
-    title: '데이트 시뮬레이션',
-    description: '사주 궁합 기반 AI 캐릭터와 5턴 데이트 대화',
-    href: '/dating-sim',
-    emoji: '💘',
-    bgColor: '#FFFBEB',
-    ready: true,
-  },
-];
-
+// 모아모아 홈 — 오케스트레이터. 데이터/스타일 세부사항은 하위 컴포넌트가 소유하고,
+// 여기서는 조립만 담당한다.
 export default function ViralHub() {
   const router = useRouter();
 
+  const handleSelectItem = useCallback((item: TestCatalogItem) => {
+    if (!item.ready) return;
+    router.push(item.href);
+  }, [router]);
+
   return (
-    <div className="bg-white fixed inset-0 flex justify-center">
-      <div className="w-full max-w-[440px] h-full flex flex-col bg-white">
-        {/* 헤더 — shrink-0 고정 */}
-        <div className="shrink-0" style={{ padding: '60px 20px 0' }}>
-          <h1 style={{
-            fontSize: '22px',
-            fontWeight: 700,
-            color: '#151515',
-            lineHeight: '32px',
-            letterSpacing: '-0.44px',
-          }}>
-            사주GPT 바이럴
-          </h1>
-          <p style={{
-            fontSize: '14px',
-            fontWeight: 400,
-            color: '#848484',
-            lineHeight: '20px',
-            letterSpacing: '-0.28px',
-            marginTop: '6px',
-          }}>
-            사주 기반 바이럴 콘텐츠 모음
-          </p>
-        </div>
-
-        {/* 리스트 — flex-1 overflow-auto 스크롤 영역 */}
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#ffffff' }}>
+      <div className="w-full max-w-[768px] md:max-w-[900px] lg:max-w-[1040px] h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
         <div className="flex-1 overflow-auto w-full">
-          <div className="flex flex-col" style={{ padding: '24px 20px 40px', gap: '12px' }}>
-            {ITEMS.map((item) => (
-            <div
-              key={item.title}
-              onClick={() => {
-                if (item.ready) router.push(item.href);
-              }}
-              className="flex items-center gap-4 cursor-pointer transform-gpu"
-              style={{
-                padding: '18px 16px',
-                borderRadius: '16px',
-                border: '1px solid #f0f0f0',
-                backgroundColor: '#fff',
-                boxShadow: '4px 4px 14px rgba(0,0,0,0.04)',
-                opacity: item.ready ? 1 : 0.55,
-                cursor: item.ready ? 'pointer' : 'default',
-                transition: 'all 0.15s ease',
-              }}
-              onPointerDown={(e) => {
-                if (!item.ready) return;
-                const el = e.currentTarget;
-                el.style.transform = 'scale(0.98)';
-                const reset = () => { el.style.transform = 'scale(1)'; };
-                el.addEventListener('pointerup', reset, { once: true });
-                el.addEventListener('pointercancel', reset, { once: true });
-                el.addEventListener('pointerleave', reset, { once: true });
-              }}
-            >
-              {/* 이모지 아이콘 */}
-              <div className="shrink-0 flex items-center justify-center" style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '14px',
-                backgroundColor: item.bgColor,
-              }}>
-                <span style={{ fontSize: '26px', lineHeight: 1 }}>{item.emoji}</span>
-              </div>
+          <MoaMoaHeader />
 
-              {/* 텍스트 */}
-              <div className="flex-1" style={{ minWidth: 0 }}>
-                <div className="flex items-center gap-2">
-                  <p style={{
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    color: '#151515',
-                    letterSpacing: '-0.32px',
-                  }}>
-                    {item.title}
-                  </p>
-                  {item.tag && (
-                    <span style={{
-                      fontSize: '10px',
-                      fontWeight: 600,
-                      color: item.tagColor,
-                      backgroundColor: item.tagColor ? `${item.tagColor}14` : undefined,
-                      padding: '2px 6px',
-                      borderRadius: '6px',
-                      letterSpacing: '-0.2px',
-                    }}>
-                      {item.tag}
-                    </span>
-                  )}
-                  {!item.ready && (
-                    <span style={{
-                      fontSize: '10px',
-                      fontWeight: 500,
-                      color: '#b7b7b7',
-                      backgroundColor: '#f8f8f8',
-                      padding: '2px 6px',
-                      borderRadius: '6px',
-                    }}>
-                      준비 중
-                    </span>
-                  )}
-                </div>
-                <p style={{
+          <div className="pt-1 px-4 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
+            <HeroBanner />
+            <div className="flex flex-col mt-4 lg:mt-0" style={{ gap: '12px' }}>
+              <RankingPanel items={TEST_CATALOG} onSelect={handleSelectItem} />
+              <motion.a
+                href={SAJUGPT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ opacity: 0.9 }}
+                whileTap={{ scale: 0.995, backgroundColor: '#E8600A' }}
+                transition={{ duration: 0.12, ease: 'easeOut' }}
+                className="flex items-center justify-center shrink-0 transform-gpu"
+                style={{
+                  height: '48px',
+                  borderRadius: '16px',
+                  backgroundColor: '#FF7A1A',
+                  color: '#ffffff',
                   fontSize: '13px',
-                  fontWeight: 400,
-                  color: '#848484',
-                  letterSpacing: '-0.26px',
-                  marginTop: '3px',
-                  lineHeight: '18px',
-                }}>
-                  {item.description}
-                </p>
-              </div>
-
-              {/* 화살표 */}
-              {item.ready && (
-                <div className="shrink-0">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d4d4d4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </div>
-              )}
+                  fontWeight: 600,
+                  letterSpacing: '0',
+                  textDecoration: 'none',
+                  gap: '6px',
+                }}
+              >
+                사주GPT 바로가기
+                <motion.svg
+                  aria-hidden
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  style={{ position: 'relative', top: '1px' }}
+                  animate={{ x: 4 }}
+                  transition={{
+                    duration: 0.9,
+                    ease: [0.45, 0, 0.15, 1],
+                    repeat: Infinity,
+                    repeatType: 'mirror',
+                    repeatDelay: 0.6,
+                  }}
+                >
+                  <path d="M16.1713 13.0008L11.2713 17.9008C11.0713 18.1008 10.9753 18.3341 10.9833 18.6008C10.9913 18.8674 11.0956 19.1008 11.2963 19.3008C11.4963 19.4841 11.7296 19.5801 11.9963 19.5888C12.2629 19.5974 12.4963 19.5014 12.6963 19.3008L19.2963 12.7008C19.3963 12.6008 19.4673 12.4924 19.5093 12.3758C19.5513 12.2591 19.5716 12.1341 19.5703 12.0008C19.5689 11.8674 19.5479 11.7424 19.5073 11.6258C19.4666 11.5091 19.3959 11.4008 19.2953 11.3008L12.6953 4.70078C12.5119 4.51745 12.2826 4.42578 12.0073 4.42578C11.7319 4.42578 11.4946 4.51745 11.2953 4.70078C11.0953 4.90078 10.9953 5.13845 10.9953 5.41378C10.9953 5.68911 11.0953 5.92645 11.2953 6.12578L16.1713 11.0008H4.99625C4.71292 11.0008 4.47525 11.0968 4.28325 11.2888C4.09125 11.4808 3.99558 11.7181 3.99625 12.0008C3.99692 12.2834 4.09292 12.5211 4.28425 12.7138C4.47558 12.9064 4.71292 13.0021 4.99625 13.0008H16.1713Z" fill="currentColor" />
+                </motion.svg>
+              </motion.a>
             </div>
-            ))}
+          </div>
+
+          <div className="pt-5 px-4 md:px-6 lg:px-8">
+            <AdBannerStrip
+              backgroundColor="#FFF1E6"
+              title="사주GPT 프리미엄"
+              subtitle="지금 가입하면 첫 상담 무료"
+              imageSrc="/home/ghost.png"
+            />
+          </div>
+
+          <EditorPickSection items={TEST_CATALOG} onSelect={handleSelectItem} />
+
+          <NewTestsSection items={TEST_CATALOG} onSelect={handleSelectItem} />
+
+          <div style={{ height: '100px' }} />
+
+          <div className="px-4 md:px-6 lg:px-8 pb-6">
+            <Footer />
           </div>
         </div>
       </div>

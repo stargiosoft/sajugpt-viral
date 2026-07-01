@@ -324,7 +324,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
 
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#F5F0E8', fontFamily: 'Pretendard Variable, sans-serif' }}>
-      <div className="w-full max-w-[440px] h-full flex flex-col">
+      <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
           {step === 'landing' && (
@@ -426,7 +426,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
               <div
                 className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
                 style={{
-                  maxWidth: '440px',
+                  maxWidth: '768px',
                   backgroundColor: '#F5F0E8',
                   boxShadow: '0px -8px 16px 0px rgba(245,240,232,0.76)',
                   paddingBottom: 'env(safe-area-inset-bottom)',

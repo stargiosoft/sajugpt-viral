@@ -194,7 +194,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
 
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#fff' }}>
-      <div className="w-full max-w-[440px] h-full flex flex-col">
+      <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
           {/* ─── LANDING STEP ─── */}
@@ -335,7 +335,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
               <div
                 className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
                 style={{
-                  maxWidth: '440px',
+                  maxWidth: '768px',
                   backgroundColor: '#fff',
                   boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
                   paddingBottom: 'env(safe-area-inset-bottom)',

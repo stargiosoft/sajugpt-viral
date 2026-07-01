@@ -253,7 +253,7 @@ export default function StockClient({ stockId }: Props) {
 
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#0a0a14' }}>
-      <div className="w-full max-w-[440px] h-full flex flex-col">
+      <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
 
@@ -332,7 +332,7 @@ export default function StockClient({ stockId }: Props) {
                 left: '50%',
                 transform: 'translateX(-50%)',
                 width: '100%',
-                maxWidth: '440px',
+                maxWidth: '768px',
                 padding: '16px 20px',
                 paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
                 background: 'linear-gradient(transparent, #0a0a14 30%)',

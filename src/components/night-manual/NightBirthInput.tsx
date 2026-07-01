@@ -100,7 +100,7 @@ export default function NightBirthInput({
           onClick={canSubmit ? onSubmit : undefined}
           style={{
             width: '100%',
-            maxWidth: '440px',
+            maxWidth: '768px',
             height: '56px',
             borderRadius: '16px',
             backgroundColor: canSubmit ? '#7A38D8' : '#3d3055',

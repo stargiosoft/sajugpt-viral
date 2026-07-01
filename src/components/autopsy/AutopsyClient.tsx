@@ -224,7 +224,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
 
   return (
     <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#fff' }}>
-      <div style={{ width: '100%', maxWidth: '440px' }}>
+      <div style={{ width: '100%', maxWidth: '768px' }}>
         <AnimatePresence mode="wait">
           {/* ─── LANDING ─── */}
           {step === 'landing' && (
@@ -488,7 +488,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
               <div
                 className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10 pointer-events-auto"
                 style={{
-                  maxWidth: '440px',
+                  maxWidth: '768px',
                   backgroundColor: '#fff',
                   boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
                   paddingBottom: 'env(safe-area-inset-bottom)',
@@ -686,7 +686,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
               <div
                 className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
                 style={{
-                  maxWidth: '440px',
+                  maxWidth: '768px',
                   backgroundColor: '#fff',
                   boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
                   paddingBottom: 'env(safe-area-inset-bottom)',

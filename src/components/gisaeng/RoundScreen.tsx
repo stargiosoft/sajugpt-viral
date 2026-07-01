@@ -181,7 +181,7 @@ export default function RoundScreen({ scenario, seonbi, stats, onChoice, onNext 
         <div
           className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
           style={{
-            maxWidth: '440px',
+            maxWidth: '768px',
             backgroundColor: C.hanji,
             boxShadow: `0px -8px 16px 0px ${C.hanji}c2`,
             paddingBottom: 'env(safe-area-inset-bottom)',

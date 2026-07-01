@@ -380,7 +380,7 @@ export default function ViralDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: S.bg }}>
-      <div style={{ maxWidth: '440px', margin: '0 auto', position: 'relative' }}>
+      <div style={{ maxWidth: '768px', margin: '0 auto', position: 'relative' }}>
 
         {/* 헤더 */}
         <div style={{

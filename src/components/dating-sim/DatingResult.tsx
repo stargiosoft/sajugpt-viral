@@ -267,7 +267,7 @@ export default function DatingResult({
 
   return (
     <div className="bg-white relative min-h-screen w-full flex justify-center">
-      <div className="w-full max-w-[440px] relative" style={{ backgroundColor: '#ffffff' }}>
+      <div className="w-full max-w-[768px] relative" style={{ backgroundColor: '#ffffff' }}>
 
         {/* ─── 성공/실패 헤더 ─── */}
         <motion.div

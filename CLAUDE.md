@@ -4,6 +4,18 @@
 
 ---
 
+## AI Team
+
+작업을 시작하기 전에 `.claude/PLAYBOOK.md`와 `.claude/agents/` 디렉토리를 반드시 참조합니다.
+
+- `.claude/PLAYBOOK.md`: 모든 Agent가 공통으로 따르는 운영 규칙 (철학, 원칙, 품질 기준, 의사결정 기준, 완료 기준)
+- `.claude/WORKFLOW.md`: Agent 간 협업 절차와 실행 순서의 Single Source of Truth
+- `.claude/agents/`: 각 Agent(Project Architect, Implementer, Code Reviewer, QA 등)의 역할과 책임 정의
+
+이 문서(CLAUDE.md)는 프로젝트 자체의 규칙만 관리하며, AI Team 운영 규칙과 역할은 위 문서들이 관리합니다.
+
+---
+
 ## 프로젝트 개요
 
 - **서비스**: 사주GPT 바이럴 마케팅 "색기 배틀" | **URL**: https://sajugpt-viral.vercel.app

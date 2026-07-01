@@ -829,7 +829,7 @@ export default function DatingLanding({ onStart }: Props) {
       <div
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10 pointer-events-auto"
         style={{
-          maxWidth: '440px',
+          maxWidth: '768px',
           paddingBottom: 'env(safe-area-inset-bottom)',
           background:
             'linear-gradient(to top, #0f0a1a 50%, rgba(15,10,26,0.8) 80%, transparent 100%)',

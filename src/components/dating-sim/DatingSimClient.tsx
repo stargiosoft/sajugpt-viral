@@ -253,7 +253,7 @@ export default function DatingSimClient({ sharedResultId }: Props) {
   // ─── 렌더링 ────────────────────────────────────────
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#fff' }}>
-      <div className="w-full max-w-[440px] h-full flex flex-col">
+      <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
         <AnimatePresence mode="wait">
           {step === 'landing' && (

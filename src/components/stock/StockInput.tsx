@@ -54,7 +54,7 @@ export default function StockInput({
     <div
       className="flex flex-col w-full"
       style={{
-        maxWidth: '440px',
+        maxWidth: '768px',
         margin: '0 auto',
         minHeight: '100dvh',
         backgroundColor: '#0a0a14',
@@ -280,7 +280,7 @@ export default function StockInput({
           backdropFilter: 'blur(8px)',
         }}
       >
-        <div style={{ maxWidth: '440px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '768px', margin: '0 auto' }}>
           <motion.button
             type="button"
             onClick={onSubmit}

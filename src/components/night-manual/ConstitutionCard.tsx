@@ -170,7 +170,7 @@ export default function ConstitutionCard({ result, onContinue }: Props) {
           onClick={onContinue}
           style={{
             width: '100%',
-            maxWidth: '440px',
+            maxWidth: '768px',
             height: '56px',
             borderRadius: '16px',
             backgroundColor: '#7A38D8',

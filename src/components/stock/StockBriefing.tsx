@@ -217,7 +217,7 @@ export default function StockBriefing({ briefing, onStart }: Props) {
           left: '50%',
           transform: 'translateX(-50%)',
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: '768px',
           padding: '16px 20px',
           paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
           background: 'linear-gradient(transparent, #0a0a14 30%)',

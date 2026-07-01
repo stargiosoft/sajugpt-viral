@@ -98,7 +98,7 @@ export default function AutopsyCard({ cardNumber, title, text, coronerId, onNext
       <div
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10"
         style={{
-          maxWidth: '440px',
+          maxWidth: '768px',
           backgroundColor: '#fff',
           boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
           paddingBottom: 'env(safe-area-inset-bottom)',

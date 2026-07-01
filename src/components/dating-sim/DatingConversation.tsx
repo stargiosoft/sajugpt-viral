@@ -115,7 +115,7 @@ export default function DatingConversation({
       className="fixed inset-0 flex justify-center"
       style={{ backgroundColor: '#FAF8FC' }}
     >
-      <div className="w-full max-w-[440px] h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+      <div className="w-full max-w-[768px] h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
 
         {/* ─── 헤더 (shrink-0) ─── */}
         <div

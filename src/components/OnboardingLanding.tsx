@@ -179,7 +179,7 @@ export default function OnboardingLanding({ onStart }: Props) {
       {/* ── How it works ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '0 28px', gap: '20px' }}
+        style={{ padding: '0 20px', gap: '10px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -200,16 +200,19 @@ export default function OnboardingLanding({ onStart }: Props) {
 
         {[
           {
+            num: '1',
             emoji: '📋',
             title: '생년월일만 입력',
             desc: '이름도 필요 없어요. 3초면 끝.',
           },
           {
+            num: '2',
             emoji: '🔍',
             title: 'AI 짐승남들이 사주를 심사',
             desc: '도화살, 홍염살, 편관... 당신의 색기 요소를 정밀 분석.',
           },
           {
+            num: '3',
             emoji: '🏆',
             title: '페로몬 등급 판정',
             desc: '몇 명이 꼬이는지, 누가 꼬이는지 결과 카드로 확인.',
@@ -217,28 +220,36 @@ export default function OnboardingLanding({ onStart }: Props) {
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="flex gap-3 items-start"
+            className="flex gap-4 items-center"
             variants={fadeUp}
+            style={{
+              padding: '18px 20px',
+              borderRadius: '20px',
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(12px)',
+            }}
           >
             <div
               className="flex items-center justify-center shrink-0"
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '10px',
-                backgroundColor: 'rgba(122,56,216,0.15)',
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(122,56,216,0.5), rgba(192,132,252,0.3))',
+                border: '1px solid rgba(192,132,252,0.25)',
               }}
             >
-              <span style={{ fontSize: '16px' }}>{item.emoji}</span>
+              <span style={{ fontSize: '18px' }}>{item.emoji}</span>
             </div>
-            <div>
+            <div className="flex-1">
               <p
                 style={{
                   fontSize: '14px',
-                  fontWeight: 600,
-                  color: 'rgba(255,255,255,0.85)',
+                  fontWeight: 700,
+                  color: 'rgba(255,255,255,0.9)',
                   letterSpacing: '-0.28px',
-                  marginBottom: '4px',
+                  marginBottom: '3px',
                 }}
               >
                 {item.title}
@@ -247,7 +258,7 @@ export default function OnboardingLanding({ onStart }: Props) {
                 style={{
                   fontSize: '13px',
                   fontWeight: 400,
-                  color: 'rgba(255,255,255,0.4)',
+                  color: 'rgba(255,255,255,0.45)',
                   lineHeight: '1.5',
                   letterSpacing: '-0.26px',
                 }}
@@ -255,6 +266,17 @@ export default function OnboardingLanding({ onStart }: Props) {
                 {item.desc}
               </p>
             </div>
+            <span
+              style={{
+                fontSize: '22px',
+                fontWeight: 800,
+                color: 'rgba(255,255,255,0.06)',
+                letterSpacing: '-1px',
+                flexShrink: 0,
+              }}
+            >
+              {item.num}
+            </span>
           </motion.div>
         ))}
       </motion.div>
@@ -262,7 +284,7 @@ export default function OnboardingLanding({ onStart }: Props) {
       {/* ── Grade Preview ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '40px 28px 0', gap: '10px' }}
+        style={{ padding: '40px 20px 0', gap: '8px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -284,33 +306,48 @@ export default function OnboardingLanding({ onStart }: Props) {
         {GRADE_PREVIEW.map((g) => (
           <motion.div
             key={g.grade}
-            className="flex items-center justify-between"
+            className="flex items-center justify-between overflow-hidden"
             variants={fadeUp}
             style={{
-              padding: '12px 16px',
-              borderRadius: '12px',
+              padding: '16px 20px',
+              borderRadius: '20px',
               backgroundColor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              backdropFilter: 'blur(12px)',
+              position: 'relative',
             }}
           >
-            <div className="flex items-center gap-3">
+            {/* 왼쪽 컬러 바 */}
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: '4px',
+                backgroundColor: g.color,
+                borderRadius: '20px 0 0 20px',
+                opacity: 0.85,
+              }}
+            />
+            <div className="flex items-center gap-3" style={{ paddingLeft: '8px' }}>
               <span
                 style={{
-                  fontSize: '14px',
+                  fontSize: '15px',
                   fontWeight: 800,
                   color: g.color,
-                  width: '36px',
-                  letterSpacing: '-0.28px',
+                  width: '38px',
+                  letterSpacing: '-0.3px',
                 }}
               >
                 {g.grade}
               </span>
               <span
                 style={{
-                  fontSize: '13px',
+                  fontSize: '14px',
                   fontWeight: 500,
-                  color: 'rgba(255,255,255,0.6)',
-                  letterSpacing: '-0.26px',
+                  color: 'rgba(255,255,255,0.7)',
+                  letterSpacing: '-0.28px',
                 }}
               >
                 {g.title}
@@ -318,10 +355,10 @@ export default function OnboardingLanding({ onStart }: Props) {
             </div>
             <span
               style={{
-                fontSize: '13px',
-                fontWeight: 600,
+                fontSize: '14px',
+                fontWeight: 700,
                 color: g.color,
-                letterSpacing: '-0.26px',
+                letterSpacing: '-0.28px',
               }}
             >
               {g.count}
@@ -393,7 +430,7 @@ export default function OnboardingLanding({ onStart }: Props) {
       <div
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10"
         style={{
-          maxWidth: '440px',
+          maxWidth: '768px',
           paddingBottom: 'env(safe-area-inset-bottom)',
           background:
             'linear-gradient(to top, #0f0a1a 50%, rgba(15,10,26,0.8) 80%, transparent 100%)',
