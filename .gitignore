@@ -29,3 +29,7 @@ next-env.d.ts
 
 .vercel
 .env*.local
+
+# Claude Code — personal/local session state (not shared project config)
+.claude/settings.local.json
+.claude/projects/
