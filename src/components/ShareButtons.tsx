@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { copyToClipboard, getShareText, saveImage, shareNative } from '@/lib/share';
-import { trackEvent, trackShare } from '@/lib/analytics';
+import ShareButton from '@/components/ShareButton';
+import PressableButton from '@/components/PressableButton';
+import { useShareActions } from '@/lib/useShareActions';
 
 interface Props {
   headcount: number;
@@ -11,99 +11,39 @@ interface Props {
 }
 
 export default function ShareButtons({ headcount, battleId, cardRef }: Props) {
-  const [copied, setCopied] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
-  const handleCopy = useCallback(async () => {
-    const text = getShareText(headcount, battleId);
-    const ok = await copyToClipboard(text);
-    if (ok) {
-      setCopied(true);
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setCopied(false), 2000);
-      trackEvent('sexy_battle_share_clipboard', { headcount, battleId });
-      trackShare('sexy_battle', 'clipboard', battleId, { headcount });
-    }
-  }, [headcount, battleId]);
-
-  const handleSave = useCallback(async () => {
-    if (!cardRef.current || saving) return;
-    setSaving(true);
-    try {
-      await saveImage(cardRef.current);
-      trackEvent('sexy_battle_share_instagram', { headcount, battleId });
-      trackShare('sexy_battle', 'image_save', battleId, { headcount });
-    } catch (err) {
-      console.error('이미지 저장 실패:', err);
-    } finally {
-      setSaving(false);
-    }
-  }, [cardRef, headcount, battleId, saving]);
-
-  const handleShare = useCallback(async () => {
-    if (!cardRef.current) return;
-    const shared = await shareNative(cardRef.current, headcount, battleId);
-    if (shared) {
-      trackShare('sexy_battle', 'native', battleId, { headcount });
-    } else {
-      await handleCopy();
-    }
-  }, [cardRef, headcount, battleId, handleCopy]);
-
-  const btnStyle: React.CSSProperties = {
-    height: '56px',
-    borderRadius: '16px',
-    fontSize: '15px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    border: 'none',
-    flex: 1,
-  };
+  const { saving, handleSave } = useShareActions({
+    featureType: 'sexy_battle',
+    resultId: battleId,
+    getShareText: () => '',
+    imageFilename: '색기배틀_결과.png',
+    metadata: { headcount },
+  });
 
   return (
-    <div className="flex flex-col gap-3" style={{ padding: '0 20px' }}>
-      {/* Primary: 친구에게 도발 */}
-      <button
-        onClick={handleShare}
-        style={{
-          ...btnStyle,
-          backgroundColor: '#7A38D8',
-          color: '#fff',
-          flex: 'none',
-          width: '100%',
-        }}
-      >
-        🔥 내 친구 기강 잡으러 가기
-      </button>
+    <div className="flex flex-col gap-3 mx-auto w-full max-w-[400px] md:max-w-[520px] lg:max-w-[620px]">
+      {/* Primary: 네이티브 공유 시트 또는 폴백 모달(카카오/X/Facebook/링크복사) */}
+      <ShareButton
+        featureType="sexy_battle"
+        resultId={battleId}
+        title={`색기 배틀 — 나한테 꼬인 남자 ${headcount}명 🔥`}
+        description="넌 몇 명이나 꼬이나 해봐 ㅋㅋ"
+        shareUrl={`${origin}/sexy-battle/${battleId}`}
+        imageUrl={`${origin}/home/thumbnails/sexy-battle.jpg`}
+        label="내 친구 기강 잡으러 가기"
+        activeBackground="linear-gradient(135deg, #FF4438 0%, #E0201A 100%)"
+      />
 
-      <div className="flex gap-3">
-        {/* 클립보드 복사 */}
-        <button
-          onClick={handleCopy}
-          style={{
-            ...btnStyle,
-            backgroundColor: copied ? '#44BB44' : '#f0f0f0',
-            color: copied ? '#fff' : '#333',
-          }}
-        >
-          {copied ? '복사 완료!' : '📋 링크 복사'}
-        </button>
-
-        {/* 이미지 저장 */}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            ...btnStyle,
-            backgroundColor: '#f0f0f0',
-            color: '#333',
-            opacity: saving ? 0.6 : 1,
-          }}
-        >
-          {saving ? '저장 중...' : '📸 이미지 저장'}
-        </button>
-      </div>
+      {/* 이미지 저장 — 링크 공유와 별개인 카드 다운로드 기능이라 그대로 유지 */}
+      <PressableButton
+        onClick={() => handleSave(cardRef)}
+        disabled={saving}
+        label={saving ? '저장 중...' : '이미지 저장'}
+        bgStyle={{ backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '16px' }}
+        hoverBackground="rgba(255,255,255,0.14)"
+        textStyle={{ color: '#fff' }}
+      />
     </div>
   );
 }

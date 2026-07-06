@@ -1,11 +1,11 @@
 'use client';
 
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { Gender } from '@/types/battle';
 import BirthInput from '@/components/BirthInput';
 import GenderSelect from '@/components/GenderSelect';
-import BirthTimeInput from '@/components/BirthTimeInput';
+import TimeSelectSheet from '@/components/TimeSelectSheet';
 
 interface Props {
   birthDate: string;
@@ -30,6 +30,12 @@ export default function NightBirthInput({
 }: Props) {
   const birthTimeRef = useRef<HTMLDivElement>(null);
 
+  // 태어난 시간 선택 (시진 바텀시트)
+  const handleTimeSelect = useCallback((displayTime: string, isUnknown: boolean) => {
+    setUnknownTime(isUnknown);
+    setBirthTime(displayTime);
+  }, [setBirthTime, setUnknownTime]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -53,7 +59,13 @@ export default function NightBirthInput({
       {/* 성별 */}
       <div style={{ marginBottom: '20px' }}>
         <p style={{ fontSize: '14px', fontWeight: 600, color: '#c4b5d9', marginBottom: '8px' }}>성별</p>
-        <GenderSelect value={gender} onChange={setGender} />
+        <GenderSelect
+          value={gender}
+          onChange={setGender}
+          accentColor="#7A38D8"
+          bgColor="rgba(255,255,255,0.06)"
+          unselectedColor="rgba(255,255,255,0.28)"
+        />
       </div>
 
       {/* 생년월일 */}
@@ -64,23 +76,24 @@ export default function NightBirthInput({
           onChange={setBirthDate}
           onEnter={onSubmit}
           onComplete={() => birthTimeRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          accentColor="#7A38D8"
+          bgColor="rgba(255,255,255,0.06)"
+          textColor="#f0e6ff"
+          borderColor="transparent"
         />
       </div>
 
       {/* 태어난 시간 */}
       <div ref={birthTimeRef} style={{ marginBottom: '32px' }}>
         <p style={{ fontSize: '14px', fontWeight: 600, color: '#c4b5d9', marginBottom: '8px' }}>태어난 시간</p>
-        <BirthTimeInput
+        <TimeSelectSheet
           value={birthTime}
-          onChange={setBirthTime}
           unknownTime={unknownTime}
-          onEnter={onSubmit}
-          onUnknownTimeToggle={() => {
-            const newVal = !unknownTime;
-            setUnknownTime(newVal);
-            if (newVal) setBirthTime('오후 12:00');
-            else setBirthTime('');
-          }}
+          onSelect={handleTimeSelect}
+          accentColor="#7A38D8"
+          bgColor="rgba(255,255,255,0.06)"
+          borderColor="transparent"
+          textColor="#f0e6ff"
         />
       </div>
 

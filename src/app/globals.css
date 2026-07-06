@@ -8,6 +8,7 @@
   --color-bg: #ffffff;
   --color-text: #151515;
   --color-border: #e7e7e7;
+  --color-border-light: #F0F0F2;
   --color-card-dark: #1a1a2e;
   --color-card-dark-secondary: #16213e;
   --color-grade-sss: #FFD700;
@@ -46,4 +47,30 @@ input::-webkit-inner-spin-button {
 }
 input[type='number'] {
   -moz-appearance: textfield;
+}
+
+/* RankingPanel: 모바일 전체 폭 vs lg 사이드바(235px) 폭 차이로 인한 반응형 폰트 크기 */
+.ranking-panel {
+  --rp-heading-size: 16px;
+  --rp-title-size: 14px;
+  --rp-sub-size: 12px;
+}
+
+@media (min-width: 1024px) {
+  .ranking-panel {
+    --rp-heading-size: 15px;
+    --rp-title-size: 12.5px;
+    --rp-sub-size: 11px;
+  }
+}
+
+/* HeroBanner: 데스크톱에서 배너 자체가 커지는 만큼 타이틀도 확대 */
+.hero-banner-title {
+  --hero-title-size: 21px;
+}
+
+@media (min-width: 1024px) {
+  .hero-banner-title {
+    --hero-title-size: 25px;
+  }
 }

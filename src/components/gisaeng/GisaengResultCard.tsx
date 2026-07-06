@@ -3,7 +3,7 @@
 import { forwardRef } from 'react';
 import type { GisaengCard, SimulationResult, SeonbiType } from '@/types/gisaeng';
 import { GISAENG_TYPES, SEONBI_INFO, TIER_INFO } from '@/constants/gisaeng';
-import { trackSajuGPTClick } from '@/lib/analytics';
+import SajuGPTWatermark from '@/components/SajuGPTWatermark';
 
 interface Props {
   gisaengCard: GisaengCard;
@@ -206,20 +206,12 @@ const GisaengResultCard = forwardRef<HTMLDivElement, Props>(
           "{simulation.finalNarrative}"
         </p>
 
-        {/* 워터마크 */}
-        <a
-          href="https://www.sajugpt.co.kr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackSajuGPTClick('gisaeng')}
-          style={{
-            display: 'block', textAlign: 'center', marginTop: '16px',
-            fontSize: '13px', color: C.vermillion, fontWeight: 700,
-            letterSpacing: '-0.26px', textDecoration: 'underline', textUnderlineOffset: '3px',
-          }}
-        >
-          sajugpt.co.kr
-        </a>
+        <SajuGPTWatermark
+          featureType="gisaeng"
+          color={C.vermillion}
+          marginTop="16px"
+          letterSpacing="-0.26px"
+        />
       </div>
     );
   }

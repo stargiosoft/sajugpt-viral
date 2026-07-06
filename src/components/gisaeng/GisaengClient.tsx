@@ -15,8 +15,10 @@ import type {
   GisaengSaveResponse,
 } from '@/types/gisaeng';
 import BirthInput from '@/components/BirthInput';
+import TestTopNav from '@/components/TestTopNav';
 import GenderSelect from '@/components/GenderSelect';
-import BirthTimeInput from '@/components/BirthTimeInput';
+import TimeSelectSheet from '@/components/TimeSelectSheet';
+import StickyCTAButton from '@/components/StickyCTAButton';
 import GisaengLanding from './GisaengLanding';
 import GisaengAnalyzing from './GisaengAnalyzing';
 import GisaengCardView from './GisaengCardView';
@@ -28,6 +30,7 @@ import GisaengCTA from './GisaengCTA';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM, trackEvent } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
+import { parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
 import {
   judgeChoice,
   getAdjustedChoices,
@@ -50,16 +53,6 @@ interface Props {
   resultId?: string;
 }
 
-function convertTo24Hour(time: string): string {
-  const match = time.match(/^(오전|오후)\s(\d{2}):(\d{2})$/);
-  if (!match) return '0000';
-  const period = match[1];
-  let hour = Number(match[2]);
-  const minute = match[3];
-  if (period === '오전') { if (hour === 12) hour = 0; }
-  else { if (hour !== 12) hour += 12; }
-  return `${String(hour).padStart(2, '0')}${minute}`;
-}
 
 export default function GisaengClient({ resultId: _resultId }: Props) {
   const [birthDate, setBirthDate] = useState('');
@@ -121,16 +114,26 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
     if (hasUTM && step === 'landing') setStep('input');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 유효성 검증 — 태어난 시간은 선택사항
+  // 유효성 검증 — 생년월일 완전 입력 + 태어난 시간 명시적 선택 필요
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const parts = birthDate.split('-');
     if (parts.length !== 3) return false;
     const [year, month, day] = parts.map(Number);
+    if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return false;
+    if (!birthTime && !unknownTime) return false;
     return true;
-  }, [birthDate]);
+  }, [birthDate, birthTime, unknownTime]);
+
+  // 태어난 시간 선택 (시진 드롭다운)
+  const handleTimeSelect = useCallback((displayTime: string, isUnknown: boolean) => {
+    setUnknownTime(isUnknown);
+    setBirthTime(displayTime);
+  }, []);
 
   // 제출 → 기생 카드 생성
   const handleSubmit = async () => {
@@ -149,7 +152,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
     setError(null);
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const hhmm = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
+    const hhmm = effectiveUnknownTime ? '1200' : parseKoreanTimeTo24Hour(birthTime);
     const birthday = `${numbers}${hhmm}`;
 
     const utm = parseUTM();
@@ -326,6 +329,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#F5F0E8', fontFamily: 'Pretendard Variable, sans-serif' }}>
       <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
+        <TestTopNav />
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <GisaengLanding key="landing" onStart={() => setStep('input')} />
@@ -389,18 +393,15 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                   <p style={{ fontSize: '12px', fontWeight: 400, color: '#A69A8E', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
                     태어난 시간
                   </p>
-                  <BirthTimeInput
+                  <TimeSelectSheet
                     value={birthTime}
-                    onChange={setBirthTime}
                     unknownTime={unknownTime}
+                    onSelect={handleTimeSelect}
                     accentColor="#B8423A"
-                    onEnter={handleSubmit}
-                    onUnknownTimeToggle={() => {
-                      const newVal = !unknownTime;
-                      setUnknownTime(newVal);
-                      if (newVal) setBirthTime('오후 12:00');
-                      else setBirthTime('');
-                    }}
+                    bgColor="#fff"
+                    borderColor="1.5px solid #e7e7e7"
+                    textColor="#151515"
+                    placeholderColor="#A69A8E"
                   />
                 </motion.div>
 
@@ -423,45 +424,19 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
               </motion.div>
 
               {/* 하단 고정 CTA — 색기 배틀 동일 패턴 */}
-              <div
-                className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
-                style={{
-                  maxWidth: '768px',
-                  backgroundColor: '#F5F0E8',
-                  boxShadow: '0px -8px 16px 0px rgba(245,240,232,0.76)',
-                  paddingBottom: 'env(safe-area-inset-bottom)',
-                }}
-              >
-                <div style={{ padding: '12px 20px', width: '100%' }}>
-                  <motion.div
-                    onClick={handleSubmit}
-                    className="transform-gpu"
-                    whileTap={isFormValid() ? { scale: 0.96 } : {}}
-                    transition={{ duration: 0.1, ease: 'easeInOut' }}
-                    style={{
-                      height: '56px',
-                      borderRadius: '16px',
-                      backgroundColor: isFormValid() ? '#B8423A' : '#EDE6D8',
-                      cursor: isFormValid() ? 'pointer' : 'not-allowed',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'background-color 0.2s',
-                    }}
-                  >
-                    <p style={{
-                      fontSize: '16px',
-                      fontWeight: 500,
-                      lineHeight: '25px',
-                      letterSpacing: '-0.32px',
-                      color: isFormValid() ? '#fff' : '#A69A8E',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      기방 문 열기 🏮
-                    </p>
-                  </motion.div>
-                </div>
-              </div>
+              <StickyCTAButton
+                isValid={isFormValid()}
+                onClick={handleSubmit}
+                label="기방 문 열기 🏮"
+                containerBackground="#F5F0E8"
+                containerBoxShadow="0px -8px 16px 0px rgba(245,240,232,0.76)"
+                activeBackground="#B8423A"
+                inactiveBackground="#EDE6D8"
+                inactiveTextColor="#A69A8E"
+                fontWeight={500}
+                lineHeight="25px"
+                letterSpacing="-0.32px"
+              />
             </motion.div>
           )}
 

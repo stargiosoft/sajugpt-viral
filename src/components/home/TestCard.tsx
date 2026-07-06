@@ -18,25 +18,33 @@ interface TestCardProps {
   item: TestCatalogItem;
   isNew?: boolean;
   onSelect: (item: TestCatalogItem) => void;
+  selectedId?: string | null;
 }
 
-export default function TestCard({ item, isNew, onSelect }: TestCardProps) {
+export default function TestCard({ item, isNew, onSelect, selectedId }: TestCardProps) {
   const theme = THEME_STYLES[item.colorTheme];
   const categoryLabel = CATEGORIES.find((c) => c.key === item.category)?.label ?? '';
+  const isDimmed = !!selectedId && selectedId !== item.id;
 
   return (
     <motion.div
       onClick={() => { if (item.ready) onSelect(item); }}
-      whileTap={item.ready ? { scale: 0.98 } : undefined}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      animate={{
+        scale: isDimmed ? 0.9998 : 1,
+        opacity: isDimmed ? 0.95 : item.ready ? 1 : 0.55,
+      }}
+      whileTap={item.ready ? { scale: 0.995 } : undefined}
+      transition={{ duration: 0.22, ease: 'easeOut' }}
       className="group transform-gpu w-full"
       style={{
         cursor: item.ready ? 'pointer' : 'default',
-        opacity: item.ready ? 1 : 0.55,
+        outline: 'none',
       }}
     >
       {/* 썸네일 (가로형) — 박스는 고정, 내부 이미지만 확대되어 클리핑됨 */}
-      <div
+      <motion.div
+        whileTap={item.ready ? { filter: 'brightness(1.05)' } : undefined}
+        transition={{ duration: 0.15, ease: 'easeOut' }}
         className="relative transform-gpu w-full aspect-[4/3]"
         style={{
           borderRadius: '16px',
@@ -69,7 +77,7 @@ export default function TestCard({ item, isNew, onSelect }: TestCardProps) {
             fontWeight: 700,
             color: isNew ? '#ffffff' : '#0d0d0d',
             backgroundColor: isNew ? '#FF7A1A' : 'rgba(255,255,255,0.92)',
-            padding: '4px 9px',
+            padding: '4.5px 9px 4px',
             borderRadius: '20px',
             letterSpacing: '-0.2px',
           }}
@@ -85,7 +93,7 @@ export default function TestCard({ item, isNew, onSelect }: TestCardProps) {
             <span style={{ fontSize: '11px', fontWeight: 600, color: '#ffffff' }}>준비 중</span>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* 텍스트 */}
       <div style={{ padding: '10px 2px 0' }}>
@@ -96,7 +104,7 @@ export default function TestCard({ item, isNew, onSelect }: TestCardProps) {
             color: '#0d0d0d',
             letterSpacing: '-0.3px',
             lineHeight: '1.3',
-            marginBottom: '1px',
+            marginBottom: '-1px',
           }}
         >
           {item.title}

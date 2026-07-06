@@ -1,28 +1,30 @@
 'use client';
 
+import { motion } from 'framer-motion';
+
 interface AdBannerStripProps {
   backgroundColor?: string;
   title?: string;
   subtitle?: string;
   imageSrc?: string;
+  href?: string;
 }
 
 // Hero+랭킹 섹션 아래 가로 띠 배너 광고 자리 — 실제 광고 연동 전까지의 플레이스홀더
-export default function AdBannerStrip({ backgroundColor = '#F5F5F6', title, subtitle, imageSrc }: AdBannerStripProps) {
+export default function AdBannerStrip({ backgroundColor = '#F5F5F6', title, subtitle, imageSrc, href }: AdBannerStripProps) {
   const hasContent = Boolean(title || subtitle || imageSrc);
 
-  return (
-    <div
-      className="relative flex items-center overflow-hidden"
-      style={{
-        height: '100px',
-        borderRadius: '16px',
-        backgroundColor,
-        border: hasContent ? 'none' : '1px dashed #DADADE',
-        justifyContent: 'center',
-        padding: hasContent ? '0 32px' : 0,
-      }}
-    >
+  const containerStyle = {
+    height: '100px',
+    borderRadius: '16px',
+    backgroundColor,
+    border: hasContent ? 'none' : '1px dashed #DADADE',
+    justifyContent: 'center' as const,
+    padding: hasContent ? '0 28px 0 36px' : 0,
+  };
+
+  const content = (
+    <>
       <span
         className="absolute"
         style={{
@@ -30,8 +32,8 @@ export default function AdBannerStrip({ backgroundColor = '#F5F5F6', title, subt
           right: '12px',
           fontSize: '10px',
           fontWeight: 700,
-          color: hasContent ? 'rgba(0,0,0,0.4)' : '#aaa',
-          backgroundColor: hasContent ? 'rgba(0,0,0,0.08)' : 'transparent',
+          color: hasContent ? '#B0793F' : '#aaa',
+          backgroundColor: hasContent ? 'rgba(255,255,255,0.85)' : 'transparent',
           padding: hasContent ? '3px 9px' : 0,
           borderRadius: '999px',
           letterSpacing: '0.3px',
@@ -47,7 +49,7 @@ export default function AdBannerStrip({ backgroundColor = '#F5F5F6', title, subt
               src={imageSrc}
               alt=""
               className="shrink-0"
-              style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
+              style={{ height: '64px', width: 'auto', objectFit: 'contain' }}
             />
           )}
           <div className="flex flex-col justify-center min-w-0" style={{ gap: '5px' }}>
@@ -68,6 +70,28 @@ export default function AdBannerStrip({ backgroundColor = '#F5F5F6', title, subt
           광고 배너 영역
         </span>
       )}
+    </>
+  );
+
+  if (hasContent && href) {
+    return (
+      <motion.a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        whileTap={{ scale: 0.998 }}
+        transition={{ duration: 0.12, ease: 'easeOut' }}
+        className="relative flex items-center overflow-hidden transform-gpu"
+        style={containerStyle}
+      >
+        {content}
+      </motion.a>
+    );
+  }
+
+  return (
+    <div className="relative flex items-center overflow-hidden" style={containerStyle}>
+      {content}
     </div>
   );
 }

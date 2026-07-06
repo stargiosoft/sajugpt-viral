@@ -8,7 +8,8 @@ import {
   STAT_LABELS, getCompatibility,
 } from '@/constants/night-manual';
 import { saveImage, copyToClipboard } from '@/lib/share';
-import { trackShare, trackSajuGPTClick } from '@/lib/analytics';
+import { trackShare } from '@/lib/analytics';
+import SajuGPTWatermark from '@/components/SajuGPTWatermark';
 
 interface Props {
   result: NightManualResult;
@@ -240,25 +241,7 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
           </p>
         </div>
 
-        {/* 워터마크 */}
-        <a
-          href="https://www.sajugpt.co.kr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackSajuGPTClick('night_manual', result.nightManualId)}
-          className="text-center"
-          style={{
-            display: 'block',
-            fontSize: '13px',
-            fontWeight: 700,
-            color: '#7A38D8',
-            marginTop: '16px',
-            textDecoration: 'underline',
-            textUnderlineOffset: '3px',
-          }}
-        >
-          sajugpt.co.kr
-        </a>
+        <SajuGPTWatermark featureType="night_manual" resultId={result.nightManualId} marginTop="16px" />
       </motion.div>
 
       {/* 공유 버튼 */}

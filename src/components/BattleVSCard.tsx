@@ -3,17 +3,9 @@
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import type { BattleComparison, Grade } from '@/types/battle';
-import { trackSajuGPTClick } from '@/lib/analytics';
 import GradeBadge from '@/components/GradeBadge';
-
-const GRADE_COLORS: Record<Grade, string> = {
-  SSS: '#FFD700',
-  SS: '#FF4444',
-  S: '#7A38D8',
-  A: '#4488FF',
-  B: '#44BB44',
-  CUT: '#888888',
-};
+import { GRADE_COLOR_MAP } from '@/constants/grades';
+import SajuGPTWatermark from '@/components/SajuGPTWatermark';
 
 interface Props {
   battle: BattleComparison;
@@ -26,11 +18,11 @@ function PlayerColumn({ label, headcount, grade, title, isWinner }: {
   title: string;
   isWinner: boolean;
 }) {
-  const gradeColor = GRADE_COLORS[grade] ?? '#888';
+  const gradeColor = GRADE_COLOR_MAP[grade] ?? '#888';
 
   return (
     <div className="flex flex-col items-center" style={{ flex: 1, gap: '8px' }}>
-      <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', letterSpacing: '-0.26px' }}>
+      <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '-0.26px' }}>
         {label}
       </p>
       <motion.div
@@ -44,9 +36,9 @@ function PlayerColumn({ label, headcount, grade, title, isWinner }: {
         <p style={{ fontSize: '48px', fontWeight: 900, color: gradeColor, lineHeight: 1 }}>
           {headcount}
         </p>
-        <p style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.5)' }}>명</p>
+        <p style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>명</p>
       </motion.div>
-      <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', letterSpacing: '-0.26px' }}>
+      <p style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.26px' }}>
         「{title}」
       </p>
       {isWinner && (
@@ -78,20 +70,20 @@ const BattleVSCard = forwardRef<HTMLDivElement, Props>(
     return (
       <div
         ref={ref}
-        className="flex flex-col items-center"
+        className="flex flex-col items-center w-full max-w-[400px] md:max-w-[520px] lg:max-w-[620px]"
         style={{
-          width: '100%',
           minHeight: '480px',
           borderRadius: '20px',
-          background: 'linear-gradient(180deg, #1A1025 0%, #0D0A14 100%)',
+          backgroundColor: '#161616',
+          border: '1px solid rgba(255,255,255,0.08)',
           padding: '32px 20px',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
         {/* 상단 타이틀 */}
-        <p style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginBottom: '4px', letterSpacing: '-0.28px' }}>
-          🔥 색기 배틀 결과
+        <p style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', marginBottom: '4px', letterSpacing: '-0.28px' }}>
+          색기 배틀 결과
         </p>
 
         {/* 승패 결과 배지 */}
@@ -102,15 +94,15 @@ const BattleVSCard = forwardRef<HTMLDivElement, Props>(
           style={{
             padding: '6px 16px',
             borderRadius: '20px',
-            backgroundColor: winType === '무승부' ? 'rgba(255,255,255,0.1)' : 'rgba(255,215,0,0.15)',
-            border: winType === '무승부' ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,215,0,0.3)',
+            backgroundColor: winType === '무승부' ? 'rgba(255,255,255,0.06)' : 'rgba(255,193,7,0.12)',
+            border: winType === '무승부' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,193,7,0.3)',
             marginBottom: '24px',
           }}
         >
           <p style={{
             fontSize: '13px',
             fontWeight: 700,
-            color: winType === '무승부' ? 'rgba(255,255,255,0.7)' : '#FFD700',
+            color: winType === '무승부' ? 'rgba(255,255,255,0.5)' : '#FFC107',
             letterSpacing: '-0.26px',
           }}>
             {winType === '무승부' ? '⚔️ 무승부' : winType === '압승' ? '💀 압승' : '⚡ 신승'}
@@ -163,7 +155,7 @@ const BattleVSCard = forwardRef<HTMLDivElement, Props>(
           style={{
             fontSize: '14px',
             fontWeight: 600,
-            color: 'rgba(255,255,255,0.7)',
+            color: 'rgba(255,255,255,0.75)',
             textAlign: 'center',
             lineHeight: '1.6',
             letterSpacing: '-0.28px',
@@ -173,24 +165,13 @@ const BattleVSCard = forwardRef<HTMLDivElement, Props>(
           "{winnerMessage}"
         </motion.p>
 
-        {/* 워터마크 */}
-        <a
-          href="https://www.sajugpt.co.kr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackSajuGPTClick('sexy_battle')}
-          style={{
-            marginTop: 'auto',
-            paddingTop: '20px',
-            fontSize: '12px',
-            fontWeight: 700,
-            color: '#7A38D8',
-            textDecoration: 'underline',
-            textUnderlineOffset: '2px',
-          }}
-        >
-          sajugpt.co.kr
-        </a>
+        <SajuGPTWatermark
+          featureType="sexy_battle"
+          color="#FF4438"
+          marginTop="auto"
+          fontSize="12px"
+          letterSpacing="0"
+        />
       </div>
     );
   }

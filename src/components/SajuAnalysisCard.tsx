@@ -21,25 +21,24 @@ export default function SajuAnalysisCard({ result }: Props) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.4 }}
+      className="w-full max-w-[400px] md:max-w-[520px] lg:max-w-[620px]"
       style={{
-        width: '100%',
-        maxWidth: '400px',
         borderRadius: '24px',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+        backgroundColor: '#161616',
+        border: '1px solid rgba(255,255,255,0.08)',
         padding: '20px',
       }}
     >
       {/* 헤더 */}
       <div className="flex items-center" style={{ gap: '8px', marginBottom: '14px' }}>
-        <span style={{ fontSize: '14px', color: '#7A38D8' }}>✦</span>
+        <span style={{ fontSize: '14px', color: '#FF4438' }}>✦</span>
         <h3 style={{
           fontFamily: 'Pretendard Variable, sans-serif',
           fontSize: '15px',
           fontWeight: 700,
           lineHeight: '20px',
           letterSpacing: '-0.45px',
-          color: '#151515',
+          color: '#ffffff',
         }}>
           사주가 말하는 당신의 페로몬
         </h3>
@@ -56,8 +55,8 @@ export default function SajuAnalysisCard({ result }: Props) {
                 fontSize: '12px',
                 fontWeight: 600,
                 letterSpacing: '-0.24px',
-                color: '#7A38D8',
-                backgroundColor: '#F7F2FA',
+                color: '#FF4438',
+                backgroundColor: 'rgba(255,68,56,0.12)',
                 borderRadius: '4px',
                 padding: '4px 10px',
               }}
@@ -71,11 +70,11 @@ export default function SajuAnalysisCard({ result }: Props) {
       {/* AI 판정문 전체 */}
       <p style={{
         fontFamily: 'Pretendard Variable, sans-serif',
-        fontSize: '14px',
+        fontSize: '15px',
         fontWeight: 400,
-        lineHeight: '24px',
-        letterSpacing: '-0.42px',
-        color: '#525252',
+        lineHeight: '26px',
+        letterSpacing: '-0.3px',
+        color: 'rgba(255,255,255,0.85)',
       }}>
         {verdict}
       </p>

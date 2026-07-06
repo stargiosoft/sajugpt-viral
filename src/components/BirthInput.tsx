@@ -8,11 +8,34 @@ interface Props {
   onComplete?: () => void; // 8자리 완성 시 다음 필드로 포커스
   onEnter?: () => void;    // 엔터 키 시 폼 제출
   accentColor?: string;
+  bgColor?: string;
+  textColor?: string;
+  borderColor?: string;
+  errorColor?: string;
+  errorGap?: string;
+  errorOverlay?: boolean;
+  errorFontSize?: string;
+  errorIconSize?: number;
 }
 
-export default function BirthInput({ value, onChange, onComplete, onEnter, accentColor = '#7A38D8' }: Props) {
+export default function BirthInput({
+  value,
+  onChange,
+  onComplete,
+  onEnter,
+  accentColor = '#7A38D8',
+  bgColor = '#fff',
+  textColor = '#151515',
+  borderColor = '#e7e7e7',
+  errorColor = '#FF0000',
+  errorGap = '4px',
+  errorOverlay = false,
+  errorFontSize = '13px',
+  errorIconSize = 16,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
+  const [isFocused, setIsFocused] = useState(false);
 
   const isValidDate = useCallback((dateStr: string): boolean => {
     if (dateStr.length !== 10) return false;
@@ -49,14 +72,14 @@ export default function BirthInput({ value, onChange, onComplete, onEnter, accen
   const valid = isValidDate(value);
 
   return (
-    <div className="flex flex-col gap-1 w-full">
+    <div className="flex flex-col w-full" style={{ position: 'relative' }}>
       <div
         className="relative w-full"
         style={{
           height: '56px',
           borderRadius: '16px',
-          border: error ? '1.5px solid #FF0000' : valid ? `1.5px solid ${accentColor}` : '1.5px solid #e7e7e7',
-          backgroundColor: '#fff',
+          border: error ? `1.5px solid ${errorColor}` : isFocused ? `1.5px solid ${accentColor}` : `1.5px solid ${borderColor}`,
+          backgroundColor: bgColor,
           transition: 'border-color 0.2s',
         }}
       >
@@ -65,33 +88,37 @@ export default function BirthInput({ value, onChange, onComplete, onEnter, accen
             ref={inputRef}
             type="text"
             inputMode="numeric"
-            value={valid ? `${value} (양력)` : value}
+            value={valid && !isFocused ? `${value} (양력)` : value}
             onChange={e => handleChange(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onEnter?.(); } }}
             placeholder="예: 1992-07-15"
             autoComplete="off"
             autoFocus
-            onFocus={() => {
-              if (valid && inputRef.current) {
-                inputRef.current.value = value;
-              }
-            }}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             className="flex-1 outline-none bg-transparent w-full"
             style={{
               fontSize: '16px',
               lineHeight: '20px',
               letterSpacing: '-0.45px',
-              color: '#151515',
+              color: textColor,
             }}
           />
         </div>
       </div>
       {error && (
-        <div className="flex gap-1 items-center" style={{ padding: '0 4px' }}>
-          <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-            <path d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8C1.5 11.59 4.41 14.5 8 14.5C11.59 14.5 14.5 11.59 14.5 8C14.5 4.41 11.59 1.5 8 1.5ZM8 11C7.72 11 7.5 10.78 7.5 10.5V8C7.5 7.72 7.72 7.5 8 7.5C8.28 7.5 8.5 7.72 8.5 8V10.5C8.5 10.78 8.28 11 8 11ZM8.5 6.5H7.5V5.5H8.5V6.5Z" fill="#FA5B4A" />
+        <div
+          className="flex gap-1 items-center"
+          style={{
+            padding: '0 4px',
+            marginTop: errorGap,
+            ...(errorOverlay ? { position: 'absolute', top: '100%', left: 0, right: 0 } : {}),
+          }}
+        >
+          <svg width={errorIconSize} height={errorIconSize} fill="none" viewBox="0 0 16 16">
+            <path d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8C1.5 11.59 4.41 14.5 8 14.5C11.59 14.5 14.5 11.59 14.5 8C14.5 4.41 11.59 1.5 8 1.5ZM8 11C7.72 11 7.5 10.78 7.5 10.5V8C7.5 7.72 7.72 7.5 8 7.5C8.28 7.5 8.5 7.72 8.5 8V10.5C8.5 10.78 8.28 11 8 11ZM8.5 6.5H7.5V5.5H8.5V6.5Z" fill={errorColor} />
           </svg>
-          <p style={{ color: '#fa5b4a', fontSize: '13px', lineHeight: '22px' }}>{error}</p>
+          <p style={{ color: errorColor, fontSize: errorFontSize, lineHeight: '22px' }}>{error}</p>
         </div>
       )}
     </div>

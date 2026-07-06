@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import MoaMoaHeader from './home/MoaMoaHeader';
@@ -19,10 +19,17 @@ const SAJUGPT_URL = 'https://www.sajugpt.co.kr/';
 // 여기서는 조립만 담당한다.
 export default function ViralHub() {
   const router = useRouter();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const navigateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (navigateTimeoutRef.current) clearTimeout(navigateTimeoutRef.current);
+  }, []);
 
   const handleSelectItem = useCallback((item: TestCatalogItem) => {
-    if (!item.ready) return;
-    router.push(item.href);
+    if (!item.ready || navigateTimeoutRef.current) return;
+    setSelectedId(item.id);
+    navigateTimeoutRef.current = setTimeout(() => router.push(item.href), 180);
   }, [router]);
 
   return (
@@ -34,7 +41,7 @@ export default function ViralHub() {
           <div className="pt-1 px-4 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
             <HeroBanner />
             <div className="flex flex-col mt-4 lg:mt-0" style={{ gap: '12px' }}>
-              <RankingPanel items={TEST_CATALOG} onSelect={handleSelectItem} />
+              <RankingPanel items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
               <motion.a
                 href={SAJUGPT_URL}
                 target="_blank"
@@ -49,7 +56,7 @@ export default function ViralHub() {
                   backgroundColor: '#FF7A1A',
                   color: '#ffffff',
                   fontSize: '13px',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   letterSpacing: '0',
                   textDecoration: 'none',
                   gap: '6px',
@@ -78,20 +85,19 @@ export default function ViralHub() {
             </div>
           </div>
 
-          <div className="pt-5 px-4 md:px-6 lg:px-8">
+          <div className="px-4 md:px-6 lg:px-8" style={{ paddingTop: '28px' }}>
             <AdBannerStrip
               backgroundColor="#FFF1E6"
-              title="사주GPT 프리미엄"
-              subtitle="지금 가입하면 첫 상담 무료"
+              title="여름 특집 살귀 타로"
+              subtitle="무더위엔 살귀타로로 여름운세 확인"
               imageSrc="/home/ghost.png"
+              href={SAJUGPT_URL}
             />
           </div>
 
-          <EditorPickSection items={TEST_CATALOG} onSelect={handleSelectItem} />
+          <EditorPickSection items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
 
-          <NewTestsSection items={TEST_CATALOG} onSelect={handleSelectItem} />
-
-          <div style={{ height: '100px' }} />
+          <NewTestsSection items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
 
           <div className="px-4 md:px-6 lg:px-8 pb-6">
             <Footer />

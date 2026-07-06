@@ -5,8 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Gender, AutopsyStep, AutopsyResult, CauseOfDeathInput, RelationshipDuration, CoronerId } from '@/types/autopsy';
 import { CORONERS } from '@/constants/autopsy';
 import BirthInput from '@/components/BirthInput';
+import TestTopNav from '@/components/TestTopNav';
 import GenderSelect from '@/components/GenderSelect';
-import BirthTimeInput from '@/components/BirthTimeInput';
+import TimeSelectSheet from '@/components/TimeSelectSheet';
+import StickyCTAButton from '@/components/StickyCTAButton';
 import CauseOfDeathSelect from '@/components/autopsy/CauseOfDeathSelect';
 import DurationSelect from '@/components/autopsy/DurationSelect';
 import CoronerSelect from '@/components/autopsy/CoronerSelect';
@@ -19,23 +21,10 @@ import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { supabase } from '@/lib/supabase';
 import { parseUTM, trackEvent } from '@/lib/analytics';
 import { loadTargetSaju, saveTargetSaju } from '@/lib/sajuCache';
+import { parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
 
 interface Props {
   autopsyId?: string;
-}
-
-function convertTo24Hour(time: string): string {
-  const match = time.match(/^(오전|오후)\s(\d{2}):(\d{2})$/);
-  if (!match) return '0000';
-  const period = match[1];
-  let hour = Number(match[2]);
-  const minute = match[3];
-  if (period === '오전') {
-    if (hour === 12) hour = 0;
-  } else {
-    if (hour !== 12) hour += 12;
-  }
-  return `${String(hour).padStart(2, '0')}${minute}`;
 }
 
 export default function AutopsyClient({ autopsyId }: Props) {
@@ -102,27 +91,23 @@ export default function AutopsyClient({ autopsyId }: Props) {
     saveTargetSaju({ birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
-  // 유효성 검증 — 태어난 시간은 선택사항
+  // 유효성 검증
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const [year, month, day] = birthDate.split('-').map(Number);
     if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    if (!birthTime && !unknownTime) return false;
     if (!causeInput || !duration || !coronerId) return false;
     return true;
-  }, [birthDate, causeInput, duration, coronerId]);
+  }, [birthDate, birthTime, unknownTime, causeInput, duration, coronerId]);
 
-  // 모르겠어요 토글
-  const handleUnknownTimeToggle = useCallback(() => {
-    const newValue = !unknownTime;
-    setUnknownTime(newValue);
-    if (newValue) {
-      setBirthTime('오후 12:00');
-    } else {
-      setBirthTime('');
-    }
-  }, [unknownTime]);
+  // 태어난 시간 선택 (시진 드롭다운)
+  const handleTimeSelect = useCallback((displayTime: string, isUnknown: boolean) => {
+    setUnknownTime(isUnknown);
+    setBirthTime(displayTime);
+  }, []);
 
   // 분석 요청
   const handleSubmit = useCallback(async () => {
@@ -142,7 +127,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
     setSubmitting(true);
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const hhmm = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
+    const hhmm = effectiveUnknownTime ? '1200' : parseKoreanTimeTo24Hour(birthTime);
     const birthday = `${numbers}${hhmm}`;
 
     const minDelay = new Promise(resolve => setTimeout(resolve, 2500));
@@ -223,8 +208,10 @@ export default function AutopsyClient({ autopsyId }: Props) {
   const coronerName = coronerId ? CORONERS.find(c => c.id === coronerId)?.name ?? '' : '';
 
   return (
-    <div className="flex justify-center" style={{ minHeight: '100dvh', backgroundColor: '#fff' }}>
-      <div style={{ width: '100%', maxWidth: '768px' }}>
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#fff' }}>
+      <div className="w-full max-w-[768px] h-full flex flex-col">
+        <div className="flex-1 overflow-auto w-full">
+        <TestTopNav />
         <AnimatePresence mode="wait">
           {/* ─── LANDING ─── */}
           {step === 'landing' && (
@@ -631,12 +618,15 @@ export default function AutopsyClient({ autopsyId }: Props) {
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
                 >
                   <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>그 놈이 태어난 시간</p>
-                  <BirthTimeInput
+                  <TimeSelectSheet
                     value={birthTime}
-                    onChange={setBirthTime}
                     unknownTime={unknownTime}
-                    onUnknownTimeToggle={handleUnknownTimeToggle}
-                    onEnter={handleSubmit}
+                    onSelect={handleTimeSelect}
+                    accentColor="#7A38D8"
+                    bgColor="#fff"
+                    borderColor="1.5px solid #e7e7e7"
+                    textColor="#151515"
+                    placeholderColor="#b7b7b7"
                   />
                 </motion.div>
 
@@ -683,41 +673,17 @@ export default function AutopsyClient({ autopsyId }: Props) {
               </motion.div>
 
               {/* 하단 고정 CTA */}
-              <div
-                className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
-                style={{
-                  maxWidth: '768px',
-                  backgroundColor: '#fff',
-                  boxShadow: '0px -8px 16px 0px rgba(255,255,255,0.76)',
-                  paddingBottom: 'env(safe-area-inset-bottom)',
-                }}
-              >
-                <div style={{ padding: '12px 20px', width: '100%' }}>
-                  <motion.div
-                    onClick={handleSubmit}
-                    className="transform-gpu"
-                    whileTap={isFormValid() && !submitting ? { scale: 0.96 } : {}}
-                    style={{
-                      height: '56px',
-                      borderRadius: '16px',
-                      backgroundColor: isFormValid() && !submitting ? '#7A38D8' : '#f8f8f8',
-                      cursor: isFormValid() && !submitting ? 'pointer' : 'not-allowed',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'background-color 0.2s',
-                    }}
-                  >
-                    <p style={{
-                      fontSize: '16px',
-                      fontWeight: 500,
-                      color: isFormValid() && !submitting ? '#fff' : '#b7b7b7',
-                    }}>
-                      {submitting ? '검시관 호출 중...' : '부검 시작'}
-                    </p>
-                  </motion.div>
-                </div>
-              </div>
+              <StickyCTAButton
+                isValid={isFormValid() && !submitting}
+                onClick={handleSubmit}
+                label={submitting ? '검시관 호출 중...' : '부검 시작'}
+                containerBackground="#fff"
+                containerBoxShadow="0px -8px 16px 0px rgba(255,255,255,0.76)"
+                activeBackground="#7A38D8"
+                inactiveBackground="#f8f8f8"
+                inactiveTextColor="#b7b7b7"
+                fontWeight={500}
+              />
             </motion.div>
           )}
 
@@ -865,6 +831,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
             />
           )}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );

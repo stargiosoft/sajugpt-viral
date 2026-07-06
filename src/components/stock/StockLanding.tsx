@@ -8,69 +8,17 @@ interface Props {
   onStart: () => void;
 }
 
-// ─── 틱커 종목 데이터 ────────────────────────────────
-const TICKER_ITEMS = [
-  { name: '도화살관련', price: 18200, change: +4.3 },
-  { name: '정관안정', price: 9800, change: -1.2 },
-  { name: '편인과다', price: 1200, change: -12.8 },
-  { name: '식신성장', price: 14500, change: +2.7 },
-  { name: '편관테마', price: 6300, change: +0.8 },
-  { name: '홍염살', price: 22100, change: +6.1 },
-  { name: '공망주의', price: 450, change: -18.3 },
-  { name: '비견균형', price: 11700, change: +1.4 },
-];
+// ─── 토스 스타일 컬러 토큰 ────────────────────────────
+const COLOR_BG = '#191F28';
+const COLOR_CARD = '#202632';
+const COLOR_UP = '#F04452';
+const COLOR_TEXT_PRIMARY = '#F2F3F5';
+const COLOR_TEXT_SECONDARY = '#8B95A1';
+const COLOR_TEXT_TERTIARY = '#4E5968';
+const COLOR_BRAND = '#7A38D8';
 
-// ─── 틱커 테이프 ─────────────────────────────────────
-function TickerTape() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]; // 2배로 복제해서 무한 루프 효과
-
-  return (
-    <div className="overflow-hidden" style={{
-      borderBottom: '1px solid #1a1a2e',
-      height: '32px',
-    }}>
-      <motion.div
-        className="flex items-center gap-6"
-        animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        style={{ height: '32px', whiteSpace: 'nowrap' }}
-      >
-        {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 shrink-0">
-            <span style={{
-              fontSize: '11px',
-              fontWeight: 500,
-              color: '#666',
-              letterSpacing: '-0.22px',
-            }}>
-              {item.name}
-            </span>
-            <span style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-              color: item.change > 0 ? '#ef4444' : '#3b82f6',
-              letterSpacing: '0px',
-            }}>
-              {item.price.toLocaleString()}
-            </span>
-            <span style={{
-              fontSize: '10px',
-              fontWeight: 500,
-              fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-              color: item.change > 0 ? '#ef4444' : '#3b82f6',
-            }}>
-              {item.change > 0 ? '▲' : '▼'}{Math.abs(item.change)}%
-            </span>
-          </div>
-        ))}
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── 블러 가격 카운터 ─────────────────────────────────
-function BlurredPriceCounter() {
+// ─── 스크램블 가격 카운터 ─────────────────────────────
+function ScrambledPriceCounter() {
   const [scrambledPrice, setScrambledPrice] = useState('???,???');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -88,42 +36,24 @@ function BlurredPriceCounter() {
   return (
     <div className="flex items-baseline gap-1">
       <span style={{
-        fontSize: '52px',
+        fontSize: '44px',
         fontWeight: 800,
-        fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-        color: '#fff',
-        letterSpacing: '-2px',
-        lineHeight: '56px',
-        filter: 'blur(6px)',
-        userSelect: 'none',
+        color: COLOR_TEXT_PRIMARY,
+        letterSpacing: '-1px',
+        lineHeight: '52px',
+        fontVariantNumeric: 'tabular-nums',
       }}>
         {scrambledPrice}
       </span>
       <span style={{
-        fontSize: '20px',
+        fontSize: '18px',
         fontWeight: 600,
-        color: '#555',
-        letterSpacing: '-0.4px',
+        color: COLOR_TEXT_SECONDARY,
+        letterSpacing: '-0.36px',
       }}>
         원
       </span>
     </div>
-  );
-}
-
-// ─── 깜빡이는 인디케이터 ──────────────────────────────
-function BlinkingDot({ color }: { color: string }) {
-  return (
-    <motion.div
-      animate={{ opacity: [1, 0.3, 1] }}
-      transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-      style={{
-        width: '6px',
-        height: '6px',
-        borderRadius: '50%',
-        backgroundColor: color,
-      }}
-    />
   );
 }
 
@@ -135,366 +65,164 @@ export default function StockLanding({ onStart }: Props) {
   return (
     <div className="flex flex-col" style={{
       minHeight: '100%',
-      backgroundColor: '#0a0a14',
+      backgroundColor: COLOR_BG,
     }}>
-      {/* ─── 틱커 테이프 ─── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-      >
-        <TickerTape />
-      </motion.div>
-
-      {/* ─── 메인 콘텐츠 ─── */}
       <div className="flex-1 flex flex-col" style={{
         padding: '0 20px',
         paddingBottom: '120px',
       }}>
 
         {/* 상단 여백 */}
-        <div style={{ height: '40px' }} />
-
-        {/* ─── 시스템 상태 바 ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6, ease: sectionEase }}
-          className="flex items-center gap-2"
-          style={{ marginBottom: '28px' }}
-        >
-          <BlinkingDot color="#ef4444" />
-          <span style={{
-            fontSize: '11px',
-            fontWeight: 500,
-            fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-            color: '#ef4444',
-            letterSpacing: '0.5px',
-          }}>
-            LIVE
-          </span>
-          <div style={{ width: '1px', height: '10px', backgroundColor: '#2a2a3e' }} />
-          <span style={{
-            fontSize: '11px',
-            fontWeight: 400,
-            color: '#555',
-            letterSpacing: '-0.22px',
-          }}>
-            사주증권 리서치센터
-          </span>
-        </motion.div>
+        <div style={{ height: '48px' }} />
 
         {/* ─── 헤드라인 ─── */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.7, ease: sectionEase }}
-          style={{ marginBottom: '12px' }}
+          transition={{ delay: 0.2, duration: 0.7, ease: sectionEase }}
+          style={{ marginBottom: '8px' }}
         >
           <h1 style={{
-            fontSize: '28px',
-            fontWeight: 800,
-            color: '#f0f0f0',
-            lineHeight: '40px',
-            letterSpacing: '-0.56px',
+            fontSize: '32px',
+            fontWeight: 700,
+            color: COLOR_TEXT_PRIMARY,
+            lineHeight: '45px',
+            letterSpacing: '-0.52px',
           }}>
-            당신의 연애 주가가<br />
-            <span style={{ color: '#ef4444' }}>폭락</span>하고 있습니다
+            당신의 연애 주가,<br />
+            <span style={{ color: COLOR_UP }}>상장폐지</span> 직전입니다
           </h1>
         </motion.div>
 
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6, ease: sectionEase }}
+          transition={{ delay: 0.35, duration: 0.6, ease: sectionEase }}
           style={{
-            fontSize: '14px',
+            fontSize: '15px',
             fontWeight: 400,
-            color: '#777',
-            lineHeight: '22px',
-            letterSpacing: '-0.42px',
-            marginBottom: '36px',
+            color: COLOR_TEXT_SECONDARY,
+            lineHeight: '26px',
+            letterSpacing: '-0.3px',
+            marginBottom: '32px',
+            paddingLeft: '4px',
           }}
         >
-          사주 원국을 분석해 연애 시세를 조회합니다.<br />
-          조작단이 주가 상승 작전을 짜드립니다.
+          사주로 분석한 당신의 연애 시세.<br />
+          지금 확인하지 않으면 이유도 모른 채 <span style={{ color: COLOR_UP, fontWeight: 600 }}>떡락</span>합니다.
         </motion.p>
 
-        {/* ─── 종목 리포트 미리보기 (블러) ─── */}
+        {/* ─── 종목 리포트 미리보기 ─── */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.7, ease: sectionEase }}
-          className="relative transform-gpu"
+          transition={{ delay: 0.6, duration: 0.7, ease: sectionEase }}
           style={{
-            borderRadius: '16px',
-            border: '1px solid #1e1e30',
-            backgroundColor: '#0f0f1e',
+            borderRadius: '20px',
+            backgroundColor: COLOR_CARD,
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.28)',
             padding: '24px 20px',
             marginBottom: '32px',
-            overflow: 'hidden',
           }}
         >
-          {/* 배경 그리드 패턴 */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `
-              linear-gradient(rgba(122,56,216,0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(122,56,216,0.03) 1px, transparent 1px)
-            `,
-            backgroundSize: '24px 24px',
-            pointerEvents: 'none',
-          }} />
+          {/* 현재가 */}
+          <div style={{ marginBottom: '16px' }}>
+            <span style={{
+              display: 'block',
+              fontSize: '13px',
+              fontWeight: 400,
+              color: COLOR_TEXT_SECONDARY,
+              letterSpacing: '-0.26px',
+              marginBottom: '4px',
+            }}>
+              당신의 현재가
+            </span>
+            <ScrambledPriceCounter />
+          </div>
 
-          <div className="relative">
-            {/* 헤더 */}
-            <div className="flex items-center justify-between" style={{ marginBottom: '20px' }}>
-              <div className="flex items-center gap-2">
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '2px',
-                  backgroundColor: '#7A38D8',
-                }} />
-                <span style={{
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: '#666',
-                  letterSpacing: '-0.24px',
-                }}>
-                  종목 리포트
-                </span>
-              </div>
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 500,
-                fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-                color: '#444',
-              }}>
-                섹터: ???
-              </span>
-            </div>
+          {/* 미니 차트 (SVG, 좌→우 드로잉 애니메이션) */}
+          <svg width="100%" height="48" viewBox="0 0 300 48" preserveAspectRatio="none">
+            <motion.path
+              d="M0,30 C30,28 50,32 80,26 C110,20 130,35 160,38 C190,41 210,24 240,18 C260,14 280,8 300,4"
+              fill="none"
+              stroke={COLOR_BRAND}
+              strokeWidth="2"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ delay: 0.9, duration: 1.2, ease: 'easeOut' }}
+            />
+          </svg>
 
-            {/* 현재가 (블러) */}
-            <div style={{ marginBottom: '16px' }}>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: 400,
-                color: '#555',
-                letterSpacing: '-0.22px',
-              }}>
-                당신의 현재가
-              </span>
-              <BlurredPriceCounter />
-            </div>
-
-            {/* 적정가 + 저평가율 */}
-            <div className="flex items-center gap-3" style={{ marginBottom: '20px' }}>
-              <div className="flex items-center gap-1">
-                <span style={{ fontSize: '12px', fontWeight: 400, color: '#555' }}>적정가</span>
-                <span style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-                  color: '#888',
-                  filter: 'blur(4px)',
-                  userSelect: 'none',
-                }}>
-                  ??,???원
-                </span>
-              </div>
-              <div style={{
-                padding: '2px 8px',
-                borderRadius: '4px',
-                backgroundColor: 'rgba(239, 68, 68, 0.12)',
-              }}>
-                <span style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-                  color: '#ef4444',
-                }}>
-                  ▼??% 저평가
-                </span>
-              </div>
-            </div>
-
-            {/* 미니 차트 (SVG, 정적 패턴) */}
-            <div style={{ marginBottom: '16px' }}>
-              <svg width="100%" height="48" viewBox="0 0 300 48" preserveAspectRatio="none" style={{ opacity: 0.4 }}>
-                <defs>
-                  <linearGradient id="chartGradLanding" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7A38D8" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#7A38D8" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M0,30 C30,28 50,32 80,26 C110,20 130,35 160,38 C190,41 210,24 240,18 C260,14 280,8 300,4"
-                  fill="none"
-                  stroke="#7A38D8"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M0,30 C30,28 50,32 80,26 C110,20 130,35 160,38 C190,41 210,24 240,18 C260,14 280,8 300,4 L300,48 L0,48 Z"
-                  fill="url(#chartGradLanding)"
-                />
-              </svg>
-            </div>
-
-            {/* 투자의견 */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span style={{
-                  fontSize: '12px',
-                  fontWeight: 400,
-                  color: '#555',
-                }}>
-                  투자의견
-                </span>
-                <div style={{
-                  padding: '3px 10px',
-                  borderRadius: '6px',
-                  backgroundColor: 'rgba(122, 56, 216, 0.15)',
-                  filter: 'blur(3px)',
-                  userSelect: 'none',
-                }}>
-                  <span style={{
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: '#7A38D8',
-                  }}>
-                    ??? ???
-                  </span>
-                </div>
-              </div>
-              <span style={{
-                fontSize: '10px',
-                fontWeight: 400,
-                color: '#444',
-              }}>
-                생년월일 입력 시 공개
-              </span>
-            </div>
+          {/* 푸터 */}
+          <div className="flex items-center justify-between" style={{ marginTop: '20px' }}>
+            <span style={{
+              display: 'inline-block',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: COLOR_TEXT_SECONDARY,
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              padding: '4px 7px 3px',
+              borderRadius: '8px',
+              letterSpacing: '0px',
+            }}>
+              생년월일 입력 시 공개
+            </span>
+            <span style={{
+              fontSize: '12px',
+              fontWeight: 500,
+              color: COLOR_TEXT_TERTIARY,
+            }}>
+              사주증권 리서치센터
+            </span>
           </div>
         </motion.div>
 
-        {/* ─── 경고 배너 ─── */}
+        {/* ─── 조작단 아바타 ─── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.6, ease: sectionEase }}
-          className="flex items-center gap-3 transform-gpu"
-          style={{
-            borderRadius: '12px',
-            border: '1px solid rgba(239, 68, 68, 0.15)',
-            backgroundColor: 'rgba(239, 68, 68, 0.06)',
-            padding: '14px 16px',
-            marginBottom: '32px',
-          }}
+          transition={{ delay: 0.8, duration: 0.6, ease: sectionEase }}
+          className="flex items-center gap-3"
         >
-          <BlinkingDot color="#ef4444" />
+          <div className="flex items-center" style={{ paddingLeft: '2px' }}>
+            {CREW_ORDER.map((id, index) => {
+              const crew = CREW_MEMBERS[id];
+              const bobDelay = 0.9 + index * 0.15;
+              return (
+                <motion.div
+                  key={id}
+                  className="overflow-hidden shrink-0 transform-gpu"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    marginLeft: index === 0 ? 0 : '-10px',
+                    border: `2px solid ${COLOR_BG}`,
+                    position: 'relative',
+                    zIndex: CREW_ORDER.length - index,
+                  }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: [0, -4, 0] }}
+                  transition={{
+                    opacity: { delay: bobDelay, duration: 0.4 },
+                    y: { delay: bobDelay, duration: 2, repeat: Infinity, repeatType: 'loop', ease: 'easeInOut' },
+                  }}
+                >
+                  <img src={crew.image} alt={crew.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </motion.div>
+              );
+            })}
+          </div>
           <span style={{
-            fontSize: '13px',
+            fontSize: '14px',
             fontWeight: 500,
-            color: '#ef4444',
-            lineHeight: '18px',
+            color: COLOR_TEXT_SECONDARY,
             letterSpacing: '-0.26px',
           }}>
-            관리종목 지정 위험 — 시세 조회가 필요합니다
+            조작단 3인이 당신의 시세를 분석 중이에요
           </span>
         </motion.div>
-
-        {/* ─── 조작단원 소개 ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.3, duration: 0.6, ease: sectionEase }}
-          style={{ marginBottom: '24px' }}
-        >
-          <span style={{
-            fontSize: '12px',
-            fontWeight: 500,
-            color: '#555',
-            letterSpacing: '-0.24px',
-          }}>
-            주가 조작단 대기 중
-          </span>
-        </motion.div>
-
-        <div className="flex flex-col gap-3">
-          {CREW_ORDER.map((id, index) => {
-            const crew = CREW_MEMBERS[id];
-            return (
-              <motion.div
-                key={id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1.4 + index * 0.12, duration: 0.5, ease: sectionEase }}
-                className="flex items-center gap-3 transform-gpu"
-                style={{
-                  borderRadius: '12px',
-                  border: '1px solid #1e1e30',
-                  backgroundColor: '#0f0f1e',
-                  padding: '14px 16px',
-                }}
-              >
-                {/* 캐릭터 썸네일 */}
-                <div className="overflow-hidden transform-gpu shrink-0" style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  border: `2px solid ${crew.color}`,
-                }}>
-                  <img src={crew.image} alt={crew.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-
-                <div className="flex-1" style={{ minWidth: 0 }}>
-                  <div className="flex items-center gap-2" style={{ marginBottom: '2px' }}>
-                    <span style={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#e0e0e0',
-                      letterSpacing: '-0.28px',
-                    }}>
-                      {crew.name}
-                    </span>
-                    <span style={{
-                      fontSize: '11px',
-                      fontWeight: 400,
-                      color: crew.color,
-                      letterSpacing: '-0.22px',
-                    }}>
-                      {crew.faction}
-                    </span>
-                  </div>
-                  <p style={{
-                    fontSize: '12px',
-                    fontWeight: 400,
-                    color: '#666',
-                    letterSpacing: '-0.24px',
-                    lineHeight: '16px',
-                  }}>
-                    &ldquo;{crew.philosophy}&rdquo;
-                  </p>
-                </div>
-
-                {/* 상태 표시 */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <BlinkingDot color={crew.color} />
-                  <span style={{
-                    fontSize: '10px',
-                    fontWeight: 500,
-                    fontFamily: '"SF Mono", "Cascadia Code", "Consolas", monospace',
-                    color: '#555',
-                  }}>
-                    대기
-                  </span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
       </div>
 
       {/* ─── 하단 CTA ─── */}
@@ -507,30 +235,30 @@ export default function StockLanding({ onStart }: Props) {
         maxWidth: '768px',
         padding: '16px 20px',
         paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-        background: 'linear-gradient(transparent, #0a0a14 30%)',
+        background: `linear-gradient(transparent, ${COLOR_BG} 30%)`,
         pointerEvents: 'auto',
       }}>
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.7, duration: 0.5, ease: sectionEase }}
-          whileTap={{ scale: 0.97 }}
+          transition={{ delay: 1.0, duration: 0.5, ease: sectionEase }}
+          whileHover={{ filter: 'brightness(1.08)', transition: { duration: 0.15, ease: 'easeOut' } }}
+          whileTap={{ filter: 'brightness(0.92)', scale: 0.995, transition: { duration: 0.15, ease: 'easeOut' } }}
           onClick={onStart}
           style={{
             width: '100%',
             padding: '16px',
-            borderRadius: '14px',
-            backgroundColor: '#7A38D8',
+            borderRadius: '16px',
+            backgroundColor: COLOR_BRAND,
             color: '#fff',
             fontSize: '16px',
             fontWeight: 700,
             letterSpacing: '-0.32px',
             border: 'none',
             cursor: 'pointer',
-            boxShadow: '0 4px 24px rgba(122, 56, 216, 0.35)',
           }}
         >
-          내 시세 조회하기
+          시작하기
         </motion.button>
       </div>
     </div>

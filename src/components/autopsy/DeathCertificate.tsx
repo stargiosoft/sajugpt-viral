@@ -3,7 +3,7 @@
 import { forwardRef } from 'react';
 import type { AutopsyResult } from '@/types/autopsy';
 import { CAUSES_OF_DEATH, DISCERNMENT_GRADES, CORONERS } from '@/constants/autopsy';
-import { trackSajuGPTClick } from '@/lib/analytics';
+import SajuGPTWatermark from '@/components/SajuGPTWatermark';
 
 interface Props {
   result: AutopsyResult;
@@ -156,26 +156,14 @@ const DeathCertificate = forwardRef<HTMLDivElement, Props>(({ result }, ref) => 
         </p>
       </div>
 
-      {/* 하단 워터마크 */}
-      <a
-        href="https://sajugpt.co.kr"
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => trackSajuGPTClick('saju_autopsy')}
-        style={{
-          fontSize: '11px',
-          fontWeight: 600,
-          color: '#7A38D8',
-          textAlign: 'center',
-          marginTop: '12px',
-          letterSpacing: '0.3px',
-          textDecoration: 'underline',
-          textUnderlineOffset: '2px',
-          display: 'block',
-        }}
-      >
-        sajugpt.co.kr
-      </a>
+      <SajuGPTWatermark
+        featureType="saju_autopsy"
+        fontSize="11px"
+        fontWeight={600}
+        marginTop="12px"
+        letterSpacing="0.3px"
+        textUnderlineOffset="2px"
+      />
     </div>
   );
 });

@@ -40,7 +40,7 @@ export type FeatureType =
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 
-export type ShareMethod = 'kakao' | 'clipboard' | 'native' | 'image_save';
+export type ShareMethod = 'kakao' | 'clipboard' | 'native' | 'image_save' | 'x' | 'facebook';
 
 interface TrackViralEventParams {
   featureType: FeatureType;

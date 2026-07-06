@@ -3,11 +3,20 @@
 import React from 'react';
 import type { StockReport } from '@/types/stock';
 import { INVESTMENT_OPINIONS, getPriceGrade, FAIR_VALUE_GRADES } from '@/constants/stock';
-import { trackSajuGPTClick } from '@/lib/analytics';
+import SajuGPTWatermark from '@/components/SajuGPTWatermark';
 
 interface Props {
   report: StockReport;
 }
+
+// ─── 토스 스타일 컬러 토큰 (StockLanding과 동일) ──────────
+const COLOR_CARD = '#202632';
+const COLOR_UP = '#F04452';
+const COLOR_DOWN = '#3182F6';
+const COLOR_TEXT_PRIMARY = '#F2F3F5';
+const COLOR_TEXT_SECONDARY = '#8B95A1';
+const COLOR_TEXT_TERTIARY = '#4E5968';
+const COLOR_DIVIDER = 'rgba(255,255,255,0.06)';
 
 function formatPrice(price: number): string {
   return price.toLocaleString('ko-KR');
@@ -70,15 +79,15 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
     const fvGrade = FAIR_VALUE_GRADES[fairValueGrade];
 
     const isUndervalued = undervalueRate > 0;
-    const changeSymbol = isUndervalued ? '\u25BC' : '\u25B2';
-    const changeColor = isUndervalued ? '#DC2626' : '#059669';
+    const changeSymbol = isUndervalued ? '▼' : '▲';
+    const changeColor = isUndervalued ? COLOR_UP : COLOR_DOWN;
 
     // Price grade accent
     const accentColor =
       priceGrade === 'premium'
         ? '#CA8A04'
         : priceGrade === 'penny'
-          ? '#DC2626'
+          ? COLOR_UP
           : priceGrade === 'warning'
             ? '#6B7280'
             : '#7A38D8';
@@ -103,73 +112,36 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
         ref={ref}
         className="flex flex-col w-full"
         style={{
-          background: isWarning
-            ? 'linear-gradient(180deg, #111111 0%, #1a1a1a 100%)'
-            : isPenny
-              ? 'linear-gradient(180deg, #0f0f1e 0%, #1e0a0a 100%)'
-              : 'linear-gradient(180deg, #0f0f1e 0%, #1a1a2e 100%)',
-          border: `1px solid ${isPenny ? '#3a1a1a' : isWarning ? '#2a2a2a' : '#2a2a3e'}`,
-          borderRadius: '16px',
-          padding: '28px 24px 20px',
-          minHeight: '600px',
-          maxWidth: '400px',
-          position: 'relative',
+          backgroundColor: COLOR_CARD,
+          borderRadius: '20px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.28)',
           overflow: 'hidden',
         }}
       >
-        {/* Glow effect for penny stocks */}
-        {isPenny && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '-40px',
-              right: '-40px',
-              width: '160px',
-              height: '160px',
-              background: 'radial-gradient(circle, rgba(220,38,38,0.15) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-
-        {/* Premium glow */}
-        {priceGrade === 'premium' && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '-30px',
-              left: '-30px',
-              width: '140px',
-              height: '140px',
-              background: 'radial-gradient(circle, rgba(202,138,4,0.12) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-
         {/* 1. Header */}
-        <div className="flex flex-col gap-2">
-          <div
+        <div
+          className="flex flex-col"
+          style={{ gap: '12px', padding: '20px 20px', borderBottom: `1px solid ${COLOR_DIVIDER}` }}
+        >
+          <span
             style={{
-              fontSize: '11px',
-              fontWeight: 500,
-              color: '#666666',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: COLOR_TEXT_SECONDARY,
+              letterSpacing: '-0.24px',
             }}
           >
             연애 시장가 리포트
-          </div>
+          </span>
           <div className="flex items-center gap-2">
             <span
               style={{
                 fontSize: '12px',
-                fontWeight: 600,
+                fontWeight: 700,
                 color: accentColor,
-                backgroundColor: `${accentColor}18`,
-                padding: '3px 10px',
-                borderRadius: '20px',
-                border: `1px solid ${accentColor}33`,
+                backgroundColor: `${accentColor}22`,
+                padding: '4px 10px',
+                borderRadius: '8px',
               }}
             >
               {sector}
@@ -177,12 +149,12 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
             {grade.badgeLabel && (
               <span
                 style={{
-                  fontSize: '10px',
-                  fontWeight: 500,
-                  color: grade.borderColor,
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                  border: `1px solid ${grade.borderColor}44`,
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: COLOR_TEXT_SECONDARY,
+                  backgroundColor: 'rgba(255,255,255,0.06)',
+                  padding: '4px 10px',
+                  borderRadius: '8px',
                 }}
               >
                 {grade.badgeLabel}
@@ -191,102 +163,87 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
           </div>
         </div>
 
-        {/* 2. Current Price (THE STAR) */}
-        <div className="flex flex-col" style={{ marginTop: '28px' }}>
-          <span
-            style={{
-              fontSize: '13px',
-              fontWeight: 500,
-              color: '#777777',
-              marginBottom: '4px',
-            }}
-          >
-            내 연애 시장가
-          </span>
-          <span
-            style={{
-              fontSize: '48px',
-              fontWeight: 800,
-              color: isPenny ? '#FF4444' : isWarning ? '#888888' : '#FFFFFF',
-              lineHeight: 1.1,
-              letterSpacing: '-0.02em',
-              textShadow: isPenny
-                ? '0 0 20px rgba(220,38,38,0.3)'
-                : 'none',
-            }}
-          >
-            {formatPrice(currentPrice)}
-            <span style={{ fontSize: '20px', fontWeight: 600, marginLeft: '2px' }}>
-              원
-            </span>
-          </span>
-        </div>
-
-        {/* 3. Fair Value line */}
-        <div className="flex items-center gap-2" style={{ marginTop: '12px' }}>
-          <span
-            style={{
-              fontSize: '14px',
-              fontWeight: 500,
-              color: '#888888',
-            }}
-          >
-            적정가{' '}
-            <span style={{ color: fvGrade.color, fontWeight: 600 }}>
-              {formatPrice(fairValue)}원
-            </span>
-          </span>
-          <span
-            style={{
-              fontSize: '14px',
-              fontWeight: 700,
-              color: changeColor,
-            }}
-          >
-            {changeSymbol}
-            {Math.abs(undervalueRate)}%
-          </span>
-          {isUndervalued && (
+        {/* 2. Current Price + Chart */}
+        <div style={{ padding: '24px 20px', borderBottom: `1px solid ${COLOR_DIVIDER}` }}>
+          <div className="flex flex-col" style={{ marginBottom: '16px' }}>
             <span
               style={{
-                fontSize: '10px',
-                fontWeight: 600,
-                color: '#DC2626',
-                backgroundColor: 'rgba(220,38,38,0.1)',
-                padding: '2px 6px',
-                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 400,
+                color: COLOR_TEXT_SECONDARY,
+                marginBottom: '4px',
               }}
             >
-              저평가
+              내 연애 시장가
             </span>
-          )}
-        </div>
+            <span
+              style={{
+                fontSize: '44px',
+                fontWeight: 800,
+                color: isPenny ? COLOR_UP : isWarning ? COLOR_TEXT_SECONDARY : COLOR_TEXT_PRIMARY,
+                lineHeight: 1.1,
+                letterSpacing: '-1px',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {formatPrice(currentPrice)}
+              <span style={{ fontSize: '18px', fontWeight: 600, marginLeft: '2px', color: COLOR_TEXT_SECONDARY }}>
+                원
+              </span>
+            </span>
+          </div>
 
-        {/* 4. Mini Chart */}
-        <div
-          style={{
-            marginTop: '24px',
-            backgroundColor: 'rgba(255,255,255,0.03)',
-            borderRadius: '12px',
-            padding: '12px 8px 8px',
-            border: '1px solid rgba(255,255,255,0.05)',
-          }}
-        >
+          {/* Fair Value line */}
+          <div className="flex items-center gap-2" style={{ marginBottom: '20px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 400, color: COLOR_TEXT_SECONDARY }}>
+              적정가{' '}
+              <span style={{ color: fvGrade.color, fontWeight: 700 }}>
+                {formatPrice(fairValue)}원
+              </span>
+            </span>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '3px 8px',
+                borderRadius: '8px',
+                backgroundColor: `${changeColor}22`,
+              }}
+            >
+              <span style={{ fontSize: '12px', fontWeight: 700, color: changeColor }}>
+                {changeSymbol} {Math.abs(undervalueRate)}%
+              </span>
+            </div>
+            {isUndervalued && (
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: COLOR_UP,
+                  backgroundColor: `${COLOR_UP}1A`,
+                  padding: '3px 8px',
+                  borderRadius: '8px',
+                }}
+              >
+                저평가
+              </span>
+            )}
+          </div>
+
+          {/* Mini Chart */}
           <svg
             viewBox={`0 0 ${chartW} ${chartH}`}
             width="100%"
             height="80"
             style={{ overflow: 'visible' }}
           >
-            {/* Gradient fill under the line */}
             <defs>
               <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#7A38D8" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#7A38D8" stopOpacity="0" />
+                <stop offset="0%" stopColor={accentColor} stopOpacity="0.3" />
+                <stop offset="100%" stopColor={accentColor} stopOpacity="0" />
               </linearGradient>
             </defs>
 
-            {/* Fill area */}
             {chartData.length > 0 && (
               <path
                 d={`${chartPath} L${chartW - chartPad},${chartH - chartPad} L${chartPad},${chartH - chartPad} Z`}
@@ -294,24 +251,23 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
               />
             )}
 
-            {/* Line */}
             <path
               d={chartPath}
               fill="none"
-              stroke="#7A38D8"
+              stroke={accentColor}
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
 
             {/* NOW marker */}
-            <circle cx={nowPt.x} cy={nowPt.y} r="4" fill="#FFFFFF" />
-            <circle cx={nowPt.x} cy={nowPt.y} r="6" fill="none" stroke="#FFFFFF" strokeWidth="1.5" opacity="0.4" />
+            <circle cx={nowPt.x} cy={nowPt.y} r="4" fill={COLOR_TEXT_PRIMARY} />
+            <circle cx={nowPt.x} cy={nowPt.y} r="6" fill="none" stroke={COLOR_TEXT_PRIMARY} strokeWidth="1.5" opacity="0.4" />
             <text
               x={nowPt.x}
               y={nowPt.y - 10}
               textAnchor="middle"
-              fill="#FFFFFF"
+              fill={COLOR_TEXT_PRIMARY}
               fontSize="9"
               fontWeight="700"
             >
@@ -321,7 +277,6 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
             {/* Surge month marker */}
             {surgeIndex !== nowIndex && (
               <>
-                {/* Star icon */}
                 <text
                   x={surgePt.x}
                   y={surgePt.y - 2}
@@ -347,73 +302,43 @@ const StockReportCard = React.forwardRef<HTMLDivElement, Props>(
           </svg>
         </div>
 
-        {/* 5. Investment Opinion Badge */}
-        <div className="flex justify-center" style={{ marginTop: '24px' }}>
+        {/* 3. Investment Opinion + Comment */}
+        <div className="flex flex-col items-center" style={{ padding: '24px 20px', borderBottom: `1px solid ${COLOR_DIVIDER}` }}>
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              fontSize: '18px',
+              fontSize: '17px',
               fontWeight: 800,
               color: opinion.color,
-              backgroundColor: `${opinion.color}15`,
+              backgroundColor: `${opinion.color}1F`,
               padding: '10px 24px',
               borderRadius: '12px',
-              border: `1.5px solid ${opinion.color}33`,
-              letterSpacing: '0.02em',
+              letterSpacing: '-0.34px',
+              marginBottom: '16px',
             }}
           >
-            {investmentOpinion === 'strong_buy' ? '\u2605' : '\u25CF'}{' '}
-            {opinion.label}{' '}
-            {investmentOpinion === 'strong_buy' ? '\u2605' : '\u25CF'}
+            {investmentOpinion === 'strong_buy' ? '★' : '●'} {opinion.label}
           </div>
-        </div>
 
-        {/* 6. Analyst Comment */}
-        <div
-          style={{
-            marginTop: '20px',
-            fontSize: '13px',
-            fontWeight: 400,
-            fontStyle: 'italic',
-            color: '#AAAAAA',
-            lineHeight: 1.6,
-            textAlign: 'center',
-            padding: '0 8px',
-          }}
-        >
-          &quot;{analystComment}&quot;
-        </div>
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* 7. Footer watermark */}
-        <div
-          className="flex justify-center"
-          style={{
-            marginTop: '16px',
-            paddingTop: '12px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-          }}
-        >
-          <a
-            href="https://www.sajugpt.co.kr/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackSajuGPTClick('saju_stock')}
+          <p
             style={{
-              fontSize: '13px',
-              fontWeight: 700,
-              color: '#7A38D8',
-              letterSpacing: '-0.26px',
-              textDecoration: 'underline',
-              textUnderlineOffset: '3px',
+              fontSize: '14px',
+              fontWeight: 400,
+              color: COLOR_TEXT_SECONDARY,
+              lineHeight: 1.6,
+              textAlign: 'center',
+              padding: '0 8px',
             }}
           >
-            sajugpt.co.kr
-          </a>
+            &quot;{analystComment}&quot;
+          </p>
+        </div>
+
+        {/* 4. Footer watermark */}
+        <div className="flex justify-center" style={{ padding: '16px 20px' }}>
+          <SajuGPTWatermark featureType="saju_stock" letterSpacing="-0.26px" />
         </div>
       </div>
     );

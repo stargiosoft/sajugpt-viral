@@ -1,423 +1,317 @@
 'use client';
 
-import { useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CHARACTERS } from '@/constants/characters';
+import { copyToClipboard, shareKakao } from '@/lib/share';
+import { trackEvent, trackShare } from '@/lib/analytics';
 
 interface Props {
   onStart: () => void;
 }
 
-const GRADE_PREVIEW = [
-  { grade: 'SSS', title: '만인의 정복자', count: '5명', color: '#FFD700' },
-  { grade: 'SS', title: '치명적 요부', count: '4명', color: '#FF4444' },
-  { grade: 'S', title: '은밀한 사냥꾼', count: '3명', color: '#7A38D8' },
-  { grade: 'A', title: '늦깎이 매력폭발', count: '2명', color: '#4488FF' },
-  { grade: 'B', title: '원픽 집착남 보유', count: '1명', color: '#44BB44' },
-  { grade: 'CUT', title: '입구컷', count: '0명', color: '#666' },
-];
+const SHARE_TEXT = '🔥 색기 배틀 — 당신의 사주에 발정 난 남자는 몇 명?\n얼굴 가리고, 사주만으로 AI 짐승남을 홀려보세요';
 
-const stagger = {
-  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
-};
+/** 지정된 지연 후 0에서 목표값까지 이징을 태워 올라가는 카운트업 — 지연은 부모 motion 진입 애니메이션과 맞춰 등장과 동시에 체감되게 함 */
+function useCountUp(target: number, duration = 1600, delay = 400): number {
+  const [value, setValue] = useState(0);
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
-};
+  useEffect(() => {
+    let raf: number;
+    let cancelled = false;
+    const startTimer = setTimeout(() => {
+      const start = performance.now();
+      const tick = (now: number) => {
+        if (cancelled) return;
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.floor(eased * target));
+        if (progress < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, delay);
+    return () => {
+      cancelled = true;
+      clearTimeout(startTimer);
+      cancelAnimationFrame(raf);
+    };
+  }, [target, duration, delay]);
+
+  return value;
+}
+
+/** 카운트업 렌더링을 별도 컴포넌트로 분리 — 매 프레임 setState가 부모(전체 랜딩) 리렌더로 번지면
+ *  같은 시점에 도는 말풍선 float 애니메이션이 끊겨 보이므로, 재렌더 범위를 숫자 자신으로만 격리 */
+function CountUpNumber({ target, duration, delay }: { target: number; duration?: number; delay?: number }) {
+  const value = useCountUp(target, duration, delay);
+  return <>{value.toLocaleString()}</>;
+}
 
 export default function OnboardingLanding({ onStart }: Props) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+
+  const handleCopy = useCallback(async () => {
+    const origin = window.location.origin;
+    const ok = await copyToClipboard(`${SHARE_TEXT}\n👉 ${origin}/sexy-battle`);
+    if (ok) {
+      setCopied(true);
+      clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+      trackEvent('sexy_battle_share_test_clipboard');
+      trackShare('sexy_battle', 'clipboard');
+    }
+  }, []);
+
+  const handleKakaoShare = useCallback(() => {
+    const origin = window.location.origin;
+    const ok = shareKakao({
+      title: '색기 배틀 — 페로몬 등급 판정',
+      description: '얼굴 가리고, 사주만으로 AI 짐승남을 홀려보세요',
+      imageUrl: `${origin}/home/thumbnails/sexy-battle.jpg`,
+      link: `${origin}/sexy-battle`,
+      buttonText: '나도 해보기',
+    });
+    if (ok) {
+      trackEvent('sexy_battle_share_test_kakao');
+      trackShare('sexy_battle', 'kakao');
+    } else {
+      handleCopy();
+    }
+  }, [handleCopy]);
+
+  const handleXShare = useCallback(() => {
+    const origin = window.location.origin;
+    const text = encodeURIComponent(SHARE_TEXT);
+    const url = encodeURIComponent(`${origin}/sexy-battle`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer');
+    trackEvent('sexy_battle_share_test_x');
+    trackShare('sexy_battle', 'x');
+  }, []);
 
   return (
-    <div
-      ref={scrollRef}
-      className="relative flex flex-col items-center overflow-x-hidden"
-      style={{
-        minHeight: '100%',
-        background: 'linear-gradient(180deg, #0f0a1a 0%, #1c1035 40%, #2a1548 70%, #1c1035 100%)',
-        paddingBottom: '100px',
-      }}
-    >
-      {/* ── Hero Section ── */}
-      <motion.div
-        className="flex flex-col items-center w-full"
-        style={{ paddingTop: '72px', paddingBottom: '8px' }}
-        initial="hidden"
-        animate="visible"
-        variants={stagger}
-      >
-        <motion.p
-          variants={fadeUp}
-          style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#a78bfa',
-            letterSpacing: '2px',
-            marginBottom: '16px',
-            textTransform: 'uppercase',
-          }}
-        >
-          페로몬 등급 판정
-        </motion.p>
-
-        <motion.h1
-          variants={fadeUp}
-          style={{
-            fontSize: '30px',
-            fontWeight: 800,
-            color: '#ffffff',
-            textAlign: 'center',
-            lineHeight: '1.35',
-            letterSpacing: '-0.6px',
-          }}
-        >
-          당신의 사주에<br />
-          <span style={{ color: '#c084fc' }}>발정 난 남자</span>는<br />
-          몇 명?
-        </motion.h1>
-
-        <motion.p
-          variants={fadeUp}
-          style={{
-            fontSize: '14px',
-            color: 'rgba(255,255,255,0.5)',
-            textAlign: 'center',
-            marginTop: '16px',
-            lineHeight: '1.7',
-            letterSpacing: '-0.28px',
-          }}
-        >
-          얼굴 가리고, 사주만으로<br />
-          AI 짐승남을 홀려보세요
-        </motion.p>
-      </motion.div>
-
-      {/* ── Character Showcase ── */}
-      <motion.div
-        className="flex justify-center items-end w-full"
-        style={{ padding: '32px 20px 16px', gap: '4px' }}
-        initial="hidden"
-        animate="visible"
-        variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.6 } } }}
-      >
-        {CHARACTERS.map((char, i) => {
-          const isCenter = i === 0;
-          const size = isCenter ? 76 : 58;
-          return (
-            <motion.div
-              key={char.id}
-              className="flex flex-col items-center"
-              variants={{
-                hidden: { opacity: 0, y: 30, scale: 0.7 },
-                visible: {
-                  opacity: 1,
-                  y: isCenter ? 0 : 8,
-                  scale: 1,
-                  transition: { type: 'spring', bounce: 0.35, duration: 0.6 },
-                },
-              }}
-            >
-              <div
-                className="overflow-hidden transform-gpu"
-                style={{
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  borderRadius: '50%',
-                  border: isCenter
-                    ? '3px solid #FFD700'
-                    : '2px solid rgba(255,255,255,0.2)',
-                  boxShadow: isCenter
-                    ? '0 0 20px rgba(255,215,0,0.3)'
-                    : 'none',
-                }}
-              >
-                <img
-                  src={char.thumbnail}
-                  alt={char.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  loading="eager"
-                />
-              </div>
-              <p
-                style={{
-                  fontSize: '11px',
-                  fontWeight: isCenter ? 700 : 400,
-                  color: isCenter ? '#FFD700' : 'rgba(255,255,255,0.45)',
-                  marginTop: '8px',
-                  letterSpacing: '-0.22px',
-                }}
-              >
-                {char.name}
-              </p>
-              <p
-                style={{
-                  fontSize: '10px',
-                  fontWeight: 400,
-                  color: 'rgba(255,255,255,0.25)',
-                  marginTop: '2px',
-                  letterSpacing: '-0.2px',
-                }}
-              >
-                {char.archetype}
-              </p>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-
-      {/* ── Divider ── */}
-      <div
-        style={{
-          width: '40px',
-          height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          margin: '24px auto',
-        }}
+    <div className="flex flex-col items-center" style={{ minHeight: '100%', backgroundColor: '#0d0d0d' }}>
+      {/* ── 상단 썸네일 (영상) ── */}
+      <motion.video
+        src="/home/thumbnails/sexy-battle.mp4"
+        poster="/home/thumbnails/sexy-battle.jpg"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        className="w-full"
+        style={{ aspectRatio: '3 / 2', objectFit: 'cover', display: 'block' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4 }}
       />
 
-      {/* ── How it works ── */}
+      {/* ── 말풍선 서브카피 ── */}
       <motion.div
-        className="w-full flex flex-col"
-        style={{ padding: '0 20px', gap: '10px' }}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-40px' }}
-        variants={{ visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } } }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.4 }}
+        style={{ position: 'relative', marginTop: '48px' }}
       >
-        <motion.p
-          variants={fadeUp}
+        <div
+          aria-hidden
           style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'rgba(255,255,255,0.3)',
-            letterSpacing: '1.5px',
-            marginBottom: '4px',
+            position: 'absolute',
+            bottom: '-6px',
+            left: '50%',
+            transform: 'translateX(-50%) rotate(45deg)',
+            width: '14px',
+            height: '14px',
+            backgroundColor: '#1E1E22',
+            borderRadius: '3px',
+            zIndex: 2,
+          }}
+        />
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'inline-block',
+            backgroundColor: '#1E1E22',
+            borderRadius: '18px',
+            padding: '14px 20px 15.5px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
           }}
         >
-          진행 방식
-        </motion.p>
-
-        {[
-          {
-            num: '1',
-            emoji: '📋',
-            title: '생년월일만 입력',
-            desc: '이름도 필요 없어요. 3초면 끝.',
-          },
-          {
-            num: '2',
-            emoji: '🔍',
-            title: 'AI 짐승남들이 사주를 심사',
-            desc: '도화살, 홍염살, 편관... 당신의 색기 요소를 정밀 분석.',
-          },
-          {
-            num: '3',
-            emoji: '🏆',
-            title: '페로몬 등급 판정',
-            desc: '몇 명이 꼬이는지, 누가 꼬이는지 결과 카드로 확인.',
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            className="flex gap-4 items-center"
-            variants={fadeUp}
-            style={{
-              padding: '18px 20px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(12px)',
-            }}
-          >
-            <div
-              className="flex items-center justify-center shrink-0"
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(122,56,216,0.5), rgba(192,132,252,0.3))',
-                border: '1px solid rgba(192,132,252,0.25)',
-              }}
-            >
-              <span style={{ fontSize: '18px' }}>{item.emoji}</span>
-            </div>
-            <div className="flex-1">
-              <p
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: 'rgba(255,255,255,0.9)',
-                  letterSpacing: '-0.28px',
-                  marginBottom: '3px',
-                }}
-              >
-                {item.title}
-              </p>
-              <p
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 400,
-                  color: 'rgba(255,255,255,0.45)',
-                  lineHeight: '1.5',
-                  letterSpacing: '-0.26px',
-                }}
-              >
-                {item.desc}
-              </p>
-            </div>
-            <span
-              style={{
-                fontSize: '22px',
-                fontWeight: 800,
-                color: 'rgba(255,255,255,0.06)',
-                letterSpacing: '-1px',
-                flexShrink: 0,
-              }}
-            >
-              {item.num}
-            </span>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* ── Grade Preview ── */}
-      <motion.div
-        className="w-full flex flex-col"
-        style={{ padding: '40px 20px 0', gap: '8px' }}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-40px' }}
-        variants={{ visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
-      >
-        <motion.p
-          variants={fadeUp}
-          style={{
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'rgba(255,255,255,0.3)',
-            letterSpacing: '1.5px',
-            marginBottom: '8px',
-          }}
-        >
-          등급 체계
-        </motion.p>
-
-        {GRADE_PREVIEW.map((g) => (
-          <motion.div
-            key={g.grade}
-            className="flex items-center justify-between overflow-hidden"
-            variants={fadeUp}
-            style={{
-              padding: '16px 20px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              backdropFilter: 'blur(12px)',
-              position: 'relative',
-            }}
-          >
-            {/* 왼쪽 컬러 바 */}
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: '4px',
-                backgroundColor: g.color,
-                borderRadius: '20px 0 0 20px',
-                opacity: 0.85,
-              }}
-            />
-            <div className="flex items-center gap-3" style={{ paddingLeft: '8px' }}>
-              <span
-                style={{
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  color: g.color,
-                  width: '38px',
-                  letterSpacing: '-0.3px',
-                }}
-              >
-                {g.grade}
-              </span>
-              <span
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: 'rgba(255,255,255,0.7)',
-                  letterSpacing: '-0.28px',
-                }}
-              >
-                {g.title}
-              </span>
-            </div>
-            <span
-              style={{
-                fontSize: '14px',
-                fontWeight: 700,
-                color: g.color,
-                letterSpacing: '-0.28px',
-              }}
-            >
-              {g.count}
-            </span>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* ── Social Proof ── */}
-      <motion.div
-        className="flex items-center justify-center gap-2 w-full"
-        style={{ padding: '36px 28px 24px' }}
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
-        {/* Stacked mini avatars */}
-        <div className="flex" style={{ marginRight: '4px' }}>
-          {CHARACTERS.slice(0, 3).map((char, i) => (
-            <div
-              key={char.id}
-              className="overflow-hidden transform-gpu"
-              style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                border: '2px solid #1c1035',
-                marginLeft: i > 0 ? '-8px' : '0',
-                zIndex: 3 - i,
-              }}
-            >
-              <img
-                src={char.thumbnail}
-                alt=""
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
-          ))}
+          <p style={{ fontSize: '14.5px', fontWeight: 700, color: '#ffffff', textAlign: 'center', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>
+            사주로 짐승남 홀리기
+          </p>
         </div>
-        <p
-          style={{
-            fontSize: '13px',
-            color: 'rgba(255,255,255,0.4)',
-            letterSpacing: '-0.26px',
-          }}
-        >
-          <span style={{ color: '#c084fc', fontWeight: 600 }}>142,847</span>명
-          진단 완료
-        </p>
+      </motion.div>
+
+      {/* ── 시작하기 버튼 — 배경만 스케일 애니메이션, 텍스트는 별도 레이어라 위치 고정 ── */}
+      <motion.div
+        className="w-full"
+        style={{ padding: '28px 20px 0' }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.4 }}
+      >
+        <div style={{ position: 'relative', height: '60px' }}>
+          <motion.div
+            onClick={onStart}
+            className="transform-gpu"
+            whileHover={{ filter: 'brightness(1.08)' }}
+            whileTap={{ filter: 'brightness(0.92)', scale: 0.995 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '18px',
+              background: 'linear-gradient(135deg, #FF4438 0%, #E0201A 100%)',
+              cursor: 'pointer',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              fontSize: '17px',
+              fontWeight: 700,
+              letterSpacing: '-0.34px',
+              pointerEvents: 'none',
+            }}
+          >
+            시작하기
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── 참여자수 + 테스트 공유하기 ── */}
+      <motion.div
+        className="flex flex-col items-center w-full"
+        style={{ padding: '0 20px', marginTop: '64px', marginBottom: '36px' }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.4 }}
+      >
+        <div className="flex flex-col items-center" style={{ gap: '4px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', letterSpacing: '-0.26px' }}>참여자수</span>
+          <span style={{ fontSize: '30px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.4px', fontVariantNumeric: 'tabular-nums' }}>
+            <CountUpNumber target={142847} />
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center" style={{ gap: '4px', marginTop: '38px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', letterSpacing: '-0.26px' }}>공유하기</span>
+          <span style={{ fontSize: '30px', fontWeight: 800, color: '#FF5B4D', letterSpacing: '-0.4px', fontVariantNumeric: 'tabular-nums' }}>
+            18,204
+          </span>
+        </div>
+
+        <div className="flex items-center" style={{ gap: '16px', marginTop: '16px' }}>
+          <motion.button
+            type="button"
+            aria-label="카카오톡으로 공유"
+            onClick={handleKakaoShare}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
+            className="transform-gpu"
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '50%',
+              backgroundColor: '#FEE500',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 3C6.477 3 2 6.68 2 11.2c0 2.9 1.85 5.44 4.63 6.9-.2.75-.73 2.7-.84 3.12-.13.5.18.5.38.36.16-.11 2.53-1.72 3.56-2.42.7.1 1.44.15 2.27.15 5.523 0 10-3.68 10-8.2S17.523 3 12 3z"
+                fill="#191600"
+              />
+            </svg>
+          </motion.button>
+
+          <motion.button
+            type="button"
+            aria-label="X에 공유"
+            onClick={handleXShare}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
+            className="transform-gpu"
+            style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.06)',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M13.6 10.6 20.9 2h-1.7l-6.3 7.5L7.8 2H2l7.7 11.2L2 22h1.7l6.7-8 5.4 8H22l-8-11.4Zm-2.4 2.8-.8-1.1L4 3.3h2.6l5 7.2.8 1.1 6.6 9.4h-2.6l-5.2-7.6Z"
+                fill="#ffffff"
+              />
+            </svg>
+          </motion.button>
+
+          <motion.button
+            type="button"
+            aria-label="링크 복사"
+            onClick={handleCopy}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
+            className="transform-gpu"
+            style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '50%',
+              backgroundColor: copied ? 'rgba(255,91,77,0.18)' : 'rgba(255,255,255,0.06)',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+          >
+            {copied ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M5 13l4 4L19 7" stroke="#FF5B4D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 1 1 0 10h-2M8 12h8" stroke="rgba(255,255,255,0.75)" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            )}
+          </motion.button>
+        </div>
+        {copied && (
+          <p style={{ fontSize: '12px', color: '#FF5B4D', fontWeight: 600, marginTop: '12px' }}>
+            링크가 복사됐어요!
+          </p>
+        )}
       </motion.div>
 
       {/* ── Disclaimer ── */}
       <p
         style={{
           fontSize: '11px',
-          color: 'rgba(255,255,255,0.2)',
+          color: 'rgba(255,255,255,0.25)',
           textAlign: 'center',
-          padding: '0 28px 32px',
+          padding: '0 28px 132px',
           lineHeight: '1.5',
         }}
       >
@@ -425,49 +319,6 @@ export default function OnboardingLanding({ onStart }: Props) {
         <br />
         실제 운세·심리 진단이 아닙니다.
       </p>
-
-      {/* ── Fixed Bottom CTA ── */}
-      <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-10"
-        style={{
-          maxWidth: '768px',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          background:
-            'linear-gradient(to top, #0f0a1a 50%, rgba(15,10,26,0.8) 80%, transparent 100%)',
-        }}
-      >
-        <div style={{ padding: '12px 20px 24px' }}>
-          <motion.div
-            onClick={onStart}
-            className="transform-gpu"
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ duration: 0.1, ease: 'easeInOut' }}
-            style={{
-              height: '56px',
-              borderRadius: '16px',
-              backgroundColor: '#7A38D8',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 24px rgba(122,56,216,0.4)',
-            }}
-          >
-            <p
-              style={{
-                fontSize: '16px',
-                fontWeight: 600,
-                color: '#ffffff',
-                letterSpacing: '-0.32px',
-                lineHeight: '25px',
-              }}
-            >
-              내 페로몬 등급 확인하기
-            </p>
-          </motion.div>
-        </div>
-      </div>
     </div>
   );
 }

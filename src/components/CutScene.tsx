@@ -80,7 +80,8 @@ export default function CutScene({ onComplete }: Props) {
           <div
             className="flex flex-col gap-2"
             style={{
-              backgroundColor: '#1e1e32',
+              backgroundColor: '#ffffff',
+              border: '1px solid #F0F0F0',
               borderRadius: '16px',
               padding: '20px',
               maxWidth: '320px',
@@ -95,7 +96,7 @@ export default function CutScene({ onComplete }: Props) {
                 style={{
                   fontSize: '15px',
                   fontWeight: 500,
-                  color: '#eee',
+                  color: '#333',
                   lineHeight: '1.6',
                 }}
               >

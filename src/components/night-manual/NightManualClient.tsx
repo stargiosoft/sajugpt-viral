@@ -5,9 +5,11 @@ import { AnimatePresence } from 'framer-motion';
 import type { Gender } from '@/types/battle';
 import type { NightManualStep, NightManualResult, ServantType, InterventionChoice } from '@/types/night-manual';
 import { getCompatibility } from '@/constants/night-manual';
+import TestTopNav from '@/components/TestTopNav';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { supabase } from '@/lib/supabase';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
+import { parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
 import NightLanding from './NightLanding';
 import NightBirthInput from './NightBirthInput';
 import NightAnalyzing from './NightAnalyzing';
@@ -18,17 +20,6 @@ import NightResultCard from './NightResultCard';
 
 interface Props {
   nightManualId?: string;
-}
-
-function convertTo24Hour(time: string): string {
-  const match = time.match(/^(오전|오후)\s(\d{2}):(\d{2})$/);
-  if (!match) return '0000';
-  const period = match[1];
-  let hour = Number(match[2]);
-  const minute = match[3];
-  if (period === '오전') { if (hour === 12) hour = 0; }
-  else { if (hour !== 12) hour += 12; }
-  return `${String(hour).padStart(2, '0')}${minute}`;
 }
 
 export default function NightManualClient({ nightManualId }: Props) {
@@ -89,8 +80,20 @@ export default function NightManualClient({ nightManualId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isFormValid = useCallback(() => {
+    const numbers = birthDate.replace(/[^\d]/g, '');
+    if (numbers.length !== 8) return false;
+    const [year, month, day] = birthDate.split('-').map(Number);
+    if (!year || !month || !day) return false;
+    if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return false;
+    if (!birthTime && !unknownTime) return false;
+    return true;
+  }, [birthDate, birthTime, unknownTime]);
+
   const handleSubmit = useCallback(async () => {
-    if (submitting) return;
+    if (!isFormValid() || submitting) return;
 
     // 태어난 시간 미입력 시 자동으로 '모르겠어요' 처리 → 오후 12:00
     const hasValidTime = birthTime.includes('오전') || birthTime.includes('오후');
@@ -106,7 +109,7 @@ export default function NightManualClient({ nightManualId }: Props) {
     saveSelfSaju({ birthDate, birthTime: effectiveUnknownTime ? '오후 12:00' : birthTime, unknownTime: effectiveUnknownTime, gender });
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const timePart = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
+    const timePart = effectiveUnknownTime ? '1200' : parseKoreanTimeTo24Hour(birthTime);
     const birthday = numbers + timePart;
 
     setStep('analyzing');
@@ -130,7 +133,7 @@ export default function NightManualClient({ nightManualId }: Props) {
     } finally {
       setSubmitting(false);
     }
-  }, [birthDate, birthTime, unknownTime, gender, submitting]);
+  }, [isFormValid, birthDate, birthTime, unknownTime, gender, submitting]);
 
   const handleServantSelect = useCallback(async (servant: ServantType) => {
     if (!result) return;
@@ -162,9 +165,7 @@ export default function NightManualClient({ nightManualId }: Props) {
     setStep('landing');
   }, []);
 
-  // 태어난 시간은 선택사항
-  const isDateValid = /^\d{4}-\d{2}-\d{2}$/.test(birthDate);
-  const canSubmit = isDateValid && !submitting;
+  const canSubmit = isFormValid() && !submitting;
 
   return (
     <div
@@ -173,6 +174,7 @@ export default function NightManualClient({ nightManualId }: Props) {
     >
       <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
+        <TestTopNav />
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <NightLanding key="landing" onStart={() => setStep('input')} />

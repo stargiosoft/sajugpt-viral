@@ -18,6 +18,7 @@ import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { EARLY_EXIT_THRESHOLD } from '@/constants/dating-characters';
+import TestTopNav from '@/components/TestTopNav';
 import DatingLanding from './DatingLanding';
 import DatingInput from './DatingInput';
 import DatingAnalyzing from './DatingAnalyzing';
@@ -111,9 +112,22 @@ export default function DatingSimClient({ sharedResultId }: Props) {
     }
   }, [sharedResultId]);
 
+  // 유효성 검증 — DatingInput의 CTA 버튼과 동일한 규칙
+  const isFormValid = useCallback(() => {
+    const numbers = birthDate.replace(/[^\d]/g, '');
+    if (numbers.length !== 8) return false;
+    const [year, month, day] = birthDate.split('-').map(Number);
+    if (!year || !month || !day) return false;
+    if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return false;
+    if (!birthTime && !unknownTime) return false;
+    return true;
+  }, [birthDate, birthTime, unknownTime]);
+
   // ─── Step 1→2: 사주 분석 제출 ──────────────────────
   const handleSubmit = useCallback(async () => {
-    if (!birthDate || submitting) return;
+    if (!isFormValid() || submitting) return;
     setError(null);
     setSubmitting(true);
 
@@ -139,7 +153,7 @@ export default function DatingSimClient({ sharedResultId }: Props) {
     } finally {
       setSubmitting(false);
     }
-  }, [birthDate, birthTime, unknownTime, gender, submitting]);
+  }, [isFormValid, submitting, birthDate, birthTime, unknownTime, gender]);
 
   // ─── Step 2→3: 캐릭터 선택 후 대화 생성 ──────────────
   const handleCharacterSelect = useCallback(async (characterId: string) => {
@@ -255,6 +269,7 @@ export default function DatingSimClient({ sharedResultId }: Props) {
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#fff' }}>
       <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
+        <TestTopNav />
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <motion.div

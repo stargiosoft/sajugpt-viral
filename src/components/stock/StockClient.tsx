@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Gender, StockStep, StockAnalysisResult, RelationshipStatus, UserChoice, UserChoices } from '@/types/stock';
+import TestTopNav from '@/components/TestTopNav';
 import StockLanding from '@/components/stock/StockLanding';
 import StockInput from '@/components/stock/StockInput';
 import StockAnalyzing from '@/components/stock/StockAnalyzing';
@@ -15,6 +16,7 @@ import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM, trackEvent, trackShare, trackSajuGPTClick } from '@/lib/analytics';
 import { copyToClipboard, saveImage } from '@/lib/share';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
+import { parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
 
 // ─── 공유 버튼 (plan 단계용) ──────────────────────────────
 function PlanShareButton({ type, stockId, currentPrice, cardRef }: {
@@ -77,19 +79,6 @@ interface Props {
   stockId?: string;
 }
 
-function convertTo24Hour(time: string): string {
-  const match = time.match(/^(오전|오후)\s(\d{2}):(\d{2})$/);
-  if (!match) return '0000';
-  const period = match[1];
-  let hour = Number(match[2]);
-  const minute = match[3];
-  if (period === '오전') {
-    if (hour === 12) hour = 0;
-  } else {
-    if (hour !== 12) hour += 12;
-  }
-  return `${String(hour).padStart(2, '0')}${minute}`;
-}
 
 export default function StockClient({ stockId }: Props) {
   // 입력 상태
@@ -154,26 +143,22 @@ export default function StockClient({ stockId }: Props) {
     saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
-  // 유효성 검증 — 태어난 시간은 선택사항
+  // 유효성 검증 — 태어난 시간은 명시적으로 선택(모름 포함)해야 함
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const [year, month, day] = birthDate.split('-').map(Number);
     if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    if (!birthTime && !unknownTime) return false;
     return true;
-  }, [birthDate]);
+  }, [birthDate, birthTime, unknownTime]);
 
-  // 모르겠어요 토글
-  const handleUnknownTimeToggle = useCallback(() => {
-    const newValue = !unknownTime;
-    setUnknownTime(newValue);
-    if (newValue) {
-      setBirthTime('오후 12:00');
-    } else {
-      setBirthTime('');
-    }
-  }, [unknownTime]);
+  // 태어난 시간 선택 (시진 드롭다운)
+  const handleTimeSelect = useCallback((displayTime: string, isUnknown: boolean) => {
+    setUnknownTime(isUnknown);
+    setBirthTime(displayTime);
+  }, []);
 
   // 분석 요청
   const handleSubmit = useCallback(async () => {
@@ -193,7 +178,7 @@ export default function StockClient({ stockId }: Props) {
     setSubmitting(true);
 
     const numbers = birthDate.replace(/[^\d]/g, '');
-    const hhmm = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
+    const hhmm = effectiveUnknownTime ? '1200' : parseKoreanTimeTo24Hour(birthTime);
     const birthday = `${numbers}${hhmm}`;
 
     const minDelay = new Promise(resolve => setTimeout(resolve, 2500));
@@ -252,9 +237,10 @@ export default function StockClient({ stockId }: Props) {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#0a0a14' }}>
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#191F28' }}>
       <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
+        <TestTopNav bgColor="#191F28" />
         <AnimatePresence mode="wait">
 
           {/* ─── LANDING ─── */}
@@ -283,9 +269,8 @@ export default function StockClient({ stockId }: Props) {
                 birthDate={birthDate}
                 setBirthDate={setBirthDate}
                 birthTime={birthTime}
-                setBirthTime={setBirthTime}
                 unknownTime={unknownTime}
-                onUnknownTimeToggle={handleUnknownTimeToggle}
+                onTimeSelect={handleTimeSelect}
                 gender={gender}
                 setGender={setGender}
                 relationshipStatus={relationshipStatus}
@@ -320,7 +305,7 @@ export default function StockClient({ stockId }: Props) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
               className="flex flex-col"
-              style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '120px' }}
+              style={{ minHeight: '100dvh', backgroundColor: '#191F28', padding: '0 20px', paddingBottom: '120px' }}
             >
               <div style={{ height: '48px' }} />
               <StockReportCard ref={reportCardRef} report={result.stockReport} />
@@ -335,14 +320,16 @@ export default function StockClient({ stockId }: Props) {
                 maxWidth: '768px',
                 padding: '16px 20px',
                 paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-                background: 'linear-gradient(transparent, #0a0a14 30%)',
+                backgroundColor: '#191F28',
               }}>
-                <button
+                <motion.button
                   onClick={() => setStep('briefing')}
+                  whileHover={{ filter: 'brightness(1.08)', transition: { duration: 0.15, ease: 'easeOut' } }}
+                  whileTap={{ filter: 'brightness(0.92)', scale: 0.995, transition: { duration: 0.15, ease: 'easeOut' } }}
                   style={{
                     width: '100%',
                     padding: '16px',
-                    borderRadius: '14px',
+                    borderRadius: '16px',
                     backgroundColor: '#7A38D8',
                     color: '#fff',
                     fontSize: '16px',
@@ -353,7 +340,7 @@ export default function StockClient({ stockId }: Props) {
                   }}
                 >
                   이 주가, 이대로 두실 겁니까?
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           )}

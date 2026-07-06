@@ -1,11 +1,12 @@
 'use client';
 
-import { useRef, useCallback } from 'react';
+import { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { Gender } from '@/types/dating';
 import BirthInput from '@/components/BirthInput';
 import GenderSelect from '@/components/GenderSelect';
-import BirthTimeInput from '@/components/BirthTimeInput';
+import TimeSelectSheet from '@/components/TimeSelectSheet';
+import StickyCTAButton from '@/components/StickyCTAButton';
 
 interface Props {
   birthDate: string;
@@ -39,26 +40,22 @@ export default function DatingInput({
   submitting,
   error,
 }: Props) {
-  const birthTimeRef = useRef<HTMLDivElement>(null);
-
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const [year, month, day] = birthDate.split('-').map(Number);
     if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return false;
+    if (!birthTime && !unknownTime) return false;
     return true;
-  }, [birthDate]);
+  }, [birthDate, birthTime, unknownTime]);
 
-  const handleUnknownTimeToggle = useCallback(() => {
-    const newValue = !unknownTime;
-    setUnknownTime(newValue);
-    if (newValue) {
-      setBirthTime('오후 12:00');
-    } else {
-      setBirthTime('');
-    }
-  }, [unknownTime, setUnknownTime, setBirthTime]);
+  const handleTimeSelect = useCallback((displayTime: string, isUnknown: boolean) => {
+    setUnknownTime(isUnknown);
+    setBirthTime(displayTime);
+  }, [setUnknownTime, setBirthTime]);
 
   return (
     <motion.div
@@ -141,17 +138,12 @@ export default function DatingInput({
           <BirthInput
             value={birthDate}
             onChange={setBirthDate}
-            onEnter={onSubmit}
-            onComplete={() => {
-              const timeInput = birthTimeRef.current?.querySelector('input');
-              if (timeInput) setTimeout(() => timeInput.focus(), 100);
-            }}
+            onEnter={() => { if (isFormValid() && !submitting) onSubmit(); }}
           />
         </motion.div>
 
         {/* 태어난 시간 */}
         <motion.div
-          ref={birthTimeRef}
           className="flex flex-col gap-1 w-full"
           style={{ marginTop: '36px' }}
           variants={fadeUpVariant}
@@ -167,12 +159,15 @@ export default function DatingInput({
           }}>
             태어난 시간
           </p>
-          <BirthTimeInput
+          <TimeSelectSheet
             value={birthTime}
-            onChange={setBirthTime}
             unknownTime={unknownTime}
-            onUnknownTimeToggle={handleUnknownTimeToggle}
-            onEnter={onSubmit}
+            onSelect={handleTimeSelect}
+            accentColor="#7A38D8"
+            bgColor="#fff"
+            borderColor="1px solid #e7e7e7"
+            textColor="#151515"
+            placeholderColor="#b7b7b7"
           />
         </motion.div>
 
@@ -201,46 +196,19 @@ export default function DatingInput({
       </motion.div>
 
       {/* 하단 고정 CTA 버튼 — 디자인 시스템 패턴 */}
-      <div
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10 pointer-events-auto"
-        style={{
-          maxWidth: '768px',
-          backgroundColor: '#fff',
-          boxShadow: '0px -8px 16px 0px rgba(255, 255, 255, 0.76)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-        }}
-      >
-        <div style={{ padding: '12px 20px', width: '100%' }}>
-          <motion.div
-            onClick={onSubmit}
-            className="transform-gpu cursor-pointer"
-            whileTap={isFormValid() && !submitting ? { scale: 0.96 } : {}}
-            transition={{ duration: 0.1, ease: 'easeInOut' }}
-            style={{
-              height: '56px',
-              borderRadius: '16px',
-              backgroundColor: isFormValid() && !submitting ? '#7A38D8' : '#f8f8f8',
-              cursor: isFormValid() && !submitting ? 'pointer' : 'not-allowed',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background-color 0.2s',
-            }}
-          >
-            <p style={{
-              fontFamily: 'Pretendard Variable, sans-serif',
-              fontSize: '16px',
-              fontWeight: 500,
-              lineHeight: '25px',
-              letterSpacing: '-0.32px',
-              color: isFormValid() && !submitting ? '#fff' : '#b7b7b7',
-              whiteSpace: 'nowrap',
-            }}>
-              {submitting ? '분석 중...' : '사주 분석하기'}
-            </p>
-          </motion.div>
-        </div>
-      </div>
+      <StickyCTAButton
+        isValid={isFormValid() && !submitting}
+        onClick={onSubmit}
+        label={submitting ? '분석 중...' : '사주 분석하기'}
+        containerBackground="#fff"
+        containerBoxShadow="0px -8px 16px 0px rgba(255, 255, 255, 0.76)"
+        activeBackground="#7A38D8"
+        inactiveBackground="#f8f8f8"
+        inactiveTextColor="#b7b7b7"
+        fontWeight={500}
+        lineHeight="25px"
+        letterSpacing="-0.32px"
+      />
     </motion.div>
   );
 }

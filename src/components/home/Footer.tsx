@@ -1,11 +1,11 @@
 'use client';
 
 import { Fragment } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
-import localFont from 'next/font/local';
+import { motion } from 'framer-motion';
+import MoaMoaWordmark from '@/components/MoaMoaWordmark';
 
-const oneMobilePop = localFont({ src: '../../fonts/ONEMobilePOP.ttf' });
+const MotionLink = motion.create(Link);
 
 const SUPPORT_EMAIL = 'support@stargio.co.kr';
 
@@ -16,8 +16,8 @@ const TEXT_LINKS: { label: string; href?: string }[] = [
 ];
 
 const ACTION_LINKS: { label: string; href: string; variant: 'outline' | 'solid' }[] = [
-  { label: '의견보내기', href: `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('[모아모아] 의견 보내기')}`, variant: 'outline' },
-  { label: '제휴 문의', href: `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('[모아모아] 제휴 문의')}`, variant: 'solid' },
+  { label: '의견보내기', href: '/feedback', variant: 'outline' },
+  { label: '제휴 문의', href: '/partner', variant: 'solid' },
 ];
 
 const BUSINESS_INFO: [string, string][] = [
@@ -44,34 +44,21 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between" style={{ gap: '16px' }}>
           <div className="flex items-center" style={{ gap: '6px' }}>
             <img src="/home/fire.svg" alt="" style={{ width: '28px', height: '28px' }} />
-            <span
-              className={oneMobilePop.className}
-              style={{ fontSize: '18px', color: '#0d0d0d', letterSpacing: '-0.4px', position: 'relative', top: '2px' }}
-            >
-              {'모아모아'.split('').map((char, i) => (
-                <span
-                  key={i}
-                  style={{ display: 'inline-block', transform: char === '모' ? 'none' : 'rotate(-5deg)' }}
-                >
-                  {char}
-                </span>
-              ))}
-            </span>
+            <MoaMoaWordmark />
           </div>
 
           <div className="flex items-center" style={{ gap: '6px' }}>
             {ACTION_LINKS.map((link) => (
-              <motion.a
+              <MotionLink
                 key={link.label}
                 href={link.href}
                 whileHover={{ opacity: 0.9 }}
-                whileTap={{ scale: 0.995, backgroundColor: link.variant === 'solid' ? '#E8600A' : '#F2F2F4' }}
+                whileTap={{ scale: 0.995, backgroundColor: link.variant === 'solid' ? '#E8600A' : '#E4E4E8' }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
-                className="flex items-center justify-center shrink-0 transform-gpu"
+                className="flex items-center justify-center flex-1 sm:flex-none sm:w-[84px] transform-gpu"
                 style={{
-                  width: '84px',
                   fontSize: '12px',
-                  fontWeight: 500,
+                  fontWeight: 700,
                   letterSpacing: '-0.2px',
                   textDecoration: 'none',
                   borderRadius: '14px',
@@ -82,7 +69,7 @@ export default function Footer() {
                 }}
               >
                 {link.label}
-              </motion.a>
+              </MotionLink>
             ))}
           </div>
         </div>

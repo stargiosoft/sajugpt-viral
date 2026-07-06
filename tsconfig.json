@@ -37,12 +37,6 @@
   ],
   "exclude": [
     "node_modules",
-    "supabase",
-    "src/main.ts",
-    "src/counter.ts",
-    "src/style.css",
-    "src/assets",
-    "src/_old_pages",
-    "vite.config.ts"
+    "supabase"
   ]
 }

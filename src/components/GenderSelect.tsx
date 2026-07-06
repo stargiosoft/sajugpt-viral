@@ -7,13 +7,15 @@ interface Props {
   value: Gender;
   onChange: (value: Gender) => void;
   accentColor?: string;
+  bgColor?: string;
+  unselectedColor?: string;
 }
 
-export default function GenderSelect({ value, onChange, accentColor = '#7A38D8' }: Props) {
+export default function GenderSelect({ value, onChange, accentColor = '#7A38D8', bgColor = '#f8f8f8', unselectedColor = '#b7b7b7' }: Props) {
   return (
     <div
       className="overflow-hidden isolate"
-      style={{ backgroundColor: '#f8f8f8', borderRadius: '16px', padding: '8px' }}
+      style={{ backgroundColor: bgColor, borderRadius: '16px', padding: '8px' }}
     >
       <div className="flex gap-2">
         {(['female', 'male'] as const).map(g => (
@@ -24,6 +26,7 @@ export default function GenderSelect({ value, onChange, accentColor = '#7A38D8' 
             className="flex-1 flex items-center justify-between relative"
             style={{
               height: '48px',
+              minWidth: 0,
               borderRadius: '12px',
               padding: '12px 20px',
               backgroundColor: 'transparent',
@@ -50,16 +53,16 @@ export default function GenderSelect({ value, onChange, accentColor = '#7A38D8' 
                 fontWeight: 500,
                 lineHeight: '20px',
                 letterSpacing: '-0.45px',
-                color: value === g ? '#fff' : '#b7b7b7',
+                color: value === g ? '#fff' : unselectedColor,
                 transition: 'color 0.2s',
               }}
             >
               {g === 'female' ? '여성' : '남성'}
             </span>
-            <svg className="relative z-[1]" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <svg className="relative z-[1] shrink-0" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path
                 d="M7 11.625L10.3294 16L17 9"
-                stroke={value === g ? '#fff' : '#E7E7E7'}
+                stroke={value === g ? '#fff' : unselectedColor}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="3"

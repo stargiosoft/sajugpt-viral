@@ -12,7 +12,7 @@ export default function CharacterAvatar({ src, name, size = 48 }: Props) {
         width: `${size}px`,
         height: `${size}px`,
         borderRadius: '50%',
-        border: '2px solid rgba(255,255,255,0.3)',
+        border: '2px solid #F0F0F0',
         flexShrink: 0,
       }}
     >

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import AnalyzingScreen from '@/components/AnalyzingScreen';
 import type { DatingStep } from '@/types/dating';
 
 interface Props {
@@ -38,48 +38,13 @@ export default function DatingAnalyzing({ phase }: Props) {
   const config = PHASE_CONFIG[phase] ?? PHASE_CONFIG.analyzing;
 
   return (
-    <div
-      className="flex flex-col items-center justify-center"
-      style={{ minHeight: '60vh', padding: '0 24px' }}
-    >
-      {/* 펄싱 링 + 하트 아이콘 */}
-      <motion.div
-        animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0.2, 0.6] }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          width: '120px',
-          height: '120px',
-          borderRadius: '50%',
-          border: '2px solid rgba(122, 56, 216, 0.4)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '32px',
-        }}
-      >
-        <span style={{ fontSize: '48px', lineHeight: 1 }}>💘</span>
-      </motion.div>
-
-      {/* 순차 등장 메시지 */}
-      {config.messages.map((msg, i) => (
-        <motion.p
-          key={`${phase}-${i}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.6, duration: 0.4 }}
-          style={{
-            fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '15px',
-            fontWeight: 500,
-            color: '#666',
-            marginBottom: '8px',
-            textAlign: 'center',
-            letterSpacing: '-0.3px',
-          }}
-        >
-          {msg}
-        </motion.p>
-      ))}
-    </div>
+    <AnalyzingScreen
+      messages={config.messages}
+      emoji="💘"
+      ringColor="rgba(122, 56, 216, 0.4)"
+      ringBorderWidth="2px"
+      emojiFontSize="48px"
+      messageLetterSpacing="-0.3px"
+    />
   );
 }

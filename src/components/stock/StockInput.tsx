@@ -5,16 +5,16 @@ import type { Gender } from '@/types/battle';
 import type { RelationshipStatus } from '@/types/stock';
 import BirthInput from '@/components/BirthInput';
 import GenderSelect from '@/components/GenderSelect';
-import BirthTimeInput from '@/components/BirthTimeInput';
+import TimeSelectSheet from '@/components/TimeSelectSheet';
+import StickyCTAButton from '@/components/StickyCTAButton';
 import { RELATIONSHIP_STATUSES } from '@/constants/stock';
 
 interface Props {
   birthDate: string;
   setBirthDate: (v: string) => void;
   birthTime: string;
-  setBirthTime: (v: string) => void;
   unknownTime: boolean;
-  onUnknownTimeToggle: () => void;
+  onTimeSelect: (displayTime: string, isUnknown: boolean) => void;
   gender: Gender;
   setGender: (v: Gender) => void;
   relationshipStatus: RelationshipStatus;
@@ -38,9 +38,8 @@ export default function StockInput({
   birthDate,
   setBirthDate,
   birthTime,
-  setBirthTime,
   unknownTime,
-  onUnknownTimeToggle,
+  onTimeSelect,
   gender,
   setGender,
   relationshipStatus,
@@ -54,10 +53,6 @@ export default function StockInput({
     <div
       className="flex flex-col w-full"
       style={{
-        maxWidth: '768px',
-        margin: '0 auto',
-        minHeight: '100dvh',
-        backgroundColor: '#0a0a14',
         padding: '0 20px',
         paddingBottom: '100px',
       }}
@@ -70,20 +65,9 @@ export default function StockInput({
         variants={sectionVariants}
         style={{ paddingTop: '48px', marginBottom: '36px' }}
       >
-        <p
-          style={{
-            fontSize: '13px',
-            fontWeight: 500,
-            color: '#7A38D8',
-            letterSpacing: '-0.3px',
-            marginBottom: '8px',
-          }}
-        >
-          사주증권 리서치센터
-        </p>
         <h1
           style={{
-            fontSize: '26px',
+            fontSize: '30px',
             fontWeight: 700,
             color: '#ffffff',
             letterSpacing: '-0.6px',
@@ -91,7 +75,7 @@ export default function StockInput({
             marginBottom: '8px',
           }}
         >
-          연애 시장 내 값어치는?
+          연애 시장에서 내 몸값은?
         </h1>
         <p
           style={{
@@ -100,9 +84,10 @@ export default function StockInput({
             color: '#888888',
             letterSpacing: '-0.3px',
             lineHeight: '22px',
+            paddingLeft: '2px',
           }}
         >
-          사주증권 리서치센터가 당신의 연애 주가를 조회합니다
+          사주로 분석한 당신의 연애 주가를 확인해 보세요.
         </p>
       </motion.div>
 
@@ -112,20 +97,22 @@ export default function StockInput({
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        style={{ marginBottom: '20px' }}
+        style={{ marginBottom: '36px' }}
       >
         <p
           style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#cccccc',
-            letterSpacing: '-0.3px',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: 'rgba(255,255,255,0.45)',
+            lineHeight: '16px',
+            letterSpacing: '-0.24px',
+            padding: '0 4px',
             marginBottom: '8px',
           }}
         >
           성별
         </p>
-        <GenderSelect value={gender} onChange={setGender} />
+        <GenderSelect value={gender} onChange={setGender} accentColor="#7A38D8" bgColor="rgba(255,255,255,0.06)" unselectedColor="rgba(255,255,255,0.28)" />
       </motion.div>
 
       {/* Birth Date */}
@@ -134,22 +121,35 @@ export default function StockInput({
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        style={{ marginBottom: '20px' }}
+        style={{ marginBottom: '36px' }}
       >
         <p
           style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#cccccc',
-            letterSpacing: '-0.3px',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: 'rgba(255,255,255,0.45)',
+            lineHeight: '16px',
+            letterSpacing: '-0.24px',
+            padding: '0 4px',
             marginBottom: '8px',
           }}
         >
           생년월일
         </p>
-        <div className="stock-input-wrapper">
-          <BirthInput value={birthDate} onChange={setBirthDate} onEnter={onSubmit} />
-        </div>
+        <BirthInput
+          value={birthDate}
+          onChange={setBirthDate}
+          onEnter={onSubmit}
+          accentColor="#7A38D8"
+          bgColor="rgba(255,255,255,0.06)"
+          textColor="#ffffff"
+          borderColor="transparent"
+          errorColor="#F04452"
+          errorGap="8px"
+          errorOverlay
+          errorFontSize="12px"
+          errorIconSize={14}
+        />
       </motion.div>
 
       {/* Birth Time */}
@@ -158,25 +158,26 @@ export default function StockInput({
         initial="hidden"
         animate="visible"
         variants={sectionVariants}
-        style={{ marginBottom: '20px' }}
+        style={{ marginBottom: '36px' }}
       >
         <p
           style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#cccccc',
-            letterSpacing: '-0.3px',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: 'rgba(255,255,255,0.45)',
+            lineHeight: '16px',
+            letterSpacing: '-0.24px',
+            padding: '0 4px',
             marginBottom: '8px',
           }}
         >
           태어난 시간
         </p>
-        <BirthTimeInput
+        <TimeSelectSheet
           value={birthTime}
-          onChange={setBirthTime}
           unknownTime={unknownTime}
-          onUnknownTimeToggle={onUnknownTimeToggle}
-          onEnter={onSubmit}
+          onSelect={onTimeSelect}
+          accentColor="#B794F6"
         />
       </motion.div>
 
@@ -190,10 +191,12 @@ export default function StockInput({
       >
         <p
           style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#cccccc',
-            letterSpacing: '-0.3px',
+            fontSize: '12px',
+            fontWeight: 400,
+            color: 'rgba(255,255,255,0.45)',
+            lineHeight: '16px',
+            letterSpacing: '-0.24px',
+            padding: '0 4px',
             marginBottom: '8px',
           }}
         >
@@ -201,7 +204,7 @@ export default function StockInput({
         </p>
         <div
           className="overflow-hidden isolate"
-          style={{ backgroundColor: '#1a1a2e', borderRadius: '16px', padding: '8px' }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '16px', padding: '8px' }}
         >
           <div className="flex gap-2">
             {RELATIONSHIP_STATUSES.map((status) => (
@@ -238,7 +241,7 @@ export default function StockInput({
                     fontWeight: 500,
                     lineHeight: '20px',
                     letterSpacing: '-0.45px',
-                    color: relationshipStatus === status.id ? '#ffffff' : '#666666',
+                    color: relationshipStatus === status.id ? '#ffffff' : 'rgba(255,255,255,0.28)',
                     transition: 'color 0.2s',
                   }}
                 >
@@ -255,55 +258,34 @@ export default function StockInput({
         <motion.div
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
+          className="flex gap-1 items-center"
           style={{
+            marginTop: '24px',
+            borderRadius: '10px',
             padding: '12px 16px',
-            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-            borderRadius: '12px',
-            marginBottom: '16px',
+            backgroundColor: 'rgba(240,68,82,0.12)',
+            border: '1px solid rgba(240,68,82,0.3)',
           }}
         >
-          <p style={{ fontSize: '14px', color: '#ef4444', lineHeight: '20px' }}>
+          <p style={{ color: '#FF8A80', fontSize: '13px' }}>
             {error}
           </p>
         </motion.div>
       )}
 
       {/* Fixed Bottom CTA */}
-      <div
-        className="fixed left-0 right-0"
-        style={{
-          bottom: 0,
-          zIndex: 50,
-          padding: '12px 20px',
-          paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
-          backgroundColor: 'rgba(10, 10, 20, 0.95)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        <div style={{ maxWidth: '768px', margin: '0 auto' }}>
-          <motion.button
-            type="button"
-            onClick={onSubmit}
-            disabled={!isFormValid || submitting}
-            whileTap={isFormValid && !submitting ? { scale: 0.97 } : {}}
-            className="w-full"
-            style={{
-              height: '56px',
-              borderRadius: '16px',
-              border: 'none',
-              backgroundColor: isFormValid && !submitting ? '#7A38D8' : '#2a2a3e',
-              color: isFormValid && !submitting ? '#ffffff' : '#555555',
-              fontSize: '17px',
-              fontWeight: 700,
-              letterSpacing: '-0.4px',
-              cursor: isFormValid && !submitting ? 'pointer' : 'not-allowed',
-              transition: 'background-color 0.2s, color 0.2s',
-            }}
-          >
-            {submitting ? '조회 중...' : '시세 조회'}
-          </motion.button>
-        </div>
-      </div>
+      <StickyCTAButton
+        isValid={isFormValid && !submitting}
+        onClick={onSubmit}
+        label={submitting ? '조회 중...' : '내 주가 보기'}
+        containerBackground="#191F28"
+        activeBackground="#7A38D8"
+        inactiveBackground="rgba(255,255,255,0.08)"
+        inactiveTextColor="rgba(255,255,255,0.35)"
+        fontWeight={700}
+        lineHeight="22px"
+        letterSpacing="-0.4px"
+      />
     </div>
   );
 }

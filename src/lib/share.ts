@@ -75,6 +75,16 @@ export async function saveImage(element: HTMLElement, filename = '색기배틀_�
   URL.revokeObjectURL(url);
 }
 
+export function shareX(text: string, url: string): void {
+  const params = new URLSearchParams({ text, url });
+  window.open(`https://twitter.com/intent/tweet?${params.toString()}`, '_blank', 'noopener,noreferrer');
+}
+
+export function shareFacebook(url: string): void {
+  const params = new URLSearchParams({ u: url });
+  window.open(`https://www.facebook.com/sharer/sharer.php?${params.toString()}`, '_blank', 'noopener,noreferrer');
+}
+
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);

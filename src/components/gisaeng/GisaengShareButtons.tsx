@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, type RefObject } from 'react';
+import type { RefObject } from 'react';
+import { useCallback } from 'react';
 import type { GisaengTier } from '@/types/gisaeng';
 import { TIER_INFO } from '@/constants/gisaeng';
-import { captureCardImage, saveImage, copyToClipboard, shareNative } from '@/lib/share';
-import { trackEvent, trackShare } from '@/lib/analytics';
+import { trackEvent } from '@/lib/analytics';
+import { useShareActions } from '@/lib/useShareActions';
 
 interface Props {
   cardRef: RefObject<HTMLDivElement | null>;
@@ -15,38 +16,26 @@ interface Props {
 }
 
 export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySalary, gisaengName }: Props) {
-  const [copied, setCopied] = useState(false);
-
   const tierLabel = TIER_INFO[tier].label;
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const shareUrl = `${baseUrl}/gisaeng/${resultId}`;
 
-  const shareText = `🏮 기생 시뮬 — ${tier}티어 ${tierLabel}\n${gisaengName} | 월 ${monthlySalary.toLocaleString()}냥\n넌 몇 냥이야? ㅋㅋ\n👉 ${shareUrl}`;
+  const { copied, handleCopy, handleSave, handleNativeShare: shareNative } = useShareActions({
+    featureType: 'gisaeng',
+    resultId,
+    getShareText: () => {
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      return `🏮 기생 시뮬 — ${tier}티어 ${tierLabel}\n${gisaengName} | 월 ${monthlySalary.toLocaleString()}냥\n넌 몇 냥이야? ㅋㅋ\n👉 ${baseUrl}/gisaeng/${resultId}`;
+    },
+    imageFilename: `기생시뮬_${tier}티어.png`,
+    metadata: { tier, monthlySalary },
+    onCopy: () => trackEvent('gisaeng_share_copy'),
+    onSave: () => trackEvent('gisaeng_share_save'),
+    onNative: () => trackEvent('gisaeng_share_native'),
+  });
 
-  const handleCopy = async () => {
-    await copyToClipboard(shareText);
-    setCopied(true);
-    trackEvent('gisaeng_share_copy');
-    trackShare('gisaeng', 'clipboard', resultId, { tier, monthlySalary });
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleSave = async () => {
-    if (!cardRef.current) return;
-    await saveImage(cardRef.current, `기생시뮬_${tier}티어.png`);
-    trackEvent('gisaeng_share_save');
-    trackShare('gisaeng', 'image_save', resultId, { tier });
-  };
-
-  const handleNativeShare = async () => {
-    if (!cardRef.current) return;
-    const shared = await shareNative(cardRef.current, monthlySalary);
-    if (!shared) {
-      handleCopy();
-    }
-    trackEvent('gisaeng_share_native');
-    trackShare('gisaeng', 'native', resultId, { tier });
-  };
+  const handleNativeShare = useCallback(
+    () => shareNative(cardRef, { title: `🏮 기생 시뮬 — ${tier}티어 ${tierLabel}`, text: `${gisaengName} | 월 ${monthlySalary.toLocaleString()}냥\n넌 몇 냥이야? ㅋㅋ` }),
+    [shareNative, cardRef, tier, tierLabel, gisaengName, monthlySalary]
+  );
 
   return (
     <div className="flex flex-col gap-3">
@@ -98,7 +87,7 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
           {copied ? '복사됨!' : '🔗 링크 복사'}
         </button>
         <button
-          onClick={handleSave}
+          onClick={() => handleSave(cardRef)}
           className="flex-1 flex items-center justify-center"
           style={{
             height: '48px',

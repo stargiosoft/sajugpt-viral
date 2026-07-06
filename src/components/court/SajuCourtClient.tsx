@@ -5,8 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Gender } from '@/types/battle';
 import type { CourtStep, CourtResult, PeriodInput } from '@/types/court';
 import BirthInput from '@/components/BirthInput';
+import TestTopNav from '@/components/TestTopNav';
 import GenderSelect from '@/components/GenderSelect';
-import BirthTimeInput from '@/components/BirthTimeInput';
+import TimeSelectSheet from '@/components/TimeSelectSheet';
+import StickyCTAButton from '@/components/StickyCTAButton';
 import CourtLanding from '@/components/court/CourtLanding';
 import CourtAnalyzing from '@/components/court/CourtAnalyzing';
 import IndictmentCard from '@/components/court/IndictmentCard';
@@ -17,6 +19,7 @@ import CourtShareButtons from '@/components/court/CourtShareButtons';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM, trackEvent } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
+import { parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
 import {
   getPeriodBonus,
   getSentenceGrade,
@@ -25,17 +28,6 @@ import {
   getJudgeComment,
   getCrimeInfo,
 } from '@/constants/court';
-
-function convertTo24Hour(time: string): string {
-  const match = time.match(/^(오전|오후)\s(\d{2}):(\d{2})$/);
-  if (!match) return '0000';
-  const period = match[1];
-  let hour = Number(match[2]);
-  const minute = match[3];
-  if (period === '오전') { if (hour === 12) hour = 0; }
-  else { if (hour !== 12) hour += 12; }
-  return `${String(hour).padStart(2, '0')}${minute}`;
-}
 
 
 export default function SajuCourtClient() {
@@ -104,15 +96,22 @@ export default function SajuCourtClient() {
   }, [birthDate, birthTime, unknownTime, gender]);
 
 
-  // 유효성 검증 — 태어난 시간은 선택사항
+  // 유효성 검증 — 태어난 시간은 명시적으로 선택(모름 포함)해야 함
   const isFormValid = useCallback(() => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
     const [year, month, day] = birthDate.split('-').map(Number);
     if (!year || !month || !day) return false;
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    if (!birthTime && !unknownTime) return false;
     return true;
-  }, [birthDate]);
+  }, [birthDate, birthTime, unknownTime]);
+
+  // 태어난 시간 선택 (시진 드롭다운)
+  const handleTimeSelect = useCallback((displayTime: string, isUnknown: boolean) => {
+    setUnknownTime(isUnknown);
+    setBirthTime(displayTime);
+  }, []);
 
   const handleSubmit = async () => {
     if (!isFormValid() || submitting) return;
@@ -132,7 +131,7 @@ export default function SajuCourtClient() {
 
     try {
       const numbers = birthDate.replace(/[^\d]/g, '');
-      const time24 = effectiveUnknownTime ? '1200' : convertTo24Hour(birthTime);
+      const time24 = effectiveUnknownTime ? '1200' : parseKoreanTimeTo24Hour(birthTime);
       const result = await callEdgeFunction<CourtResult>('analyze-saju-court', {
         birthday: `${numbers}${time24}`,
         gender,
@@ -190,6 +189,7 @@ export default function SajuCourtClient() {
     >
       <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full flex flex-col items-center">
+      <TestTopNav />
       <AnimatePresence mode="wait">
 
         {/* ─── LANDING ──────────────────────────── */}
@@ -230,17 +230,15 @@ export default function SajuCourtClient() {
               </div>
               <div>
                 <label style={{ fontSize: '14px', fontWeight: 600, color: '#A99BC4', marginBottom: '8px', display: 'block' }}>태어난 시간</label>
-                <BirthTimeInput
+                <TimeSelectSheet
                   value={birthTime}
-                  onChange={setBirthTime}
                   unknownTime={unknownTime}
-                  onEnter={handleSubmit}
-                  onUnknownTimeToggle={() => {
-                    const newVal = !unknownTime;
-                    setUnknownTime(newVal);
-                    if (newVal) setBirthTime('오후 12:00');
-                    else setBirthTime('');
-                  }}
+                  onSelect={handleTimeSelect}
+                  accentColor="#7A38D8"
+                  bgColor="#fff"
+                  borderColor="1.5px solid #e7e7e7"
+                  textColor="#151515"
+                  placeholderColor="#b7b7b7"
                 />
               </div>
             </div>
@@ -250,45 +248,19 @@ export default function SajuCourtClient() {
             )}
 
             {/* 하단 고정 CTA 버튼 */}
-            <div
-              className="fixed bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-start w-full z-10"
-              style={{
-                maxWidth: '768px',
-                background: 'linear-gradient(to top, #0C0914 60%, transparent)',
-                paddingBottom: 'env(safe-area-inset-bottom)',
-              }}
-            >
-              <div style={{ padding: '12px 20px', width: '100%' }}>
-                <motion.div
-                  onClick={handleSubmit}
-                  className="transform-gpu"
-                  whileTap={isFormValid() && !submitting ? { scale: 0.96 } : {}}
-                  transition={{ duration: 0.1, ease: 'easeInOut' }}
-                  style={{
-                    height: '56px',
-                    borderRadius: '16px',
-                    backgroundColor: isFormValid() && !submitting ? '#7A38D8' : 'rgba(122, 56, 216, 0.08)',
-                    boxShadow: isFormValid() && !submitting ? '0 4px 24px rgba(122, 56, 216, 0.25)' : 'none',
-                    cursor: isFormValid() && !submitting ? 'pointer' : 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  <p style={{
-                    fontSize: '16px',
-                    fontWeight: 500,
-                    lineHeight: '25px',
-                    letterSpacing: '-0.32px',
-                    color: isFormValid() && !submitting ? '#fff' : '#4A3D64',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {submitting ? '분석 중...' : '기소장 받기'}
-                  </p>
-                </motion.div>
-              </div>
-            </div>
+            <StickyCTAButton
+              isValid={isFormValid() && !submitting}
+              onClick={handleSubmit}
+              label={submitting ? '분석 중...' : '기소장 받기'}
+              containerBackground="linear-gradient(to top, #0C0914 60%, transparent)"
+              activeBackground="#7A38D8"
+              inactiveBackground="rgba(122, 56, 216, 0.08)"
+              activeBoxShadow="0 4px 24px rgba(122, 56, 216, 0.25)"
+              inactiveTextColor="#4A3D64"
+              fontWeight={500}
+              lineHeight="25px"
+              letterSpacing="-0.32px"
+            />
           </div>
         )}
 

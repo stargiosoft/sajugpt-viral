@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { captureCardImage, copyToClipboard, saveImage } from '@/lib/share';
-import { trackEvent, trackShare } from '@/lib/analytics';
+import { useCallback } from 'react';
+import { trackEvent } from '@/lib/analytics';
+import { useShareActions } from '@/lib/useShareActions';
 
 interface Props {
   label?: string;
@@ -13,56 +13,26 @@ interface Props {
 }
 
 export default function CourtShareButtons({ cardRef, courtId, crimeLabel, sentence }: Props) {
-  const [copied, setCopied] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  const getShareText = () => {
+  const getShareText = useCallback(() => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     return `⚖️ 사주 법정 — ${crimeLabel}\n징역 ${sentence}년 선고 💰\n넌 뭐 나올지 해봐 ㅋㅋ\n👉 ${baseUrl}/court/${courtId}`;
-  };
+  }, [crimeLabel, sentence, courtId]);
 
-  const handleCopy = useCallback(async () => {
-    const ok = await copyToClipboard(getShareText());
-    if (ok) {
-      setCopied(true);
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setCopied(false), 2000);
-      trackEvent('saju_court_share_clipboard');
-      trackShare('saju_court', 'clipboard', courtId, { crimeLabel, sentence });
-    }
-  }, [crimeLabel, sentence]);
+  const { copied, saving, handleCopy, handleSave, handleNativeShare } = useShareActions({
+    featureType: 'saju_court',
+    resultId: courtId,
+    getShareText,
+    imageFilename: `사주법정_${crimeLabel}.png`,
+    metadata: { crimeLabel, sentence },
+    onCopy: () => trackEvent('saju_court_share_clipboard'),
+    onSave: () => trackEvent('saju_court_share_image'),
+    onNative: () => trackEvent('saju_court_share_native'),
+  });
 
-  const handleSave = useCallback(async () => {
-    if (!cardRef.current || saving) return;
-    setSaving(true);
-    try {
-      await saveImage(cardRef.current, `사주법정_${crimeLabel}.png`);
-      trackEvent('saju_court_share_image');
-      trackShare('saju_court', 'image_save', courtId);
-    } catch { /* noop */ }
-    setSaving(false);
-  }, [cardRef, crimeLabel, saving]);
-
-  const handleNative = useCallback(async () => {
-    if (!navigator.share || !cardRef.current) {
-      await handleCopy();
-      return;
-    }
-    try {
-      const blob = await captureCardImage(cardRef.current);
-      const file = new File([blob], `사주법정_${crimeLabel}.png`, { type: 'image/png' });
-      await navigator.share({
-        title: `⚖️ ${crimeLabel} — 징역 ${sentence}년`,
-        text: getShareText(),
-        files: [file],
-      });
-      trackEvent('saju_court_share_native');
-      trackShare('saju_court', 'native', courtId);
-    } catch {
-      await handleCopy();
-    }
-  }, [cardRef, crimeLabel, sentence, handleCopy]);
+  const handleNative = useCallback(
+    () => handleNativeShare(cardRef, { title: `⚖️ ${crimeLabel} — 징역 ${sentence}년` }),
+    [handleNativeShare, cardRef, crimeLabel, sentence]
+  );
 
   const btnStyle: React.CSSProperties = {
     height: '56px',
@@ -88,7 +58,7 @@ export default function CourtShareButtons({ cardRef, courtId, crimeLabel, senten
         </button>
 
         <button
-          onClick={handleSave}
+          onClick={() => handleSave(cardRef)}
           disabled={saving}
           style={{
             ...btnStyle,

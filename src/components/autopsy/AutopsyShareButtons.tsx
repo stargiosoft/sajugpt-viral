@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { captureCardImage, copyToClipboard, saveImage, shareKakao } from '@/lib/share';
+import { useCallback } from 'react';
+import { shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
+import { useShareActions } from '@/lib/useShareActions';
 
 interface Props {
   causeOfDeathLabel: string;
@@ -11,56 +12,25 @@ interface Props {
 }
 
 export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, cardRef }: Props) {
-  const [copied, setCopied] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const getShareText = useCallback(
+    () => `🔬 사주 부검 결과 — "${causeOfDeathLabel}" 판정\n너도 전남친 부검해봐 ㅋㅋ\n👉 ${typeof window !== 'undefined' ? window.location.origin : ''}/autopsy/${autopsyId}`,
+    [causeOfDeathLabel, autopsyId]
+  );
 
-  const shareText = `🔬 사주 부검 결과 — "${causeOfDeathLabel}" 판정\n너도 전남친 부검해봐 ㅋㅋ\n👉 ${typeof window !== 'undefined' ? window.location.origin : ''}/autopsy/${autopsyId}`;
+  const { copied, saving, handleCopy, handleSave, handleNativeShare: shareNative } = useShareActions({
+    featureType: 'saju_autopsy',
+    resultId: autopsyId,
+    getShareText,
+    imageFilename: '사주부검_사망진단서.png',
+    onCopy: () => trackEvent('autopsy_share_clipboard', { causeOfDeathLabel, autopsyId }),
+    onSave: () => trackEvent('autopsy_share_save', { causeOfDeathLabel, autopsyId }),
+    onNative: () => trackEvent('autopsy_share_native', { causeOfDeathLabel, autopsyId }),
+  });
 
-  const handleCopy = useCallback(async () => {
-    const ok = await copyToClipboard(shareText);
-    if (ok) {
-      setCopied(true);
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setCopied(false), 2000);
-      trackEvent('autopsy_share_clipboard', { causeOfDeathLabel, autopsyId });
-      trackShare('saju_autopsy', 'clipboard', autopsyId);
-    }
-  }, [shareText, causeOfDeathLabel, autopsyId]);
-
-  const handleSave = useCallback(async () => {
-    if (!cardRef.current || saving) return;
-    setSaving(true);
-    try {
-      await saveImage(cardRef.current, '사주부검_사망진단서.png');
-      trackEvent('autopsy_share_save', { causeOfDeathLabel, autopsyId });
-      trackShare('saju_autopsy', 'image_save', autopsyId);
-    } catch (err) {
-      console.error('이미지 저장 실패:', err);
-    } finally {
-      setSaving(false);
-    }
-  }, [cardRef, causeOfDeathLabel, autopsyId, saving]);
-
-  const handleNativeShare = useCallback(async () => {
-    if (!cardRef.current || !navigator.share) {
-      await handleCopy();
-      return;
-    }
-    try {
-      const blob = await captureCardImage(cardRef.current);
-      const file = new File([blob], '사주부검_사망진단서.png', { type: 'image/png' });
-      await navigator.share({
-        title: `사주 부검 결과 — ${causeOfDeathLabel}`,
-        text: '너도 전남친 부검해봐 ㅋㅋ',
-        files: [file],
-      });
-      trackEvent('autopsy_share_native', { causeOfDeathLabel, autopsyId });
-      trackShare('saju_autopsy', 'native', autopsyId);
-    } catch {
-      await handleCopy();
-    }
-  }, [cardRef, causeOfDeathLabel, autopsyId, handleCopy]);
+  const handleNativeShare = useCallback(
+    () => shareNative(cardRef, { title: `사주 부검 결과 — ${causeOfDeathLabel}`, text: '너도 전남친 부검해봐 ㅋㅋ' }),
+    [shareNative, cardRef, causeOfDeathLabel]
+  );
 
   const handleKakaoShare = useCallback(() => {
     const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/autopsy/${autopsyId}`;
@@ -106,7 +76,7 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
       {/* 보조 공유 행 */}
       <div className="flex gap-3">
         <button
-          onClick={handleSave}
+          onClick={() => handleSave(cardRef)}
           style={{
             ...btnStyle,
             backgroundColor: '#F7F2FA',

@@ -1,13 +1,5 @@
 import type { Grade } from '@/types/battle';
-
-const GRADE_COLORS: Record<Grade, string> = {
-  SSS: '#FFD700',
-  SS: '#FF4444',
-  S: '#7A38D8',
-  A: '#4488FF',
-  B: '#44BB44',
-  CUT: '#888888',
-};
+import { GRADE_COLOR_MAP } from '@/constants/grades';
 
 interface Props {
   grade: Grade;
@@ -15,7 +7,7 @@ interface Props {
 }
 
 export default function GradeBadge({ grade, size = 'lg' }: Props) {
-  const color = GRADE_COLORS[grade];
+  const color = GRADE_COLOR_MAP[grade];
   const isLg = size === 'lg';
 
   return (
@@ -24,14 +16,13 @@ export default function GradeBadge({ grade, size = 'lg' }: Props) {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: isLg ? '6px 20px' : '3px 10px',
-        borderRadius: '8px',
-        backgroundColor: `${color}22`,
-        border: `2px solid ${color}`,
+        padding: isLg ? '8px 22px' : '4px 12px',
+        borderRadius: '100px',
+        backgroundColor: `${color}1A`,
         color: color,
-        fontSize: isLg ? '28px' : '14px',
+        fontSize: isLg ? '26px' : '13px',
         fontWeight: 800,
-        letterSpacing: '2px',
+        letterSpacing: '1px',
       }}
     >
       {grade === 'CUT' ? '입구컷' : `${grade}등급`}

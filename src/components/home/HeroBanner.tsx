@@ -232,8 +232,9 @@ export default function HeroBanner() {
 
       <div className="absolute" style={{ left: '22px', right: '80px', bottom: '20px' }}>
         <p
+          className="hero-banner-title"
           style={{
-            fontSize: '26px',
+            fontSize: 'var(--hero-title-size)',
             fontWeight: 800,
             color: '#ffffff',
             letterSpacing: '-0.4px',

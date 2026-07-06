@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { OperationPlan } from '@/types/stock';
-import { trackSajuGPTClick } from '@/lib/analytics';
+import SajuGPTWatermark from '@/components/SajuGPTWatermark';
 
 interface Props {
   plan: OperationPlan;
@@ -241,22 +241,7 @@ const StockPlanCard = React.forwardRef<HTMLDivElement, Props>(
 
         {/* Footer watermark */}
         <div style={{ padding: '12px 20px 16px', textAlign: 'center' }}>
-          <a
-            href="https://www.sajugpt.co.kr/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackSajuGPTClick('saju_stock')}
-            style={{
-              fontSize: '13px',
-              fontWeight: 700,
-              color: '#7A38D8',
-              letterSpacing: '-0.26px',
-              textDecoration: 'underline',
-              textUnderlineOffset: '3px',
-            }}
-          >
-            sajugpt.co.kr
-          </a>
+          <SajuGPTWatermark featureType="saju_stock" letterSpacing="-0.26px" />
         </div>
       </div>
     );

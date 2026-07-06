@@ -2,7 +2,7 @@
 
 import { forwardRef } from 'react';
 import type { CourtResult, SentenceGrade } from '@/types/court';
-import { trackSajuGPTClick } from '@/lib/analytics';
+import SajuGPTWatermark from '@/components/SajuGPTWatermark';
 
 interface Props {
   result: CourtResult;
@@ -134,25 +134,7 @@ const IndictmentCard = forwardRef<HTMLDivElement, Props>(
           <p style={{ fontSize: '11px', color: '#4A3D64', marginTop: '4px' }}>아래 재판 참여하면 석방일 확인!</p>
         </div>
 
-        {/* 워터마크 */}
-        <a
-          href="https://www.sajugpt.co.kr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => trackSajuGPTClick('saju_court')}
-          style={{
-            display: 'block',
-            fontSize: '13px',
-            fontWeight: 700,
-            color: '#7A38D8',
-            textAlign: 'center',
-            marginTop: '16px',
-            textDecoration: 'underline',
-            textUnderlineOffset: '3px',
-          }}
-        >
-          sajugpt.co.kr
-        </a>
+        <SajuGPTWatermark featureType="saju_court" marginTop="16px" />
       </div>
     );
   }

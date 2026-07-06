@@ -13,16 +13,8 @@ interface Props {
 
 export default function ChatBubble({ messages, isDM = false }: Props) {
   return (
-    <div
-      className="flex flex-col gap-2"
-      style={{
-        backgroundColor: isDM ? '#2a2a3e' : '#1e1e32',
-        borderRadius: '16px',
-        padding: '16px',
-      }}
-    >
-      {/* Header */}
-      <div style={{ fontSize: '11px', color: '#888', marginBottom: '4px', textAlign: 'center' }}>
+    <div className="flex flex-col gap-3">
+      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', textAlign: 'center', fontWeight: 600, letterSpacing: '1px' }}>
         {isDM ? 'DM' : '단톡방'}
       </div>
 
@@ -33,17 +25,17 @@ export default function ChatBubble({ messages, isDM = false }: Props) {
         return (
           <div key={i} className="flex items-start gap-2">
             <CharacterAvatar src={char.thumbnail} name={char.name} size={32} />
-            <div className="flex flex-col">
-              <span style={{ fontSize: '11px', color: '#aaa', marginBottom: '2px', fontWeight: 600 }}>
+            <div className="flex flex-col" style={{ gap: '4px' }}>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>
                 {char.name}
               </span>
               <div
                 style={{
-                  backgroundColor: '#3a3a52',
-                  borderRadius: '12px',
-                  padding: '8px 12px',
+                  backgroundColor: 'rgba(255,255,255,0.06)',
+                  borderRadius: '14px',
+                  padding: '10px 14px',
                   fontSize: '13px',
-                  color: '#eee',
+                  color: 'rgba(255,255,255,0.85)',
                   fontWeight: 400,
                   lineHeight: '1.5',
                   maxWidth: '240px',

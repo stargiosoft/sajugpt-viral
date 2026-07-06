@@ -49,3 +49,7 @@ export const GRADE_MAP: Record<number, GradeInfo> = {
 export function getGradeInfo(headcount: number): GradeInfo {
   return GRADE_MAP[Math.min(headcount, 5)] ?? GRADE_MAP[0];
 }
+
+export const GRADE_COLOR_MAP: Record<Grade, string> = Object.fromEntries(
+  Object.values(GRADE_MAP).map(({ grade, color }) => [grade, color])
+) as Record<Grade, string>;
