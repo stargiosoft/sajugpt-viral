@@ -11,11 +11,12 @@ interface Props extends ShareContent {
   activeBackground: string;
   textColor?: string;
   style?: CSSProperties;
+  hoverBackground?: string;
 }
 
 // 결과 페이지 공유 CTA 공용 버튼 — title/description/shareUrl(/imageUrl)만 넘기면
 // 네이티브 공유 시트 또는 폴백 모달(카카오/X/Facebook/링크복사) + 토스트까지 전부 처리한다.
-export default function ShareButton({ label, activeBackground, textColor = '#fff', style, ...content }: Props) {
+export default function ShareButton({ label, activeBackground, textColor = '#fff', style, hoverBackground, ...content }: Props) {
   const {
     share,
     isModalOpen,
@@ -35,6 +36,7 @@ export default function ShareButton({ label, activeBackground, textColor = '#fff
         label={label}
         style={style}
         bgStyle={{ background: activeBackground, borderRadius: '16px' }}
+        hoverBackground={hoverBackground}
         textStyle={{ color: textColor }}
       />
       <ShareModal
