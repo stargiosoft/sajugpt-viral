@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LandingCTAButton from '@/components/LandingCTAButton';
 
 interface Props {
   onStart: () => void;
@@ -651,50 +652,12 @@ export default function CourtLanding({ onStart }: Props) {
         }}
       >
         <div style={{ padding: '12px 20px' }}>
-          <div
+          <LandingCTAButton
             onClick={onStart}
-            className="transform-gpu cursor-pointer"
-            style={{
-              height: '56px',
-              borderRadius: '16px',
-              background: `linear-gradient(135deg, ${C.primary}, ${C.primaryDark})`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.15s ease',
-              boxShadow: `0 4px 24px ${C.primaryGlow}`,
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'scale(0.99)';
-              e.currentTarget.style.opacity = '0.9';
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.opacity = '1';
-            }}
-            onTouchStart={(e) => {
-              e.currentTarget.style.transform = 'scale(0.99)';
-              e.currentTarget.style.opacity = '0.9';
-            }}
-            onTouchEnd={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.opacity = '1';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.opacity = '1';
-            }}
-          >
-            <p style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#ffffff',
-              letterSpacing: '-0.32px',
-              lineHeight: '25px',
-            }}>
-              출석하기
-            </p>
-          </div>
+            label="출석하기"
+            background={`linear-gradient(135deg, ${C.primary}, ${C.primaryDark})`}
+            boxShadow={`0 4px 24px ${C.primaryGlow}`}
+          />
         </div>
       </div>
     </div>

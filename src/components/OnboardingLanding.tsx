@@ -1,50 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
+import CountUpNumber from '@/components/CountUpNumber';
+import LandingCTAButton from '@/components/LandingCTAButton';
 
 interface Props {
   onStart: () => void;
 }
 
 const SHARE_TEXT = '🔥 색기 배틀 — 당신의 사주에 발정 난 남자는 몇 명?\n얼굴 가리고, 사주만으로 AI 짐승남을 홀려보세요';
-
-/** 지정된 지연 후 0에서 목표값까지 이징을 태워 올라가는 카운트업 — 지연은 부모 motion 진입 애니메이션과 맞춰 등장과 동시에 체감되게 함 */
-function useCountUp(target: number, duration = 1600, delay = 400): number {
-  const [value, setValue] = useState(0);
-
-  useEffect(() => {
-    let raf: number;
-    let cancelled = false;
-    const startTimer = setTimeout(() => {
-      const start = performance.now();
-      const tick = (now: number) => {
-        if (cancelled) return;
-        const progress = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setValue(Math.floor(eased * target));
-        if (progress < 1) raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    }, delay);
-    return () => {
-      cancelled = true;
-      clearTimeout(startTimer);
-      cancelAnimationFrame(raf);
-    };
-  }, [target, duration, delay]);
-
-  return value;
-}
-
-/** 카운트업 렌더링을 별도 컴포넌트로 분리 — 매 프레임 setState가 부모(전체 랜딩) 리렌더로 번지면
- *  같은 시점에 도는 말풍선 float 애니메이션이 끊겨 보이므로, 재렌더 범위를 숫자 자신으로만 격리 */
-function CountUpNumber({ target, duration, delay }: { target: number; duration?: number; delay?: number }) {
-  const value = useCountUp(target, duration, delay);
-  return <>{value.toLocaleString()}</>;
-}
 
 export default function OnboardingLanding({ onStart }: Props) {
   const [copied, setCopied] = useState(false);
@@ -153,38 +120,7 @@ export default function OnboardingLanding({ onStart }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
       >
-        <div style={{ position: 'relative', height: '60px' }}>
-          <motion.div
-            onClick={onStart}
-            className="transform-gpu"
-            whileHover={{ filter: 'brightness(1.08)' }}
-            whileTap={{ filter: 'brightness(0.92)', scale: 0.995 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '18px',
-              background: 'linear-gradient(135deg, #FF4438 0%, #E0201A 100%)',
-              cursor: 'pointer',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontSize: '17px',
-              fontWeight: 700,
-              letterSpacing: '-0.34px',
-              pointerEvents: 'none',
-            }}
-          >
-            시작하기
-          </div>
-        </div>
+        <LandingCTAButton onClick={onStart} label="시작하기" background="linear-gradient(135deg, #FF4438 0%, #E0201A 100%)" />
       </motion.div>
 
       {/* ── 참여자수 + 테스트 공유하기 ── */}

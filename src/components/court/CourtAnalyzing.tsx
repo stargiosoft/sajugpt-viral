@@ -7,10 +7,9 @@ export default function CourtAnalyzing() {
   return (
     <AnalyzingScreen
       messages={ANALYZING_MESSAGES}
-      emoji="⚖️"
-      ringColor="rgba(122, 56, 216, 0.4)"
-      ringBorderWidth="2px"
+      lottieColor="#7A38D8"
       messageColor="#6B5C85"
+      repeat
     />
   );
 }

@@ -53,3 +53,7 @@ export function getGradeInfo(headcount: number): GradeInfo {
 export const GRADE_COLOR_MAP: Record<Grade, string> = Object.fromEntries(
   Object.values(GRADE_MAP).map(({ grade, color }) => [grade, color])
 ) as Record<Grade, string>;
+
+export function getGradeLabel(grade: Grade): string {
+  return grade === 'CUT' ? '입구컷' : `${grade}등급`;
+}

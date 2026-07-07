@@ -1,5 +1,5 @@
 import type { Grade } from '@/types/battle';
-import { GRADE_COLOR_MAP } from '@/constants/grades';
+import { GRADE_COLOR_MAP, getGradeLabel } from '@/constants/grades';
 
 interface Props {
   grade: Grade;
@@ -18,14 +18,14 @@ export default function GradeBadge({ grade, size = 'lg' }: Props) {
         justifyContent: 'center',
         padding: isLg ? '8px 22px' : '4px 12px',
         borderRadius: '100px',
-        backgroundColor: `${color}1A`,
-        color: color,
+        backgroundColor: color,
+        color: '#ffffff',
         fontSize: isLg ? '26px' : '13px',
         fontWeight: 800,
         letterSpacing: '1px',
       }}
     >
-      {grade === 'CUT' ? '입구컷' : `${grade}등급`}
+      {getGradeLabel(grade)}
     </span>
   );
 }

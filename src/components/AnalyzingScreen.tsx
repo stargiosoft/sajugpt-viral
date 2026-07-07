@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useMemo, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import Lottie from 'lottie-react';
 import squareShapeLoading from '@/lottie/square-shape-loading-11.json';
 import { recolorLottie } from '@/lib/lottieRecolor';
 
 const DEFAULT_LOTTIE_LAYER_OPACITIES = [0.4, 0.7, 1];
+const HOLD_AFTER_STACKED_MS = 1200;
 
 interface Props {
   messages: string[];
@@ -27,6 +28,8 @@ interface Props {
   headingColor?: string;
   staggerDelay?: number;
   wrapWithMotion?: boolean;
+  /** 분석 시간이 길어서 메시지가 다 쌓인 뒤에도 대기해야 할 때 — 잠시 멈췄다 처음부터 다시 쌓는다 */
+  repeat?: boolean;
 }
 
 // "분석 중" 대기 화면 — 펄싱 링(또는 Lottie) + 순차 등장 메시지. gisaeng은 메시지가 하나씩 누적되며
@@ -48,11 +51,21 @@ export default function AnalyzingScreen({
   headingColor,
   staggerDelay = 0.6,
   wrapWithMotion = false,
+  repeat = false,
 }: Props) {
   const lottieData = useMemo(
     () => (lottieColor ? recolorLottie(squareShapeLoading, lottieColor, lottieLayerOpacities) : null),
     [lottieColor, lottieLayerOpacities]
   );
+
+  const [round, setRound] = useState(0);
+  const roundDurationMs = (messages.length - 1) * staggerDelay * 1000 + 400 + HOLD_AFTER_STACKED_MS;
+
+  useEffect(() => {
+    if (!repeat) return;
+    const timer = setTimeout(() => setRound(prev => prev + 1), roundDurationMs);
+    return () => clearTimeout(timer);
+  }, [repeat, round, roundDurationMs]);
 
   const content = (
     <div
@@ -91,7 +104,7 @@ export default function AnalyzingScreen({
 
       {messages.map((msg, i) => (
         <motion.p
-          key={i}
+          key={`${round}-${i}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * staggerDelay, duration: 0.4 }}

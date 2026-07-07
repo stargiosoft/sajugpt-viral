@@ -6,6 +6,8 @@ import type { GisaengTier } from '@/types/gisaeng';
 import { TIER_INFO } from '@/constants/gisaeng';
 import { trackEvent } from '@/lib/analytics';
 import { useShareActions } from '@/lib/useShareActions';
+import PressableButton from '@/components/PressableButton';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
 
 interface Props {
   cardRef: RefObject<HTMLDivElement | null>;
@@ -39,73 +41,30 @@ export default function GisaengShareButtons({ cardRef, resultId, tier, monthlySa
 
   return (
     <div className="flex flex-col gap-3">
-      <button
+      <PressableButton
         onClick={handleNativeShare}
-        className="w-full flex items-center justify-center"
-        style={{
-          height: '56px',
-          borderRadius: '16px',
-          backgroundColor: '#B8423A',
-          border: 'none',
-          transition: 'all 0.15s ease',
-        }}
-        onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
-        onPointerUp={e => { e.currentTarget.style.transform = ''; }}
-        onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
-      >
-        <span style={{
-          fontFamily: 'Pretendard Variable, sans-serif',
-          fontSize: '16px',
-          fontWeight: 500,
-          lineHeight: '25px',
-          letterSpacing: '-0.32px',
-          color: '#ffffff',
-        }}>
-          🏮 친구도 기생 시켜보기
-        </span>
-      </button>
+        label="🏮 친구도 기생 시켜보기"
+        bgStyle={{ backgroundColor: '#B8423A', borderRadius: '16px' }}
+        textStyle={{ color: '#ffffff' }}
+      />
 
       <div className="flex gap-3">
-        <button
+        <OutlineBoxButton
           onClick={handleCopy}
-          className="flex-1 flex items-center justify-center"
-          style={{
-            height: '48px',
-            borderRadius: '16px',
-            backgroundColor: '#fff',
-            border: '1px solid #DDD5C8',
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#3D3530',
-            letterSpacing: '-0.26px',
-            transition: 'all 0.15s ease',
-          }}
-          onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
-          onPointerUp={e => { e.currentTarget.style.transform = ''; }}
-          onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
+          background="#fff"
+          border="1px solid #DDD5C8"
+          color="#3D3530"
         >
           {copied ? '복사됨!' : '🔗 링크 복사'}
-        </button>
-        <button
+        </OutlineBoxButton>
+        <OutlineBoxButton
           onClick={() => handleSave(cardRef)}
-          className="flex-1 flex items-center justify-center"
-          style={{
-            height: '48px',
-            borderRadius: '16px',
-            backgroundColor: '#fff',
-            border: '1px solid #DDD5C8',
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#3D3530',
-            letterSpacing: '-0.26px',
-            transition: 'all 0.15s ease',
-          }}
-          onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
-          onPointerUp={e => { e.currentTarget.style.transform = ''; }}
-          onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
+          background="#fff"
+          border="1px solid #DDD5C8"
+          color="#3D3530"
         >
           💾 이미지 저장
-        </button>
+        </OutlineBoxButton>
       </div>
     </div>
   );

@@ -138,6 +138,17 @@ public/characters/          # 캐릭터 webp 5장
 - **Phase 1 (현재)**: 1인 진단 + 결과 카드 + 공유
 - **Phase 2 (추후)**: 배틀 수락 + VS 카드 + 챗봇 전환 CTA — DB 스키마는 Phase 1에서 설계 완료
 
+## 공용 버튼/입력 컴포넌트 (신규 테스트에도 반드시 재사용)
+
+- `StickyCTAButton` — 하단 고정 primary CTA (폰트/높이 고정, 배경·텍스트 색상만 props로)
+- `TextLinkButton` — "다른 테스트도 해보기" 등 텍스트 링크 (14px/600 고정, color/hoverColor만 props로)
+- `OutlineBoxButton` — "다시 해보기" 등 보더 박스 버튼 (fontWeight 600 고정, color/background/border/height/fontSize만 props로)
+- `LandingCTAButton` — 랜딩 화면 히어로 CTA("시작하기"류), StickyCTAButton과 동일 타이포(16px/700), background/color만 props로
+- `PressableButton` — 공유/이미지저장/전환 CTA 박스 버튼의 기반 프리미티브 (href 지원), bgStyle/textStyle/hoverBackground만 커스터마이즈
+- `BirthInput` / `TimeSelectSheet` / `GenderSelect` — 생년월일·시간·성별 입력 (accentColor 등 색상 props만, 로직·타이포·바텀시트 동작 고정)
+- `FieldLabel` — 입력 필드 상단 라벨("성별"/"생년월일"/"태어난 시간") — 12px/400 고정, color만 props로
+- 색상만 테스트별로 다르게, 타이포·인터랙션·레이아웃은 절대 새로 짜지 말고 위 컴포넌트에 props로 전달
+
 ## 개발 체크리스트
 
 - 독립적인 비동기 작업은 순차 `await` 대신 `Promise.all`로 병렬 실행

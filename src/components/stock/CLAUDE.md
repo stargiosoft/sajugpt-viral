@@ -8,4 +8,27 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #10469 | 2:44 PM | ✅ | Chart line left-to-right drawing animation implemented in StockLanding | ~322 |
+
+### Jul 7, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #10998 | 12:17 PM | 🔄 | StockReportCard 반응형 패딩 적용 | ~161 |
+| #10997 | 12:16 PM | 🔄 | StockReportCard 투자의견·클로징 섹션 그룹 제거 | ~127 |
+| #10996 | " | 🔄 | StockReportCard 차트/투자의견/클로징 섹션 통합 그룹화 | ~185 |
+| #10983 | 12:00 PM | 🔴 | StockPlanCard.tsx 구문 오류 수정 완료 | ~155 |
+| #10981 | " | ✅ | StockPlanCard 작전 결과 섹션 여백 증가 | ~128 |
+| #10942 | 11:31 AM | ✅ | StockPlanCard 로드맵 컬럼 반응형 너비 적용 | ~129 |
+| #10941 | 11:30 AM | ✅ | StockPlanCard "Operation Plan" 영문 배지 제거 | ~143 |
+| #10940 | 11:29 AM | 🔄 | StockPlanCard 3단계 잠금 섹션 상단 패딩 제거 | ~100 |
+| #10924 | 11:15 AM | 🔄 | StockPlanCard 헤더 레이아웃 통합 리팩토링 | ~183 |
+| #10923 | 11:14 AM | 🔄 | StockPlanCard 타이포그래피 및 레이아웃 개선 | ~180 |
+| #10920 | 11:07 AM | ✅ | StockPlanCard UI 재디자인 완료 | ~234 |
+| #10907 | 10:58 AM | ✅ | StockReportCard 클로징 섹션 강조 텍스트 색상 중립화 | ~149 |
+| #10894 | 10:51 AM | ✅ | StockClient plan 단계에서 "다시 해보기" 버튼 제거 | ~136 |
+| #10867 | 10:23 AM | 🔄 | StockTurn 대화 인터페이스 리디자인 | ~226 |
+| #10866 | 10:21 AM | 🟣 | StockBriefing UI 완전 재디자인 | ~237 |
+| #10833 | 9:22 AM | ✅ | StockReportCard 전체 디자인 시스템 재정비 | ~318 |
+| #10807 | 9:03 AM | ✅ | StockReportCard 디자인 세부 조정 | ~276 |
+| #10795 | 8:56 AM | 🟣 | StockLanding 및 StockReportCard UI 재디자인 | ~237 |
 </claude-mem-context>

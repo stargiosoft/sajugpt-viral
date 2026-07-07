@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-sloppy-imports
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -7,7 +6,9 @@ import type { Gender, Step, BattleResult, ChallengerPreview } from '@/types/batt
 import BirthInput from '@/components/BirthInput';
 import TestTopNav from '@/components/TestTopNav';
 import StickyCTAButton from '@/components/StickyCTAButton';
+import TextLinkButton from '@/components/TextLinkButton';
 import GenderSelect from '@/components/GenderSelect';
+import FieldLabel from '@/components/FieldLabel';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import AnalyzingScreen from '@/components/AnalyzingScreen';
 import ResultCard from '@/components/ResultCard';
@@ -20,12 +21,6 @@ import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { parseUTM, trackEvent } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { formatKoreanTime, parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
-
-const OTHER_TEST_LINK_HOVER = {
-  whileHover: { color: 'rgba(255,255,255,0.8)' },
-  whileTap: { scale: 0.97 },
-  transition: { duration: 0.15, ease: 'easeOut' as const },
-};
 
 interface Props {
   battleId?: string;
@@ -92,6 +87,26 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
   useEffect(() => {
     saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
+
+  // 개발용 — ?mock=cut 쿼리로 실제 API 호출 없이 CUT(0명) 컷신/결과 화면 바로 미리보기. 프로덕션 빌드에서는 비활성화.
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return;
+    if (new URLSearchParams(window.location.search).get('mock') !== 'cut') return;
+
+    setResult({
+      battleId: 'mock-cut',
+      score: 0,
+      headcount: 0,
+      grade: 'CUT',
+      title: '조선시대 수녀',
+      characters: [],
+      verdict: '도화살이니 홍염살이니 하는 흔한 꼬리치는 재주는 없지만, 너만의 매력으로도 충분해.',
+      chatScript: '',
+      sajuHighlights: { doHwaSal: false, hongYeomSal: false, topSipsung: '', fireRatio: 0, yeonaeSeongHyang: '' },
+    });
+    setShowCutScene(true);
+    setStep('result');
+  }, []);
 
 
   // 유효성 검증 — 태어난 시간은 선택사항
@@ -207,18 +222,16 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                   얼굴 말고, 사주부터 불어
                 </h1>
                 {isBattleAccept && (
-                  <div className="flex flex-col items-center" style={{ gap: '6px', marginBottom: '16px', width: '100%', maxWidth: '340px' }}>
-                    <p style={{ fontSize: '12px', color: '#FF4438', fontWeight: 700, textAlign: 'center', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                      ⚠️ 친구한테 도발장이 날아왔어요 ⚠️
+                  <div className="flex flex-col items-center" style={{ gap: '8px', marginBottom: '4px' }}>
+                    <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.55)', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
+                      친구한테 도발장이 날아왔어요
                     </p>
                     <div
                       style={{
-                        width: '100%',
-                        padding: '14px 20px',
-                        borderRadius: '16px',
-                        background: 'linear-gradient(135deg, rgba(255,68,56,0.15) 0%, rgba(255,68,56,0.05) 100%)',
-                        border: '1px solid #FF4438',
-                        boxShadow: '0 0 15px rgba(255,68,56,0.2)',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        backgroundColor: 'rgba(255,68,56,0.14)',
+                        border: '1px solid rgba(255,68,56,0.3)',
                       }}
                     >
                       <p style={{ fontSize: '16px', fontWeight: 700, color: '#FF5B4D', textAlign: 'center', letterSpacing: '-0.32px' }}>
@@ -242,24 +255,19 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                 {/* 성별 */}
                 <motion.div
                   className="flex flex-col w-full"
-                  style={{ gap: '8px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: 'rgba(255,255,255,0.45)', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
-                    성별
-                  </p>
+                  <FieldLabel color="rgba(255,255,255,0.45)">성별</FieldLabel>
                   <GenderSelect value={gender} onChange={setGender} accentColor="#FF4438" bgColor="rgba(255,255,255,0.06)" unselectedColor="rgba(255,255,255,0.28)" />
                 </motion.div>
 
                 {/* 생년월일 */}
                 <motion.div
                   className="flex flex-col w-full"
-                  style={{ marginTop: '36px', gap: '8px' }}
+                  style={{ marginTop: '36px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: 'rgba(255,255,255,0.45)', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
-                    생년월일 (양력 기준으로 입력해 주세요)
-                  </p>
+                  <FieldLabel color="rgba(255,255,255,0.45)">생년월일 (양력 기준으로 입력해 주세요)</FieldLabel>
                   <BirthInput
                     value={birthDate}
                     onChange={setBirthDate}
@@ -280,12 +288,10 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                 <motion.div
                   ref={birthTimeRef}
                   className="flex flex-col w-full"
-                  style={{ marginTop: '36px', gap: '8px' }}
+                  style={{ marginTop: '36px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: 'rgba(255,255,255,0.45)', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
-                    태어난 시간
-                  </p>
+                  <FieldLabel color="rgba(255,255,255,0.45)">태어난 시간</FieldLabel>
                   <TimeSelectSheet
                     value={birthTime}
                     unknownTime={unknownTime}
@@ -322,9 +328,6 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                 activeBackground="linear-gradient(135deg, #FF4438 0%, #E0201A 100%)"
                 inactiveBackground="rgba(255,255,255,0.08)"
                 inactiveTextColor="rgba(255,255,255,0.35)"
-                fontWeight={600}
-                lineHeight="25px"
-                letterSpacing="-0.32px"
               />
             </motion.div>
           )}
@@ -370,22 +373,15 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                     <SajuAnalysisCard result={result} />
                   </div>
                   <ShareButtons headcount={result.headcount} battleId={result.battleId} cardRef={cardRef} />
-                  <motion.a
+                  <TextLinkButton
                     href="/"
                     className="mx-auto w-full max-w-[400px] md:max-w-[520px] lg:max-w-[620px]"
-                    {...OTHER_TEST_LINK_HOVER}
-                    style={{
-                      display: 'block',
-                      textAlign: 'center',
-                      padding: '18px 0 0',
-                      color: 'rgba(255,255,255,0.4)',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                    }}
+                    color="rgba(255,255,255,0.4)"
+                    hoverColor="rgba(255,255,255,0.8)"
+                    layoutStyle={{ display: 'block', textAlign: 'center', padding: '18px 0 0' }}
                   >
                     다른 테스트도 해보기
-                  </motion.a>
+                  </TextLinkButton>
 
                   {/* 이미지 저장용 숨김 카드 — 데스크탑 화면폭과 무관하게 항상 모바일 크기로 캡처 */}
                   <div style={{ position: 'absolute', top: 0, left: '-9999px', width: '400px', pointerEvents: 'none' }} aria-hidden="true">
@@ -423,22 +419,15 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
               {/* 공유 버튼 — VS 카드 기준으로 캡처 */}
               <ShareButtons headcount={result.headcount} battleId={result.battleId} cardRef={vsCardRef} />
 
-              <motion.a
+              <TextLinkButton
                 href="/"
                 className="mx-auto w-full max-w-[400px] md:max-w-[520px] lg:max-w-[620px]"
-                {...OTHER_TEST_LINK_HOVER}
-                style={{
-                  display: 'block',
-                  textAlign: 'center',
-                  padding: '18px 0 0',
-                  color: 'rgba(255,255,255,0.4)',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                }}
+                color="rgba(255,255,255,0.4)"
+                hoverColor="rgba(255,255,255,0.8)"
+                layoutStyle={{ display: 'block', textAlign: 'center', padding: '18px 0 0' }}
               >
                 다른 테스트도 해보기
-              </motion.a>
+              </TextLinkButton>
 
               {/* 이미지 저장용 숨김 카드 — 데스크탑 화면폭과 무관하게 항상 모바일 크기로 캡처 */}
               <div style={{ position: 'absolute', top: 0, left: '-9999px', width: '400px', pointerEvents: 'none' }} aria-hidden="true">

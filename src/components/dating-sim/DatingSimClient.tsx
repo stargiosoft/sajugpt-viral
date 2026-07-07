@@ -269,7 +269,7 @@ export default function DatingSimClient({ sharedResultId }: Props) {
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#fff' }}>
       <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
-        <TestTopNav />
+        <TestTopNav bgColor="#ffffff" logoColor="#333333" />
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <motion.div

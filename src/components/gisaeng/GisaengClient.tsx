@@ -19,6 +19,9 @@ import TestTopNav from '@/components/TestTopNav';
 import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import StickyCTAButton from '@/components/StickyCTAButton';
+import TextLinkButton from '@/components/TextLinkButton';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
+import FieldLabel from '@/components/FieldLabel';
 import GisaengLanding from './GisaengLanding';
 import GisaengAnalyzing from './GisaengAnalyzing';
 import GisaengCardView from './GisaengCardView';
@@ -363,36 +366,30 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
               >
                 {/* 성별 */}
                 <motion.div
-                  className="flex flex-col gap-1 w-full"
+                  className="flex flex-col w-full"
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#A69A8E', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
-                    성별
-                  </p>
+                  <FieldLabel color="#A69A8E">성별</FieldLabel>
                   <GenderSelect value={gender} onChange={setGender} accentColor="#B8423A" />
                 </motion.div>
 
                 {/* 생년월일 */}
                 <motion.div
-                  className="flex flex-col gap-1 w-full"
+                  className="flex flex-col w-full"
                   style={{ marginTop: '36px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#A69A8E', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
-                    생년월일 (양력 기준으로 입력해 주세요)
-                  </p>
+                  <FieldLabel color="#A69A8E">생년월일 (양력 기준으로 입력해 주세요)</FieldLabel>
                   <BirthInput value={birthDate} onChange={setBirthDate} accentColor="#B8423A" onEnter={handleSubmit} />
                 </motion.div>
 
                 {/* 태어난 시간 */}
                 <motion.div
-                  className="flex flex-col gap-1 w-full"
+                  className="flex flex-col w-full"
                   style={{ marginTop: '36px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#A69A8E', lineHeight: '16px', letterSpacing: '-0.24px', padding: '0 4px' }}>
-                    태어난 시간
-                  </p>
+                  <FieldLabel color="#A69A8E">태어난 시간</FieldLabel>
                   <TimeSelectSheet
                     value={birthTime}
                     unknownTime={unknownTime}
@@ -433,9 +430,6 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                 activeBackground="#B8423A"
                 inactiveBackground="#EDE6D8"
                 inactiveTextColor="#A69A8E"
-                fontWeight={500}
-                lineHeight="25px"
-                letterSpacing="-0.32px"
               />
             </motion.div>
           )}
@@ -516,47 +510,22 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
                 seonbi={simulationResult.finalSeonbi}
                 tier={simulationResult.tier}
               />
-              <button
+              <OutlineBoxButton
                 onClick={handleReset}
-                className="w-full flex items-center justify-center"
-                style={{
-                  height: '56px',
-                  borderRadius: '16px',
-                  backgroundColor: 'transparent',
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#6B5F56',
-                  letterSpacing: '-0.32px',
-                  lineHeight: '25px',
-                  border: 'none',
-                  transition: 'all 0.15s ease',
-                }}
-                onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)'; }}
-                onPointerUp={e => { e.currentTarget.style.transform = ''; }}
-                onPointerLeave={e => { e.currentTarget.style.transform = ''; }}
+                height="56px"
+                borderRadius="16px"
+                fontSize="16px"
+                color="#6B5F56"
               >
                 다시 도전하기
-              </button>
-              <a
+              </OutlineBoxButton>
+              <TextLinkButton
                 href="/"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  height: '56px',
-                  borderRadius: '16px',
-                  backgroundColor: 'transparent',
-                  color: '#999',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  border: 'none',
-                  cursor: 'pointer',
-                  textDecoration: 'none',
-                  lineHeight: '56px',
-                  textAlign: 'center',
-                }}
+                color="#999"
+                layoutStyle={{ display: 'block', width: '100%', lineHeight: '56px', textAlign: 'center' }}
               >
                 다른 테스트도 해보기
-              </a>
+              </TextLinkButton>
             </div>
           )}
         </AnimatePresence>

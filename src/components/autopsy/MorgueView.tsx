@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { CORONERS, DISCERNMENT_GRADES } from '@/constants/autopsy';
 import { trackEvent } from '@/lib/analytics';
 import type { DiscernmentGrade, CoronerId, MorgueStats, MorgueAutopsy } from '@/types/autopsy';
+import PressableButton from '@/components/PressableButton';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
 
 interface Props {
   targetSajuType: string;
@@ -287,41 +289,22 @@ export default function MorgueView({ targetSajuType, autopsyId, onBack, onReplay
 
           {/* 하단 버튼 */}
           <div className="flex flex-col gap-3">
-            <button
+            <PressableButton
               onClick={() => {
                 trackEvent('autopsy_morgue_replay');
                 onReplay();
               }}
-              style={{
-                width: '100%',
-                height: '56px',
-                borderRadius: '16px',
-                backgroundColor: '#7A38D8',
-                color: '#fff',
-                fontSize: '16px',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              내 전남친도 부검하기
-            </button>
-            <button
+              label="내 전남친도 부검하기"
+              bgStyle={{ backgroundColor: '#7A38D8', borderRadius: '16px' }}
+              textStyle={{ color: '#fff' }}
+            />
+            <OutlineBoxButton
               onClick={onBack}
-              style={{
-                width: '100%',
-                height: '48px',
-                borderRadius: '16px',
-                backgroundColor: 'transparent',
-                color: '#999',
-                fontSize: '14px',
-                fontWeight: 600,
-                border: '1px solid #e7e7e7',
-                cursor: 'pointer',
-              }}
+              border="1px solid #e7e7e7"
+              color="#999"
             >
               사망진단서로 돌아가기
-            </button>
+            </OutlineBoxButton>
           </div>
         </>
       )}

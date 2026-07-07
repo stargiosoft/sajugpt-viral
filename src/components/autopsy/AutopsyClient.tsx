@@ -9,6 +9,8 @@ import TestTopNav from '@/components/TestTopNav';
 import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import StickyCTAButton from '@/components/StickyCTAButton';
+import LandingCTAButton from '@/components/LandingCTAButton';
+import FieldLabel from '@/components/FieldLabel';
 import CauseOfDeathSelect from '@/components/autopsy/CauseOfDeathSelect';
 import DurationSelect from '@/components/autopsy/DurationSelect';
 import CoronerSelect from '@/components/autopsy/CoronerSelect';
@@ -482,52 +484,14 @@ export default function AutopsyClient({ autopsyId }: Props) {
                 }}
               >
                 <div style={{ padding: '12px 20px' }}>
-                  <div
+                  <LandingCTAButton
                     onClick={() => {
                       trackEvent('autopsy_land');
                       setStep('input');
                     }}
-                    className="transform-gpu cursor-pointer"
-                    style={{
-                      height: '56px',
-                      borderRadius: '16px',
-                      backgroundColor: '#7A38D8',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.15s ease',
-                    }}
-                    onMouseDown={(e) => {
-                      e.currentTarget.style.transform = 'scale(0.98)';
-                      e.currentTarget.style.backgroundColor = '#5E28AB';
-                    }}
-                    onMouseUp={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.backgroundColor = '#7A38D8';
-                    }}
-                    onTouchStart={(e) => {
-                      e.currentTarget.style.transform = 'scale(0.98)';
-                      e.currentTarget.style.backgroundColor = '#5E28AB';
-                    }}
-                    onTouchEnd={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.backgroundColor = '#7A38D8';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.backgroundColor = '#7A38D8';
-                    }}
-                  >
-                    <p style={{
-                      fontSize: '16px',
-                      fontWeight: 500,
-                      lineHeight: '25px',
-                      letterSpacing: '-0.32px',
-                      color: '#fff',
-                    }}>
-                      부검 시작하기
-                    </p>
-                  </div>
+                    label="부검 시작하기"
+                    background="#7A38D8"
+                  />
                 </div>
               </div>
             </motion.div>
@@ -583,22 +547,20 @@ export default function AutopsyClient({ autopsyId }: Props) {
               >
                 {/* 성별 */}
                 <motion.div
-                  className="flex flex-col gap-1 w-full"
+                  className="flex flex-col w-full"
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>그 놈의 성별</p>
+                  <FieldLabel color="#848484">그 놈의 성별</FieldLabel>
                   <GenderSelect value={gender} onChange={setGender} />
                 </motion.div>
 
                 {/* 생년월일 */}
                 <motion.div
-                  className="flex flex-col gap-1 w-full"
+                  className="flex flex-col w-full"
                   style={{ marginTop: '28px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>
-                    그 놈의 생년월일 (양력 기준)
-                  </p>
+                  <FieldLabel color="#848484">그 놈의 생년월일 (양력 기준)</FieldLabel>
                   <BirthInput
                     value={birthDate}
                     onChange={setBirthDate}
@@ -613,11 +575,11 @@ export default function AutopsyClient({ autopsyId }: Props) {
                 {/* 태어난 시간 */}
                 <motion.div
                   ref={birthTimeRef}
-                  className="flex flex-col gap-1 w-full"
+                  className="flex flex-col w-full"
                   style={{ marginTop: '28px' }}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
                 >
-                  <p style={{ fontSize: '12px', fontWeight: 400, color: '#848484', padding: '0 4px' }}>그 놈이 태어난 시간</p>
+                  <FieldLabel color="#848484">그 놈이 태어난 시간</FieldLabel>
                   <TimeSelectSheet
                     value={birthTime}
                     unknownTime={unknownTime}
@@ -682,7 +644,6 @@ export default function AutopsyClient({ autopsyId }: Props) {
                 activeBackground="#7A38D8"
                 inactiveBackground="#f8f8f8"
                 inactiveTextColor="#b7b7b7"
-                fontWeight={500}
               />
             </motion.div>
           )}

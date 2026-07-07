@@ -39,12 +39,12 @@ export default function DatingAnalyzing({ phase }: Props) {
 
   return (
     <AnalyzingScreen
+      key={phase}
       messages={config.messages}
-      emoji="💘"
-      ringColor="rgba(122, 56, 216, 0.4)"
-      ringBorderWidth="2px"
-      emojiFontSize="48px"
+      lottieColor="#FF4D8D"
+      messageColor="#666666"
       messageLetterSpacing="-0.3px"
+      repeat
     />
   );
 }

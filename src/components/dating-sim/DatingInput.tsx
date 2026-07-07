@@ -6,6 +6,7 @@ import type { Gender } from '@/types/dating';
 import BirthInput from '@/components/BirthInput';
 import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
+import FieldLabel from '@/components/FieldLabel';
 import StickyCTAButton from '@/components/StickyCTAButton';
 
 interface Props {
@@ -66,15 +67,14 @@ export default function DatingInput({
       style={{ padding: '48px 20px 120px' }}
     >
       {/* 헤더 — 색기 배틀 동일 패턴 */}
-      <div className="flex flex-col items-center" style={{ marginBottom: '40px' }}>
-        <span style={{ fontSize: '40px', marginBottom: '8px' }}>💜</span>
+      <div className="flex flex-col items-start" style={{ marginBottom: '40px' }}>
         <h1 style={{
           fontFamily: 'Pretendard Variable, sans-serif',
           fontSize: '28px',
           fontWeight: 800,
           color: '#151515',
           marginBottom: '8px',
-          textAlign: 'center',
+          textAlign: 'left',
           letterSpacing: '-0.56px',
         }}>
           데이트 시뮬레이션
@@ -84,11 +84,12 @@ export default function DatingInput({
           fontSize: '15px',
           color: '#666',
           fontWeight: 500,
-          textAlign: 'center',
+          textAlign: 'left',
           lineHeight: '1.6',
           letterSpacing: '-0.45px',
+          paddingLeft: '1px',
         }}>
-          사주 궁합 기반 AI 캐릭터와<br />5턴의 데이트 대화를 시작합니다
+          사주 궁합 AI와 5턴 데이트를 시작해요
         </p>
       </div>
 
@@ -101,73 +102,48 @@ export default function DatingInput({
       >
         {/* 성별 */}
         <motion.div
-          className="flex flex-col gap-1 w-full"
+          className="flex flex-col w-full"
           variants={fadeUpVariant}
         >
-          <p style={{
-            fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '12px',
-            fontWeight: 400,
-            color: '#848484',
-            lineHeight: '16px',
-            letterSpacing: '-0.24px',
-            padding: '0 4px',
-          }}>
-            성별
-          </p>
-          <GenderSelect value={gender} onChange={setGender} />
+          <FieldLabel color="#848484">성별</FieldLabel>
+          <GenderSelect value={gender} onChange={setGender} accentColor="#FF4D8D" />
         </motion.div>
 
         {/* 생년월일 */}
         <motion.div
-          className="flex flex-col gap-1 w-full"
+          className="flex flex-col w-full"
           style={{ marginTop: '36px' }}
           variants={fadeUpVariant}
         >
-          <p style={{
-            fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '12px',
-            fontWeight: 400,
-            color: '#848484',
-            lineHeight: '16px',
-            letterSpacing: '-0.24px',
-            padding: '0 4px',
-          }}>
-            생년월일 (양력 기준으로 입력해 주세요)
-          </p>
+          <FieldLabel color="#848484">생년월일 (양력 기준으로 입력해 주세요)</FieldLabel>
           <BirthInput
             value={birthDate}
             onChange={setBirthDate}
             onEnter={() => { if (isFormValid() && !submitting) onSubmit(); }}
+            accentColor="#FF4D8D"
           />
         </motion.div>
 
         {/* 태어난 시간 */}
         <motion.div
-          className="flex flex-col gap-1 w-full"
+          className="flex flex-col w-full"
           style={{ marginTop: '36px' }}
           variants={fadeUpVariant}
         >
-          <p style={{
-            fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '12px',
-            fontWeight: 400,
-            color: '#848484',
-            lineHeight: '16px',
-            letterSpacing: '-0.24px',
-            padding: '0 4px',
-          }}>
-            태어난 시간
-          </p>
+          <FieldLabel color="#848484">태어난 시간</FieldLabel>
           <TimeSelectSheet
             value={birthTime}
             unknownTime={unknownTime}
             onSelect={handleTimeSelect}
-            accentColor="#7A38D8"
+            accentColor="#FF4D8D"
             bgColor="#fff"
             borderColor="1px solid #e7e7e7"
             textColor="#151515"
             placeholderColor="#b7b7b7"
+            sheetBgColor="#ffffff"
+            sheetTextColor="#1a1a1a"
+            dragHandleColor="rgba(0,0,0,0.15)"
+            hoverBgClass="hover:bg-black/5"
           />
         </motion.div>
 
@@ -202,12 +178,9 @@ export default function DatingInput({
         label={submitting ? '분석 중...' : '사주 분석하기'}
         containerBackground="#fff"
         containerBoxShadow="0px -8px 16px 0px rgba(255, 255, 255, 0.76)"
-        activeBackground="#7A38D8"
+        activeBackground="#FF4D8D"
         inactiveBackground="#f8f8f8"
         inactiveTextColor="#b7b7b7"
-        fontWeight={500}
-        lineHeight="25px"
-        letterSpacing="-0.32px"
       />
     </motion.div>
   );

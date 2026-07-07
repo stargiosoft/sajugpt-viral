@@ -6,6 +6,9 @@ import type { StockAnalysisResult } from '@/types/stock';
 import { CREW_MEMBERS } from '@/constants/stock';
 import { copyToClipboard, saveImage, captureCardImage } from '@/lib/share';
 import { trackEvent, trackShare, trackSajuGPTClick } from '@/lib/analytics';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
+import TextLinkButton from '@/components/TextLinkButton';
+import PressableButton from '@/components/PressableButton';
 
 interface Props {
   result: StockAnalysisResult;
@@ -93,16 +96,6 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
     }
   }, [reportCardRef, result, handleCopy]);
 
-  const btnStyle: React.CSSProperties = {
-    flex: 1,
-    height: '52px',
-    borderRadius: '12px',
-    fontSize: '14px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    border: 'none',
-  };
-
   return (
     <div
       className="flex flex-col w-full"
@@ -140,46 +133,33 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
         style={{ marginBottom: '32px' }}
       >
         {/* Primary share */}
-        <button
+        <PressableButton
           onClick={handleNativeShare}
-          style={{
-            ...btnStyle,
-            flex: 'unset',
-            width: '100%',
-            backgroundColor: '#7A38D8',
-            color: '#fff',
-            fontSize: '16px',
-            fontWeight: 700,
-          }}
-        >
-          📱 내 종목 리포트 공유하기
-        </button>
+          label="📱 내 종목 리포트 공유하기"
+          style={{ height: '52px' }}
+          bgStyle={{ backgroundColor: '#7A38D8', borderRadius: '12px' }}
+          textStyle={{ color: '#fff' }}
+        />
 
         <div className="flex gap-3">
-          <button
+          <OutlineBoxButton
             onClick={handleCopy}
-            style={{
-              ...btnStyle,
-              backgroundColor: copied ? '#1a3a1a' : '#1a1a2e',
-              color: copied ? '#4ADE80' : '#ccc',
-              border: copied ? '1px solid #4ADE80' : '1px solid #2a2a3e',
-            }}
+            height="52px"
+            background={copied ? '#1a3a1a' : '#1a1a2e'}
+            color={copied ? '#4ADE80' : '#ccc'}
+            border={copied ? '1px solid #4ADE80' : '1px solid #2a2a3e'}
           >
             {copied ? '✅ 복사됨' : '🔗 링크 복사'}
-          </button>
-          <button
+          </OutlineBoxButton>
+          <OutlineBoxButton
             onClick={handleSave}
-            disabled={saving}
-            style={{
-              ...btnStyle,
-              backgroundColor: '#1a1a2e',
-              color: '#ccc',
-              border: '1px solid #2a2a3e',
-              opacity: saving ? 0.6 : 1,
-            }}
+            height="52px"
+            background="#1a1a2e"
+            color="#ccc"
+            border="1px solid #2a2a3e"
           >
             {saving ? '저장 중...' : '💾 이미지 저장'}
-          </button>
+          </OutlineBoxButton>
         </div>
       </motion.div>
 
@@ -273,60 +253,22 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
         className="flex flex-col gap-3"
         style={{ marginTop: '32px' }}
       >
-        <button
+        <OutlineBoxButton
           onClick={onReset}
-          style={{
-            width: '100%',
-            height: '48px',
-            borderRadius: '12px',
-            backgroundColor: '#1a1a2e',
-            color: '#888',
-            fontSize: '14px',
-            fontWeight: 600,
-            border: '1px solid #2a2a3e',
-            cursor: 'pointer',
-          }}
+          background="#1a1a2e"
+          border="1px solid #2a2a3e"
+          color="#888"
         >
           🔄 다른 종목 분석하기
-        </button>
+        </OutlineBoxButton>
 
-        <button
-          onClick={onReset}
-          style={{
-            width: '100%',
-            height: '44px',
-            borderRadius: '12px',
-            backgroundColor: 'transparent',
-            color: '#555',
-            fontSize: '13px',
-            fontWeight: 500,
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
+        <TextLinkButton onClick={onReset} color="#555" layoutStyle={{ display: 'block', width: '100%', height: '44px', lineHeight: '44px', textAlign: 'center' }}>
           처음으로
-        </button>
+        </TextLinkButton>
 
-        <a
-          href="/"
-          style={{
-            display: 'block',
-            width: '100%',
-            height: '44px',
-            borderRadius: '12px',
-            backgroundColor: 'transparent',
-            color: '#555',
-            fontSize: '13px',
-            fontWeight: 500,
-            border: 'none',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            lineHeight: '44px',
-            textAlign: 'center',
-          }}
-        >
+        <TextLinkButton href="/" color="#555" layoutStyle={{ display: 'block', width: '100%', height: '44px', lineHeight: '44px', textAlign: 'center' }}>
           다른 테스트도 해보기
-        </a>
+        </TextLinkButton>
       </div>
     </div>
   );

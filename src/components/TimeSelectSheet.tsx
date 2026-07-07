@@ -43,6 +43,10 @@ interface Props {
   borderColor?: string;
   textColor?: string;
   placeholderColor?: string;
+  sheetBgColor?: string;
+  sheetTextColor?: string;
+  dragHandleColor?: string;
+  hoverBgClass?: string;
 }
 
 // 태어난 시간을 12띠시 단위로 고르는 공용 바텀시트 — 모든 테스트가 이 컴포넌트로 시간을 입력받는다.
@@ -55,6 +59,10 @@ export default function TimeSelectSheet({
   borderColor = 'none',
   textColor = '#ffffff',
   placeholderColor = 'rgba(255,255,255,0.35)',
+  sheetBgColor = '#1E1E22',
+  sheetTextColor = '#ffffff',
+  dragHandleColor = 'rgba(255,255,255,0.2)',
+  hoverBgClass = 'hover:bg-white/10',
 }: Props) {
   const [open, setOpen] = useState(false);
   const dragControls = useDragControls();
@@ -118,7 +126,7 @@ export default function TimeSelectSheet({
                 zIndex: 91,
                 maxWidth: '768px',
                 margin: '0 auto',
-                backgroundColor: '#1E1E22',
+                backgroundColor: sheetBgColor,
                 borderTopLeftRadius: '24px',
                 borderTopRightRadius: '24px',
                 paddingBottom: 'env(safe-area-inset-bottom)',
@@ -142,9 +150,9 @@ export default function TimeSelectSheet({
                 className="flex justify-center"
                 style={{ padding: '10px 0 2px', flexShrink: 0, cursor: 'grab', touchAction: 'none' }}
               >
-                <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: 'rgba(255,255,255,0.2)' }} />
+                <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: dragHandleColor }} />
               </div>
-              <p style={{ fontSize: '22px', fontWeight: 700, color: '#ffffff', textAlign: 'left', padding: '30px 20px 14px', flexShrink: 0 }}>
+              <p style={{ fontSize: '22px', fontWeight: 700, color: sheetTextColor, textAlign: 'left', padding: '30px 20px 14px', flexShrink: 0 }}>
                 태어난 시간을 선택해 주세요
               </p>
               <div className="overflow-y-auto" style={{ padding: '0 12px 12px' }}>
@@ -155,7 +163,7 @@ export default function TimeSelectSheet({
                       key={block.key}
                       type="button"
                       onClick={() => handlePick(block)}
-                      className="w-full text-left transition-colors duration-150 hover:bg-white/10"
+                      className={`w-full text-left transition-colors duration-150 ${hoverBgClass}`}
                       style={{
                         padding: '14px',
                         borderRadius: '12px',
@@ -168,7 +176,7 @@ export default function TimeSelectSheet({
                         style={{
                           fontSize: '15px',
                           fontWeight: block.isUnknown ? 700 : 500,
-                          color: isSelected ? accentColor : '#ffffff',
+                          color: isSelected ? accentColor : sheetTextColor,
                           letterSpacing: '-0.3px',
                         }}
                       >

@@ -9,6 +9,8 @@ const SEONBI_HANJA: Record<SeonbiType, { hanja: string; color: string }> = {
   jealousy:  { hanja: '怒', color: '#3D3530' },
 };
 import { trackEvent, trackSajuGPTClick } from '@/lib/analytics';
+import PressableButton from '@/components/PressableButton';
+import TextLinkButton from '@/components/TextLinkButton';
 
 interface Props {
   seonbi: Record<SeonbiType, SeonbiState>;
@@ -35,27 +37,18 @@ export default function GisaengCTA({ seonbi, tier }: Props) {
         <p style={{ fontSize: '14px', color: '#B8423A', fontWeight: 600, lineHeight: 1.6, textAlign: 'center', letterSpacing: '-0.28px' }}>
           &ldquo;{D_TIER_CTA}&rdquo;
         </p>
-        <a
-          href="https://www.sajugpt.co.kr/"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => { trackEvent('gisaeng_cta_click', { tier, target: 'fortune' }); trackSajuGPTClick('gisaeng'); }}
-          className="w-full flex items-center justify-center mt-4"
-          style={{
-            height: '48px',
-            borderRadius: '12px',
-            backgroundColor: '#B8423A',
-            border: 'none',
-            fontSize: '15px',
-            fontWeight: 600,
-            color: '#ffffff',
-            letterSpacing: '-0.3px',
-            textDecoration: 'none',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          운명 상담받기 →
-        </a>
+        <div style={{ marginTop: '16px' }}>
+          <PressableButton
+            href="https://www.sajugpt.co.kr/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => { trackEvent('gisaeng_cta_click', { tier, target: 'fortune' }); trackSajuGPTClick('gisaeng'); }}
+            label="운명 상담받기 →"
+            style={{ height: '48px' }}
+            bgStyle={{ backgroundColor: '#B8423A', borderRadius: '12px' }}
+            textStyle={{ color: '#ffffff' }}
+          />
+        </div>
       </div>
     );
   }
@@ -103,35 +96,26 @@ export default function GisaengCTA({ seonbi, tier }: Props) {
         &ldquo;{CTA_COPY[topType]}&rdquo;
       </p>
 
-      <a
-        href="https://www.sajugpt.co.kr/"
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => { trackEvent('gisaeng_cta_click', { tier, target: topType }); trackSajuGPTClick('gisaeng'); }}
-        className="w-full flex items-center justify-center mt-4"
-        style={{
-          height: '48px',
-          borderRadius: '12px',
-          backgroundColor: '#B8423A',
-          border: 'none',
-          fontSize: '15px',
-          fontWeight: 600,
-          color: '#ffffff',
-          letterSpacing: '-0.3px',
-          textDecoration: 'none',
-          transition: 'all 0.15s ease',
-        }}
-      >
-        이 선비와 대화하기 →
-      </a>
+      <div style={{ marginTop: '16px' }}>
+        <PressableButton
+          href="https://www.sajugpt.co.kr/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => { trackEvent('gisaeng_cta_click', { tier, target: topType }); trackSajuGPTClick('gisaeng'); }}
+          label="이 선비와 대화하기 →"
+          style={{ height: '48px' }}
+          bgStyle={{ backgroundColor: '#B8423A', borderRadius: '12px' }}
+          textStyle={{ color: '#ffffff' }}
+        />
+      </div>
 
-      <button
+      <TextLinkButton
         onClick={() => trackEvent('gisaeng_cta_browse')}
-        className="w-full mt-2 flex items-center justify-center"
-        style={{ height: '36px', color: '#A69A8E', fontSize: '13px', letterSpacing: '-0.26px', border: 'none', backgroundColor: 'transparent' }}
+        color="#A69A8E"
+        layoutStyle={{ width: '100%', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '8px' }}
       >
         다른 선비 둘러보기 &gt;
-      </button>
+      </TextLinkButton>
     </div>
   );
 }

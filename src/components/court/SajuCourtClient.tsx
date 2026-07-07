@@ -9,6 +9,10 @@ import TestTopNav from '@/components/TestTopNav';
 import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import StickyCTAButton from '@/components/StickyCTAButton';
+import TextLinkButton from '@/components/TextLinkButton';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
+import PressableButton from '@/components/PressableButton';
+import FieldLabel from '@/components/FieldLabel';
 import CourtLanding from '@/components/court/CourtLanding';
 import CourtAnalyzing from '@/components/court/CourtAnalyzing';
 import IndictmentCard from '@/components/court/IndictmentCard';
@@ -172,16 +176,6 @@ export default function SajuCourtClient() {
   const percentile = calculatePercentile(sentence);
   const judgeComment = getJudgeComment(sentenceGrade.grade);
 
-  const btnStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '16px',
-    borderRadius: '14px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '16px',
-    fontWeight: 700,
-  };
-
   return (
     <div
       className="fixed inset-0 flex justify-center"
@@ -221,15 +215,15 @@ export default function SajuCourtClient() {
 
             <div className="flex flex-col gap-5">
               <div>
-                <label style={{ fontSize: '14px', fontWeight: 600, color: '#A99BC4', marginBottom: '8px', display: 'block' }}>성별</label>
+                <FieldLabel color="#A99BC4">성별</FieldLabel>
                 <GenderSelect value={gender} onChange={setGender} />
               </div>
               <div>
-                <label style={{ fontSize: '14px', fontWeight: 600, color: '#A99BC4', marginBottom: '8px', display: 'block' }}>생년월일</label>
+                <FieldLabel color="#A99BC4">생년월일</FieldLabel>
                 <BirthInput value={birthDate} onChange={setBirthDate} onEnter={handleSubmit} />
               </div>
               <div>
-                <label style={{ fontSize: '14px', fontWeight: 600, color: '#A99BC4', marginBottom: '8px', display: 'block' }}>태어난 시간</label>
+                <FieldLabel color="#A99BC4">태어난 시간</FieldLabel>
                 <TimeSelectSheet
                   value={birthTime}
                   unknownTime={unknownTime}
@@ -257,9 +251,6 @@ export default function SajuCourtClient() {
               inactiveBackground="rgba(122, 56, 216, 0.08)"
               activeBoxShadow="0 4px 24px rgba(122, 56, 216, 0.25)"
               inactiveTextColor="#4A3D64"
-              fontWeight={500}
-              lineHeight="25px"
-              letterSpacing="-0.32px"
             />
           </div>
         )}
@@ -354,22 +345,12 @@ export default function SajuCourtClient() {
               />
             </div>
             <div className="flex flex-col gap-3" style={{ padding: '0 20px' }}>
-              <button
+              <PressableButton
                 onClick={() => setStep('accomplice')}
-                style={{
-                  height: '56px',
-                  borderRadius: '16px',
-                  fontSize: '15px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  border: 'none',
-                  width: '100%',
-                  backgroundColor: '#7A38D8',
-                  color: '#fff',
-                }}
-              >
-                공범 지목하기
-              </button>
+                label="공범 지목하기"
+                bgStyle={{ backgroundColor: '#7A38D8', borderRadius: '16px' }}
+                textStyle={{ color: '#fff' }}
+              />
               <CourtShareButtons
                 label="판결문 공유하기"
                 cardRef={verdictRef}
@@ -377,42 +358,23 @@ export default function SajuCourtClient() {
                 crimeLabel={courtResult.crimeLabel}
                 sentence={sentence}
               />
-              <button
+              <OutlineBoxButton
                 onClick={handleReset}
-                style={{
-                  width: '100%',
-                  height: '56px',
-                  borderRadius: '16px',
-                  backgroundColor: 'transparent',
-                  color: '#999',
-                  fontSize: '15px',
-                  fontWeight: 700,
-                  border: '1px solid #e7e7e7',
-                  cursor: 'pointer',
-                }}
+                height="56px"
+                borderRadius="16px"
+                fontSize="16px"
+                border="1px solid #e7e7e7"
+                color="#999"
               >
                 다시 해보기
-              </button>
-              <a
+              </OutlineBoxButton>
+              <TextLinkButton
                 href="/"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  height: '56px',
-                  borderRadius: '16px',
-                  backgroundColor: 'transparent',
-                  color: '#999',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  border: 'none',
-                  cursor: 'pointer',
-                  textDecoration: 'none',
-                  lineHeight: '56px',
-                  textAlign: 'center',
-                }}
+                color="#999"
+                layoutStyle={{ display: 'block', width: '100%', lineHeight: '56px', textAlign: 'center' }}
               >
                 다른 테스트도 해보기
-              </a>
+              </TextLinkButton>
             </div>
           </div>
         )}
@@ -441,34 +403,48 @@ export default function SajuCourtClient() {
             </p>
 
             <div className="flex flex-col gap-3 w-full">
-              <a
+              <OutlineBoxButton
                 href="https://www.sajugpt.co.kr/"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ ...btnStyle, backgroundColor: 'rgba(232, 98, 122, 0.10)', border: '1px solid rgba(232, 98, 122, 0.25)', color: '#E8627A', textAlign: 'center', textDecoration: 'none', display: 'block' }}
+                height="56px"
+                fontSize="16px"
+                background="rgba(232, 98, 122, 0.10)"
+                border="1px solid rgba(232, 98, 122, 0.25)"
+                color="#E8627A"
               >
                 윤태산에게 항소하기
-              </a>
-              <a
+              </OutlineBoxButton>
+              <OutlineBoxButton
                 href="https://www.sajugpt.co.kr/"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ ...btnStyle, backgroundColor: 'rgba(78, 205, 196, 0.10)', border: '1px solid rgba(78, 205, 196, 0.25)', color: '#4ECDC4', textAlign: 'center', textDecoration: 'none', display: 'block' }}
+                height="56px"
+                fontSize="16px"
+                background="rgba(78, 205, 196, 0.10)"
+                border="1px solid rgba(78, 205, 196, 0.25)"
+                color="#4ECDC4"
               >
                 서휘윤에게 상담받기
-              </a>
-              <button
+              </OutlineBoxButton>
+              <OutlineBoxButton
                 onClick={handleReset}
-                style={{ ...btnStyle, backgroundColor: 'rgba(122, 56, 216, 0.08)', border: '1px solid rgba(122, 56, 216, 0.15)', color: '#6B5C85' }}
+                height="56px"
+                fontSize="16px"
+                background="rgba(122, 56, 216, 0.08)"
+                border="1px solid rgba(122, 56, 216, 0.15)"
+                color="#6B5C85"
               >
                 다른 사주로 해보기
-              </button>
-              <a
+              </OutlineBoxButton>
+              <TextLinkButton
                 href="/"
-                style={{ color: '#6B5C85', fontSize: '14px', textAlign: 'center', marginTop: '8px', textDecoration: 'underline', textUnderlineOffset: '3px', opacity: 0.7 }}
+                color="#6B5C85"
+                underline
+                layoutStyle={{ textAlign: 'center', marginTop: '8px', opacity: 0.7 }}
               >
                 다른 테스트도 해보기
-              </a>
+              </TextLinkButton>
             </div>
           </div>
         )}

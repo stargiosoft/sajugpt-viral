@@ -10,6 +10,8 @@ import {
 import { saveImage, copyToClipboard } from '@/lib/share';
 import { trackShare } from '@/lib/analytics';
 import SajuGPTWatermark from '@/components/SajuGPTWatermark';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
+import TextLinkButton from '@/components/TextLinkButton';
 
 interface Props {
   result: NightManualResult;
@@ -265,63 +267,40 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
         </button>
 
         <div className="flex gap-3">
-          <button
+          <OutlineBoxButton
             onClick={handleCopy}
             className="flex-1"
-            style={{
-              height: '48px', borderRadius: '12px',
-              backgroundColor: '#1e1a2e', border: '1px solid #2a2440',
-              cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: '#c4b5d9',
-            }}
+            background="#1e1a2e"
+            border="1px solid #2a2440"
+            color="#c4b5d9"
           >
             {copied ? '복사됨!' : '🔗 링크 복사'}
-          </button>
-          <button
+          </OutlineBoxButton>
+          <OutlineBoxButton
             onClick={handleSaveImage}
             className="flex-1"
-            style={{
-              height: '48px', borderRadius: '12px',
-              backgroundColor: '#1e1a2e', border: '1px solid #2a2440',
-              cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: '#c4b5d9',
-            }}
+            background="#1e1a2e"
+            border="1px solid #2a2440"
+            color="#c4b5d9"
           >
             💾 이미지 저장
-          </button>
+          </OutlineBoxButton>
         </div>
 
         {/* 리플레이 */}
-        <button
-          onClick={onReset}
-          style={{
-            width: '100%', height: '44px', borderRadius: '12px',
-            backgroundColor: 'transparent', border: '1px solid #2a2440',
-            cursor: 'pointer', fontSize: '14px', fontWeight: 500, color: '#6b6080',
-            marginTop: '8px',
-          }}
-        >
-          다시 진단받기
-        </button>
-        <a
-          href="/"
-          style={{
-            display: 'block',
-            width: '100%',
-            height: '44px',
-            borderRadius: '12px',
-            backgroundColor: 'transparent',
-            color: '#6b6080',
-            fontSize: '13px',
-            fontWeight: 500,
-            border: 'none',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            lineHeight: '44px',
-            textAlign: 'center',
-            marginTop: '4px',
-          }}
-        >
+        <div style={{ marginTop: '8px' }}>
+          <OutlineBoxButton
+            onClick={onReset}
+            height="44px"
+            border="1px solid #2a2440"
+            color="#6b6080"
+          >
+            다시 진단받기
+          </OutlineBoxButton>
+        </div>
+        <TextLinkButton href="/" color="#6b6080" layoutStyle={{ display: 'block', width: '100%', height: '44px', lineHeight: '44px', textAlign: 'center', marginTop: '4px' }}>
           다른 테스트도 해보기
-        </a>
+        </TextLinkButton>
       </motion.div>
     </motion.div>
   );

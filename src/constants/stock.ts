@@ -124,6 +124,43 @@ export const INVESTMENT_OPINIONS: Record<InvestmentOpinion, InvestmentOpinionInf
   },
 };
 
+// ─── 투자의견 카드 문구 (리포트 카드 "현재 투자 의견" / 손절 경고 박스용) ───
+// **텍스트**는 손절 경고 박스에서 강조색으로 렌더링된다.
+
+export interface InvestmentOpinionDetail {
+  quote: string;
+  warningTitle: string;
+  warningBody: string;
+}
+
+export const INVESTMENT_OPINION_DETAILS: Record<InvestmentOpinion, InvestmentOpinionDetail> = {
+  strong_buy: {
+    quote: '지금 안 잡으면 평생 후회할 주식이에요.',
+    warningTitle: '지금 **망설이면**, 나중에 **땅을 치고** 후회합니다.',
+    warningBody: '이 정도 저평가는 오래가지 않아요.',
+  },
+  buy: {
+    quote: '지금이 매수하기 딱 좋은 타이밍이에요.',
+    warningTitle: '**무릎에서** 사야 **어깨에서** 웃습니다.',
+    warningBody: '망설이는 사이 기회가 지나갈 수 있어요.',
+  },
+  hold: {
+    quote: '지금 팔기엔 아까운 주식이에요.',
+    warningTitle: '지금 **손절**하면, 나중에 **땅을 칠** 상입니다.',
+    warningBody: '아직 시장이 당신의 가치를 모를 뿐이에요.',
+  },
+  reduce: {
+    quote: '지금은 차익 실현을 고민할 때예요.',
+    warningTitle: '너무 오래 들고 있으면 **물릴** 상입니다.',
+    warningBody: '오른 만큼 내려올 수도 있어요.',
+  },
+  warning: {
+    quote: '지금은 잠시 숨 고르기가 필요해요.',
+    warningTitle: '여기서 **포기하기엔** 아직 이릅니다.',
+    warningBody: '관리종목도 반등할 때가 있어요.',
+  },
+};
+
 // ─── 가격 등급 ───────────────────────────────────────
 
 export interface PriceGradeInfo {

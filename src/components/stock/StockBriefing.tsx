@@ -1,11 +1,35 @@
 'use client';
 
+import { Fragment } from 'react';
 import { motion } from 'framer-motion';
 import { CREW_MEMBERS } from '@/constants/stock';
+import TriangleIcon from '@/components/stock/TriangleIcon';
+import LandingCTAButton from '@/components/LandingCTAButton';
 
 interface Props {
   briefing: { headline: string; subtext: string };
   onStart: () => void;
+}
+
+const COLOR_BG = '#191F28';
+const COLOR_UP = '#F04452';
+const COLOR_BRAND = '#7A38D8';
+const COLOR_TEXT_PRIMARY = '#F2F3F5';
+const COLOR_TEXT_SECONDARY = '#8B95A1';
+const COLOR_TEXT_TERTIARY = '#4E5968';
+
+// "▼"/"▲" 문자를 포함한 동적 텍스트를 아이콘 컴포넌트로 교체해서 렌더링
+function renderWithTriangles(text: string, color: string) {
+  return text.split(/([▼▲])/g).map((chunk, i) => {
+    if (chunk === '▼' || chunk === '▲') {
+      return (
+        <span key={i} style={{ display: 'inline-flex', verticalAlign: '-2px' }}>
+          <TriangleIcon color={color} up={chunk === '▲'} />
+        </span>
+      );
+    }
+    return <Fragment key={i}>{chunk}</Fragment>;
+  });
 }
 
 const crewEntries = [
@@ -29,62 +53,53 @@ export default function StockBriefing({ briefing, onStart }: Props) {
       className="flex flex-col w-full"
       style={{
         minHeight: '100dvh',
-        backgroundColor: '#0a0a14',
+        backgroundColor: COLOR_BG,
         padding: '0 20px',
         paddingBottom: '120px',
       }}
     >
-      {/* Red accent border at top */}
-      <div style={{ height: '3px', backgroundColor: '#DC2626', margin: '0 -20px' }} />
-
       {/* Header */}
-      <div style={{ paddingTop: '48px', marginBottom: '32px' }}>
+      <div style={{ paddingTop: '48px', paddingLeft: '6px', marginBottom: '32px' }}>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: [0.4, 1, 0.4], scale: 1 }}
+          animate={{ opacity: [0.6, 1, 0.6], scale: 1 }}
           transition={{
-            opacity: { repeat: Infinity, duration: 2, ease: 'easeInOut' },
+            opacity: { repeat: Infinity, duration: 1.1, ease: 'easeInOut' },
             scale: { duration: 0.4 },
           }}
+          className="inline-flex items-center"
           style={{
-            fontSize: '13px',
+            padding: '5px 12px',
+            borderRadius: '20px',
+            backgroundColor: `${COLOR_UP}1F`,
+            border: `1px solid ${COLOR_UP}55`,
+            marginBottom: '20px',
+          }}
+        >
+          <span style={{
+            fontSize: '12px',
             fontWeight: 700,
-            color: '#DC2626',
-            letterSpacing: '2px',
+            color: COLOR_UP,
+            letterSpacing: '1px',
             textTransform: 'uppercase',
-            marginBottom: '8px',
-          }}
-        >
-          긴급 소집
+          }}>
+            긴급 소집 · 사주증권 특별 보고
+          </span>
         </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          style={{
-            fontSize: '15px',
-            fontWeight: 500,
-            color: '#888',
-            letterSpacing: '-0.3px',
-            marginBottom: '24px',
-          }}
-        >
-          사주증권 특별 보고
-        </motion.p>
 
         {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
           style={{
-            fontSize: '24px',
+            fontSize: '28px',
             fontWeight: 700,
-            color: '#ffffff',
+            color: COLOR_TEXT_PRIMARY,
             letterSpacing: '-0.6px',
-            lineHeight: '34px',
+            lineHeight: '38px',
             marginBottom: '12px',
+            paddingLeft: '3px',
           }}
         >
           {briefing.headline}
@@ -94,92 +109,71 @@ export default function StockBriefing({ briefing, onStart }: Props) {
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.5 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
           style={{
             fontSize: '16px',
             fontWeight: 600,
-            color: '#DC2626',
+            color: COLOR_UP,
             lineHeight: '24px',
             letterSpacing: '-0.3px',
-            marginBottom: '16px',
+            marginBottom: '10px',
+            paddingLeft: '5px',
           }}
         >
-          {briefing.subtext}
+          {renderWithTriangles(briefing.subtext, COLOR_UP)}
         </motion.p>
 
-        {/* Warning text */}
+        {/* 소집 콜 — 경고와 드라마틱 라인을 한 줄로 압축 */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.5 }}
+          transition={{ delay: 1.0, duration: 0.5 }}
           style={{
             fontSize: '14px',
-            fontWeight: 500,
-            color: '#888',
+            fontWeight: 600,
+            color: COLOR_TEXT_SECONDARY,
             lineHeight: '22px',
-            marginBottom: '8px',
+            paddingLeft: '6px',
           }}
         >
-          이대로 두면 관리종목 지정, 최악의 경우 상폐 가능성.
-        </motion.p>
-
-        {/* Dramatic line */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.6, duration: 0.5 }}
-          style={{
-            fontSize: '15px',
-            fontWeight: 700,
-            color: '#ccc',
-            lineHeight: '22px',
-          }}
-        >
-          주가 조작단을 소집합니다.
+          지금 조작단을 소집하지 않으면, 상폐입니다.
         </motion.p>
       </div>
 
-      {/* Divider */}
+      {/* Crew member entries — 단체 대화방처럼 하나의 카드로 감싼 채팅 버블 */}
       <motion.div
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ delay: 2.0, duration: 0.4 }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.6, duration: 0.4 }}
+        className="flex flex-col"
         style={{
-          height: '1px',
-          backgroundColor: '#2a2a3e',
-          marginBottom: '24px',
-          transformOrigin: 'left',
+          gap: '24px',
+          padding: '28px 24px',
+          borderRadius: '18px',
+          backgroundColor: 'rgba(255,255,255,0.03)',
         }}
-      />
-
-      {/* Crew member entries */}
-      <div className="flex flex-col gap-4">
+      >
         {crewEntries.map((entry, i) => (
           <motion.div
             key={entry.member.id}
             initial={{ opacity: 0, x: -24 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 2.3 + i * 0.5, duration: 0.5 }}
+            transition={{ delay: 2.0 + i * 0.5, duration: 0.5 }}
             className="flex items-start gap-3"
-            style={{
-              padding: '14px 16px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255,255,255,0.03)',
-            }}
           >
             <div className="overflow-hidden transform-gpu shrink-0" style={{
-              width: '44px', height: '44px', borderRadius: '50%',
-              border: `2px solid ${entry.member.color}`,
+              width: '40px', height: '40px', borderRadius: '50%',
+              border: `2px solid rgba(255,255,255,0.15)`,
             }}>
               <img src={entry.member.image} alt={entry.member.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <div>
+            <div className="flex flex-col items-start" style={{ flex: 1 }}>
               <p
                 style={{
                   fontSize: '13px',
                   fontWeight: 700,
-                  color: entry.member.color,
-                  marginBottom: '4px',
+                  color: COLOR_TEXT_PRIMARY,
+                  marginBottom: '6px',
                 }}
               >
                 {entry.member.name}
@@ -187,7 +181,7 @@ export default function StockBriefing({ briefing, onStart }: Props) {
                   style={{
                     fontSize: '11px',
                     fontWeight: 500,
-                    color: '#666',
+                    color: COLOR_TEXT_SECONDARY,
                     marginLeft: '6px',
                   }}
                 >
@@ -196,18 +190,22 @@ export default function StockBriefing({ briefing, onStart }: Props) {
               </p>
               <p
                 style={{
-                  fontSize: '15px',
+                  fontSize: '14px',
                   fontWeight: 500,
-                  color: '#ddd',
-                  lineHeight: '22px',
+                  color: COLOR_TEXT_PRIMARY,
+                  lineHeight: '21px',
+                  padding: '10px 14px',
+                  borderRadius: '16px',
+                  borderTopLeftRadius: '4px',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
                 }}
               >
-                &ldquo;{entry.line}&rdquo;
+                {entry.line}
               </p>
             </div>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Bottom CTA */}
       <div
@@ -220,30 +218,16 @@ export default function StockBriefing({ briefing, onStart }: Props) {
           maxWidth: '768px',
           padding: '16px 20px',
           paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-          background: 'linear-gradient(transparent, #0a0a14 30%)',
+          background: `linear-gradient(transparent, ${COLOR_BG} 30%)`,
         }}
       >
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 3.8, duration: 0.4 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onStart}
-          style={{
-            width: '100%',
-            padding: '16px',
-            borderRadius: '14px',
-            backgroundColor: '#7A38D8',
-            color: '#fff',
-            fontSize: '16px',
-            fontWeight: 700,
-            letterSpacing: '-0.32px',
-            border: 'none',
-            cursor: 'pointer',
-          }}
         >
-          작전 회의 시작하기 →
-        </motion.button>
+          <LandingCTAButton onClick={onStart} label="작전 회의 시작하기" background={COLOR_BRAND} />
+        </motion.div>
       </div>
     </div>
   );

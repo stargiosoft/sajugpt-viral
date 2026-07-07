@@ -1,19 +1,17 @@
-// deno-lint-ignore-file no-sloppy-imports
 'use client';
 
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import type { BattleResult } from '@/types/battle';
-import GradeBadge from './GradeBadge';
+import { getGradeLabel } from '@/constants/grades';
 import ChatBubble from './ChatBubble';
-import CharacterAvatar from './CharacterAvatar';
-import { CHARACTERS } from '@/constants/characters';
 import SajuGPTWatermark from './SajuGPTWatermark';
 
 interface Props {
   result: BattleResult;
 }
 
+/** 결과 카드 내 단톡방/DM 대사 파싱 */
 function parseChatScript(script: string, characters: BattleResult['characters']): { characterId: string; text: string }[] {
   const lines = script.split('\n').filter(l => l.trim());
   return lines.map(line => {
@@ -29,14 +27,18 @@ function parseChatScript(script: string, characters: BattleResult['characters'])
   });
 }
 
+/** verdict에서 첫 문장만 추출 (한줄 팩폭용) */
 function extractOneLiner(verdict: string): string {
+  // 첫 문장 (마침표/물음표/느낌표 기준) — 길어도 자르지 않고 그대로 반환, 화면에서 2줄까지 자연스럽게 줄바꿈
   const match = verdict.match(/^[^.!?]*[.!?]/);
-  if (match && match[0].length <= 60) return match[0];
-  if (verdict.length > 50) return verdict.slice(0, 50) + '...';
-  return verdict;
+  return match ? match[0] : verdict;
 }
 
+// 카드 전체 라벨/캡션에 쓰는 톤을 하나로 통일 (기존엔 0.3~0.4가 제각각이었음)
 const TEXT_LABEL = 'rgba(255,255,255,0.45)';
+
+// 히어로 영역(마릿수/등급 필)에 쓰는 브랜드 레드 — 등급별 색과 무관하게 고정
+const HERO_ACCENT = '#FF4438';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 14 },
@@ -54,14 +56,13 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
       ref={ref}
       className="w-full max-w-[400px] md:max-w-[520px] lg:max-w-[620px]"
       style={{
-        backgroundColor: '#111111',
-        border: '1px solid rgba(255,255,255,0.12)',
+        backgroundColor: '#161616',
+        border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: '24px',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        padding: '32px 20px 24px',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+        padding: '28px 20px 24px',
       }}
     >
       <motion.div
@@ -70,96 +71,124 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
         variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
         style={{ display: 'flex', flexDirection: 'column' }}
       >
-        {/* 타이틀 바 */}
+        {/* 상단 바 */}
         <motion.div
           variants={fadeUp}
           className="flex items-center justify-center"
           style={{
             fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '11px',
+            fontSize: '26px',
             fontWeight: 700,
-            color: '#FF4438', 
-            letterSpacing: '2px',
-            marginBottom: '20px',
-            textTransform: 'uppercase',
+            color: '#ffffff',
+            letterSpacing: '1.5px',
+            marginBottom: '8px',
           }}
         >
-          ✦ SAJUGPT 페로몬 판정 ✦
+          페로몬 판정
         </motion.div>
 
-        {/* 스코어 보드*/}
-        <motion.div 
-          variants={fadeUp} 
-          className="flex flex-col items-center justify-center" 
-          style={{ 
-            backgroundColor: 'rgba(255,255,255,0.03)',
-            borderRadius: '16px',
-            padding: '20px 0 16px',
-            border: '1px solid rgba(255,255,255,0.04)',
-            marginBottom: '24px'
-          }}
-        >
+        {/* 마릿수 — 카드의 핵심 히어로 */}
+        <motion.div variants={fadeUp} className="flex flex-col items-center" style={{ marginBottom: '24px' }}>
           <span style={{
             fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '12px',
+            fontSize: '14px',
             color: TEXT_LABEL,
-            marginBottom: '4px',
-            fontWeight: 600,
-            letterSpacing: '-0.3px'
+            marginBottom: '32px',
+            fontWeight: 500,
           }}>
-            나에게 환장하는 AI 짐승남
+            짐승남들이 꼬여든 결과
           </span>
-          
           <motion.span
-            initial={{ scale: 0.5, opacity: 0 }}
+            initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 260, damping: 15 }}
+            transition={{ delay: 0.35, type: 'spring', stiffness: 260, damping: 16 }}
+            className="flex items-baseline justify-center"
+            style={{ fontFamily: 'Pretendard Variable, sans-serif', lineHeight: 1, gap: '4px' }}
+          >
+            <span
+              style={{
+                fontSize: 'clamp(56px, 18vw, 82px)',
+                fontWeight: 900,
+                backgroundImage: `linear-gradient(180deg, #FFD5CF 0%, #FF7A6B 45%, ${HERO_ACCENT} 100%)`,
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              {headcount}
+            </span>
+            <span style={{ fontSize: '26px', fontWeight: 700, color: '#ffffff' }}>명</span>
+          </motion.span>
+        </motion.div>
+
+        {/* 등급 + 칭호 — 투명 배경 + 얇은 보더의 가로형 필, 세로 구분선으로 좌우 분리 */}
+        <motion.div variants={fadeUp} className="flex items-center justify-center" style={{ marginBottom: '40px' }}>
+          <div
+            className="flex items-center"
             style={{
-              fontFamily: 'Pretendard Variable, sans-serif',
-              fontSize: '80px', 
-              fontWeight: 900,
-              color: '#ffffff',
-              lineHeight: 1,
-              textShadow: '0 0 20px rgba(255,68,56,0.3)',
+              padding: '10px 22px',
+              borderRadius: '100px',
+              backgroundImage: 'linear-gradient(135deg, #3a0c09 0%, #8a231a 30%, #ff6a52 50%, #8a231a 70%, #3a0c09 100%)',
+              border: '1px solid rgba(255,180,160,0.4)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.35)',
             }}
           >
-            {headcount}<span style={{ fontSize: '28px', fontWeight: 700, color: '#FF4438', marginLeft: '2px' }}>명</span>
-          </motion.span>
-
-          <div className="flex items-center justify-center gap-1.5" style={{ marginTop: '10px' }}>
-            <GradeBadge grade={grade} size="sm" />
             <span style={{
               fontFamily: 'Pretendard Variable, sans-serif',
               fontSize: '15px',
-              fontWeight: 800,
+              fontWeight: 700,
+              color: '#fff1ee',
+              whiteSpace: 'nowrap',
+            }}>
+              {getGradeLabel(grade)}
+            </span>
+            <span style={{ width: '1px', height: '12px', backgroundColor: 'rgba(255,255,255,0.35)', margin: '0 14px' }} />
+            <span style={{
+              fontFamily: 'Pretendard Variable, sans-serif',
+              fontSize: '15px',
+              fontWeight: 700,
               color: '#ffffff',
-              letterSpacing: '-0.4px'
+              whiteSpace: 'nowrap',
             }}>
               {title}
             </span>
           </div>
         </motion.div>
 
-        {/* 한줄 팩폭 코멘트*/}
-        <motion.div variants={fadeUp} style={{ textAlign: 'center', padding: '0 12px', marginBottom: '24px' }}>
+        {/* 구분선 — 위(핵심 결과)와 아래(디테일)를 시각적으로 분리 */}
+        <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.06)', marginBottom: '40px' }} />
+
+        {/* 단톡방 / DM — 채팅 메시지가 없으면(0명/CUT) 이 블록과 아래 구분선을 함께 생략해 구분선이 연달아 겹치지 않게 함 */}
+        {chatMessages.length > 0 && (
+          <>
+            <motion.div variants={fadeUp} style={{ marginBottom: '40px', flex: '0 0 auto' }}>
+              <ChatBubble messages={chatMessages} isDM={isDM} />
+            </motion.div>
+
+            <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.06)', marginBottom: '38px' }} />
+          </>
+        )}
+
+        {/* 한줄 팩폭 (verdict 첫 문장) — 채팅 버블과 톤을 맞춘 은은한 레드 틴트 박스로 카드의 결론임을 강조 */}
+        <motion.div variants={fadeUp} style={{ marginBottom: '20px' }}>
           <p style={{
             fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '16px',
-            fontWeight: 700,
-            lineHeight: '24px',
-            letterSpacing: '-0.4px',
+            fontSize: '17px',
+            fontWeight: 500,
+            lineHeight: '32px',
+            letterSpacing: '-0.3px',
             color: '#FF6B5E',
+            textAlign: 'center',
+            textWrap: 'balance',
+            wordBreak: 'keep-all',
+            backgroundColor: 'rgba(255,68,56,0.08)',
+            borderRadius: '14px',
+            padding: '16px 18px',
           }}>
-            "{oneLiner}"
+            {oneLiner}
           </p>
         </motion.div>
-
-        {/* 메신저 영역 */}
-        {chatMessages.length > 0 && (
-          <motion.div variants={fadeUp} style={{ marginBottom: '24px', flex: '0 0 auto' }}>
-            <ChatBubble messages={chatMessages} isDM={isDM} />
-          </motion.div>
-        )}
 
         <SajuGPTWatermark
           featureType="sexy_battle"

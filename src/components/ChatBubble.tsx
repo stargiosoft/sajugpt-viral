@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-sloppy-imports
 import CharacterAvatar from './CharacterAvatar';
 import { CHARACTERS } from '@/constants/characters';
 
@@ -14,20 +13,9 @@ interface Props {
 
 export default function ChatBubble({ messages, isDM = false }: Props) {
   return (
-    <div 
-      className="flex flex-col gap-3.5" 
-      style={{ 
-        backgroundColor: 'rgba(0,0,0,0.3)', 
-        borderRadius: '16px', 
-        padding: '16px 14px' 
-      }}
-    >
-      {/* 상단 메신저 헤더 라벨 */}
-      <div className="flex items-center justify-center gap-1.5" style={{ marginBottom: '4px' }}>
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: isDM ? '#E1306C' : '#FEE500' }} />
-        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', textAlign: 'center', fontWeight: 700, letterSpacing: '0.5px' }}>
-          {isDM ? '실시간 인스타 DM' : '단톡방 아수라장'}
-        </div>
+    <div className="flex flex-col gap-4">
+      <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', textAlign: 'center', fontWeight: 600, letterSpacing: '1px' }}>
+        {isDM ? '그가 당신만 본 순간' : '그들이 당신을 본 순간'}
       </div>
 
       {messages.map((msg, i) => {
@@ -35,26 +23,25 @@ export default function ChatBubble({ messages, isDM = false }: Props) {
         if (!char) return null;
 
         return (
-          <div key={i} className="flex items-start gap-2.5">
-            <CharacterAvatar src={char.thumbnail} name={char.name} size={34} />
-            <div className="flex flex-col" style={{ gap: '3px' }}>
-              {/* 캐릭터 이름 */}
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', fontWeight: 600, paddingLeft: '2px' }}>
+          <div key={i} className="flex items-start gap-2">
+            <CharacterAvatar src={char.thumbnail} name={char.name} size={32} />
+            {/* flex:1 + minWidth:0 — 이 래퍼가 행의 남은 폭만큼 정확한(definite) 너비를 갖게 해서, 아래 버블의 % 기반 max-width가 제대로 계산되게 함 */}
+            <div className="flex flex-col" style={{ gap: '4px', flex: '1 1 0%', minWidth: 0 }}>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>
                 {char.name}
               </span>
-              
               <div
                 style={{
-                  backgroundColor: isDM ? 'rgba(255,255,255,0.08)' : 'rgba(254,229,0,0.12)', 
-                  border: isDM ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(254,229,0,0.15)',
-                  borderRadius: '0px 14px 14px 14px', 
+                  backgroundColor: 'rgba(255,255,255,0.06)',
+                  borderRadius: '14px',
                   padding: '10px 14px',
-                  fontSize: '13px',
-                  color: isDM ? '#ffffff' : '#FFEFA0', 
-                  fontWeight: 500,
-                  lineHeight: '1.45',
-                  maxWidth: '250px',
-                  wordBreak: 'break-all',
+                  fontSize: '15px',
+                  color: 'rgba(255,255,255,0.85)',
+                  fontWeight: 400,
+                  lineHeight: '1.5',
+                  width: 'fit-content',
+                  maxWidth: 'min(100%, 420px)',
+                  wordBreak: 'keep-all',
                 }}
               >
                 {msg.text}

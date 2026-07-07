@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { trackEvent } from '@/lib/analytics';
 import { useShareActions } from '@/lib/useShareActions';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
 
 interface Props {
   label?: string;
@@ -34,41 +35,27 @@ export default function CourtShareButtons({ cardRef, courtId, crimeLabel, senten
     [handleNativeShare, cardRef, crimeLabel, sentence]
   );
 
-  const btnStyle: React.CSSProperties = {
-    height: '56px',
-    borderRadius: '16px',
-    fontSize: '15px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    border: 'none',
-    flex: 1,
-  };
-
   return (
     <div className="flex gap-3">
-        <button
-          onClick={handleCopy}
-          style={{
-            ...btnStyle,
-            backgroundColor: copied ? '#44BB44' : '#f0f0f0',
-            color: copied ? '#fff' : '#333',
-          }}
-        >
-          {copied ? '복사 완료!' : '📋 링크 복사'}
-        </button>
+      <OutlineBoxButton
+        onClick={handleCopy}
+        height="56px"
+        fontSize="15px"
+        background={copied ? '#44BB44' : '#f0f0f0'}
+        color={copied ? '#fff' : '#333'}
+      >
+        {copied ? '복사 완료!' : '📋 링크 복사'}
+      </OutlineBoxButton>
 
-        <button
-          onClick={() => handleSave(cardRef)}
-          disabled={saving}
-          style={{
-            ...btnStyle,
-            backgroundColor: '#f0f0f0',
-            color: '#333',
-            opacity: saving ? 0.6 : 1,
-          }}
-        >
-          {saving ? '저장 중...' : '📸 이미지 저장'}
-        </button>
+      <OutlineBoxButton
+        onClick={() => handleSave(cardRef)}
+        height="56px"
+        fontSize="15px"
+        background="#f0f0f0"
+        color="#333"
+      >
+        {saving ? '저장 중...' : '📸 이미지 저장'}
+      </OutlineBoxButton>
     </div>
   );
 }

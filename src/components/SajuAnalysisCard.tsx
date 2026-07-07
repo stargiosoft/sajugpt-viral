@@ -30,8 +30,7 @@ export default function SajuAnalysisCard({ result }: Props) {
       }}
     >
       {/* 헤더 */}
-      <div className="flex items-center" style={{ gap: '8px', marginBottom: '14px' }}>
-        <span style={{ fontSize: '14px', color: '#FF4438' }}>✦</span>
+      <div className="flex items-center" style={{ marginBottom: '14px' }}>
         <h3 style={{
           fontFamily: 'Pretendard Variable, sans-serif',
           fontSize: '15px',
@@ -39,6 +38,7 @@ export default function SajuAnalysisCard({ result }: Props) {
           lineHeight: '20px',
           letterSpacing: '-0.45px',
           color: '#ffffff',
+          paddingLeft: '2px',
         }}>
           사주가 말하는 당신의 페로몬
         </h3>
@@ -46,7 +46,7 @@ export default function SajuAnalysisCard({ result }: Props) {
 
       {/* 사주 태그 */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap" style={{ gap: '6px', marginBottom: '14px' }}>
+        <div className="flex flex-wrap" style={{ gap: '6px', marginBottom: '14px', paddingLeft: '2px' }}>
           {tags.map(tag => (
             <span
               key={tag}
@@ -55,9 +55,9 @@ export default function SajuAnalysisCard({ result }: Props) {
                 fontSize: '12px',
                 fontWeight: 600,
                 letterSpacing: '-0.24px',
-                color: '#FF4438',
-                backgroundColor: 'rgba(255,68,56,0.12)',
-                borderRadius: '4px',
+                color: '#FF6B5E',
+                backgroundColor: 'rgba(255,68,56,0.08)',
+                borderRadius: '8px',
                 padding: '4px 10px',
               }}
             >
@@ -75,6 +75,7 @@ export default function SajuAnalysisCard({ result }: Props) {
         lineHeight: '26px',
         letterSpacing: '-0.3px',
         color: 'rgba(255,255,255,0.85)',
+        paddingLeft: '2px',
       }}>
         {verdict}
       </p>

@@ -4,6 +4,8 @@ import { useCallback } from 'react';
 import { shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import { useShareActions } from '@/lib/useShareActions';
+import PressableButton from '@/components/PressableButton';
+import OutlineBoxButton from '@/components/OutlineBoxButton';
 
 interface Props {
   causeOfDeathLabel: string;
@@ -46,55 +48,36 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
     }
   }, [causeOfDeathLabel, autopsyId]);
 
-  const btnStyle: React.CSSProperties = {
-    height: '56px',
-    borderRadius: '16px',
-    fontSize: '15px',
-    fontWeight: 700,
-    cursor: 'pointer',
-    border: 'none',
-    flex: 1,
-  };
-
   return (
     <div className="flex flex-col gap-3" style={{ padding: '0 20px' }}>
       {/* 메인 CTA — 카카오톡으로 도발 공유 */}
-      <button
+      <PressableButton
         onClick={handleKakaoShare}
-        style={{
-          ...btnStyle,
-          flex: 'unset',
-          width: '100%',
-          backgroundColor: '#FEE500',
-          color: '#191919',
-          fontSize: '16px',
-        }}
-      >
-        💬 친구한테 보내기
-      </button>
+        label="💬 친구한테 보내기"
+        bgStyle={{ backgroundColor: '#FEE500', borderRadius: '16px' }}
+        textStyle={{ color: '#191919' }}
+      />
 
       {/* 보조 공유 행 */}
       <div className="flex gap-3">
-        <button
+        <OutlineBoxButton
           onClick={() => handleSave(cardRef)}
-          style={{
-            ...btnStyle,
-            backgroundColor: '#F7F2FA',
-            color: '#7A38D8',
-          }}
+          height="56px"
+          fontSize="15px"
+          background="#F7F2FA"
+          color="#7A38D8"
         >
           {saving ? '저장 중...' : '💾 이미지 저장'}
-        </button>
-        <button
+        </OutlineBoxButton>
+        <OutlineBoxButton
           onClick={handleCopy}
-          style={{
-            ...btnStyle,
-            backgroundColor: copied ? '#E8D5F5' : '#F7F2FA',
-            color: '#7A38D8',
-          }}
+          height="56px"
+          fontSize="15px"
+          background={copied ? '#E8D5F5' : '#F7F2FA'}
+          color="#7A38D8"
         >
           {copied ? '복사 완료!' : '🔗 링크 복사'}
-        </button>
+        </OutlineBoxButton>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import LandingCTAButton from '@/components/LandingCTAButton';
 
 interface Props {
   onStart: () => void;
@@ -448,29 +449,20 @@ export default function GisaengLanding({ onStart }: Props) {
         }}
       >
         <div style={{ padding: '12px 20px 24px' }}>
-          <motion.div
+          <LandingCTAButton
             onClick={onStart}
-            className="transform-gpu cursor-pointer"
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.1 }}
-            style={{
-              height: '56px',
-              borderRadius: '14px',
-              backgroundColor: C.vermillion,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 20px rgba(184, 66, 58, 0.25)',
-            }}
-          >
-            <p style={{ fontSize: '16px', fontWeight: 600, color: C.hanji, letterSpacing: '-0.32px' }}>
-              기방 문 열기
-            </p>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M6 3L11 8L6 13" stroke={C.hanji} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </motion.div>
+            background={C.vermillion}
+            color={C.hanji}
+            boxShadow="0 4px 20px rgba(184, 66, 58, 0.25)"
+            label={
+              <span className="flex items-center" style={{ gap: '8px' }}>
+                기방 문 열기
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 3L11 8L6 13" stroke={C.hanji} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            }
+          />
 
           <p style={{ fontSize: '11px', fontWeight: 400, color: C.inkFaint, textAlign: 'center', marginTop: '8px' }}>
             가입 없이 생년월일만 입력

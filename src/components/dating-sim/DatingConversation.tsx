@@ -21,7 +21,7 @@ interface Props {
 
 const CHOICE_CONFIG: Record<string, { label: string; emoji: string; color: string; bg: string }> = {
   bold: { label: '직진', emoji: '💘', color: '#FF3D7F', bg: '#FFF0F3' },
-  witty: { label: '위트', emoji: '✨', color: '#7A38D8', bg: '#F7F2FA' },
+  witty: { label: '위트', emoji: '✨', color: '#9B51E0', bg: '#F6EFFC' },
   safe: { label: '안전', emoji: '🤍', color: '#4488FF', bg: '#F0F5FF' },
 };
 
@@ -108,12 +108,12 @@ export default function DatingConversation({
   if (!turn) return null;
 
   const affectionPercent = Math.min(100, Math.max(0, affection));
-  const gaugeColor = affectionPercent >= 60 ? '#7A38D8' : affectionPercent >= 30 ? '#4488FF' : '#FF3D7F';
+  const gaugeColor = '#FF4D8D';
 
   return (
     <div
       className="fixed inset-0 flex justify-center"
-      style={{ backgroundColor: '#FAF8FC' }}
+      style={{ backgroundColor: '#ffffff' }}
     >
       <div className="w-full max-w-[768px] h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
 
@@ -122,7 +122,6 @@ export default function DatingConversation({
           className="shrink-0"
           style={{
             padding: '16px 20px 12px',
-            borderBottom: '1px solid #f3f3f3',
             backgroundColor: '#ffffff',
           }}
         >
@@ -135,7 +134,7 @@ export default function DatingConversation({
                   width: '36px',
                   height: '36px',
                   borderRadius: '9999px',
-                  border: '2px solid #7A38D8',
+                  border: '2px solid #FF4D8D',
                   flexShrink: 0,
                 }}
               >
@@ -176,7 +175,7 @@ export default function DatingConversation({
               style={{
                 padding: '4px 12px',
                 borderRadius: '9999px',
-                backgroundColor: '#F7F2FA',
+                backgroundColor: '#F5F5F5',
               }}
             >
               <span style={{
@@ -184,7 +183,7 @@ export default function DatingConversation({
                 fontSize: '12px',
                 fontWeight: 600,
                 letterSpacing: '-0.24px',
-                color: '#7A38D8',
+                color: '#767676',
               }}>
                 {turn.turnNumber} / {conversationTree.turns.length}
               </span>
@@ -194,7 +193,7 @@ export default function DatingConversation({
           {/* 호감도 게이지 */}
           <div
             className="w-full overflow-hidden"
-            style={{ height: '6px', borderRadius: '9999px', backgroundColor: '#EDE5F7' }}
+            style={{ height: '6px', borderRadius: '9999px', backgroundColor: '#EEEEEE' }}
           >
             <motion.div
               className="h-full"
@@ -223,18 +222,17 @@ export default function DatingConversation({
                 className="inline-flex items-center"
                 style={{
                   gap: '6px',
-                  padding: '6px 14px',
+                  padding: '8px 18px',
                   borderRadius: '9999px',
-                  backgroundColor: '#F7F2FA',
-                  border: '1px solid #EDE5F7',
+                  backgroundColor: '#FFF0F5',
                 }}
               >
                 <span style={{
                   fontFamily: 'Pretendard Variable, sans-serif',
-                  fontSize: '12px',
-                  fontWeight: 500,
+                  fontSize: '15px',
+                  fontWeight: 600,
                   letterSpacing: '-0.24px',
-                  color: '#7A38D8',
+                  color: '#FF4D8D',
                 }}>
                   {turn.situation}
                 </span>
@@ -251,15 +249,16 @@ export default function DatingConversation({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="flex items-start"
-              style={{ gap: '10px', marginBottom: '8px' }}
+              style={{ gap: '10px', marginBottom: '12px' }}
             >
               <div
                 className="overflow-hidden flex-shrink-0"
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '38px',
+                  height: '38px',
                   borderRadius: '9999px',
-                  backgroundColor: '#EDE5F7',
+                  backgroundColor: '#FCE4EC',
+                  border: '2px solid rgba(255, 77, 141, 0.3)',
                 }}
               >
                 <img
@@ -273,26 +272,26 @@ export default function DatingConversation({
                 <p style={{
                   fontFamily: 'Pretendard Variable, sans-serif',
                   fontSize: '12px',
-                  fontWeight: 500,
+                  fontWeight: 600,
                   lineHeight: '16px',
                   letterSpacing: '-0.24px',
-                  color: '#848484',
-                  marginBottom: '4px',
+                  color: '#767676',
+                  marginBottom: '6px',
                 }}>
                   {character?.name}
                 </p>
                 <div
                   style={{
-                    padding: '12px 16px',
-                    borderRadius: '4px 16px 16px 16px',
-                    backgroundColor: '#F7F2FA',
+                    padding: '12px 14px',
+                    borderRadius: '6px 18px 18px 18px',
+                    backgroundColor: '#FFF0F5',
                   }}
                 >
                   <p style={{
                     fontFamily: 'Pretendard Variable, sans-serif',
                     fontSize: '15px',
                     fontWeight: 400,
-                    lineHeight: '24px',
+                    lineHeight: '25px',
                     letterSpacing: '-0.45px',
                     color: '#151515',
                   }}>
@@ -314,17 +313,17 @@ export default function DatingConversation({
               >
                 <div
                   style={{
-                    padding: '12px 16px',
-                    borderRadius: '16px 4px 16px 16px',
-                    backgroundColor: '#7A38D8',
-                    maxWidth: '260px',
+                    padding: '12px 14px',
+                    borderRadius: '18px 6px 18px 18px',
+                    backgroundColor: '#FF4D8D',
+                    maxWidth: 'min(80%, 420px)',
                   }}
                 >
                   <p style={{
                     fontFamily: 'Pretendard Variable, sans-serif',
                     fontSize: '15px',
-                    fontWeight: 400,
-                    lineHeight: '24px',
+                    fontWeight: 500,
+                    lineHeight: '25px',
                     letterSpacing: '-0.45px',
                     color: '#ffffff',
                   }}>
@@ -349,10 +348,11 @@ export default function DatingConversation({
                 <div
                   className="overflow-hidden flex-shrink-0"
                   style={{
-                    width: '36px',
-                    height: '36px',
+                    width: '38px',
+                    height: '38px',
                     borderRadius: '9999px',
-                    backgroundColor: '#EDE5F7',
+                    backgroundColor: '#FCE4EC',
+                    border: '2px solid rgba(255, 77, 141, 0.3)',
                   }}
                 >
                   <img
@@ -364,18 +364,18 @@ export default function DatingConversation({
                 </div>
                 <div
                   style={{
-                    padding: '12px 16px',
-                    borderRadius: '4px 16px 16px 16px',
-                    backgroundColor: '#EDE5F7',
+                    padding: '12px 14px',
+                    borderRadius: '6px 18px 18px 18px',
+                    backgroundColor: '#FFF0F5',
                   }}
                 >
                   <p style={{
                     fontFamily: 'Pretendard Variable, sans-serif',
-                    fontSize: '14px',
+                    fontSize: '15px',
                     fontWeight: 400,
-                    lineHeight: '22px',
-                    letterSpacing: '-0.42px',
-                    color: '#525252',
+                    lineHeight: '25px',
+                    letterSpacing: '-0.45px',
+                    color: '#151515',
                   }}>
                     {turn.characterReactions[selectedChoiceId] ?? '...'}
                   </p>
@@ -395,10 +395,10 @@ export default function DatingConversation({
             paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
             backgroundColor: '#ffffff',
             boxShadow: '0px -8px 16px 0px rgba(255, 255, 255, 0.76)',
-            borderTop: '1px solid #f3f3f3',
           }}
         >
           {!selectedChoiceId && !transitioning && (
+            <div style={{ backgroundColor: '#F7F7F7', borderRadius: '20px', padding: '16px' }}>
             <div className="flex flex-col" style={{ gap: '8px' }}>
               {turn.choices.map((choice, i) => {
                 const config = CHOICE_CONFIG[choice.type] ?? CHOICE_CONFIG.safe;
@@ -410,15 +410,15 @@ export default function DatingConversation({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.06, duration: 0.2 }}
                     onClick={() => handleChoiceSelect(choice)}
-                    className="w-full flex items-center cursor-pointer"
+                    className="group relative w-full flex flex-col items-stretch cursor-pointer bg-white border border-[#F2F2F2] hover:bg-[#ffedf3] hover:border-[#FFA9C7] transition-colors duration-150"
                     style={{
-                      height: '56px',
+                      minHeight: '56px',
                       borderRadius: '16px',
-                      padding: '0 16px',
-                      backgroundColor: '#ffffff',
-                      border: `1.5px solid #e7e7e7`,
-                      transition: 'all 0.15s ease',
-                      gap: '12px',
+                      paddingTop: '20px',
+                      paddingBottom: '21px',
+                      paddingLeft: '24px',
+                      paddingRight: '24px',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.07)',
                     }}
                     onPointerDown={(e) => {
                       e.currentTarget.style.transform = 'scale(0.99)';
@@ -430,23 +430,23 @@ export default function DatingConversation({
                     }}
                     onPointerLeave={(e) => {
                       e.currentTarget.style.transform = '';
-                      e.currentTarget.style.borderColor = '#e7e7e7';
-                      e.currentTarget.style.backgroundColor = '#ffffff';
+                      e.currentTarget.style.borderColor = '';
+                      e.currentTarget.style.backgroundColor = '';
                     }}
                   >
-                    <span style={{ fontSize: '16px', flexShrink: 0 }}>{config.emoji}</span>
-                    <span style={{
-                      fontFamily: 'Pretendard Variable, sans-serif',
-                      fontSize: '15px',
-                      fontWeight: 400,
-                      lineHeight: '20px',
-                      letterSpacing: '-0.45px',
-                      color: '#151515',
-                      flex: 1,
-                      textAlign: 'left',
-                    }}>
-                      {choice.text}
+                    <span
+                      aria-hidden
+                      className="inline-flex items-center justify-center shrink-0"
+                      style={{ position: 'absolute', top: '50%', right: '20px', transform: 'translateY(-50%)' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" style={{ transform: 'scaleX(-1)' }}>
+                        <path
+                          fill="#b0b0b0"
+                          d="m 15.970695,3.001955 a 1.0000999,1.0000999 0 0 0 -0.6875,0.30274 l -7.9902299,7.98828 a 1.0000999,1.0000999 0 0 0 0,1.41406 l 7.9902299,7.98828 a 1.0000999,1.0000999 0 1 0 1.41407,-1.41406 l -7.2832099,-7.28125 7.2832099,-7.28125 a 1.0000999,1.0000999 0 0 0 -0.72657,-1.7168 z"
+                        />
+                      </svg>
                     </span>
+
                     <span
                       style={{
                         fontFamily: 'Pretendard Variable, sans-serif',
@@ -455,15 +455,30 @@ export default function DatingConversation({
                         color: config.color,
                         backgroundColor: config.bg,
                         padding: '2px 8px',
-                        borderRadius: '4px',
-                        flexShrink: 0,
+                        borderRadius: '6px',
+                        marginBottom: '4px',
+                        width: 'fit-content',
                       }}
                     >
                       {config.label}
                     </span>
+                    <div className="w-full" style={{ paddingRight: '20px', paddingLeft: '2px', textAlign: 'left' }}>
+                      <span style={{
+                        fontFamily: 'Pretendard Variable, sans-serif',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        lineHeight: '20px',
+                        letterSpacing: '-0.45px',
+                        color: '#151515',
+                        textAlign: 'left',
+                      }}>
+                        {choice.text}
+                      </span>
+                    </div>
                   </motion.button>
                 );
               })}
+            </div>
             </div>
           )}
 
@@ -483,7 +498,7 @@ export default function DatingConversation({
                       width: '6px',
                       height: '6px',
                       borderRadius: '9999px',
-                      backgroundColor: '#7A38D8',
+                      backgroundColor: '#FF4D8D',
                     }}
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}

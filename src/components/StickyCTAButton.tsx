@@ -15,10 +15,12 @@ interface Props {
   activeBoxShadow?: string;
   activeTextColor?: string;
   inactiveTextColor: string;
-  fontWeight: number;
-  lineHeight?: string;
-  letterSpacing?: string;
 }
+
+// 모든 테스트 공통 CTA 타이포 스펙 — 색상만 테스트별로 다르게 넘긴다.
+const CTA_FONT_WEIGHT = 700;
+const CTA_LINE_HEIGHT = '24px';
+const CTA_LETTER_SPACING = '-0.32px';
 
 // 하단 고정 CTA 바 — 입력 폼 유효성에 따라 활성/비활성 스타일만 바뀌고
 // 색상/그림자/문구는 테스트별로 다르다.
@@ -33,9 +35,6 @@ export default function StickyCTAButton({
   activeBoxShadow,
   activeTextColor = '#fff',
   inactiveTextColor,
-  fontWeight,
-  lineHeight,
-  letterSpacing,
 }: Props) {
   return (
     <div
@@ -76,9 +75,9 @@ export default function StickyCTAButton({
             <p
               style={{
                 fontSize: '16px',
-                fontWeight,
-                lineHeight,
-                letterSpacing,
+                fontWeight: CTA_FONT_WEIGHT,
+                lineHeight: CTA_LINE_HEIGHT,
+                letterSpacing: CTA_LETTER_SPACING,
                 color: isValid ? activeTextColor : inactiveTextColor,
                 whiteSpace: 'nowrap',
               }}

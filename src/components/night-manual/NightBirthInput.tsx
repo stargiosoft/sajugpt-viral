@@ -6,6 +6,7 @@ import type { Gender } from '@/types/battle';
 import BirthInput from '@/components/BirthInput';
 import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
+import FieldLabel from '@/components/FieldLabel';
 
 interface Props {
   birthDate: string;
@@ -58,7 +59,7 @@ export default function NightBirthInput({
 
       {/* 성별 */}
       <div style={{ marginBottom: '20px' }}>
-        <p style={{ fontSize: '14px', fontWeight: 600, color: '#c4b5d9', marginBottom: '8px' }}>성별</p>
+        <FieldLabel color="#c4b5d9">성별</FieldLabel>
         <GenderSelect
           value={gender}
           onChange={setGender}
@@ -70,7 +71,7 @@ export default function NightBirthInput({
 
       {/* 생년월일 */}
       <div style={{ marginBottom: '20px' }}>
-        <p style={{ fontSize: '14px', fontWeight: 600, color: '#c4b5d9', marginBottom: '8px' }}>생년월일</p>
+        <FieldLabel color="#c4b5d9">생년월일</FieldLabel>
         <BirthInput
           value={birthDate}
           onChange={setBirthDate}
@@ -85,7 +86,7 @@ export default function NightBirthInput({
 
       {/* 태어난 시간 */}
       <div ref={birthTimeRef} style={{ marginBottom: '32px' }}>
-        <p style={{ fontSize: '14px', fontWeight: 600, color: '#c4b5d9', marginBottom: '8px' }}>태어난 시간</p>
+        <FieldLabel color="#c4b5d9">태어난 시간</FieldLabel>
         <TimeSelectSheet
           value={birthTime}
           unknownTime={unknownTime}

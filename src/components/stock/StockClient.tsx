@@ -4,6 +4,9 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Gender, StockStep, StockAnalysisResult, RelationshipStatus, UserChoice, UserChoices } from '@/types/stock';
 import TestTopNav from '@/components/TestTopNav';
+import PressableButton from '@/components/PressableButton';
+import ShareButton from '@/components/ShareButton';
+import TextLinkButton from '@/components/TextLinkButton';
 import StockLanding from '@/components/stock/StockLanding';
 import StockInput from '@/components/stock/StockInput';
 import StockAnalyzing from '@/components/stock/StockAnalyzing';
@@ -13,65 +16,38 @@ import StockTurn from '@/components/stock/StockTurn';
 import StockPlanCard from '@/components/stock/StockPlanCard';
 import StockResult from '@/components/stock/StockResult';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
-import { parseUTM, trackEvent, trackShare, trackSajuGPTClick } from '@/lib/analytics';
-import { copyToClipboard, saveImage } from '@/lib/share';
+import { parseUTM, trackEvent, trackShare } from '@/lib/analytics';
+import { saveImage } from '@/lib/share';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
 
-// ─── 공유 버튼 (plan 단계용) ──────────────────────────────
-function PlanShareButton({ type, stockId, currentPrice, cardRef }: {
-  type: 'copy' | 'save';
+// ─── 이미지 저장 버튼 (plan 단계용) — 색기배틀 ShareButtons와 동일한 PressableButton 스타일 ──────────
+function PlanSaveImageButton({ stockId, cardRef }: {
   stockId: string;
-  currentPrice?: number;
-  cardRef?: React.RefObject<HTMLDivElement | null>;
+  cardRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const [active, setActive] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  const handleCopy = async () => {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    const text = `📈 내 연애 주가: ${(currentPrice ?? 0).toLocaleString()}원\n주가 조작단이 분석한 내 작전 계획서\n👉 ${baseUrl}/stock/${stockId}`;
-    const ok = await copyToClipboard(text);
-    if (ok) {
-      setActive(true);
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setActive(false), 2000);
-      trackShare('saju_stock', 'clipboard', stockId);
-    }
-  };
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!cardRef?.current || active) return;
-    setActive(true);
+    if (!cardRef.current || saving) return;
+    setSaving(true);
     try {
       await saveImage(cardRef.current, '주가조작단_작전계획서.png');
       trackShare('saju_stock', 'image_save', stockId);
     } catch { /* noop */ }
-    setActive(false);
+    setSaving(false);
   };
 
-  const isCopy = type === 'copy';
   return (
-    <button
-      onClick={isCopy ? handleCopy : handleSave}
-      disabled={!isCopy && active}
-      style={{
-        flex: 1,
-        height: '52px',
-        borderRadius: '14px',
-        fontSize: '14px',
-        fontWeight: 600,
-        cursor: 'pointer',
-        backgroundColor: isCopy && active ? '#1a3a1a' : '#1a1a2e',
-        color: isCopy && active ? '#4ADE80' : '#ccc',
-        border: isCopy && active ? '1px solid #4ADE80' : '1px solid #2a2a3e',
-        opacity: !isCopy && active ? 0.6 : 1,
-      }}
-    >
-      {isCopy
-        ? (active ? '✅ 복사됨' : '📋 링크 복사')
-        : (active ? '저장 중...' : '📸 이미지 저장')}
-    </button>
+    <PressableButton
+      onClick={handleSave}
+      disabled={saving}
+      label={saving ? '저장 중...' : '이미지 저장'}
+      style={{ height: '52px' }}
+      bgStyle={{ borderRadius: '14px', backgroundColor: 'rgba(255,255,255,0.06)' }}
+      hoverBackground="rgba(255,255,255,0.12)"
+      textStyle={{ color: '#D1D5DB', fontSize: '14px' }}
+    />
   );
 }
 
@@ -307,7 +283,7 @@ export default function StockClient({ stockId }: Props) {
               className="flex flex-col"
               style={{ minHeight: '100dvh', backgroundColor: '#191F28', padding: '0 20px', paddingBottom: '120px' }}
             >
-              <div style={{ height: '48px' }} />
+              <div style={{ height: '20px' }} />
               <StockReportCard ref={reportCardRef} report={result.stockReport} />
 
               {/* 하단 버튼 */}
@@ -420,78 +396,34 @@ export default function StockClient({ stockId }: Props) {
               className="flex flex-col"
               style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '40px' }}
             >
-              <div style={{ height: '48px' }} />
+              <div style={{ height: '20px' }} />
               <StockPlanCard ref={planCardRef} plan={result.operationPlan} />
 
               <div className="flex flex-col gap-3" style={{ marginTop: '32px' }}>
-                <a
-                  href="https://www.sajugpt.co.kr/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackSajuGPTClick('saju_stock')}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '16px',
-                    borderRadius: '14px',
-                    backgroundColor: '#7A38D8',
-                    color: '#fff',
-                    fontSize: '16px',
-                    fontWeight: 700,
-                    letterSpacing: '-0.32px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    textDecoration: 'none',
-                  }}
-                >
-                  3단계 작전 실행하기
-                </a>
+                <ShareButton
+                  featureType="saju_stock"
+                  resultId={result.id}
+                  title="내 연애 주가 작전 계획서"
+                  description="저평가된 내 연애 주가, 조작단이 세운 작전을 확인해보세요"
+                  shareUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/stock/${result.id}`}
+                  imageUrl={`${typeof window !== 'undefined' ? window.location.origin : ''}/home/thumbnails/stock.jpg`}
+                  label="친구 주가도 조작하기"
+                  activeBackground="rgba(255,255,255,0.06)"
+                  hoverBackground="rgba(255,255,255,0.12)"
+                  textColor="#D1D5DB"
+                  style={{ height: '52px' }}
+                />
 
-                <div className="flex gap-3">
-                  <PlanShareButton
-                    type="copy"
-                    stockId={result.id}
-                    currentPrice={result.stockReport.currentPrice}
-                  />
-                  <PlanShareButton
-                    type="save"
-                    cardRef={planCardRef}
-                    stockId={result.id}
-                  />
-                </div>
+                <PlanSaveImageButton cardRef={planCardRef} stockId={result.id} />
 
-                <button
-                  onClick={handleReset}
-                  style={{
-                    width: '100%',
-                    height: '52px',
-                    borderRadius: '14px',
-                    backgroundColor: '#1a1a2e',
-                    color: '#999',
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    border: '1px solid #2a2a3e',
-                    cursor: 'pointer',
-                  }}
-                >
-                  다시 해보기
-                </button>
-
-                <a
+                <TextLinkButton
                   href="/"
-                  style={{
-                    color: '#555',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    textDecoration: 'underline',
-                    textUnderlineOffset: '3px',
-                    textAlign: 'center',
-                    marginTop: '4px',
-                  }}
+                  color="rgba(255,255,255,0.4)"
+                  hoverColor="rgba(255,255,255,0.6)"
+                  layoutStyle={{ display: 'block', textAlign: 'center', marginTop: '4px' }}
                 >
                   다른 테스트도 해보기
-                </a>
+                </TextLinkButton>
               </div>
             </motion.div>
           )}

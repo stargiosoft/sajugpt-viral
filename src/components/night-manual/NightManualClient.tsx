@@ -170,11 +170,15 @@ export default function NightManualClient({ nightManualId }: Props) {
   return (
     <div
       className="fixed inset-0 flex justify-center"
-      style={{ backgroundColor: '#0d0d1a' }}
+      style={{
+        background: step === 'landing'
+          ? 'linear-gradient(180deg, #050b16 0%, #0a1a2e 30%, #0d2440 60%, #050b16 100%)'
+          : '#050b16',
+      }}
     >
       <div className="w-full max-w-[768px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
-        <TestTopNav />
+        <TestTopNav bgColor={step === 'landing' ? 'rgba(5, 11, 22, 0.55)' : '#050b16'} />
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <NightLanding key="landing" onStart={() => setStep('input')} />

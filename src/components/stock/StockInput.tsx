@@ -7,6 +7,7 @@ import BirthInput from '@/components/BirthInput';
 import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import StickyCTAButton from '@/components/StickyCTAButton';
+import FieldLabel from '@/components/FieldLabel';
 import { RELATIONSHIP_STATUSES } from '@/constants/stock';
 
 interface Props {
@@ -99,19 +100,7 @@ export default function StockInput({
         variants={sectionVariants}
         style={{ marginBottom: '36px' }}
       >
-        <p
-          style={{
-            fontSize: '12px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.45)',
-            lineHeight: '16px',
-            letterSpacing: '-0.24px',
-            padding: '0 4px',
-            marginBottom: '8px',
-          }}
-        >
-          성별
-        </p>
+        <FieldLabel color="rgba(255,255,255,0.45)">성별</FieldLabel>
         <GenderSelect value={gender} onChange={setGender} accentColor="#7A38D8" bgColor="rgba(255,255,255,0.06)" unselectedColor="rgba(255,255,255,0.28)" />
       </motion.div>
 
@@ -123,19 +112,7 @@ export default function StockInput({
         variants={sectionVariants}
         style={{ marginBottom: '36px' }}
       >
-        <p
-          style={{
-            fontSize: '12px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.45)',
-            lineHeight: '16px',
-            letterSpacing: '-0.24px',
-            padding: '0 4px',
-            marginBottom: '8px',
-          }}
-        >
-          생년월일
-        </p>
+        <FieldLabel color="rgba(255,255,255,0.45)">생년월일</FieldLabel>
         <BirthInput
           value={birthDate}
           onChange={setBirthDate}
@@ -160,19 +137,7 @@ export default function StockInput({
         variants={sectionVariants}
         style={{ marginBottom: '36px' }}
       >
-        <p
-          style={{
-            fontSize: '12px',
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.45)',
-            lineHeight: '16px',
-            letterSpacing: '-0.24px',
-            padding: '0 4px',
-            marginBottom: '8px',
-          }}
-        >
-          태어난 시간
-        </p>
+        <FieldLabel color="rgba(255,255,255,0.45)">태어난 시간</FieldLabel>
         <TimeSelectSheet
           value={birthTime}
           unknownTime={unknownTime}
@@ -282,9 +247,6 @@ export default function StockInput({
         activeBackground="#7A38D8"
         inactiveBackground="rgba(255,255,255,0.08)"
         inactiveTextColor="rgba(255,255,255,0.35)"
-        fontWeight={700}
-        lineHeight="22px"
-        letterSpacing="-0.4px"
       />
     </div>
   );
