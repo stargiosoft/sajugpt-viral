@@ -1,4 +1,4 @@
-import type { ConstitutionType, ServantType, CompatibilityGrade, NightStats } from '@/types/night-manual';
+import type { ConstitutionType, ServantType, CompatibilityGrade, NightStats } from '@/types/night-manual.ts';
 
 // ─── 체질 유형 ─────────────────────────────────────────
 export interface ConstitutionMeta {

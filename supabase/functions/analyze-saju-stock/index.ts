@@ -1,6 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getCorsHeaders, handleCorsPreflightRequest, jsonResponse, errorResponse } from '../server/cors.ts';
-
+import { createClient } from 'supabase';
+import { handleCorsPreflightRequest, jsonResponse, errorResponse } from '../server/cors.ts';
 // ─── 타입 ───────────────────────────────────────────────
 
 type RelationshipStatus = 'single' | 'some' | 'dating';
@@ -303,7 +302,7 @@ async function generateDiscussion(
   h: SajuHighlights,
   currentPrice: number,
   fairValue: number,
-  targetPrice: number,
+  _targetPrice: number,
   opinion: InvestmentOpinion,
   surgeMonthLabel: string,
   status: RelationshipStatus,
@@ -430,7 +429,6 @@ function generateFallbackDiscussion(
   crewComment: string;
 } {
   const comment = FALLBACK_COMMENTS[opinion];
-  const undervalueRate = Math.round((1 - currentPrice / fairValue) * 100);
 
   const makeTurn = (title: string, kangLines: string, yoonLines: string, chaLines: string, question: string, choiceA: string, choiceB: string, choiceC: string): TurnData => ({
     title,

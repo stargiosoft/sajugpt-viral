@@ -1,5 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getCorsHeaders, handleCorsPreflightRequest, jsonResponse, errorResponse } from '../server/cors.ts';
+import { createClient } from 'supabase';
+import { handleCorsPreflightRequest, jsonResponse, errorResponse } from '../server/cors.ts';
 
 // ─── 타입 ───────────────────────────────────────────────
 interface RequestBody {

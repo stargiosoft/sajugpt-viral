@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-sloppy-imports
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -20,7 +21,6 @@ import { parseUTM, trackEvent } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { formatKoreanTime, parseKoreanTimeTo24Hour } from '@/lib/koreanTime';
 
-// "다른 테스트도 해보기" — 박스가 아닌 텍스트 링크라 배경 대신 글자색으로 호버/탭 피드백을 준다.
 const OTHER_TEST_LINK_HOVER = {
   whileHover: { color: 'rgba(255,255,255,0.8)' },
   whileTap: { scale: 0.97 },
@@ -207,16 +207,18 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
                   얼굴 말고, 사주부터 불어
                 </h1>
                 {isBattleAccept && (
-                  <div className="flex flex-col items-center" style={{ gap: '8px', marginBottom: '4px' }}>
-                    <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.55)', fontWeight: 500, textAlign: 'center', lineHeight: '1.6', letterSpacing: '-0.45px' }}>
-                      친구한테 도발장이 날아왔어요
+                  <div className="flex flex-col items-center" style={{ gap: '6px', marginBottom: '16px', width: '100%', maxWidth: '340px' }}>
+                    <p style={{ fontSize: '12px', color: '#FF4438', fontWeight: 700, textAlign: 'center', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                      ⚠️ 친구한테 도발장이 날아왔어요 ⚠️
                     </p>
                     <div
                       style={{
-                        padding: '12px 20px',
-                        borderRadius: '12px',
-                        backgroundColor: 'rgba(255,68,56,0.14)',
-                        border: '1px solid rgba(255,68,56,0.3)',
+                        width: '100%',
+                        padding: '14px 20px',
+                        borderRadius: '16px',
+                        background: 'linear-gradient(135deg, rgba(255,68,56,0.15) 0%, rgba(255,68,56,0.05) 100%)',
+                        border: '1px solid #FF4438',
+                        boxShadow: '0 0 15px rgba(255,68,56,0.2)',
                       }}
                     >
                       <p style={{ fontSize: '16px', fontWeight: 700, color: '#FF5B4D', textAlign: 'center', letterSpacing: '-0.32px' }}>

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-sloppy-imports
 import type {
   CrewMemberId,
   FairValueGrade,
@@ -27,7 +28,7 @@ export const CREW_MEMBERS: Record<CrewMemberId, CrewMemberInfo> = {
     name: '윤태산',
     position: '작전 본부장',
     faction: '공격파',
-    philosophy: '비상장이 문제. 시장에 나가야 주가가 움직인다',
+    philosophy: '비상장이 문제. 일단 판에 깔아야 돈이 찬다.',
     tone: '반말, 직설, 급함',
     emoji: '⚡',
     color: '#DC2626',
@@ -38,7 +39,7 @@ export const CREW_MEMBERS: Record<CrewMemberId, CrewMemberInfo> = {
     name: '서휘윤',
     position: '펀더멘털 분석가',
     faction: '가치파',
-    philosophy: '적정가가 높아도 본인이 자기 값어치를 모르면 시장가는 바닥',
+    philosophy: '스스로 가치를 모르면 시장가는 언제나 바닥.',
     tone: '존댓말, 차분, 날카로움',
     emoji: '📊',
     color: '#2563EB',
@@ -49,7 +50,7 @@ export const CREW_MEMBERS: Record<CrewMemberId, CrewMemberInfo> = {
     name: '최설계',
     position: '차트 전략가',
     faction: '타이밍파',
-    philosophy: '타이밍이 전부. 준비 안 끝나면 1년 더 기다려야',
+    philosophy: '타이밍이 전부. 성급하면 1년 내내 물린다.',
     tone: '반존대, 계산적, 긴급함',
     emoji: '📈',
     color: '#059669',
@@ -91,7 +92,7 @@ export const INVESTMENT_OPINIONS: Record<InvestmentOpinion, InvestmentOpinionInf
     label: '강력 매수',
     color: '#DC2626',
     bgColor: '#FEF2F2',
-    fallbackComment: '펀더멘털 대비 극심한 저평가. 시장이 이 종목을 모르고 있다.',
+    fallbackComment: '역대급 저평가 꿀매물. 세력 매집 시급.',
   },
   buy: {
     id: 'buy',
@@ -105,21 +106,21 @@ export const INVESTMENT_OPINIONS: Record<InvestmentOpinion, InvestmentOpinionInf
     label: '보유(존버)',
     color: '#CA8A04',
     bgColor: '#FEFCE8',
-    fallbackComment: '현재 구간에서 손절은 최악의 선택. 존버가 답.',
+    fallbackComment: '여기서 손절하면 평생 후회함. 존버가 답.',
   },
   reduce: {
     id: 'reduce',
     label: '비중 축소',
     color: '#059669',
     bgColor: '#ECFDF5',
-    fallbackComment: '고점 근접. 차익 실현 권고.',
+    fallbackComment: '단기 고점 도달. 이제 슬슬 익절할 타이밍.',
   },
   warning: {
     id: 'warning',
     label: '관리종목',
     color: '#6B7280',
     bgColor: '#F3F4F6',
-    fallbackComment: '일시적 거래 정지 구간. 반등은 옵니다.',
+    fallbackComment: '잠정적 거래 정지. 멘탈 잡으면 반등 옴.',
   },
 };
 
