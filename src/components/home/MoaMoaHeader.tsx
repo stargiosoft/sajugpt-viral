@@ -6,7 +6,7 @@ import MoaMoaWordmark from '@/components/MoaMoaWordmark';
 export default function MoaMoaHeader() {
   return (
     <div
-      className="sticky top-0 z-20 flex items-center px-5 py-3 md:px-6 lg:px-8"
+      className="sticky top-0 z-20 flex items-center px-3 py-3 md:px-6 lg:px-8"
       style={{
         backgroundColor: 'rgba(255, 255, 255, 0.88)',
         backdropFilter: 'blur(5px)',

@@ -38,7 +38,7 @@ export default function ViralHub() {
         <div className="flex-1 overflow-auto w-full">
           <MoaMoaHeader />
 
-          <div className="pt-1 px-4 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
+          <div className="pt-1 px-3 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
             <HeroBanner />
             <div className="flex flex-col mt-4 lg:mt-0" style={{ gap: '12px' }}>
               <RankingPanel items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
@@ -85,7 +85,7 @@ export default function ViralHub() {
             </div>
           </div>
 
-          <div className="px-4 md:px-6 lg:px-8" style={{ paddingTop: '28px' }}>
+          <div className="px-3 md:px-6 lg:px-8" style={{ paddingTop: '28px' }}>
             <AdBannerStrip
               backgroundColor="#FFF1E6"
               title="여름 특집 살귀 타로"
@@ -99,7 +99,7 @@ export default function ViralHub() {
 
           <NewTestsSection items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
 
-          <div className="px-4 md:px-6 lg:px-8 pb-6">
+          <div className="px-3 md:px-6 lg:px-8 pb-6">
             <Footer />
           </div>
         </div>

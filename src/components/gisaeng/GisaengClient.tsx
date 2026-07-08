@@ -344,7 +344,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{ padding: '48px 20px 120px' }}
+              style={{ padding: '48px 12px 120px' }}
             >
               {/* 헤더 — 색기 배틀 동일 패턴 */}
               <div className="flex flex-col items-center" style={{ marginBottom: '40px' }}>
@@ -493,7 +493,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
           )}
 
           {step === 'result' && simulationResult && analyzeData && (
-            <div key="result" className="flex-1 flex flex-col gap-5" style={{ padding: '32px 20px 48px' }}>
+            <div key="result" className="flex-1 flex flex-col gap-5" style={{ padding: '32px 12px 48px' }}>
               <GisaengResultCard
                 ref={resultCardRef}
                 gisaengCard={analyzeData.gisaengCard}

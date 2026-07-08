@@ -205,7 +205,7 @@ export default function SajuCourtClient() {
 
         {/* ─── INPUT ────────────────────────────── */}
         {step === 'input' && (
-          <div className="w-full" style={{ padding: '32px 24px 120px' }}>
+          <div className="w-full" style={{ padding: '32px 12px 120px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#E8E0F5', marginBottom: '8px' }}>
               사주 법정
             </h2>
@@ -260,7 +260,7 @@ export default function SajuCourtClient() {
 
         {/* ─── INDICTMENT (기소장) ──────────────── */}
         {step === 'indictment' && courtResult && (
-          <div className="w-full" style={{ padding: '24px 20px 120px' }}>
+          <div className="w-full" style={{ padding: '24px 12px 120px' }}>
             <div className="flex justify-center">
               <IndictmentCard
                 ref={indictmentRef}
@@ -282,7 +282,7 @@ export default function SajuCourtClient() {
                 paddingBottom: 'env(safe-area-inset-bottom)',
               }}
             >
-              <div style={{ padding: '12px 20px', width: '100%' }}>
+              <div style={{ padding: '12px 12px', width: '100%' }}>
                 <motion.div
                   onClick={() => setStep('trial_1')}
                   className="transform-gpu"
@@ -332,7 +332,7 @@ export default function SajuCourtClient() {
 
         {/* ─── VERDICT (판결문) ─────────────────── */}
         {step === 'verdict' && courtResult && (
-          <div className="w-full" style={{ padding: '24px 20px 48px' }}>
+          <div className="w-full" style={{ padding: '24px 12px 48px' }}>
             <div className="flex justify-center" style={{ marginBottom: '24px' }}>
               <VerdictCard
                 ref={verdictRef}
@@ -344,7 +344,7 @@ export default function SajuCourtClient() {
                 judgeComment={judgeComment}
               />
             </div>
-            <div className="flex flex-col gap-3" style={{ padding: '0 20px' }}>
+            <div className="flex flex-col gap-3" style={{ padding: '0 12px' }}>
               <PressableButton
                 onClick={() => setStep('accomplice')}
                 label="공범 지목하기"
@@ -391,7 +391,7 @@ export default function SajuCourtClient() {
 
         {/* ─── CONVERSION (항소 → 챗봇) ────────── */}
         {step === 'conversion' && courtResult && (
-          <div className="flex flex-col items-center w-full" style={{ padding: '40px 24px' }}>
+          <div className="flex flex-col items-center w-full" style={{ padding: '40px 12px' }}>
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7A38D8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px', opacity: 0.8 }}>
               <path d="M12 3v18" /><path d="m4 7 4-4 4 4" /><path d="m12 7 4-4 4 4" /><path d="M4 7h8" /><path d="M12 7h8" /><circle cx="6" cy="19" r="2" /><circle cx="18" cy="19" r="2" />
             </svg>

@@ -42,7 +42,7 @@ export default function NightBirthInput({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '60px 24px 120px', minHeight: '100dvh' }}
+      style={{ padding: '60px 12px 120px', minHeight: '100dvh' }}
     >
       <h2
         className="text-center"
@@ -107,7 +107,7 @@ export default function NightBirthInput({
       {/* 제출 버튼 — 하단 고정 */}
       <div
         className="fixed left-0 right-0 bottom-0 flex justify-center"
-        style={{ padding: '16px 24px', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+        style={{ padding: '16px 12px', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
       >
         <motion.button
           whileTap={canSubmit ? { scale: 0.96 } : {}}

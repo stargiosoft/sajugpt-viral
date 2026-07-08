@@ -54,7 +54,7 @@ export default function StockInput({
     <div
       className="flex flex-col w-full"
       style={{
-        padding: '0 20px',
+        padding: '0 12px',
         paddingBottom: '100px',
       }}
     >

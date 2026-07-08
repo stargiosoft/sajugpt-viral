@@ -147,7 +147,7 @@ export default function StockLanding({ onStart }: Props) {
       backgroundColor: COLOR_BG,
     }}>
       <div className="flex-1 flex flex-col" style={{
-        padding: '0 20px',
+        padding: '0 12px',
         paddingBottom: '120px',
       }}>
 
@@ -457,7 +457,7 @@ export default function StockLanding({ onStart }: Props) {
         transform: 'translateX(-50%)',
         width: '100%',
         maxWidth: '768px',
-        padding: '16px 20px',
+        padding: '16px 12px',
         paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
         background: `linear-gradient(transparent, ${COLOR_BG} 30%)`,
         pointerEvents: 'auto',

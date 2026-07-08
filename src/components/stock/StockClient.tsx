@@ -281,7 +281,7 @@ export default function StockClient({ stockId }: Props) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
               className="flex flex-col"
-              style={{ minHeight: '100dvh', backgroundColor: '#191F28', padding: '0 20px', paddingBottom: '120px' }}
+              style={{ minHeight: '100dvh', backgroundColor: '#191F28', padding: '0 12px', paddingBottom: '120px' }}
             >
               <div style={{ height: '20px' }} />
               <StockReportCard ref={reportCardRef} report={result.stockReport} />
@@ -294,7 +294,7 @@ export default function StockClient({ stockId }: Props) {
                 transform: 'translateX(-50%)',
                 width: '100%',
                 maxWidth: '768px',
-                padding: '16px 20px',
+                padding: '16px 12px',
                 paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
                 backgroundColor: '#191F28',
               }}>
@@ -394,7 +394,7 @@ export default function StockClient({ stockId }: Props) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
               className="flex flex-col"
-              style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '40px' }}
+              style={{ minHeight: '100dvh', padding: '0 12px', paddingBottom: '40px' }}
             >
               <div style={{ height: '20px' }} />
               <StockPlanCard ref={planCardRef} plan={result.operationPlan} />

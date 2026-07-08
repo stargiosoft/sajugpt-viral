@@ -70,7 +70,7 @@ export default function AnalyzingScreen({
   const content = (
     <div
       className="flex flex-col items-center justify-center w-full"
-      style={{ minHeight, padding: '0 24px' }}
+      style={{ minHeight, padding: '0 12px' }}
     >
       {lottieData ? (
         <div style={{ width: lottieSize, height: lottieSize, marginBottom: '24px' }}>

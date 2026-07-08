@@ -224,7 +224,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
               className="flex flex-col"
-              style={{ minHeight: '100dvh', padding: '0 20px', paddingBottom: '120px' }}
+              style={{ minHeight: '100dvh', padding: '0 12px', paddingBottom: '120px' }}
             >
               {/* 상단 여백 */}
               <div style={{ height: '64px' }} />
@@ -483,7 +483,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
                   paddingBottom: 'env(safe-area-inset-bottom)',
                 }}
               >
-                <div style={{ padding: '12px 20px' }}>
+                <div style={{ padding: '12px 12px' }}>
                   <LandingCTAButton
                     onClick={() => {
                       trackEvent('autopsy_land');
@@ -504,7 +504,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{ padding: '48px 20px 120px' }}
+              style={{ padding: '48px 12px 120px' }}
             >
               {/* 헤더 */}
               <div className="flex flex-col items-center" style={{ marginBottom: '36px' }}>
@@ -705,7 +705,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              style={{ padding: '24px 20px 48px' }}
+              style={{ padding: '24px 12px 48px' }}
             >
               {/* 사망진단서 카드 */}
               <div className="flex justify-center" style={{ marginBottom: '24px' }}>
@@ -720,7 +720,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
               />
 
               {/* 영안실 + 리플레이 + 다른 테스트 */}
-              <div className="flex flex-col gap-3" style={{ padding: '0 20px', marginTop: '12px' }}>
+              <div className="flex flex-col gap-3" style={{ padding: '0 12px', marginTop: '12px' }}>
                 {/* 영안실 안치 */}
                 <button
                   onClick={handleArchive}

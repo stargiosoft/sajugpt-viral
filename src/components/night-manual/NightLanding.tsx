@@ -232,7 +232,7 @@ export default function NightLanding({ onStart }: Props) {
       {/* ── 시작하기 버튼 ── */}
       <motion.div
         className="w-full"
-        style={{ padding: '28px 20px 0' }}
+        style={{ padding: '28px 12px 0' }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
@@ -243,7 +243,7 @@ export default function NightLanding({ onStart }: Props) {
       {/* ── 참여자수 + 테스트 공유하기 ── */}
       <motion.div
         className="flex flex-col items-center w-full"
-        style={{ padding: '0 20px', marginTop: '64px', marginBottom: '36px' }}
+        style={{ padding: '0 12px', marginTop: '64px', marginBottom: '36px' }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.4 }}
@@ -364,7 +364,7 @@ export default function NightLanding({ onStart }: Props) {
           fontSize: '11px',
           color: 'rgba(234,242,255,0.25)',
           textAlign: 'center',
-          padding: '0 28px 132px',
+          padding: '0 12px 132px',
           lineHeight: '1.5',
         }}
       >

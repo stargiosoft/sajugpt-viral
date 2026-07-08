@@ -185,7 +185,7 @@ export default function GisaengLanding({ onStart }: Props) {
       {/* ── 선비 3명 프리뷰 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '0 24px', gap: '16px' }}
+        style={{ padding: '0 12px', gap: '16px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -279,7 +279,7 @@ export default function GisaengLanding({ onStart }: Props) {
       {/* ── 진행 방식 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '40px 24px 0', gap: '0' }}
+        style={{ padding: '40px 12px 0', gap: '0' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -366,7 +366,7 @@ export default function GisaengLanding({ onStart }: Props) {
       {/* ── 티어 프리뷰 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '40px 24px 0', gap: '8px' }}
+        style={{ padding: '40px 12px 0', gap: '8px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -432,7 +432,7 @@ export default function GisaengLanding({ onStart }: Props) {
           fontWeight: 400,
           color: C.inkFaint,
           textAlign: 'center',
-          padding: '32px 28px 24px',
+          padding: '32px 12px 24px',
           lineHeight: 1.5,
         }}
       >
@@ -448,7 +448,7 @@ export default function GisaengLanding({ onStart }: Props) {
           background: `linear-gradient(to top, ${C.hanji} 60%, ${C.hanji}CC 80%, transparent 100%)`,
         }}
       >
-        <div style={{ padding: '12px 20px 24px' }}>
+        <div style={{ padding: '12px 12px 24px' }}>
           <LandingCTAButton
             onClick={onStart}
             background={C.vermillion}

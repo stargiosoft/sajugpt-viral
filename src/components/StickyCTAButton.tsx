@@ -46,7 +46,7 @@ export default function StickyCTAButton({
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      <div style={{ padding: '12px 20px', width: '100%' }}>
+      <div style={{ padding: '12px', width: '100%' }}>
         <div style={{ position: 'relative', height: '56px' }}>
           <motion.div
             onClick={isValid ? onClick : undefined}

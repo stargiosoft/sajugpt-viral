@@ -29,7 +29,7 @@ export default function ServantSelection({ result, onSelect }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '40px 24px 40px', minHeight: '100dvh' }}
+      style={{ padding: '40px 12px 40px', minHeight: '100dvh' }}
     >
       <div className="text-center" style={{ marginBottom: '32px' }}>
         <p style={{ fontSize: '13px', color: '#8b7aaa', letterSpacing: '2px' }}>

@@ -30,6 +30,11 @@ const COLOR_TEXT_PRIMARY = '#151515';
 const COLOR_TEXT_SECONDARY = '#6E6E72';
 const COLOR_TEXT_BRIGHT = '#4B4B4F';
 
+// ── 캐릭터 헤더 배경 하트 패턴 ──
+const HEART_PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><path fill='white' fill-opacity='0.16' d='M20 30s-8-5.2-8-11.2c0-3.4 2.6-5.8 5.8-5.8 1.8 0 3.5.9 4.5 2.3 1-1.4 2.7-2.3 4.5-2.3 3.2 0 5.8 2.4 5.8 5.8C32.6 24.8 20 30 20 30z'/></svg>"
+)}")`;
+
 // ── 점수 바 컬러 (4개 각각 다른 색상, 트랙 배경은 통일) ──
 const SCORE_COLORS: Record<string, { bar: string; track: string }> = {
   charm:        { bar: '#FF5C93', track: COLOR_BOX_LIGHT },
@@ -71,7 +76,7 @@ function ScoreGaugeColumn({ scoreKey, label, score, delay }: {
         fontWeight: 800,
         letterSpacing: '-0.3px',
         color: COLOR_TEXT_PRIMARY,
-        marginTop: '10px',
+        marginTop: '12px',
       }}>
         {score}
       </span>
@@ -82,7 +87,7 @@ function ScoreGaugeColumn({ scoreKey, label, score, delay }: {
         fontWeight: 600,
         letterSpacing: '-0.24px',
         color: COLOR_TEXT_SECONDARY,
-        marginTop: '4px',
+        marginTop: '1px',
         textAlign: 'center',
       }}>
         {label}
@@ -91,16 +96,34 @@ function ScoreGaugeColumn({ scoreKey, label, score, delay }: {
   );
 }
 
-// ── 총점 바 게이지 ──
-function ScoreGaugeBar({ score, color }: { score: number; color: string }) {
+// ── 총점 원형 프로그레스 ──
+function ScoreGaugeRing({ score, color }: { score: number; color: string }) {
   const percent = (score / 10) * 100;
+  const size = 108;
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - percent / 100);
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="flex items-baseline" style={{ marginBottom: '12px' }}>
+    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={size / 2} cy={size / 2} r={radius} stroke={COLOR_BOX_LIGHT} strokeWidth={strokeWidth} fill="none" />
+        <motion.circle
+          cx={size / 2} cy={size / 2} r={radius}
+          stroke={color} strokeWidth={strokeWidth} fill="none"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1, delay: 0.4, ease: 'easeOut' }}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </svg>
+      <div className="flex flex-col items-center justify-center" style={{ position: 'absolute', inset: 0 }}>
         <span style={{
           fontFamily: 'Pretendard Variable, sans-serif',
-          fontSize: '40px',
+          fontSize: '26px',
           fontWeight: 800,
           letterSpacing: '-0.5px',
           color,
@@ -110,29 +133,13 @@ function ScoreGaugeBar({ score, color }: { score: number; color: string }) {
         </span>
         <span style={{
           fontFamily: 'Pretendard Variable, sans-serif',
-          fontSize: '15px',
+          fontSize: '12px',
           fontWeight: 400,
           color: COLOR_TEXT_SECONDARY,
-          marginLeft: '4px',
+          marginTop: '2px',
         }}>
           / 10
         </span>
-      </div>
-      <div
-        className="w-full overflow-hidden"
-        style={{ height: '12px', borderRadius: '9999px', backgroundColor: COLOR_BOX_LIGHT }}
-      >
-        <motion.div
-          className="h-full"
-          style={{
-            background: 'linear-gradient(90deg, #FFB3C6 0%, #FF4D8D 100%)',
-            borderRadius: '9999px',
-            boxShadow: '0 0 10px rgba(255, 77, 141, 0.45)',
-          }}
-          initial={{ width: 0 }}
-          animate={{ width: `${percent}%` }}
-          transition={{ duration: 1, delay: 0.4, ease: 'easeOut' }}
-        />
       </div>
     </div>
   );
@@ -154,6 +161,7 @@ export default function DatingResult({
   const charName = character?.name ?? '캐릭터';
   const badge = finalResult ? getPercentileBadge(finalResult.percentile, finalResult.totalCount) : null;
   const accentColor = success ? '#E0357A' : '#B33951';
+  const sameIlganDelta = finalResult ? scoreTable.total - finalResult.sameIlganAvg : 0;
 
   const shareUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/dating-sim/${resultId}` : '';
@@ -172,50 +180,28 @@ export default function DatingResult({
       <div className="w-full max-w-[768px] relative">
 
         {/* ─── 성공/실패 헤더 ─── */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex flex-col items-center"
-          style={{ padding: '40px 20px 20px' }}
-        >
-          <h2 style={{
-            fontFamily: 'Pretendard Variable, sans-serif',
-            fontSize: '28px',
-            fontWeight: 800,
-            letterSpacing: '-0.56px',
-            color: accentColor,
-          }}>
-            {success ? '데이트 승낙!' : '데이트 거절...'}
-          </h2>
-          {earlyExitTurn && (
-            <p style={{
-              fontFamily: 'Pretendard Variable, sans-serif',
-              fontSize: '13px',
-              fontWeight: 500,
-              letterSpacing: '-0.3px',
-              color: '#B33951',
-              marginTop: '4px',
-            }}>
-              {earlyExitTurn}턴 만에 조기 종료됨
-            </p>
-          )}
-          {attemptNumber > 1 && (
+        {attemptNumber > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex flex-col items-center"
+            style={{ padding: '24px 12px 0' }}
+          >
             <p style={{
               fontFamily: 'Pretendard Variable, sans-serif',
               fontSize: '12px',
               fontWeight: 400,
               letterSpacing: '-0.24px',
               color: COLOR_TEXT_SECONDARY,
-              marginTop: '4px',
             }}>
               {attemptNumber}번째 도전
             </p>
-          )}
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* ─── 결과 카드 (캡처 대상) ─── */}
-        <div style={{ padding: '0 20px 20px' }}>
+        <div style={{ padding: '0 12px 20px' }}>
           <div
             ref={cardRef}
             className="overflow-hidden"
@@ -225,200 +211,208 @@ export default function DatingResult({
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
             }}
           >
-            {/* 캐릭터 헤더 */}
-            <div
-              className="flex flex-col items-center"
+            {/* 캐릭터 헤더 — 결과 상태 + 채점표 타이틀 통합 */}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="relative overflow-hidden flex flex-col items-center"
               style={{
-                padding: '16px 20px',
-                gap: '8px',
+                padding: '32px 20px 24px',
                 background: success
-                  ? 'linear-gradient(135deg, #FF6FA5 0%, #E0357A 100%)'
-                  : 'linear-gradient(135deg, #8F2A42 0%, #B33951 100%)',
+                  ? 'linear-gradient(135deg, #FF8FBD 0%, #FF4F97 100%)'
+                  : 'linear-gradient(135deg, #A8566E 0%, #8F3E56 100%)',
               }}
             >
-              <div
-                className="overflow-hidden flex-shrink-0"
-                style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '9999px',
-                  border: '2px solid rgba(255,255,255,0.4)',
-                }}
-              >
-                <img
-                  src={character?.thumbnail ?? ''} alt={charName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-              </div>
-              <div className="flex flex-col items-center">
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: HEART_PATTERN_BG,
+                backgroundSize: '40px 40px',
+                backgroundRepeat: 'repeat',
+                pointerEvents: 'none',
+              }} />
+              <h2 style={{
+                position: 'relative',
+                fontFamily: 'Jalnan, sans-serif',
+                fontSize: '33px',
+                fontWeight: 400,
+                letterSpacing: '-0.52px',
+                color: '#ffffff',
+                WebkitTextStroke: `10px ${accentColor}`,
+                paintOrder: 'stroke fill',
+              }}>
+                {success ? '데이트 승낙!' : '데이트 거절...'}
+              </h2>
+              <p style={{
+                position: 'relative',
+                fontFamily: 'Pretendard Variable, sans-serif',
+                fontSize: '14px',
+                fontWeight: 700,
+                letterSpacing: '-0.26px',
+                color: '#ffffff',
+                marginTop: '2px',
+              }}>
+                {charName}의 채점표 · {character?.archetype}
+              </p>
+              {earlyExitTurn && (
                 <p style={{
-                  fontFamily: 'Pretendard Variable, sans-serif',
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  lineHeight: '22px',
-                  letterSpacing: '-0.32px',
-                  color: '#ffffff',
-                  textAlign: 'center',
-                }}>
-                  {charName}의 채점표
-                </p>
-                <p style={{
+                  position: 'relative',
+                  marginTop: '4px',
                   fontFamily: 'Pretendard Variable, sans-serif',
                   fontSize: '12px',
-                  fontWeight: 400,
-                  lineHeight: '16px',
+                  fontWeight: 500,
                   letterSpacing: '-0.24px',
                   color: 'rgba(255,255,255,0.7)',
-                  textAlign: 'center',
                 }}>
-                  {character?.archetype}
+                  {earlyExitTurn}턴 만에 조기 종료됨
                 </p>
-              </div>
-            </div>
+              )}
+            </motion.div>
 
-            {/* 총점 바 게이지 + 순위 */}
+            {/* ─── 그룹 1: 성적표 (종합 점수 + 항목별 점수 + 사주 유저 평균) ─── */}
             <div style={{ padding: '20px 20px 12px' }}>
-              <div
-                className="flex flex-col items-center"
-                style={{ padding: '24px 20px', borderRadius: '16px', backgroundColor: COLOR_BOX }}
-              >
-                <p style={{
-                  fontFamily: 'Pretendard Variable, sans-serif',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  letterSpacing: '-0.26px',
-                  color: COLOR_TEXT_SECONDARY,
-                  marginBottom: '12px',
-                }}>
-                  종합 점수
-                </p>
-                <ScoreGaugeBar score={scoreTable.total} color={accentColor} />
+              <div style={{ padding: '24px', borderRadius: '16px', backgroundColor: COLOR_BOX, overflow: 'hidden' }}>
 
-                {finalResult && finalResult.totalCount >= 10 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7 }}
-                    className="flex flex-col items-center"
-                    style={{ marginTop: '18px', gap: '6px' }}
-                  >
+                {/* 종합 점수 — 정보(좌) + 원형 프로그레스(우) / 모바일은 그래프 위·텍스트 아래로 스택 */}
+                <div className="flex flex-col-reverse items-center md:flex-row md:items-start" style={{ gap: '24px' }}>
+                  <div className="flex flex-col items-start w-full md:w-auto" style={{ gap: '14px' }}>
                     <p style={{
                       fontFamily: 'Pretendard Variable, sans-serif',
-                      fontSize: '15px',
-                      fontWeight: 500,
-                      letterSpacing: '-0.42px',
-                      color: COLOR_TEXT_BRIGHT,
+                      fontSize: '16px',
+                      fontWeight: 700,
+                      letterSpacing: '-0.45px',
+                      color: COLOR_TEXT_PRIMARY,
                     }}>
-                      전체 도전자{' '}
-                      <span style={{ fontWeight: 800, color: COLOR_TEXT_PRIMARY }}>
-                        {finalResult.totalCount.toLocaleString()}명
-                      </span>
-                      {' '}중{' '}
-                      <span style={{ fontWeight: 800, fontSize: '16px', color: accentColor }}>
-                        {finalResult.userRank.toLocaleString()}등
-                      </span>
+                      종합 점수
                     </p>
-                    <div className="flex items-center" style={{ gap: '8px' }}>
-                      <p style={{
-                        fontFamily: 'Pretendard Variable, sans-serif',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        letterSpacing: '-0.24px',
-                        color: COLOR_TEXT_SECONDARY,
-                      }}>
-                        상위 {finalResult.percentile}%
-                      </p>
-                      {badge && (
+
+                    {finalResult && finalResult.totalCount >= 10 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7 }}
+                        className="flex flex-col items-start"
+                        style={{ gap: '10px' }}
+                      >
+                        <p style={{
+                          fontFamily: 'Pretendard Variable, sans-serif',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          lineHeight: '19px',
+                          letterSpacing: '-0.24px',
+                          color: COLOR_TEXT_SECONDARY,
+                        }}>
+                          전체 {finalResult.totalCount.toLocaleString()}명 중{' '}
+                          <span style={{ fontWeight: 800, color: COLOR_TEXT_PRIMARY }}>
+                            {finalResult.userRank.toLocaleString()}등
+                          </span>
+                          {' '}· 상위 {finalResult.percentile}%
+                        </p>
+                        {badge && (
+                          <span className="inline-flex items-center" style={{
+                            gap: '6px',
+                            padding: '6px 14px 6px 10px',
+                            borderRadius: '9999px',
+                            backgroundColor: `${badge.color}1a`,
+                            border: `1px solid ${badge.color}40`,
+                          }}>
+                            <span style={{
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '9999px',
+                              backgroundColor: badge.color,
+                              flexShrink: 0,
+                            }} />
+                            <span style={{
+                              fontFamily: 'Pretendard Variable, sans-serif',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              letterSpacing: '-0.24px',
+                              color: badge.color,
+                            }}>
+                              {badge.label}
+                            </span>
+                          </span>
+                        )}
+                      </motion.div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-center md:flex-1">
+                    <ScoreGaugeRing score={scoreTable.total} color={SCORE_COLORS.charm.bar} />
+                  </div>
+                </div>
+
+                <div style={{ height: '1px', backgroundColor: 'rgba(0,0,0,0.06)', margin: '20px 0' }} />
+
+                {/* 항목별 점수 — 정보(좌) + 점수 바(우), 항상 가로 배치 */}
+                <div className="flex items-start" style={{ gap: '24px' }}>
+                  <div className="flex flex-col items-start" style={{ gap: '14px' }}>
+                    <p style={{
+                      fontFamily: 'Pretendard Variable, sans-serif',
+                      fontSize: '16px',
+                      fontWeight: 700,
+                      letterSpacing: '-0.45px',
+                      color: COLOR_TEXT_PRIMARY,
+                    }}>
+                      항목별 점수
+                    </p>
+
+                    {finalResult && finalResult.sameIlganCount > 0 && (
+                      <div className="flex flex-col items-start" style={{ gap: '8px' }}>
+                        <p style={{
+                          fontFamily: 'Pretendard Variable, sans-serif',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          letterSpacing: '-0.24px',
+                          color: COLOR_TEXT_SECONDARY,
+                        }}>
+                          같은 사주 유저 평균({finalResult.sameIlganAvg}점) 대비
+                        </p>
                         <span className="inline-flex items-center" style={{
                           gap: '6px',
                           padding: '6px 14px 6px 10px',
                           borderRadius: '9999px',
-                          backgroundColor: `${badge.color}1a`,
-                          border: `1px solid ${badge.color}40`,
-                          boxShadow: `0 1px 4px ${badge.color}26`,
+                          backgroundColor: sameIlganDelta >= 0 ? '#E0357A1a' : COLOR_BOX_LIGHT,
+                          fontFamily: 'Pretendard Variable, sans-serif',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          letterSpacing: '-0.24px',
+                          color: sameIlganDelta >= 0 ? '#E0357A' : COLOR_TEXT_SECONDARY,
+                          whiteSpace: 'nowrap',
                         }}>
-                          <span style={{
-                            width: '6px',
-                            height: '6px',
-                            borderRadius: '9999px',
-                            backgroundColor: badge.color,
-                            flexShrink: 0,
-                          }} />
-                          <span style={{
-                            fontFamily: 'Pretendard Variable, sans-serif',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            letterSpacing: '-0.24px',
-                            color: badge.color,
-                          }}>
-                            {badge.label}
-                          </span>
+                          <svg
+                            width="10" height="10" viewBox="0 0 24 24" fill="none"
+                            style={{ transform: sameIlganDelta >= 0 ? 'rotate(180deg)' : 'none', flexShrink: 0 }}
+                          >
+                            <path fill={sameIlganDelta >= 0 ? '#E0357A' : COLOR_TEXT_SECONDARY} d="M4.88891 7C4.52939 7 4.20527 7.24364 4.06769 7.61732C3.93011 7.99099 4.00616 8.42111 4.26037 8.70711L11.3715 16.7071C11.7186 17.0976 12.2814 17.0976 12.6285 16.7071L19.7396 8.70711C19.9938 8.42111 20.0699 7.99099 19.9323 7.61732C19.7947 7.24364 19.4706 7 19.1111 7H4.88891Z" />
+                          </svg>
+                          {Math.abs(sameIlganDelta).toFixed(1)}점 {sameIlganDelta >= 0 ? '높아요' : '낮아요'}
                         </span>
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-            </div>
+                      </div>
+                    )}
+                  </div>
 
-            {/* 세부 점수 — 세로 게이지 바 */}
-            <div style={{ padding: '0 20px 12px' }}>
-              <div
-                className="flex flex-col items-center"
-                style={{ padding: '20px 16px 24px', borderRadius: '16px', backgroundColor: COLOR_BOX }}
-              >
-                <p style={{
-                  fontFamily: 'Pretendard Variable, sans-serif',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  letterSpacing: '-0.26px',
-                  color: COLOR_TEXT_SECONDARY,
-                  marginBottom: '16px',
-                }}>
-                  항목별 점수
-                </p>
-                <div className="flex justify-center" style={{ gap: '16px' }}>
-                  {scoreKeys.map((key, i) => (
-                    <ScoreGaugeColumn
-                      key={key}
-                      scoreKey={key}
-                      label={getScoreLabel(key)}
-                      score={scoreTable[key]}
-                      delay={0.08 * i}
-                    />
-                  ))}
+                  <div className="flex justify-center" style={{ gap: '12px', flex: 1 }}>
+                    {scoreKeys.map((key, i) => (
+                      <ScoreGaugeColumn
+                        key={key}
+                        scoreKey={key}
+                        label={getScoreLabel(key)}
+                        score={scoreTable[key]}
+                        delay={0.08 * i}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* 팩폭 한줄 */}
-            {finalResult?.verdict.oneLineVerdict && (
-              <div style={{ padding: '0 20px 12px' }}>
-                <div style={{
-                  padding: '16px 20px',
-                  borderRadius: '16px',
-                  backgroundColor: COLOR_BOX,
-                  textAlign: 'center',
-                }}>
-                  <p style={{
-                    fontFamily: 'Pretendard Variable, sans-serif',
-                    fontSize: '16px',
-                    fontWeight: 700,
-                    lineHeight: '24px',
-                    letterSpacing: '-0.45px',
-                    color: COLOR_TEXT_PRIMARY,
-                  }}>
-                    &ldquo;{finalResult.verdict.oneLineVerdict}&rdquo;
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* 사주 분석 */}
+            {/* ─── 그룹 2: 설명 (사주 분석) ─── */}
             {finalResult?.verdict.sajuAnalysis && (
               <div style={{ padding: '0 20px 12px' }}>
-                <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: COLOR_BOX }}>
+                <div style={{ padding: '24px', borderRadius: '16px', backgroundColor: COLOR_BOX }}>
                   <h3 style={{
                     fontFamily: 'Pretendard Variable, sans-serif',
                     fontSize: '16px',
@@ -426,7 +420,8 @@ export default function DatingResult({
                     lineHeight: '20px',
                     letterSpacing: '-0.45px',
                     color: COLOR_TEXT_PRIMARY,
-                    marginBottom: '12px',
+                    marginTop: '6px',
+                    marginBottom: '8px',
                   }}>
                     사주가 말하는 당신의 연애 약점
                   </h3>
@@ -435,107 +430,137 @@ export default function DatingResult({
                     fontFamily: 'Pretendard Variable, sans-serif',
                     fontSize: '15px',
                     fontWeight: 500,
-                    lineHeight: '24px',
+                    lineHeight: '29px',
                     letterSpacing: '-0.42px',
-                    color: COLOR_TEXT_BRIGHT,
-                    marginBottom: '14px',
+                    color: '#6E6E72',
                   }}>
                     {finalResult.verdict.sajuAnalysis}
                   </p>
-
-                  {finalResult.verdict.patterns.length > 0 && (
-                    <div className="flex flex-col" style={{ gap: '8px', marginBottom: '14px' }}>
-                      {finalResult.verdict.patterns.map((p, i) => (
-                        <div key={i} className="flex items-start" style={{ gap: '8px' }}>
-                          <span style={{
-                            fontFamily: 'Pretendard Variable, sans-serif',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            color: '#E0357A',
-                            marginTop: '3px',
-                            flexShrink: 0,
-                          }}>→</span>
-                          <p style={{
-                            fontFamily: 'Pretendard Variable, sans-serif',
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            lineHeight: '20px',
-                            letterSpacing: '-0.3px',
-                            color: COLOR_TEXT_BRIGHT,
-                          }}>{p}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {finalResult.sameIlganCount > 0 && (
-                    <div style={{
-                      padding: '12px 16px',
-                      borderRadius: '14px',
-                      backgroundColor: COLOR_CARD,
-                      border: '1px solid rgba(0,0,0,0.05)',
-                    }}>
-                      <p style={{
-                        fontFamily: 'Pretendard Variable, sans-serif',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        letterSpacing: '-0.24px',
-                        color: COLOR_TEXT_BRIGHT,
-                        marginBottom: '4px',
-                      }}>
-                        같은 사주 유저 평균 {finalResult.sameIlganAvg}점
-                      </p>
-                      <p style={{
-                        fontFamily: 'Pretendard Variable, sans-serif',
-                        fontSize: '16px',
-                        fontWeight: 800,
-                        letterSpacing: '-0.3px',
-                        color: '#E0357A',
-                      }}>
-                        당신 {scoreTable.total}점{' '}
-                        <span style={{ fontSize: '13px', fontWeight: 600, color: COLOR_TEXT_SECONDARY }}>
-                          {scoreTable.total < finalResult.sameIlganAvg ? '(평균 이하)' : '(평균 이상)'}
-                        </span>
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
 
-            {/* 챗봇 전환 */}
+            {/* ─── 그룹 3: 윤태산이 말하길 (팩폭 + 턴별 코멘트 + 전환 대사 + CTA, 화자 통일) ─── */}
             <div style={{ padding: '0 20px 20px' }}>
-              <div style={{ padding: '20px', borderRadius: '16px', backgroundColor: COLOR_BOX }}>
+              <div style={{ padding: '24px', borderRadius: '16px', backgroundColor: COLOR_BOX }}>
                 <p style={{
                   fontFamily: 'Pretendard Variable, sans-serif',
-                  fontSize: '12px',
+                  fontSize: '16px',
                   fontWeight: 700,
-                  letterSpacing: '-0.24px',
-                  color: accentColor,
-                  textAlign: 'center',
-                  marginBottom: '6px',
-                }}>
-                  {charName}
-                </p>
-                <p style={{
-                  fontFamily: 'Pretendard Variable, sans-serif',
-                  fontSize: '15px',
-                  fontWeight: 600,
-                  lineHeight: '23px',
-                  letterSpacing: '-0.42px',
+                  letterSpacing: '-0.45px',
                   color: COLOR_TEXT_PRIMARY,
-                  textAlign: 'center',
-                  marginBottom: '14px',
                 }}>
-                  {success
-                    ? '"인정할게. 네 사주에서 느껴지는 이 에너지는 진짜야."'
-                    : '"아쉽다. 근데 네 운세 흐름은 나쁘지 않아. 방향만 잡으면 달라질 수 있어."'
-                  }
+                  {charName}이 말하길
                 </p>
+
+                {/* 채팅방 스타일 — 아바타 옆에 말풍선 묶음 */}
+                <div className="flex items-start" style={{ gap: '8px', marginTop: '16px', marginBottom: '28px', paddingLeft: '4px' }}>
+                  <div
+                    className="overflow-hidden flex-shrink-0"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '9999px',
+                    }}
+                  >
+                    <img
+                      src={character?.thumbnail ?? ''} alt={charName}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  </div>
+
+                  <div className="flex flex-col items-start" style={{ gap: '8px', flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      fontFamily: 'Pretendard Variable, sans-serif',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      letterSpacing: '-0.24px',
+                      color: accentColor,
+                      marginBottom: '2px',
+                    }}>
+                      {charName}
+                    </p>
+
+                    {finalResult?.verdict.oneLineVerdict && (
+                      <div style={{
+                        padding: '10px 16px',
+                        borderRadius: '4px 16px 16px 16px',
+                        backgroundColor: COLOR_CARD,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                        maxWidth: '92%',
+                      }}>
+                        <p style={{
+                          fontFamily: 'Pretendard Variable, sans-serif',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          lineHeight: '22px',
+                          letterSpacing: '-0.42px',
+                          color: COLOR_TEXT_PRIMARY,
+                        }}>
+                          &ldquo;{finalResult.verdict.oneLineVerdict}&rdquo;
+                        </p>
+                      </div>
+                    )}
+
+                    {finalResult?.verdict.patterns.map((p, i) => (
+                      <div key={i} style={{
+                        padding: '10px 16px',
+                        borderRadius: '16px',
+                        backgroundColor: COLOR_CARD,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                        maxWidth: '92%',
+                      }}>
+                        <p style={{
+                          fontFamily: 'Pretendard Variable, sans-serif',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          lineHeight: '19px',
+                          letterSpacing: '-0.24px',
+                          color: COLOR_TEXT_BRIGHT,
+                        }}>{p}</p>
+                      </div>
+                    ))}
+
+                    <div style={{
+                      padding: '10px 16px',
+                      borderRadius: '16px',
+                      backgroundColor: COLOR_CARD,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                      maxWidth: '92%',
+                    }}>
+                      <p style={{
+                        fontFamily: 'Pretendard Variable, sans-serif',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        lineHeight: '19px',
+                        letterSpacing: '-0.3px',
+                        color: COLOR_TEXT_BRIGHT,
+                      }}>
+                        {success
+                          ? '"인정할게. 네 사주에서 느껴지는 이 에너지는 진짜야."'
+                          : '"아쉽다. 근데 네 운세 흐름은 나쁘지 않아. 방향만 잡으면 달라질 수 있어."'
+                        }
+                      </p>
+                    </div>
+
+                    <p style={{
+                      fontFamily: 'Pretendard Variable, sans-serif',
+                      fontSize: '10px',
+                      fontWeight: 500,
+                      color: COLOR_TEXT_SECONDARY,
+                      marginTop: '2px',
+                    }}>
+                      방금 전
+                    </p>
+                  </div>
+                </div>
+
                 <PressableButton
                   href="https://www.sajugpt.co.kr/"
                   onClick={() => trackSajuGPTClick('dating', resultId)}
                   label={`${charName}에게 직접 물어보기 →`}
+                  style={{ width: '100%' }}
                   bgStyle={{ backgroundColor: '#FF4D8D', borderRadius: '16px' }}
                   hoverBackground="#FF6FA0"
                   textStyle={{ color: '#ffffff' }}
@@ -551,7 +576,7 @@ export default function DatingResult({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0 }}
           className="flex flex-col"
-          style={{ padding: '0 20px 12px', gap: '8px' }}
+          style={{ padding: '0 12px 12px', gap: '8px' }}
         >
           <ShareButton
             featureType="dating"

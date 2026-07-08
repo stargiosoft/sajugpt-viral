@@ -121,7 +121,7 @@ export default function DatingConversation({
         <div
           className="shrink-0"
           style={{
-            padding: '16px 20px 12px',
+            padding: '16px 12px 12px',
             backgroundColor: '#ffffff',
           }}
         >
@@ -207,7 +207,7 @@ export default function DatingConversation({
         {/* ─── 대화 콘텐츠 (flex-1 overflow-auto) ─── */}
         <div
           className="flex-1 overflow-auto"
-          style={{ padding: '20px 20px 0' }}
+          style={{ padding: '20px 12px 0' }}
         >
         {!transitioning && (
           <>
@@ -391,7 +391,7 @@ export default function DatingConversation({
         <div
           className="shrink-0"
           style={{
-            padding: '12px 20px',
+            padding: '12px',
             paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
             backgroundColor: '#ffffff',
             boxShadow: '0px -8px 16px 0px rgba(255, 255, 255, 0.76)',

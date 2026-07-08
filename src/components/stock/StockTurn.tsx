@@ -71,7 +71,7 @@ export default function StockTurn({ turnData, onChoice }: Props) {
       style={{
         minHeight: '100dvh',
         backgroundColor: COLOR_BG,
-        padding: '0 20px',
+        padding: '0 12px',
         paddingBottom: '120px',
       }}
     >

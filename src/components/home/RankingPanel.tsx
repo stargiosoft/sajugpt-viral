@@ -91,7 +91,7 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
               <span className="block truncate" style={{ fontSize: 'var(--rp-title-size)', fontWeight: 600, color: '#0d0d0d', letterSpacing: '-0.2px', marginBottom: '2px' }}>
                 {item.title}
               </span>
-              <span className="block truncate" style={{ fontSize: 'var(--rp-sub-size)', color: '#999', letterSpacing: '-0.2px', paddingLeft: '1px' }}>
+              <span className="block truncate" style={{ fontSize: 'var(--rp-sub-size)', fontWeight: 500, color: '#757474', letterSpacing: '-0.2px', paddingLeft: '1px' }}>
                 {CATEGORIES.find((c) => c.key === item.category)?.label ?? ''} · 참여 {item.participantLabel}
               </span>
             </span>

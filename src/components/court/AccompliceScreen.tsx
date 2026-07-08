@@ -54,7 +54,7 @@ export default function AccompliceScreen({ result, sentence, onSkip, onComplete 
   };
 
   return (
-    <div className="w-full" style={{ padding: '32px 24px' }}>
+    <div className="w-full" style={{ padding: '32px 12px' }}>
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex flex-col items-center" style={{ marginBottom: '24px' }}>
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7A38D8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '12px', opacity: 0.7 }}>

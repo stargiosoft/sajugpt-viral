@@ -354,8 +354,8 @@ export default function CourtLanding({ onStart }: Props) {
         style={{
           paddingTop: '52px',
           paddingBottom: '32px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
+          paddingLeft: '12px',
+          paddingRight: '12px',
           background: `radial-gradient(ellipse 80% 50% at 50% 0%, ${C.primaryGlow} 0%, transparent 70%)`,
         }}
         initial="hidden"
@@ -425,7 +425,7 @@ export default function CourtLanding({ onStart }: Props) {
       {/* ── 죄목 롤링 ── */}
       <motion.div
         className="w-full"
-        style={{ padding: '0 20px 28px' }}
+        style={{ padding: '0 12px 28px' }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.45, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
@@ -455,7 +455,7 @@ export default function CourtLanding({ onStart }: Props) {
       {/* ── 캐릭터 카드 (VS 구도) ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '0 20px' }}
+        style={{ padding: '0 12px' }}
         initial="hidden"
         animate="visible"
         variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.6 } } }}
@@ -468,7 +468,7 @@ export default function CourtLanding({ onStart }: Props) {
       {/* ── 진행 방식 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '40px 20px 0', gap: '16px' }}
+        style={{ padding: '40px 12px 0', gap: '16px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -499,7 +499,7 @@ export default function CourtLanding({ onStart }: Props) {
       {/* ── 형량 체계 ── */}
       <motion.div
         className="w-full flex flex-col"
-        style={{ padding: '36px 20px 0', gap: '6px' }}
+        style={{ padding: '36px 12px 0', gap: '6px' }}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-40px' }}
@@ -565,7 +565,7 @@ export default function CourtLanding({ onStart }: Props) {
       {/* ── 역설 인사이트 ── */}
       <motion.div
         className="w-full"
-        style={{ padding: '20px 20px 0' }}
+        style={{ padding: '20px 12px 0' }}
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
@@ -602,7 +602,7 @@ export default function CourtLanding({ onStart }: Props) {
       {/* ── 소셜 프루프 ── */}
       <motion.div
         className="flex items-center justify-center gap-2 w-full"
-        style={{ padding: '28px 20px 16px' }}
+        style={{ padding: '28px 12px 16px' }}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -636,7 +636,7 @@ export default function CourtLanding({ onStart }: Props) {
         fontSize: '11px',
         color: C.textDim,
         textAlign: 'center',
-        padding: '0 20px 32px',
+        padding: '0 12px 32px',
         lineHeight: '16px',
         letterSpacing: '-0.22px',
       }}>
@@ -651,7 +651,7 @@ export default function CourtLanding({ onStart }: Props) {
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        <div style={{ padding: '12px 20px' }}>
+        <div style={{ padding: '12px 12px' }}>
           <LandingCTAButton
             onClick={onStart}
             label="출석하기"

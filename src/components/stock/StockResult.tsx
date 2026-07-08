@@ -102,7 +102,7 @@ export default function StockResult({ result, reportCardRef, onReset }: Props) {
       style={{
         minHeight: '100dvh',
         backgroundColor: '#0a0a14',
-        padding: '0 20px',
+        padding: '0 12px',
         paddingBottom: '80px',
       }}
     >

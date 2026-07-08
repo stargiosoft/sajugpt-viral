@@ -77,7 +77,7 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '24px 24px 40px', minHeight: '100dvh' }}
+      style={{ padding: '24px 12px 40px', minHeight: '100dvh' }}
     >
       {/* 탈락 시종 반응 */}
       <motion.div

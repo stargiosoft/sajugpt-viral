@@ -46,7 +46,7 @@ export default function GisaengCardView({ gisaengCard, onNext }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div style={{ padding: '24px 20px 0' }}>
+      <div style={{ padding: '24px 12px 0' }}>
         {/* 카드 */}
         <div
           className="rounded-3xl overflow-hidden transform-gpu"
@@ -229,7 +229,7 @@ export default function GisaengCardView({ gisaengCard, onNext }: Props) {
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        <div style={{ padding: '12px 20px', width: '100%' }}>
+        <div style={{ padding: '12px 12px', width: '100%' }}>
           <motion.div
             onClick={onNext}
             className="transform-gpu"

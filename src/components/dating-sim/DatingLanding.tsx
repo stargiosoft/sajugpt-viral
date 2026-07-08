@@ -71,7 +71,7 @@ export default function DatingLanding({ onStart }: Props) {
       {/* ── 헤드라인 ── */}
       <motion.div
         className="w-full"
-        style={{ padding: '44px 28px 0' }}
+        style={{ padding: '44px 12px 0' }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.4 }}
@@ -100,7 +100,7 @@ export default function DatingLanding({ onStart }: Props) {
       {/* ── 시작하기 버튼 ── */}
       <motion.div
         className="w-full"
-        style={{ padding: '36px 20px 0' }}
+        style={{ padding: '36px 12px 0' }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
@@ -111,7 +111,7 @@ export default function DatingLanding({ onStart }: Props) {
       {/* ── 참여자수 + 공유하기 ── */}
       <motion.div
         className="flex flex-col items-center w-full"
-        style={{ padding: '0 20px', marginTop: '44px', marginBottom: '36px' }}
+        style={{ padding: '0 12px', marginTop: '44px', marginBottom: '36px' }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.4 }}
@@ -227,7 +227,7 @@ export default function DatingLanding({ onStart }: Props) {
       </motion.div>
 
       {/* ── Disclaimer ── */}
-      <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.3)', textAlign: 'center', padding: '0 28px 40px', lineHeight: '1.5' }}>
+      <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.3)', textAlign: 'center', padding: '0 12px 40px', lineHeight: '1.5' }}>
         본 테스트는 재미로 보는 콘텐츠이며,
         <br />
         실제 운세·심리 진단이 아닙니다.

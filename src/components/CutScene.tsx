@@ -70,7 +70,7 @@ export default function CutScene({ onComplete }: Props) {
   return (
     <div
       className="flex flex-col items-center"
-      style={{ padding: '40px 20px', minHeight: '50vh' }}
+      style={{ padding: '40px 12px', minHeight: '50vh' }}
     >
       {/* 글리치 이펙트 */}
       <AnimatePresence>

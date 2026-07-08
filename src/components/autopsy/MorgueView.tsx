@@ -86,7 +86,7 @@ export default function MorgueView({ targetSajuType, autopsyId, onBack, onReplay
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      style={{ padding: '32px 20px 48px' }}
+      style={{ padding: '32px 12px 48px' }}
     >
       {/* 헤더 */}
       <div className="flex flex-col items-center" style={{ marginBottom: '28px' }}>

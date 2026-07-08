@@ -18,7 +18,7 @@ export default function EditorPickSection({ items, onSelect, selectedId }: Edito
   return (
     <div style={{ padding: '48px 0 4px' }}>
       <h2
-        className="px-4 md:px-6 lg:px-8"
+        className="px-3 md:px-6 lg:px-8"
         style={{
           fontSize: '18px',
           fontWeight: 800,
@@ -29,7 +29,7 @@ export default function EditorPickSection({ items, onSelect, selectedId }: Edito
       >
         에디터 추천
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 px-4 md:px-6 lg:px-8" style={{ columnGap: '12px', rowGap: '16px' }}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 px-3 md:px-6 lg:px-8" style={{ columnGap: '12px', rowGap: '16px' }}>
         {picks.map((item) => (
           <TestCard key={item.id} item={item} onSelect={onSelect} selectedId={selectedId} />
         ))}

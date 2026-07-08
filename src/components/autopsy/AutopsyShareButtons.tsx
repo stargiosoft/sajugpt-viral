@@ -49,7 +49,7 @@ export default function AutopsyShareButtons({ causeOfDeathLabel, autopsyId, card
   }, [causeOfDeathLabel, autopsyId]);
 
   return (
-    <div className="flex flex-col gap-3" style={{ padding: '0 20px' }}>
+    <div className="flex flex-col gap-3" style={{ padding: '0 12px' }}>
       {/* 메인 CTA — 카카오톡으로 도발 공유 */}
       <PressableButton
         onClick={handleKakaoShare}

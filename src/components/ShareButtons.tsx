@@ -31,7 +31,7 @@ export default function ShareButtons({ headcount, battleId, cardRef }: Props) {
         description="넌 몇 명이나 꼬이나 해봐 ㅋㅋ"
         shareUrl={`${origin}/sexy-battle/${battleId}`}
         imageUrl={`${origin}/home/thumbnails/sexy-battle.jpg`}
-        label="내 친구 기강 잡으러 가기"
+        label="공유하기"
         activeBackground="linear-gradient(135deg, #FF4438 0%, #E0201A 100%)"
       />
 

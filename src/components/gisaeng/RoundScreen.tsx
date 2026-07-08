@@ -53,7 +53,7 @@ export default function RoundScreen({ scenario, seonbi, stats, onChoice, onNext 
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.3 }}
     >
-      <div style={{ padding: '32px 20px 0' }}>
+      <div style={{ padding: '32px 12px 0' }}>
         {/* 라운드 헤더 */}
         <div className="text-center" style={{ marginBottom: '24px' }}>
           <span
@@ -187,7 +187,7 @@ export default function RoundScreen({ scenario, seonbi, stats, onChoice, onNext 
             paddingBottom: 'env(safe-area-inset-bottom)',
           }}
         >
-          <div style={{ padding: '12px 20px', width: '100%' }}>
+          <div style={{ padding: '12px 12px', width: '100%' }}>
             <motion.div
               onClick={onNext}
               className="transform-gpu"

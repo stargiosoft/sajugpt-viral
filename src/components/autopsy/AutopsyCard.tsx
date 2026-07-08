@@ -35,7 +35,7 @@ export default function AutopsyCard({ cardNumber, title, text, coronerId, onNext
       exit={{ opacity: 0, x: -60 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
       className="flex flex-col"
-      style={{ padding: '48px 20px 120px', minHeight: '100dvh' }}
+      style={{ padding: '48px 12px 120px', minHeight: '100dvh' }}
     >
       {/* 카드 번호 */}
       <div className="flex items-center gap-2" style={{ marginBottom: '8px' }}>
@@ -104,7 +104,7 @@ export default function AutopsyCard({ cardNumber, title, text, coronerId, onNext
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        <div style={{ padding: '12px 20px' }}>
+        <div style={{ padding: '12px 12px' }}>
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={onNext}

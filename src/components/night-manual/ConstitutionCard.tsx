@@ -40,7 +40,7 @@ export default function ConstitutionCard({ result, onContinue }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '40px 24px 120px', minHeight: '100dvh' }}
+      style={{ padding: '40px 12px 120px', minHeight: '100dvh' }}
     >
       {/* 헤더 */}
       <motion.div
@@ -160,7 +160,7 @@ export default function ConstitutionCard({ result, onContinue }: Props) {
       {/* 다음 버튼 */}
       <div
         className="fixed left-0 right-0 bottom-0 flex justify-center"
-        style={{ padding: '16px 24px', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+        style={{ padding: '16px 12px', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
       >
         <motion.button
           initial={{ opacity: 0 }}

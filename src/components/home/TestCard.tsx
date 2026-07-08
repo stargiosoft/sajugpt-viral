@@ -109,7 +109,7 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
         >
           {item.title}
         </p>
-        <span style={{ fontSize: '11px', color: '#999', letterSpacing: '-0.2px' }}>{categoryLabel}</span>
+        <span style={{ fontSize: '11px', fontWeight: 500, color: '#757474', letterSpacing: '-0.2px' }}>{categoryLabel}</span>
       </div>
     </motion.div>
   );

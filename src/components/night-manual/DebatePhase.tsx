@@ -174,7 +174,7 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
         else if (subStep === 'intervene') handleTapPhase2();
       }}
     >
-      <div style={{ padding: '40px 24px 120px' }}>
+      <div style={{ padding: '40px 12px 120px' }}>
       {/* 헤더 */}
       <div className="text-center" style={{ marginBottom: '24px' }}>
         <p style={{ fontSize: '13px', color: '#8b7aaa', letterSpacing: '2px' }}>
@@ -361,7 +361,7 @@ export default function DebatePhase({ result, interventionChoice, onIntervene, o
             {/* 시종 선택으로 이동 */}
             <div
               className="fixed left-0 right-0 bottom-0 flex justify-center"
-              style={{ padding: '16px 24px', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+              style={{ padding: '16px 12px', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
             >
               <motion.button
                 initial={{ opacity: 0 }}

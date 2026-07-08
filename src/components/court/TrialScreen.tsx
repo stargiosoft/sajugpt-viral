@@ -143,7 +143,7 @@ export default function TrialScreen({
   }, [step]);
 
   return (
-    <div className="w-full" style={{ padding: '24px', minHeight: '60vh' }}>
+    <div className="w-full" style={{ padding: '24px 12px', minHeight: '60vh' }}>
       <div className="flex items-center gap-2" style={{ marginBottom: '20px' }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A38D8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 3v18" /><path d="m4 7 4-4 4 4" /><path d="m12 7 4-4 4 4" /><path d="M4 7h8" /><path d="M12 7h8" /><circle cx="6" cy="19" r="2" /><circle cx="18" cy="19" r="2" />

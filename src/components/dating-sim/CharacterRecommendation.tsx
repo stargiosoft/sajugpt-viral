@@ -22,7 +22,7 @@ export default function CharacterRecommendation_({ recommendations, onSelect, su
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       className="flex-1 flex flex-col"
-      style={{ minHeight: '100dvh', padding: '48px 20px 40px', backgroundColor: '#ffffff' }}
+      style={{ minHeight: '100dvh', padding: '48px 12px 40px', backgroundColor: '#ffffff' }}
     >
       {/* 헤더 */}
       <div className="flex flex-col items-start" style={{ marginBottom: '28px' }}>

@@ -29,7 +29,7 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#FAFAFA' }}>
       <div className="w-full max-w-[680px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
-          <div className="sticky top-0 z-20 flex items-center px-5 py-2 md:px-8" style={{ backgroundColor: '#FAFAFA' }}>
+          <div className="sticky top-0 z-20 flex items-center px-3 py-2 md:px-8" style={{ backgroundColor: '#FAFAFA' }}>
             <button
               type="button"
               onClick={handleBack}
@@ -56,7 +56,7 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
             </button>
           </div>
 
-          <div className="w-full px-5 py-8 md:px-8">
+          <div className="w-full px-3 py-8 md:px-8">
             <div className="flex items-center flex-wrap" style={{ gap: '10px', marginBottom: description ? '10px' : '28px', paddingLeft: '4px' }}>
               <h1 style={{ fontSize: '25px', fontWeight: 800, color: '#0d0d0d', letterSpacing: '-0.4px' }}>
                 {title}

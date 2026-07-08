@@ -54,7 +54,7 @@ export default function StockBriefing({ briefing, onStart }: Props) {
       style={{
         minHeight: '100dvh',
         backgroundColor: COLOR_BG,
-        padding: '0 20px',
+        padding: '0 12px',
         paddingBottom: '120px',
       }}
     >
@@ -216,7 +216,7 @@ export default function StockBriefing({ briefing, onStart }: Props) {
           transform: 'translateX(-50%)',
           width: '100%',
           maxWidth: '768px',
-          padding: '16px 20px',
+          padding: '16px 12px',
           paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
           background: `linear-gradient(transparent, ${COLOR_BG} 30%)`,
         }}
