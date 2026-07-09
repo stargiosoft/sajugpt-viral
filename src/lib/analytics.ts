@@ -36,7 +36,8 @@ export type FeatureType =
   | 'gisaeng'
   | 'night_manual'
   | 'dating'
-  | 'saju_stock';
+  | 'saju_stock'
+  | 'ghost_tarot';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

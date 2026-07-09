@@ -214,7 +214,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{ padding: '48px 12px 120px', minHeight: '100%', backgroundColor: '#0d0d0d' }}
+              style={{ padding: '48px 20px 120px', minHeight: '100%', backgroundColor: '#0d0d0d' }}
             >
               {/* 헤더 */}
               <div className="flex flex-col items-center" style={{ marginBottom: '40px' }}>
@@ -360,7 +360,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              style={{ padding: '24px 12px 48px' }}
+              style={{ padding: '24px 20px 48px' }}
             >
               {showCutScene && result.headcount === 0 ? (
                 <CutScene onComplete={() => setShowCutScene(false)} />
@@ -399,7 +399,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              style={{ padding: '24px 12px 48px' }}
+              style={{ padding: '24px 20px 48px' }}
             >
               {/* VS 비교 카드 */}
               <div className="flex justify-center" style={{ marginBottom: '24px' }}>

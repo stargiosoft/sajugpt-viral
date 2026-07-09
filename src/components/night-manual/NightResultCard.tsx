@@ -85,7 +85,7 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
         animate={{ y: 0, opacity: 1 }}
         style={{ marginBottom: '24px' }}
       >
-        {rejectedServants.map((type, i) => (
+        {rejectedServants.map((type) => (
           <div
             key={type}
             style={{
@@ -255,8 +255,9 @@ export default function NightResultCard({ result, selectedServant, cardRef, onRe
         style={{ marginTop: '24px' }}
       >
         <button
-          onClick={handleShareNative}
-          style={{
+            type="button"
+            onClick={handleShareNative}
+            style={{
             width: '100%', height: '52px', borderRadius: '14px',
             backgroundColor: '#7A38D8', border: 'none', cursor: 'pointer',
             fontSize: '16px', fontWeight: 700, color: '#fff',

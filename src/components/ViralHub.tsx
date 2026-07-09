@@ -91,7 +91,7 @@ export default function ViralHub() {
               title="여름 특집 살귀 타로"
               subtitle="무더위엔 살귀타로로 여름운세 확인"
               imageSrc="/home/ghost.png"
-              href={SAJUGPT_URL}
+              href="/ghost-tarot"
             />
           </div>
 

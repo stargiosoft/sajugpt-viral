@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, MouseEvent } from 'react';
 import { PRESS_HOVER_PROPS } from '@/lib/motionPresets';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   href?: string;
   target?: string;
   rel?: string;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   className?: string;
 }
 
@@ -54,14 +54,27 @@ export default function OutlineBoxButton({
 
   if (href) {
     return (
-      <motion.a href={href} target={target} rel={rel} onClick={onClick} className={className} style={style} {...PRESS_HOVER_PROPS}>
+      <motion.a 
+        href={href} 
+        target={target} 
+        rel={rel} 
+        onClick={onClick} 
+        className={className} 
+        style={style} 
+        {...PRESS_HOVER_PROPS}
+      >
         {children}
       </motion.a>
     );
   }
 
   return (
-    <motion.button onClick={onClick} className={className} style={style} {...PRESS_HOVER_PROPS}>
+    <motion.button 
+      onClick={onClick} 
+      className={className} 
+      style={style} 
+      {...PRESS_HOVER_PROPS}
+    >
       {children}
     </motion.button>
   );
