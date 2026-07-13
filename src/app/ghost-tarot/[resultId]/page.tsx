@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
-import GhostResultCard from '@/components/ghost-tarot/GhostResultCard';
+import GhostResultShareView from '@/components/ghost-tarot/GhostResultShareView';
 import ReferralTracker from '@/components/ReferralTracker';
 import { GhostResult } from '@/types/ghost-tarot';
 
@@ -74,13 +74,8 @@ export default async function GhostTarotSharePage({
         featureType="ghost_tarot"
         referrerId={resultId}
       />
-      <main className="min-h-screen bg-[#020203] text-white">
-        <GhostResultCard 
-          result={result as GhostResult} 
-          cardRef={{ current: null }} 
-          onReset={() => {
-          }} 
-        />
+      <main className="min-h-screen bg-[#050403] text-white">
+        <GhostResultShareView result={result as GhostResult} />
       </main>
     </>
   );

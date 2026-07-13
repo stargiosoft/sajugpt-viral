@@ -1,5 +1,68 @@
+import * as amplitude from '@amplitude/analytics-browser';
+
 import { supabase } from '@/lib/supabase';
 import { getFingerprint } from '@/lib/fingerprint';
+
+declare global {
+  interface Window {
+    dataLayer: unknown[];
+    gtag: (...args: unknown[]) => void;
+  }
+}
+
+const GA_ID = process.env.NEXT_PUBLIC_VIRAL_GA_ID;
+const AMPLITUDE_KEY = process.env.NEXT_PUBLIC_VIRAL_AMPLITUDE_KEY;
+
+let analyticsInitialized = false;
+let capturedUTM: UTMParams | null = null;
+
+/**
+ * 전체 바이럴 테스트 공용 GA4 + Amplitude 초기화 (feature_type으로 테스트별 구분)
+ */
+export function initViralAnalytics(): void {
+  if (analyticsInitialized || typeof window === 'undefined') return;
+  analyticsInitialized = true;
+
+  capturedUTM = parseUTM();
+
+  if (AMPLITUDE_KEY) {
+    amplitude.init(AMPLITUDE_KEY, { autocapture: false });
+
+    // autocapture를 껐기 때문에 attribution(UTM) 자동 캡처도 꺼짐 — 유입 채널(SNS)별 성과 비교를 위해 수동으로 유저 속성에 기록
+    const identify = new amplitude.Identify();
+    if (capturedUTM.utmSource) identify.set('utm_source', capturedUTM.utmSource);
+    if (capturedUTM.utmMedium) identify.set('utm_medium', capturedUTM.utmMedium);
+    if (capturedUTM.utmCampaign) identify.set('utm_campaign', capturedUTM.utmCampaign);
+    amplitude.identify(identify);
+
+    // autocapture를 껐기 때문에 공유/전환 없이 이탈하는 방문도 세션으로 잡히도록 수동 기록
+    amplitude.track('page_view', { path: window.location.pathname, ...capturedUTM });
+  }
+
+  if (GA_ID) {
+    const script = document.createElement('script');
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function gtag(...args: unknown[]) {
+      window.dataLayer.push(args);
+    };
+    window.gtag('js', new Date());
+    window.gtag('config', GA_ID);
+  }
+}
+
+function sendToThirdParty(eventName: string, properties?: Record<string, unknown>): void {
+  const mergedProperties = { ...capturedUTM, ...properties };
+  if (AMPLITUDE_KEY) {
+    amplitude.track(eventName, mergedProperties);
+  }
+  if (GA_ID && typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', eventName, mergedProperties);
+  }
+}
 
 export interface UTMParams {
   utmSource: string | null;
@@ -24,7 +87,7 @@ export function trackEvent(eventName: string, properties?: Record<string, unknow
   if (process.env.NODE_ENV === 'development') {
     console.log(`[Analytics] ${eventName}`, properties);
   }
-  // 향후 GA4 / Mixpanel 연동 지점
+  sendToThirdParty(eventName, properties);
 }
 
 // ─── 바이럴 이벤트 트래킹 (Supabase) ───
@@ -75,6 +138,14 @@ export function trackViralEvent(params: TrackViralEventParams): void {
     if (error && process.env.NODE_ENV === 'development') {
       console.error('[ViralEvent] insert failed:', error.message);
     }
+  });
+
+  sendToThirdParty(params.eventType, {
+    featureType: params.featureType,
+    shareMethod: params.shareMethod,
+    resultId: params.resultId,
+    referrerId: params.referrerId,
+    ...params.metadata,
   });
 }
 

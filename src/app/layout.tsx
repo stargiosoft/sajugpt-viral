@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import AnalyticsInit from '@/components/AnalyticsInit';
 
 export const metadata: Metadata = {
   title: '사주GPT 바이럴',
@@ -38,7 +39,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           async
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <AnalyticsInit />
+        {children}
+      </body>
     </html>
   );
 }

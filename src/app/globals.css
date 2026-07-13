@@ -8,6 +8,22 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Bookk Myungjo';
+  src: url('/fonts/BookkMyungjo-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bookk Myungjo';
+  src: url('/fonts/BookkMyungjo-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-brand-primary: #7A38D8;
   --color-brand-dark: #6B2FC2;

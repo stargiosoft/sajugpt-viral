@@ -7,12 +7,14 @@ interface Props {
   card: GhostCardType;
   onClick: () => void;
   backImage?: string;
+  glow?: boolean;
 }
 
 export default function GhostCard({
   card,
   onClick,
-  backImage = 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/ghost_back_01.png',
+  backImage = '/ghost-tarot/card-back.png',
+  glow = false,
 }: Props) {
   if (!card) return null;
 
@@ -21,8 +23,8 @@ export default function GhostCard({
       type="button"
       onClick={onClick}
       style={{
-        width: 64,
-        height: 96,
+        width: '100%',
+        aspectRatio: '2 / 3',
         padding: 0,
         background: 'none',
         border: 'none',
@@ -35,11 +37,11 @@ export default function GhostCard({
           width: '100%',
           height: '100%',
           position: 'relative',
-          borderRadius: 16,
+          borderRadius: '8%',
           overflow: 'hidden',
-          border: '1px solid rgba(168,85,247,.5)',
-          boxShadow: '0 0 20px rgba(168,85,247,.35)',
-          background: '#10051c',
+          border: '1px solid rgba(138,109,59,.7)',
+          boxShadow: glow ? '0 0 20px rgba(179,39,58,.5)' : '0 4px 10px rgba(0,0,0,.35)',
+          background: '#0c0906',
           transform: 'translateZ(0)',
           willChange: 'transform',
         }}
@@ -48,11 +50,11 @@ export default function GhostCard({
           src={backImage}
           alt="봉인된 귀신 카드 뒷면"
           fill
-          sizes="64px"
+          sizes="80px"
           priority={true}
           unoptimized={true}
           style={{
-            objectFit: 'cover',
+            objectFit: 'contain',
             imageRendering: 'auto',
           }}
         />

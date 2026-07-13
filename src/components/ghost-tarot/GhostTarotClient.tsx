@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 
@@ -12,8 +11,9 @@ import { createClient } from '@supabase/supabase-js';
 
 import GhostLanding from './GhostLanding';
 import CardSelection from './CardSelection';
-import RevealingScreen from './RevealingScreen';
 import GhostResultCard from './GhostResultCard';
+import TestTopNav from '@/components/TestTopNav';
+import { GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
 import type { GhostCardData, GhostResult } from '@/types/ghost-tarot';
 
 const supabase = createClient(
@@ -39,7 +39,7 @@ const FALLBACK_GHOST_CARDS: GhostCardData[] = [
   { id: 'f79b6cec-4829-47df-9aa7-84a41312f69c', card_name: '생명수 (바리공주의 약수)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/25_LifeWater.webp' }
 ];
 
-type Step = 'landing' | 'selection' | 'revealing' | 'result';
+type Step = 'landing' | 'selection' | 'result';
 
 interface Props {
   resultId?: string;
@@ -48,15 +48,13 @@ interface Props {
 export default function GhostTarotClient({ resultId }: Props) {
   const [step, setStep] = useState<Step>('landing');
   const [cards, setCards] = useState<GhostCardData[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(true);
   const [selectedCard, setSelectedCard] = useState<GhostCardData | null>(null);
   const [result, setResult] = useState<GhostResult | null>(null);
+  const [resultError, setResultError] = useState(false);
   const [loading] = useState(false);
-  
-  const cardRef = useRef<HTMLDivElement | null>(null);
 
   const fetchCards = async () => {
-  console.log('🔥 카드 조회 시작');
-
   const { data, error } = await supabase
     .from('ghost_tarot_results')
     .select(`
@@ -66,15 +64,14 @@ export default function GhostTarotClient({ resultId }: Props) {
     `)
     .limit(10);
 
-  console.log(data);
-  console.log(error);
-
   if (error) {
     setCards(FALLBACK_GHOST_CARDS);
+    setCardsLoading(false);
     return;
   }
 
   setCards(data ?? []);
+  setCardsLoading(false);
 };
 
   useEffect(() => {
@@ -110,7 +107,6 @@ export default function GhostTarotClient({ resultId }: Props) {
   }, [resultId]);
 
   const handleCardSelect = useCallback(async (cardId: string) => {
-    console.log('선택한 카드 UUID:', cardId);
     const card = cards.find(item => item.id === cardId);
 
     if (!card) {
@@ -119,7 +115,9 @@ export default function GhostTarotClient({ resultId }: Props) {
     }
 
     setSelectedCard(card);
-    setStep('revealing');
+    setResult(null);
+    setResultError(false);
+    setStep('result');
 
     try {
       const { data, error } = await supabase
@@ -130,25 +128,29 @@ export default function GhostTarotClient({ resultId }: Props) {
 
       if (error) throw error;
       if (!data) {
-        console.error('결과를 찾을 수 없습니다.');
+        setResultError(true);
         return;
       }
 
       setResult(data as GhostResult);
     } catch (e) {
       console.error('귀신 카드 조회 실패:', e);
+      setResultError(true);
     }
   }, [cards]);
-
-  const handleRevealComplete = useCallback(() => {
-    setStep('result');
-  }, []);
 
   const handleReset = useCallback(() => {
     setSelectedCard(null);
     setResult(null);
+    setResultError(false);
     setStep('landing');
   }, []);
+
+  const handleBack = step === 'selection'
+    ? () => setStep('landing')
+    : step === 'result'
+      ? handleReset
+      : undefined;
 
   if (loading) {
     return (
@@ -159,21 +161,19 @@ export default function GhostTarotClient({ resultId }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 flex justify-center" style={{ background: 'linear-gradient(180deg,#07050B,#15101F,#07050B)' }}>
-      <div className="w-full h-full flex flex-col" style={{ maxWidth: 440 }}>
+    <div className="fixed inset-0 flex justify-center" style={{ background: GHOST_PALETTE.bg }}>
+      <div className="w-full h-full flex flex-col max-w-[440px] md:max-w-[600px]">
         <div className="flex-1 overflow-auto">
+          <TestTopNav bgColor="rgba(7, 5, 11, 0.55)" onBack={handleBack} />
           <AnimatePresence mode="wait">
             {step === 'landing' && (
               <GhostLanding key="landing" onStart={() => setStep('selection')} />
             )}
             {step === 'selection' && (
-              <CardSelection key="selection" cards={cards} onSelect={handleCardSelect} />
+              <CardSelection key="selection" cards={cards} loading={cardsLoading} onSelect={handleCardSelect} />
             )}
-            {step === 'revealing' && selectedCard && result && (
-              <RevealingScreen key="revealing" card={selectedCard} result={result} onComplete={handleRevealComplete} />
-            )}
-            {step === 'result' && result && (
-              <GhostResultCard key="result" result={result} cardRef={cardRef} onReset={handleReset} />
+            {step === 'result' && selectedCard && (
+              <GhostResultCard key="result" card={selectedCard} result={result} error={resultError} onReset={handleReset} />
             )}
           </AnimatePresence>
         </div>
