@@ -4,8 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
-const SAJUGPT_URL = 'https://www.sajugpt.co.kr/';
-
 interface Slide {
   id: string;
   title: string;
@@ -15,35 +13,32 @@ interface Slide {
   external?: boolean;
 }
 
+const SAJUGPT_URL = 'https://www.sajugpt.co.kr/';
+
+// 비쥬얼 배너 3장 — 전부 이미지 자체에 타이틀/카피가 있어 앱이 덧씌우는 하단 텍스트는 비움
 const SLIDES: Slide[] = [
   {
-    id: 'sajugpt',
-    title: '더 깊은 사주 분석이 궁금하다면?',
-    category: 'AI',
-    image: '/home/hero-slides/slide1.jpg',
+    id: 'ghost-tarot',
+    title: '',
+    category: '',
+    image: '/home/hero-slides/slide5.jpg',
+    href: '/ghost-tarot',
+  },
+  {
+    id: 'sajugpt-male',
+    title: '',
+    category: '',
+    image: '/home/hero-slides/slide6.jpg',
     href: SAJUGPT_URL,
     external: true,
   },
   {
-    id: 'sexy-battle',
-    title: '나한테 꼬인 남자는 몇 명일까?',
-    category: '연애',
-    image: '/home/hero-slides/slide2.jpg',
-    href: '/sexy-battle',
-  },
-  {
-    id: 'court',
-    title: '연애 못한 이유, 사주로 기소당하다',
-    category: '연애',
-    image: '/home/hero-slides/slide3.jpg',
-    href: '/court',
-  },
-  {
-    id: 'dating-sim',
-    title: 'AI와 나누는 사주 궁합 데이트',
-    category: '시뮬레이션',
-    image: '/home/hero-slides/slide4.jpg',
-    href: '/dating-sim',
+    id: 'sajugpt-female',
+    title: '',
+    category: '',
+    image: '/home/hero-slides/slide7.jpg',
+    href: SAJUGPT_URL,
+    external: true,
   },
 ];
 
@@ -224,28 +219,33 @@ export default function HeroBanner() {
         ))}
       </div>
 
-      {/* 하단 텍스트 가독성용 그라디언트 */}
-      <div
-        className="absolute inset-0"
-        style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.2) 42%, rgba(0,0,0,0) 65%)' }}
-      />
+      {/* 하단 텍스트 가독성용 그라디언트 — 이미지 자체에 타이틀이 이미 있는 슬라이드(title 없음)는
+          불필요하게 원본을 어둡게 덮으므로 건너뜀 */}
+      {slide.title && (
+        <>
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.2) 42%, rgba(0,0,0,0) 65%)' }}
+          />
 
-      <div className="absolute" style={{ left: '22px', right: '80px', bottom: '20px' }}>
-        <p
-          className="hero-banner-title"
-          style={{
-            fontSize: 'var(--hero-title-size)',
-            fontWeight: 800,
-            color: '#ffffff',
-            letterSpacing: '-0.4px',
-            lineHeight: '1.3',
-            marginBottom: '7px',
-          }}
-        >
-          {slide.title}
-        </p>
-        <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{slide.category}</span>
-      </div>
+          <div className="absolute" style={{ left: '22px', right: '80px', bottom: '20px' }}>
+            <p
+              className="hero-banner-title"
+              style={{
+                fontSize: 'var(--hero-title-size)',
+                fontWeight: 800,
+                color: '#ffffff',
+                letterSpacing: '-0.4px',
+                lineHeight: '1.3',
+                marginBottom: '7px',
+              }}
+            >
+              {slide.title}
+            </p>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{slide.category}</span>
+          </div>
+        </>
+      )}
 
       <span
         className="absolute inline-flex items-center"

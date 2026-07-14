@@ -6,6 +6,7 @@ import type { GhostCardData } from '@/types/ghost-tarot';
 import GhostCard from './GhostCard';
 import GhostSealButton from './GhostSealButton';
 import { GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
+import { DESKTOP_BREAKPOINT } from '@/lib/ghost-tarot/useBreakpoint';
 
 interface Props {
   cards: GhostCardData[];
@@ -27,7 +28,7 @@ type ShufflePhase = 'mixing' | 'gathered' | 'spreading' | 'idle';
 // 실제 앱 프레임 너비(GhostTarotClient의 max-w-[440px] md:max-w-[600px]와 동일 breakpoint)
 // 기준 좌우 16px 인셋에 딱 맞는 너비 — 카드가 그 안에 꽉 차게 펼쳐짐, 화면 밖으로 안 넘침
 function getContainerWidth(windowWidth: number) {
-  const frameMax = windowWidth >= 768 ? 600 : 440;
+  const frameMax = windowWidth >= DESKTOP_BREAKPOINT ? 600 : 440;
   const frame = Math.min(windowWidth, frameMax);
   return Math.max(260, frame - 32);
 }
@@ -62,7 +63,6 @@ export default function CardSelection({
   const marginX = Math.max(0, (diagonal - cardWidth) / 2);
   const marginY = Math.max(0, (diagonal - cardHeight) / 2);
 
-  // 카드 배열을 랜덤하게 셔플
   const shuffledCards = useMemo(() => {
     if (!Array.isArray(cards)) return [];
     return cards.length > 0 ? [...cards].sort(() => Math.random() - 0.5) : [];

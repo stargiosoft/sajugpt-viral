@@ -88,10 +88,10 @@ export default function ViralHub() {
           <div className="px-3 md:px-6 lg:px-8" style={{ paddingTop: '28px' }}>
             <AdBannerStrip
               backgroundColor="#FFF1E6"
-              title="여름 특집 살귀 타로"
-              subtitle="무더위엔 살귀타로로 여름운세 확인"
+              title="더 깊은 사주 분석이 궁금하다면?"
+              subtitle="AI가 풀어주는 사주GPT에서 확인하세요"
               imageSrc="/home/ghost.png"
-              href="/ghost-tarot"
+              href={SAJUGPT_URL}
             />
           </div>
 

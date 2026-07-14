@@ -7,24 +7,14 @@ import {
 } from 'react';
 
 import { AnimatePresence } from 'framer-motion';
-import { createClient } from '@supabase/supabase-js';
 
 import GhostLanding from './GhostLanding';
 import CardSelection from './CardSelection';
 import GhostResultCard from './GhostResultCard';
 import TestTopNav from '@/components/TestTopNav';
+import { supabase } from '@/lib/supabase';
 import { GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
 import type { GhostCardData, GhostResult } from '@/types/ghost-tarot';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: false,
-    }
-  }
-);
 
 const FALLBACK_GHOST_CARDS: GhostCardData[] = [
   { id: '04d178fa-712d-4007-80a2-43a7d9bcb433', card_name: '업신 (숨겨진 조력자)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/30_Eopsin.webp' },
@@ -52,7 +42,6 @@ export default function GhostTarotClient({ resultId }: Props) {
   const [selectedCard, setSelectedCard] = useState<GhostCardData | null>(null);
   const [result, setResult] = useState<GhostResult | null>(null);
   const [resultError, setResultError] = useState(false);
-  const [loading] = useState(false);
 
   const fetchCards = async () => {
   const { data, error } = await supabase
@@ -83,7 +72,6 @@ export default function GhostTarotClient({ resultId }: Props) {
 
     const fetchSharedResult = async () => {
       try {
-        console.log('🔗 공유된 결과 ID 로드 중:', resultId);
         const { data, error } = await supabase
           .from('ghost_tarot_results')
           .select('*')
@@ -93,7 +81,6 @@ export default function GhostTarotClient({ resultId }: Props) {
         if (error) throw error;
 
         if (data) {
-          console.log('🔥 공유 데이터 로드 성공');
           setSelectedCard(data as GhostCardData);
           setResult(data as GhostResult);
           setStep('result');
@@ -151,14 +138,6 @@ export default function GhostTarotClient({ resultId }: Props) {
     : step === 'result'
       ? handleReset
       : undefined;
-
-  if (loading) {
-    return (
-      <div className="fixed top-0 left-0 right-0 flex items-center justify-center text-white" style={{ height: '100dvh', background: '#07050B' }}>
-        명부 불러오는 중...
-      </div>
-    );
-  }
 
   return (
     <div className="fixed top-0 left-0 right-0 flex justify-center" style={{ height: '100dvh', background: GHOST_PALETTE.bg }}>

@@ -27,7 +27,6 @@ export default function GhostLanding({
         position: 'relative',
       }}
     >
-      {/* 상단 썸네일 */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -47,7 +46,6 @@ export default function GhostLanding({
         />
       </motion.div>
 
-      {/* 말풍선 */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

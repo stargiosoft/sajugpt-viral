@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useId, useState, type MouseEventHandler, type ReactNode } from 'react';
+import { useId, type MouseEventHandler, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { GHOST_BRUSH_FONT } from '@/lib/ghost-tarot/theme';
+import { GHOST_BRUSH_FONT, GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
+import { useIsDesktop, useIsNarrow } from '@/lib/ghost-tarot/useBreakpoint';
 
 interface Props {
   children: ReactNode;
@@ -18,37 +19,13 @@ interface Props {
   disabled?: boolean;
 }
 
-// 프로젝트 공통 md: 브레이크포인트(768px)와 동일 기준으로 웹/모바일 판별
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const update = () => setIsDesktop(window.innerWidth >= 768);
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
-  return isDesktop;
-}
-
-// 320px급 좁은 화면(아이폰 SE 등) 전용 분기 — useIsDesktop과 별개
-function useIsNarrow() {
-  const [isNarrow, setIsNarrow] = useState(false);
-  useEffect(() => {
-    const update = () => setIsNarrow(window.innerWidth <= 360);
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
-  return isNarrow;
-}
-
 const VARIANT_STYLE = {
   primary: {
     height: 52,
     fontSize: 22,
     color: '#f5ebe0',
     background: 'rgb(179,47,23)',
-    stroke: '#8a6d3b',
+    stroke: GHOST_PALETTE.gold,
     glow: 'none',
   },
   secondary: {
@@ -56,7 +33,7 @@ const VARIANT_STYLE = {
     fontSize: 16,
     color: '#d9cbb4',
     background: 'linear-gradient(160deg, #16110b 0%, #0c0906 55%, #050403 100%)',
-    stroke: '#8a6d3b',
+    stroke: GHOST_PALETTE.gold,
     glow: 'none',
   },
 } as const;
@@ -96,7 +73,6 @@ export default function GhostSealButton({ children, variant = 'primary', onClick
         justifyContent: 'center',
       }}
     >
-      {/* 피가 끓는 듯한 은은한 텍스처 움직임 (primary만) */}
       {variant === 'primary' && (
         <motion.div
           aria-hidden
@@ -116,7 +92,6 @@ export default function GhostSealButton({ children, variant = 'primary', onClick
         />
       )}
 
-      {/* 사선 빛줄기가 좌→우로 흐르는 CTA 강조 효과 (primary만, 귀신타로 이어보기 버튼과 동일) */}
       {variant === 'primary' && (
         <div aria-hidden style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, pointerEvents: 'none' }}>
           <div
@@ -134,7 +109,6 @@ export default function GhostSealButton({ children, variant = 'primary', onClick
         </div>
       )}
 
-      {/* 지글거리는 손그림 느낌의 테두리 (secondary만) */}
       {variant === 'secondary' && (
         <svg
           aria-hidden

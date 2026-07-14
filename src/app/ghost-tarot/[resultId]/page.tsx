@@ -1,10 +1,9 @@
-// src/app/ghost-tarot/[resultId]/page.tsx
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 
 import GhostResultShareView from '@/components/ghost-tarot/GhostResultShareView';
 import ReferralTracker from '@/components/ReferralTracker';
+import { supabase } from '@/lib/supabase';
 import { GhostResult } from '@/types/ghost-tarot';
 
 interface Props {
@@ -13,20 +12,12 @@ interface Props {
   }>;
 }
 
-function createSupabaseClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
-
 export async function generateMetadata({
   params,
 }: Props): Promise<Metadata> {
   const { resultId } = await params;
 
   try {
-    const supabase = createSupabaseClient();
     const { data } = await supabase
       .from('ghost_tarot_results')
       .select('card_name, july_title, july_summary')
@@ -56,7 +47,6 @@ export default async function GhostTarotSharePage({
   params,
 }: Props) {
   const { resultId } = await params;
-  const supabase = createSupabaseClient();
 
   const { data: result, error } = await supabase
     .from('ghost_tarot_results')

@@ -5,12 +5,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 
 import GhostSealButton from './GhostSealButton';
+import GhostCTAButton from './GhostCTAButton';
 import GhostShareRow from './GhostShareRow';
-import PressableButton from '@/components/PressableButton';
 import Toast from '@/components/Toast';
 import { saveImage, captureCardImage, isMobileDevice } from '@/lib/share';
 import { trackSajuGPTClick } from '@/lib/analytics';
-import { GHOST_BRUSH_FONT, GHOST_MYUNGJO_FONT, GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
+import { GHOST_MYUNGJO_FONT, GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
+import { useIsDesktop, useIsNarrow, NARROW_BREAKPOINT } from '@/lib/ghost-tarot/useBreakpoint';
 import { GhostCardData, GhostResult } from '@/types/ghost-tarot';
 
 // 파피루스(양피지) 배경 위에 얹는 글자용 색 — GHOST_PALETTE.ink/inkDim은
@@ -74,32 +75,19 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   const fitRef = useRef<HTMLDivElement>(null);
   const [fitScale, setFitScale] = useState(1);
   const [appStoreUrl, setAppStoreUrl] = useState(IOS_APP_URL);
-  const [isDesktop, setIsDesktop] = useState(false);
-  // 320px급 좁은 화면(아이폰 SE 등) 전용 분기 — isDesktop(768px 기준)과 별개
-  const [isNarrow, setIsNarrow] = useState(false);
+  const isDesktop = useIsDesktop();
+  const isNarrow = useIsNarrow();
   const notchBoxRef = useRef<HTMLDivElement>(null);
   const [notchSize, setNotchSize] = useState({ w: 300, h: 100 });
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveResetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // 저장 성공 시 "✓ 저장됨"으로 2.5초간 표시한 뒤 원래 상태로 복귀
   const showSavedState = () => {
     setSaveState('saved');
     clearTimeout(saveResetTimerRef.current);
     saveResetTimerRef.current = setTimeout(() => setSaveState('idle'), 2500);
   };
-
-  // 프로젝트 공통 md: 브레이크포인트(768px)와 동일 기준으로 웹/모바일 판별
-  useEffect(() => {
-    const update = () => {
-      setIsDesktop(window.innerWidth >= 768);
-      setIsNarrow(window.innerWidth <= 360);
-    };
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
 
   // 기기별로 앱스토어/플레이스토어로 자동 분기 (SSR 시점엔 navigator가 없어 iOS를 기본값으로 두고, 마운트 후 안드로이드면 교체)
   useEffect(() => {
@@ -142,7 +130,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
     const recompute = () => {
       const raw = el.scrollHeight;
       // 320px급 좁은 화면은 줄바꿈이 늘어 꽉 채운 스케일이 되기 쉬워 바닥에 붙어 보임 — 여유 16px 확보
-      const avail = outer.clientHeight - (window.innerWidth <= 360 ? 16 : 0);
+      const avail = outer.clientHeight - (window.innerWidth <= NARROW_BREAKPOINT ? 16 : 0);
       const scale = raw > avail ? Math.max(avail / raw, 0.5) : 1;
       setFitScale(scale);
     };
@@ -232,7 +220,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
         alignItems: 'center',
       }}
     >
-      {/* 종이 액자 배경 — width 100%(최대 440/600px)로 브라우저 너비에 맞춰 줄어들고, aspectRatio가 고정돼 있어 안의 내용도 같이 축소됨 */}
       <div
         ref={captureRef}
         className="w-full max-w-[440px] md:max-w-[600px]"
@@ -276,7 +263,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
             }}
           >
             <div style={{ position: 'absolute', inset: 0, borderRadius: 12, overflow: 'hidden' }}>
-              {/* 흰색 매트 박스 — 카드 이미지 자체 라운딩과 별개로 카드와 세트로 보이는 배경 */}
               <div style={{ position: 'absolute', inset: '-4%', background: '#f7f2e8', borderRadius: 12 }} />
 
               {frontImage ? (
@@ -301,8 +287,8 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               fontFamily: GHOST_MYUNGJO_FONT,
               fontSize: isDesktop ? 22 : (isNarrow ? 17 : 18),
               lineHeight: 1.2,
-              color: 'rgb(42, 31, 22)',
-              WebkitTextStroke: isDesktop ? '1.4px rgb(42, 31, 22)' : '1px rgb(42, 31, 22)',
+              color: PARCHMENT_INK,
+              WebkitTextStroke: isDesktop ? `1.4px ${PARCHMENT_INK}` : `1px ${PARCHMENT_INK}`,
               textShadow: '0 1px 3px rgba(247,242,232,0.55)',
               flexShrink: 0,
               letterSpacing: '3px',
@@ -333,7 +319,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
 
           {result && !error && (
             <>
-              {/* 장식 구분선 */}
               <div className="flex items-center justify-center" style={{ marginTop: isDesktop ? 'calc(5% + 16px)' : (isNarrow ? 'calc(5% + 8px)' : 'calc(5% + 12px)'), gap: 8, width: '74%', flexShrink: 0 }}>
                 <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent 0%, ${PARCHMENT_INK_DIM} 100%)`, opacity: 0.4 }} />
                 <span
@@ -413,14 +398,13 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   marginTop: 0,
                   fontFamily: GHOST_MYUNGJO_FONT,
                   fontSize: isDesktop ? 30 : (isNarrow ? 21 : 26),
-                  lineHeight: isDesktop ? 1.6 : 1.6,
-                  color: 'rgb(42, 31, 22)',
-                  WebkitTextStroke: isDesktop ? '1.6px rgb(42, 31, 22)' : '1.3px rgb(42, 31, 22)',
+                  lineHeight: 1.6,
+                  color: PARCHMENT_INK,
+                  WebkitTextStroke: isDesktop ? `1.6px ${PARCHMENT_INK}` : `1.3px ${PARCHMENT_INK}`,
                   textShadow: '0 1px 3px rgba(247,242,232,0.55)',
                   // 기존 모바일(390px대) -1.5px는 데스크탑(-0.5px)의 3배로 과도하게 좁아서
                   // 두꺼운 스트로크와 맞물려 글자끼리 겹쳐 보였음 — 데스크탑/320px대와 동일하게 통일
                   letterSpacing: '-0.5px',
-                  // 좌우 12px 여백만 두고 나머지는 꽉 채움
                   width: 'auto',
                   marginLeft: 12,
                   marginRight: 12,
@@ -438,7 +422,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 <span style={{ width: '100%', height: 1, background: `linear-gradient(90deg, transparent 0%, ${PARCHMENT_INK_DIM} 50%, transparent 100%)`, opacity: 0.4 }} />
               </div>
 
-              {/* 결과 요약 박스 — 모서리가 안쪽으로 둥글게 파인 이중 테두리 종이 카드 느낌 */}
               <div
                 ref={notchBoxRef}
                 style={{
@@ -461,20 +444,17 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
                 >
                   <defs>
-                    {/* 중심에서 가장자리로 갈수록 짙어지는 비대칭 그라데이션 — 낡은 종이가 고르지 않게 바랜 느낌 */}
                     <radialGradient id="ghost-notch-fill" cx="38%" cy="32%" r="85%">
                       <stop offset="0%" stopColor="rgba(96,74,48,0.015)" />
                       <stop offset="50%" stopColor="rgba(84,64,42,0.04)" />
                       <stop offset="80%" stopColor="rgba(74,56,36,0.07)" />
                       <stop offset="100%" stopColor="rgba(64,48,30,0.1)" />
                     </radialGradient>
-                    {/* 반대쪽 모서리에 덧대는 얼룩 — 한쪽만 바랜 느낌을 깨서 고르지 않게 헤진 느낌 강조 */}
                     <radialGradient id="ghost-notch-stain" cx="78%" cy="82%" r="65%">
                       <stop offset="0%" stopColor="rgba(60,44,26,0.08)" />
                       <stop offset="55%" stopColor="rgba(60,44,26,0.025)" />
                       <stop offset="100%" stopColor="rgba(60,44,26,0)" />
                     </radialGradient>
-                    {/* 테두리 선도 균일하지 않게 — 진하다 옅어지길 반복해 실이 헤진 듯한 느낌 */}
                     <linearGradient id="ghost-notch-stroke-outer" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="rgba(96,74,48,0.36)" />
                       <stop offset="16%" stopColor="rgba(96,74,48,0.12)" />
@@ -502,11 +482,11 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   style={{
                     position: 'relative',
                     fontFamily: GHOST_MYUNGJO_FONT,
-                    fontSize: isDesktop ? 14.5 : (isNarrow ? 13 : 13),
+                    fontSize: isDesktop ? 14.5 : 13,
                     fontWeight: 600,
-                    lineHeight: isDesktop ? 1.75 : 1.75,
-                    color: 'rgb(42, 31, 22)',
-                    WebkitTextStroke: isDesktop ? '0.2px rgb(42, 31, 22)' : (isNarrow ? '0.1px rgb(42, 31, 22)' : '0.1px rgb(42, 31, 22)'),
+                    lineHeight: 1.75,
+                    color: PARCHMENT_INK,
+                    WebkitTextStroke: isDesktop ? `0.2px ${PARCHMENT_INK}` : `0.1px ${PARCHMENT_INK}`,
                     letterSpacing: isDesktop ? '-0.5px' : '-0.3px',
                     marginTop: isDesktop ? 0 : 2,
                   }}
@@ -520,9 +500,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
 
       </div>
 
-      {/* 리빌 연출 오버레이 — 액자(스크롤로 넘칠 수 있음)가 아니라 화면(뷰포트) 기준 position:fixed로 정중앙 고정.
-          뽑은 카드가 커지며 두근거리다 뒤집히고(0~2.35s), 실제 결과지 카드 자리로 도킹(2.35~2.85s)한 뒤
-          배경만 페이드아웃(2.85~3.3s)돼 이미 자리잡은 결과지가 자연스럽게 이어짐 */}
+      {/* 리빌 연출 오버레이 — 액자(스크롤로 넘칠 수 있음)가 아니라 화면(뷰포트) 기준 position:fixed로 정중앙 고정 */}
       <AnimatePresence>
         {revealing && (
           <motion.div
@@ -542,7 +520,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   : { width: '46%', maxWidth: 220, aspectRatio: '2 / 3', position: 'relative', perspective: 800 }
               }
             >
-              {/* 차오르는 영혼의 빛 — "결과를 알려줄 것"이라는 긴장감 */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: [0, 0.3, 0.9, 0.4], scale: [0.6, 0.9, 1.5, 1.9] }}
@@ -557,7 +534,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 }}
               />
 
-              {/* 휘몰아치는 연기 — 뒤집히는 순간(1.7~2.35s) 카드 주위로 소용돌이치듯 번짐 */}
               <motion.div
                 initial={{ opacity: 0, rotate: 0, scale: 0.8 }}
                 animate={{ opacity: [0, 0, 0.7, 0.5, 0], rotate: [0, 0, 90, 160, 220], scale: [0.8, 0.8, 1.2, 1.5, 1.8] }}
@@ -569,7 +545,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 <div style={{ position: 'absolute', top: '42%', left: '-8%', width: '42%', height: '42%', borderRadius: '50%', background: 'radial-gradient(circle, rgba(60,15,22,.4), transparent 70%)', filter: 'blur(14px)' }} />
               </motion.div>
 
-              {/* 카드 본체 — 쫀득하게 커지며 한 번 천천히 두근(~0~1.7s) 뒤 뒤집힘(1.7~2.35s) */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.3 }}
                 animate={{
@@ -585,7 +560,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   transition={{ delay: 1.7, duration: 0.65, ease: 'easeInOut' }}
                   style={{ width: '100%', height: '100%', position: 'relative', transformStyle: 'preserve-3d' }}
                 >
-                  {/* 뒷면 */}
                   <div
                     style={{
                       position: 'absolute',
@@ -599,7 +573,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                     <Image src="/ghost-tarot/card-back.png" alt="" fill className="object-cover" />
                   </div>
 
-                  {/* 앞면 */}
                   <div
                     style={{
                       position: 'absolute',
@@ -621,7 +594,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
         )}
       </AnimatePresence>
 
-      {/* 액자 바깥 하단 — 공유 / 전환 CTA / 다시하기 */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: revealing && !bgFading ? 0 : 1, y: revealing && !bgFading ? 10 : 0 }}
@@ -636,7 +608,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
         ) : (
           <>
             <div style={{ marginTop: 22 }}>
-            <PressableButton
+            <GhostCTAButton
               href={appStoreUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -649,15 +621,13 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   </svg>
                 </span>
               }
-              style={{ height: isDesktop ? 52 : (isNarrow ? 48 : 52) }}
               bgStyle={{ backgroundColor: 'rgb(179,47,23)', borderRadius: 12 }}
               shineColor="rgba(150,39,20,0.55)"
-              textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
             />
             </div>
 
             <div style={{ marginTop: 12 }}>
-                <PressableButton
+                <GhostCTAButton
                   onClick={handleSaveImage}
                   disabled={saveState === 'saving'}
                   label={
@@ -686,14 +656,12 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                       '이미지 저장하기'
                     )
                   }
-                  style={{ height: isDesktop ? 52 : (isNarrow ? 48 : 52) }}
                   bgStyle={{
                     backgroundColor: saveState === 'saved' ? 'rgba(179,47,23,0.18)' : 'transparent',
                     border: '1.5px solid rgb(179,47,23)',
                     borderRadius: 12,
                   }}
                   hoverBackground="rgba(179,47,23,0.18)"
-                  textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
                 />
             </div>
 
