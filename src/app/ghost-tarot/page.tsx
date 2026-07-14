@@ -7,10 +7,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "7월 귀신타로",
     description: "이번 달, 당신을 찾아올 경고를 확인하세요.",
+    images: [{ url: "/ghost-tarot/share-square.png", width: 1254, height: 1254 }],
   },
   twitter: {
+    card: "summary_large_image",
     title: "7월 귀신타로",
     description: "이번 달, 당신을 찾아올 경고를 확인하세요.",
+    images: [{ url: "/ghost-tarot/share-landscape.png", width: 1200, height: 630 }],
   },
 };
 

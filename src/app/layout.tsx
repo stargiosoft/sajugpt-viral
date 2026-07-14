@@ -3,6 +3,7 @@ import './globals.css';
 import AnalyticsInit from '@/components/AnalyticsInit';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://sajugpt-viral.vercel.app'),
   title: '7월 귀신타로',
   description: '이번 달, 당신을 찾아올 경고를 확인하세요.',
   icons: { icon: '/favicon.svg' },
