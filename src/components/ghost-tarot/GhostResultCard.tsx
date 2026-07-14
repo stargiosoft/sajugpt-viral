@@ -680,6 +680,20 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                         </svg>
                         저장됨
                       </span>
+                    ) : saveState === 'saving' ? (
+                      <span className="flex items-center justify-center" style={{ gap: 8 }}>
+                        <motion.svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
+                        >
+                          <circle cx="12" cy="12" r="9" stroke="#f5ebe0" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="42 100" opacity={0.9} />
+                        </motion.svg>
+                        저장 중...
+                      </span>
                     ) : (
                       '이미지 저장하기'
                     )
