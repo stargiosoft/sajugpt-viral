@@ -26,7 +26,7 @@ export default function PressableButton({ label, onClick, href, target, rel, dis
   const hoverProps = hoverBackground
     ? {
         whileHover: { backgroundColor: hoverBackground },
-        whileTap: { backgroundColor: hoverBackground, filter: 'brightness(0.97)', scale: 0.995 },
+        whileTap: { backgroundColor: hoverBackground, filter: 'brightness(0.88)', scale: 0.998 },
         transition: PRESS_HOVER_PROPS.transition,
       }
     : PRESS_HOVER_PROPS;

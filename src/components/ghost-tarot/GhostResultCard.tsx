@@ -290,8 +290,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
 
           {/* 카드 이름 — 괄호 부제는 따로 작게
               모바일(iOS Safari)에서 -webkit-text-stroke가 조상(fitRef)의 transform: scale()에 딸려
-              한 비트맵으로 합성되면 스트로크 안티앨리어싱이 깨져 쨍하고 거칠어 보임 →
-              translateZ(0)로 별도 레이어로 분리하고 font-smoothing을 명시해 자체 해상도로 다시 래스터라이즈되게 함 */}
+              한 비트맵으로 합성되면 스트로크 안티앨리어싱이 깨져 거칠어 보임 →
+              translateZ(0)로 별도 레이어로 분리해 자체 해상도로 다시 래스터라이즈되게 함
+              (font-smoothing: antialiased는 저장 이미지 대비 브라우저 스트로크가 과하게 쨍해 보이는
+              원인이라 제외 — 기본값이 더 부드러움) */}
           <h1
             style={{
               marginTop: isDesktop ? 'calc(7% - 6px)' : 'calc(7% + 0px)',
@@ -303,8 +305,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               textShadow: '0 1px 3px rgba(247,242,232,0.55)',
               flexShrink: 0,
               letterSpacing: '3px',
-              WebkitFontSmoothing: 'antialiased',
-              MozOsxFontSmoothing: 'grayscale',
               textRendering: 'optimizeLegibility',
               transform: 'translateZ(0)',
             }}
@@ -322,8 +322,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 WebkitTextStroke: '0.2px #584E44',
                 flexShrink: 0,
                 letterSpacing: '0.8px',
-                WebkitFontSmoothing: 'antialiased',
-                MozOsxFontSmoothing: 'grayscale',
                 textRendering: 'optimizeLegibility',
                 transform: 'translateZ(0)',
               }}
@@ -387,8 +385,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   <span
                     style={{
                       position: 'relative',
-                      WebkitFontSmoothing: 'antialiased',
-                      MozOsxFontSmoothing: 'grayscale',
                       textRendering: 'optimizeLegibility',
                       transform: 'translateZ(0)',
                     }}
@@ -427,8 +423,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   width: 'auto',
                   marginLeft: 12,
                   marginRight: 12,
-                  WebkitFontSmoothing: 'antialiased',
-                  MozOsxFontSmoothing: 'grayscale',
                   textRendering: 'optimizeLegibility',
                   transform: 'translateZ(0)',
                 }}
@@ -648,7 +642,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               onClick={() => trackSajuGPTClick('ghost_tarot', result?.id)}
               label={
                 <span className="flex items-center justify-center" style={{ gap: 8 }}>
-                  귀신타로 이어보기 <span style={{ position: 'relative', top: '-0.5px', fontFamily: 'Pretendard', fontSize: isDesktop ? '13.5px' : (isNarrow ? '12.5px' : '13.5px'), fontWeight: 700 }}>(사주<span style={{ fontSize: isDesktop ? '14px' : (isNarrow ? '13px' : '14px') }}>GPT</span>)</span>
+                  귀신타로 이어보기 <span style={{ position: 'relative', top: isDesktop ? '-0.5px' : '0px', fontFamily: 'Pretendard', fontSize: isDesktop ? '13.5px' : (isNarrow ? '12.5px' : '13.5px'), fontWeight: 700 }}>(사주<span style={{ fontSize: isDesktop ? '14px' : (isNarrow ? '13px' : '14px') }}>GPT</span>)</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M9 5l7 7-7 7" stroke="#f5ebe0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>

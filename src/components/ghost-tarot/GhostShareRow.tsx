@@ -23,10 +23,11 @@ export default function GhostShareRow({
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  // 링크 복사는 URL만 복사 — 설명 문구가 같이 복사되면 주소창에 그대로 붙여넣기가 안 됨
   const handleCopy = useCallback(async () => {
     const origin = window.location.origin;
     const link = shareLink ?? `${origin}/ghost-tarot`;
-    const ok = await copyToClipboard(`${shareText}\n👉 ${link}`);
+    const ok = await copyToClipboard(link);
     if (ok) {
       setCopied(true);
       clearTimeout(timerRef.current);
@@ -34,7 +35,7 @@ export default function GhostShareRow({
       trackEvent('ghost_tarot_share_test_clipboard');
       trackShare('ghost_tarot', 'clipboard', resultId);
     }
-  }, [shareText, shareLink, resultId]);
+  }, [shareLink, resultId]);
 
   const handleXShare = useCallback(() => {
     const origin = window.location.origin;

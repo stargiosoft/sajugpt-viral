@@ -3,12 +3,12 @@ import './globals.css';
 import AnalyticsInit from '@/components/AnalyticsInit';
 
 export const metadata: Metadata = {
-  title: '사주GPT 바이럴',
-  description: '사주 기반 바이럴 콘텐츠 모음 — 색기 배틀, 사주 부검실',
+  title: '7월 귀신타로',
+  description: '이번 달, 당신을 찾아올 경고를 확인하세요.',
   icons: { icon: '/favicon.svg' },
   openGraph: {
-    title: '사주GPT 바이럴',
-    description: '사주 기반 바이럴 콘텐츠 모음',
+    title: '7월 귀신타로',
+    description: '이번 달, 당신을 찾아올 경고를 확인하세요.',
     type: 'website',
     siteName: '사주GPT',
   },
