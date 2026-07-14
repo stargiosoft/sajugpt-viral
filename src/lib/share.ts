@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image';
+import { domToBlob } from 'modern-screenshot';
 
 declare global {
   interface Window {
@@ -54,6 +54,45 @@ export function shareKakao(params: {
   return true;
 }
 
+// 캡처 대상 안의 <img>들이 실제로 로드 완료됐는지 콘솔에 남김 — 모바일 캡처 실패 원인 추적용
+function logImageStates(element: HTMLElement, label: string) {
+  const images = Array.from(element.querySelectorAll('img'));
+  images.forEach((img) => {
+    console.log(`[captureCardImage:${label}]`, {
+      src: img.currentSrc || img.src,
+      complete: img.complete,
+      naturalWidth: img.naturalWidth,
+      naturalHeight: img.naturalHeight,
+    });
+  });
+  return images;
+}
+
+// 실패한 이미지들의 실제 fetch 응답(상태 코드/CORS 헤더)을 다시 확인해 진짜 원인을 로그로 남김
+async function logImageFetchDiagnostics(images: HTMLImageElement[]) {
+  await Promise.all(
+    images.map(async (img) => {
+      const src = img.currentSrc || img.src;
+      if (!src || src.startsWith('data:')) return;
+      try {
+        const res = await fetch(src, { mode: 'cors', cache: 'no-store' });
+        console.error('[captureCardImage:fetchCheck]', {
+          src,
+          status: res.status,
+          contentType: res.headers.get('content-type'),
+          corsAllowOrigin: res.headers.get('access-control-allow-origin'),
+        });
+      } catch (fetchErr) {
+        console.error('[captureCardImage:fetchCheck failed]', { src, fetchErr });
+      }
+    })
+  );
+}
+
+// html-to-image는 Safari/WebKit에서 <img src="data:image/svg+xml">를 drawImage하기 전에
+// 디코딩이 끝나지 않아 이미지 영역이 흰 채로 캡처되는 고질적 버그가 있음
+// (https://bugs.webkit.org/show_bug.cgi?id=201243). modern-screenshot은 이를 fixSvgXmlDecode
+// 옵션(기본 활성화)으로 Safari에서 drawImage를 여러 번 재시도해 우회하므로 라이브러리를 교체함
 export async function captureCardImage(element: HTMLElement): Promise<Blob> {
   const rect = element.getBoundingClientRect();
   // 모바일 bleed용 음수 마진은 화면상 부모 패딩을 상쇄하기 위한 것이라 고립된 캡처에서는
@@ -63,19 +102,33 @@ export async function captureCardImage(element: HTMLElement): Promise<Blob> {
   element.style.marginLeft = '0px';
   element.style.marginRight = '0px';
 
-  const dataUrl = await toPng(element, {
-    quality: 0.95,
-    pixelRatio: 2,
-    cacheBust: true,
+  const images = logImageStates(element, 'before');
+  console.log('[captureCardImage:size]', {
     width: rect.width,
     height: rect.height,
+    scale: 2,
+    devicePixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : null,
   });
 
-  element.style.marginLeft = prevMarginLeft;
-  element.style.marginRight = prevMarginRight;
-
-  const response = await fetch(dataUrl);
-  return response.blob();
+  try {
+    const blob = await domToBlob(element, {
+      type: 'image/png',
+      quality: 0.95,
+      scale: 2,
+      width: rect.width,
+      height: rect.height,
+      fetch: { bypassingCache: true },
+    });
+    console.log('[captureCardImage] domToBlob resolved', { size: blob.size });
+    return blob;
+  } catch (err) {
+    console.error('[captureCardImage] domToBlob failed', err);
+    await logImageFetchDiagnostics(images);
+    throw err;
+  } finally {
+    element.style.marginLeft = prevMarginLeft;
+    element.style.marginRight = prevMarginRight;
+  }
 }
 
 export async function saveImage(element: HTMLElement, filename = '색기배틀_결과.png'): Promise<void> {
@@ -84,8 +137,12 @@ export async function saveImage(element: HTMLElement, filename = '색기배틀_�
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  link.remove();
+  // Safari/WebKit은 다운로드를 비동기로 시작하므로 click() 직후 바로 revoke하면
+  // 아직 blob을 읽기 전에 URL이 무효화돼 다운로드가 조용히 실패함 — 잠시 지연 후 해제
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function shareX(text: string, url: string): void {

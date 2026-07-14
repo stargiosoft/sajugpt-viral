@@ -3,32 +3,21 @@
 import { useCallback, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { copyToClipboard, shareKakao } from '@/lib/share';
+import { copyToClipboard } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import { GHOST_BRUSH_FONT, GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
 
 const DEFAULT_SHARE_TEXT = '👻 귀신 타로 — 당신에게 붙은 존재가 이번 달 운세를 속삭입니다.\n봉인된 카드를 열어보세요';
-const DEFAULT_KAKAO_TITLE = '귀신 타로 — 당신에게 붙은 존재';
-const DEFAULT_KAKAO_DESCRIPTION = '이번 달 운세를 속삭입니다. 봉인된 카드를 열어보세요';
-const DEFAULT_KAKAO_BUTTON_TEXT = '나도 해보기';
 
 interface Props {
   shareText?: string;
   shareLink?: string;
-  kakaoTitle?: string;
-  kakaoDescription?: string;
-  kakaoImageUrl?: string;
-  kakaoButtonText?: string;
   resultId?: string;
 }
 
 export default function GhostShareRow({
   shareText = DEFAULT_SHARE_TEXT,
   shareLink,
-  kakaoTitle = DEFAULT_KAKAO_TITLE,
-  kakaoDescription = DEFAULT_KAKAO_DESCRIPTION,
-  kakaoImageUrl,
-  kakaoButtonText = DEFAULT_KAKAO_BUTTON_TEXT,
   resultId,
 }: Props) {
   const [copied, setCopied] = useState(false);
@@ -46,24 +35,6 @@ export default function GhostShareRow({
       trackShare('ghost_tarot', 'clipboard', resultId);
     }
   }, [shareText, shareLink, resultId]);
-
-  const handleKakaoShare = useCallback(() => {
-    const origin = window.location.origin;
-    const link = shareLink ?? `${origin}/ghost-tarot`;
-    const ok = shareKakao({
-      title: kakaoTitle,
-      description: kakaoDescription,
-      imageUrl: kakaoImageUrl ?? `${origin}/home/thumbnails/ghost-tarot.jpg`,
-      link,
-      buttonText: kakaoButtonText,
-    });
-    if (ok) {
-      trackEvent('ghost_tarot_share_test_kakao');
-      trackShare('ghost_tarot', 'kakao', resultId);
-    } else {
-      handleCopy();
-    }
-  }, [handleCopy, shareLink, kakaoTitle, kakaoDescription, kakaoImageUrl, kakaoButtonText, resultId]);
 
   const handleXShare = useCallback(() => {
     const origin = window.location.origin;
@@ -94,23 +65,6 @@ export default function GhostShareRow({
       </span>
 
       <div className="flex items-center" style={{ gap: 16, marginTop: 18 }}>
-        <motion.button
-          type="button"
-          aria-label="카카오톡으로 공유"
-          onClick={handleKakaoShare}
-          whileHover={{ backgroundColor: 'rgba(232,223,208,0.18)' }}
-          whileTap={{ scale: .92 }}
-          transition={{ duration: 0.15, ease: 'easeOut' }}
-          style={circleStyle}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 3C6.477 3 2 6.68 2 11.2c0 2.9 1.85 5.44 4.63 6.9-.2.75-.73 2.7-.84 3.12-.13.5.18.5.38.36.16-.11 2.53-1.72 3.56-2.42.7.1 1.44.15 2.27.15 5.523 0 10-3.68 10-8.2S17.523 3 12 3z"
-              fill={GHOST_PALETTE.ink}
-            />
-          </svg>
-        </motion.button>
-
         <motion.button
           type="button"
           aria-label="X에 공유"
