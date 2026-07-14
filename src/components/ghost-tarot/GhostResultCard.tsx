@@ -171,7 +171,8 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   const julyTitle = result?.july_title || '';
   const frontImage = card.front_image && card.front_image.trim() !== '' ? card.front_image : null;
 
-  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/ghost-tarot/${result?.id || ''}`;
+  // 공유 링크는 내 결과 페이지가 아니라 첫 시작 화면으로 — 받은 사람이 직접 뽑아보게 유도
+  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/ghost-tarot`;
   const shareText = `👻 ${cardName}\n나에게 붙은 존재가 남긴 기록...\n${julyTitle}\n너에게 찾아온 귀신도 확인해봐`;
 
   // 모바일은 <a download>가 사진앱에 바로 저장되지 않고 파일앱/새 탭으로 빠지므로
