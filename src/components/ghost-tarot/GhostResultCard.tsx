@@ -656,19 +656,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
             />
             </div>
 
-            <div className="flex" style={{ marginTop: 12, gap: 12 }}>
-              <div style={{ flex: 1 }}>
-                <PressableButton
-                  onClick={onReset}
-                  label="테스트 다시하기"
-                  style={{ height: isDesktop ? 52 : (isNarrow ? 48 : 52) }}
-                  bgStyle={{ backgroundColor: 'transparent', border: '1.5px solid rgb(179,47,23)', borderRadius: 12 }}
-                  hoverBackground="rgba(179,47,23,0.18)"
-                  textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
-                />
-              </div>
-
-              <div style={{ flex: 1 }}>
+            <div style={{ marginTop: 12 }}>
                 <PressableButton
                   onClick={handleSaveImage}
                   disabled={saveState === 'saving'}
@@ -707,7 +695,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   hoverBackground="rgba(179,47,23,0.18)"
                   textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
                 />
-              </div>
             </div>
 
             <div style={{ marginTop: 28 }}>
