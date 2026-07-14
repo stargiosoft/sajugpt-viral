@@ -121,7 +121,7 @@ export function getShareText(headcount: number, battleId: string): string {
 }
 
 /** 모바일 여부 판별 — PC에서는 네이티브 공유 사용하지 않음 */
-function isMobileDevice(): boolean {
+export function isMobileDevice(): boolean {
   if (typeof window === 'undefined') return false;
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
     || ('ontouchstart' in window && navigator.maxTouchPoints > 1);

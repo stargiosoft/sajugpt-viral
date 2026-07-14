@@ -139,7 +139,7 @@ export default function GhostShareRow({
         >
           {copied ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M5 13l4 4L19 7" stroke={GHOST_PALETTE.red} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 13l4 4L19 7" stroke={'rgb(179,47,23)'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -150,7 +150,7 @@ export default function GhostShareRow({
       </div>
 
       {copied && (
-        <p style={{ fontSize: 12, color: GHOST_PALETTE.red, fontWeight: 600, marginTop: 12 }}>
+        <p style={{ fontSize: 12, color: 'rgb(179,47,23)', fontWeight: 600, marginTop: 12 }}>
           링크가 복사됐어요!
         </p>
       )}

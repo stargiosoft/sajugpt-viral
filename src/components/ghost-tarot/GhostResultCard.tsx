@@ -7,7 +7,8 @@ import Image from 'next/image';
 import GhostSealButton from './GhostSealButton';
 import GhostShareRow from './GhostShareRow';
 import PressableButton from '@/components/PressableButton';
-import { saveImage } from '@/lib/share';
+import Toast from '@/components/Toast';
+import { saveImage, captureCardImage, isMobileDevice } from '@/lib/share';
 import { trackSajuGPTClick } from '@/lib/analytics';
 import { GHOST_BRUSH_FONT, GHOST_MYUNGJO_FONT, GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
 import { GhostCardData, GhostResult } from '@/types/ghost-tarot';
@@ -78,6 +79,16 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   const [isNarrow, setIsNarrow] = useState(false);
   const notchBoxRef = useRef<HTMLDivElement>(null);
   const [notchSize, setNotchSize] = useState({ w: 300, h: 100 });
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const saveResetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // 저장 성공 시 "✓ 저장됨"으로 2.5초간 표시한 뒤 원래 상태로 복귀
+  const showSavedState = () => {
+    setSaveState('saved');
+    clearTimeout(saveResetTimerRef.current);
+    saveResetTimerRef.current = setTimeout(() => setSaveState('idle'), 2500);
+  };
 
   // 프로젝트 공통 md: 브레이크포인트(768px)와 동일 기준으로 웹/모바일 판별
   useEffect(() => {
@@ -163,9 +174,37 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/ghost-tarot/${result?.id || ''}`;
   const shareText = `👻 ${cardName}\n나에게 붙은 존재가 남긴 기록...\n${julyTitle}\n너에게 찾아온 귀신도 확인해봐`;
 
+  // 모바일은 <a download>가 사진앱에 바로 저장되지 않고 파일앱/새 탭으로 빠지므로
+  // Web Share API로 "사진에 저장" 옵션이 있는 네이티브 공유 시트를 띄움 (지원 안 하거나 취소되면 다운로드로 폴백)
   const handleSaveImage = async () => {
-    if (captureRef.current) {
-      await saveImage(captureRef.current, `${cardName}_귀신타로.png`);
+    if (!captureRef.current || saveState === 'saving') return;
+    const filename = `${cardName}_귀신타로.png`;
+    setSaveState('saving');
+
+    if (isMobileDevice() && navigator.share) {
+      try {
+        const blob = await captureCardImage(captureRef.current);
+        const file = new File([blob], filename, { type: 'image/png' });
+        await navigator.share({ files: [file] });
+        showSavedState();
+        return;
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          // 사용자가 공유 시트를 취소함 — 실패가 아니므로 다운로드로 폴백하지 않고 그대로 원상태 복귀
+          setSaveState('idle');
+          return;
+        }
+        /* 파일 공유 미지원 등 진짜 실패 — 아래 다운로드로 폴백 */
+      }
+    }
+
+    try {
+      await saveImage(captureRef.current, filename);
+      showSavedState();
+    } catch {
+      setSaveState('idle');
+      setSaveError('이미지 저장에 실패했어요. 다시 시도해주세요.');
+      setTimeout(() => setSaveError(null), 2500);
     }
   };
 
@@ -249,7 +288,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
             </div>
           </div>
 
-          {/* 카드 이름 — 괄호 부제는 따로 작게 */}
+          {/* 카드 이름 — 괄호 부제는 따로 작게
+              모바일(iOS Safari)에서 -webkit-text-stroke가 조상(fitRef)의 transform: scale()에 딸려
+              한 비트맵으로 합성되면 스트로크 안티앨리어싱이 깨져 쨍하고 거칠어 보임 →
+              translateZ(0)로 별도 레이어로 분리하고 font-smoothing을 명시해 자체 해상도로 다시 래스터라이즈되게 함 */}
           <h1
             style={{
               marginTop: isDesktop ? 'calc(7% - 6px)' : 'calc(7% + 0px)',
@@ -261,6 +303,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               textShadow: '0 1px 3px rgba(247,242,232,0.55)',
               flexShrink: 0,
               letterSpacing: '3px',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale',
+              textRendering: 'optimizeLegibility',
+              transform: 'translateZ(0)',
             }}
           >
             {cardNameMain}
@@ -276,6 +322,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 WebkitTextStroke: '0.2px #584E44',
                 flexShrink: 0,
                 letterSpacing: '0.8px',
+                WebkitFontSmoothing: 'antialiased',
+                MozOsxFontSmoothing: 'grayscale',
+                textRendering: 'optimizeLegibility',
+                transform: 'translateZ(0)',
               }}
             >
               ({cardNameSub})
@@ -330,11 +380,21 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                       원본 픽셀 비율 그대로 고정되고 가운데만 늘어남. border-image 대신 background-image를 쓴 이유는
                       "이미지 저장하기"(html-to-image)가 border-image를 캡처하지 못해 저장된 이미지에서 배경이 빠지기 때문 */}
                   <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: -1, display: 'flex' }}>
-                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.png)', backgroundSize: '1114.48% 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat' }} />
-                    <div style={{ flex: 1, backgroundImage: 'url(/ghost-tarot/july-badge-brush.png)', backgroundSize: '121.87% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.png)', backgroundSize: '1114.48% 100%', backgroundPosition: 'right center', backgroundRepeat: 'no-repeat' }} />
+                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.webp)', backgroundSize: '1114.48% 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat' }} />
+                    <div style={{ flex: 1, backgroundImage: 'url(/ghost-tarot/july-badge-brush.webp)', backgroundSize: '121.87% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.webp)', backgroundSize: '1114.48% 100%', backgroundPosition: 'right center', backgroundRepeat: 'no-repeat' }} />
                   </div>
-                  <span style={{ position: 'relative' }}>7월 · {cleanJulyTitle(julyTitle)}</span>
+                  <span
+                    style={{
+                      position: 'relative',
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale',
+                      textRendering: 'optimizeLegibility',
+                      transform: 'translateZ(0)',
+                    }}
+                  >
+                    7월 · {cleanJulyTitle(julyTitle)}
+                  </span>
                 </span>
               </div>
             </>
@@ -360,11 +420,17 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   color: 'rgb(42, 31, 22)',
                   WebkitTextStroke: isDesktop ? '1.6px rgb(42, 31, 22)' : '1.3px rgb(42, 31, 22)',
                   textShadow: '0 1px 3px rgba(247,242,232,0.55)',
-                  letterSpacing: isDesktop ? '-0.5px' : (isNarrow ? '-0.5px' : '-1.5px'),
+                  // 기존 모바일(390px대) -1.5px는 데스크탑(-0.5px)의 3배로 과도하게 좁아서
+                  // 두꺼운 스트로크와 맞물려 글자끼리 겹쳐 보였음 — 데스크탑/320px대와 동일하게 통일
+                  letterSpacing: '-0.5px',
                   // 좌우 12px 여백만 두고 나머지는 꽉 채움
                   width: 'auto',
                   marginLeft: 12,
                   marginRight: 12,
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                  textRendering: 'optimizeLegibility',
+                  transform: 'translateZ(0)',
                 }}
               >
                 <span
@@ -610,9 +676,25 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               <div style={{ flex: 1 }}>
                 <PressableButton
                   onClick={handleSaveImage}
-                  label="이미지 저장하기"
+                  disabled={saveState === 'saving'}
+                  label={
+                    saveState === 'saved' ? (
+                      <span className="flex items-center justify-center" style={{ gap: 6 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M5 13l4 4L19 7" stroke="#f5ebe0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        저장됨
+                      </span>
+                    ) : (
+                      '이미지 저장하기'
+                    )
+                  }
                   style={{ height: isDesktop ? 52 : (isNarrow ? 48 : 52) }}
-                  bgStyle={{ backgroundColor: 'transparent', border: '1.5px solid rgb(179,47,23)', borderRadius: 12 }}
+                  bgStyle={{
+                    backgroundColor: saveState === 'saved' ? 'rgba(179,47,23,0.18)' : 'transparent',
+                    border: '1.5px solid rgb(179,47,23)',
+                    borderRadius: 12,
+                  }}
                   hoverBackground="rgba(179,47,23,0.18)"
                   textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
                 />
@@ -625,6 +707,8 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
           </>
         )}
       </motion.div>
+
+      <Toast message={saveError} />
     </div>
   );
 }
