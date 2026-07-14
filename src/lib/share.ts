@@ -55,11 +55,24 @@ export function shareKakao(params: {
 }
 
 export async function captureCardImage(element: HTMLElement): Promise<Blob> {
+  const rect = element.getBoundingClientRect();
+  // 모바일 bleed용 음수 마진은 화면상 부모 패딩을 상쇄하기 위한 것이라 고립된 캡처에서는
+  // 의미가 없고, 오히려 콘텐츠를 좌측으로 밀어 우측에 투명 여백을 남긴다 — 캡처 시엔 0으로 리셋
+  const prevMarginLeft = element.style.marginLeft;
+  const prevMarginRight = element.style.marginRight;
+  element.style.marginLeft = '0px';
+  element.style.marginRight = '0px';
+
   const dataUrl = await toPng(element, {
     quality: 0.95,
     pixelRatio: 2,
     cacheBust: true,
+    width: rect.width,
+    height: rect.height,
   });
+
+  element.style.marginLeft = prevMarginLeft;
+  element.style.marginRight = prevMarginRight;
 
   const response = await fetch(dataUrl);
   return response.blob();

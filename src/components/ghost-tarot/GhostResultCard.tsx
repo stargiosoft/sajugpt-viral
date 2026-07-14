@@ -29,6 +29,27 @@ const REVEAL_DURATION_MS = BG_FADE_START_MS + BG_FADE_DURATION_MS;
 const IOS_APP_URL = 'https://apps.apple.com/us/app/fortune-gpt/id1547399137';
 const ANDROID_APP_URL = 'https://play.google.com/store/apps/details?id=kr.semaphore.sajugpt';
 
+// 요약 박스 모서리를 안쪽으로 오목하게 파낸(concave notch) 패스 — 실제 박스 px 크기(w,h) 기준으로 그려서
+// 가로로 긴 박스에도 모서리 원호가 찌그러지지 않고 항상 정원으로 유지됨
+function notchPath(w: number, h: number, inset: number, cr: number) {
+  const x0 = inset;
+  const y0 = inset;
+  const x1 = w - inset;
+  const y1 = h - inset;
+  return [
+    `M ${x0 + cr} ${y0}`,
+    `L ${x1 - cr} ${y0}`,
+    `A ${cr} ${cr} 0 0 0 ${x1} ${y0 + cr}`,
+    `L ${x1} ${y1 - cr}`,
+    `A ${cr} ${cr} 0 0 0 ${x1 - cr} ${y1}`,
+    `L ${x0 + cr} ${y1}`,
+    `A ${cr} ${cr} 0 0 0 ${x0} ${y1 - cr}`,
+    `L ${x0} ${y0 + cr}`,
+    `A ${cr} ${cr} 0 0 0 ${x0 + cr} ${y0}`,
+    'Z',
+  ].join(' ');
+}
+
 interface Props {
   card: GhostCardData;
   result: GhostResult | null;
@@ -53,13 +74,17 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   const [fitScale, setFitScale] = useState(1);
   const [appStoreUrl, setAppStoreUrl] = useState(IOS_APP_URL);
   const [isDesktop, setIsDesktop] = useState(false);
-  // 웹에서 요약 박스가 프레임 기준 항상 정확히 16px 여백을 갖도록 fitScale 축소를 역산한 px 값
-  // (fitScale은 fitRef 자기 중심으로 축소되기 때문에, % 마진만으로는 축소된 카드에서 여백이 커짐)
-  const [desktopBoxMargin, setDesktopBoxMargin] = useState<{ marginLeftPx: number; widthPx: number } | null>(null);
+  // 320px급 좁은 화면(아이폰 SE 등) 전용 분기 — isDesktop(768px 기준)과 별개
+  const [isNarrow, setIsNarrow] = useState(false);
+  const notchBoxRef = useRef<HTMLDivElement>(null);
+  const [notchSize, setNotchSize] = useState({ w: 300, h: 100 });
 
   // 프로젝트 공통 md: 브레이크포인트(768px)와 동일 기준으로 웹/모바일 판별
   useEffect(() => {
-    const update = () => setIsDesktop(window.innerWidth >= 768);
+    const update = () => {
+      setIsDesktop(window.innerWidth >= 768);
+      setIsNarrow(window.innerWidth <= 360);
+    };
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
@@ -105,21 +130,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
 
     const recompute = () => {
       const raw = el.scrollHeight;
-      const avail = outer.clientHeight;
+      // 320px급 좁은 화면은 줄바꿈이 늘어 꽉 채운 스케일이 되기 쉬워 바닥에 붙어 보임 — 여유 16px 확보
+      const avail = outer.clientHeight - (window.innerWidth <= 360 ? 16 : 0);
       const scale = raw > avail ? Math.max(avail / raw, 0.5) : 1;
       setFitScale(scale);
-
-      // 웹 요약 박스가 프레임 기준 정확히 16px 여백을 갖도록, fitRef 자기 중심 축소(scale)를 역산
-      const frameWidth = captureRef.current?.getBoundingClientRect().width;
-      if (frameWidth) {
-        const W = frameWidth * 0.74; // fitRef 레이아웃 폭(74% 인셋 컨테이너 기준)
-        const insetLeft = frameWidth * 0.13;
-        const desiredGap = 16;
-        const targetX = -insetLeft + desiredGap;
-        const marginLeftPx = W / 2 + (targetX - W / 2) / scale;
-        const widthPx = (frameWidth - desiredGap * 2) / scale;
-        setDesktopBoxMargin({ marginLeftPx, widthPx });
-      }
     };
 
     setFitScale(1);
@@ -129,6 +143,17 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', recompute);
     };
+  }, [result, error]);
+
+  // 요약 박스의 실제 렌더 px 크기를 측정 — notchPath가 이 크기를 그대로 써서 모서리 원호가 찌그러지지 않게 함
+  useEffect(() => {
+    const el = notchBoxRef.current;
+    if (!el) return;
+    const update = () => setNotchSize({ w: el.clientWidth, h: el.clientHeight });
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [result, error]);
 
   const cardName = result?.card_name || card.card_name || '이름 없는 존재';
@@ -171,19 +196,26 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
       <div
         ref={captureRef}
         className="w-full max-w-[440px] md:max-w-[600px]"
-        style={{ position: 'relative', aspectRatio: '864 / 1821' }}
+        style={{
+          position: 'relative',
+          aspectRatio: '863 / 1823',
+          // 모바일만 부모의 좌우 16px 패딩을 상쇄해 이미지가 화면 끝까지 닿게 함 (버튼 영역 패딩은 그대로 유지)
+          ...(isDesktop ? {} : { width: 'calc(100% + 32px)', marginLeft: -16, marginRight: -16 }),
+        }}
       >
-        <Image src="/ghost-tarot/result-bg.png" alt="" fill priority className="object-contain" />
+        <Image src={isDesktop ? '/ghost-tarot/result-bg.png' : '/ghost-tarot/result-bg-mobile.png'} alt="" fill priority className="object-contain" />
 
-        {/* 빈 종이 영역 안쪽에 결과 정보 배치 (퍼센트 기반이라 액자와 함께 스케일됨) — 리빌 연출 뒤에 이미 완성된 채로 드러남 */}
+        {/* 빈 종이 영역 안쪽에 결과 정보 배치 (퍼센트 기반이라 액자와 함께 스케일됨) — 리빌 연출 뒤에 이미 완성된 채로 드러남
+            모바일 전용 배경(result-bg-mobile.png)의 종이 폭 실측값 기준으로 좌우 인셋 계산 */}
         <div
           style={{
             position: 'absolute',
-            top: 'calc(20% - 8px)',
-            left: '13%',
-            width: '74%',
-            height: '64%',
+            top: '14.8%',
+            left: isDesktop ? '15.3%' : '9.2%',
+            width: isDesktop ? '69.3%' : '81.6%',
+            height: '80.3%',
             overflow: 'hidden',
+            transform: `translateY(${isDesktop ? 44 : 4}px)`,
           }}
         >
           {/* 내용이 긴 카드는 이 래퍼 전체를 축소해서 빈 종이 영역 안에 항상 들어오도록 함 */}
@@ -195,37 +227,38 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
           <div
             ref={dockTargetRef}
             style={{
-              width: 'calc(42% + 40px)',
+              width: isDesktop ? 'calc(42% + 36px)' : (isNarrow ? 'calc(42% + 12px)' : 'calc(42% - 12px)'),
               marginTop: 20,
               aspectRatio: '2 / 3',
               position: 'relative',
-              filter: 'drop-shadow(0 10px 24px rgba(0,0,0,.7))',
+              filter: 'drop-shadow(0 6px 14px rgba(59,38,20,.55))',
               flexShrink: 0,
-              borderRadius: 12,
-              overflow: 'hidden',
             }}
           >
-            {/* 흰색 매트 박스 — 카드 이미지 자체 라운딩과 별개로 카드와 세트로 보이는 배경 */}
-            <div style={{ position: 'absolute', inset: '-4%', background: '#f7f2e8', borderRadius: 12 }} />
+            <div style={{ position: 'absolute', inset: 0, borderRadius: 12, overflow: 'hidden' }}>
+              {/* 흰색 매트 박스 — 카드 이미지 자체 라운딩과 별개로 카드와 세트로 보이는 배경 */}
+              <div style={{ position: 'absolute', inset: '-4%', background: '#f7f2e8', borderRadius: 12 }} />
 
-            {frontImage ? (
-              <Image src={frontImage} alt={cardName} fill className="object-cover" />
-            ) : (
-              <div className="w-full h-full bg-black/20 border flex items-center justify-center text-[10px]" style={{ position: 'relative', borderColor: 'rgba(138,109,59,.4)', color: PARCHMENT_INK_DIM }}>
-                형상을 불러오는 중...
-              </div>
-            )}
+              {frontImage ? (
+                <Image src={frontImage} alt={cardName} fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full bg-black/20 border flex items-center justify-center text-[10px]" style={{ position: 'relative', borderColor: 'rgba(138,109,59,.4)', color: PARCHMENT_INK_DIM }}>
+                  형상을 불러오는 중...
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 카드 이름 — 괄호 부제는 따로 작게 */}
           <h1
             style={{
-              marginTop: 'calc(8% + 14px)',
+              marginTop: isDesktop ? 'calc(7% - 6px)' : 'calc(7% + 0px)',
               fontFamily: GHOST_MYUNGJO_FONT,
-              fontSize: 23,
+              fontSize: isDesktop ? 22 : (isNarrow ? 17 : 18),
               lineHeight: 1.2,
               color: 'rgb(42, 31, 22)',
-              WebkitTextStroke: '1px rgb(42, 31, 22)',
+              WebkitTextStroke: isDesktop ? '1.4px rgb(42, 31, 22)' : '1px rgb(42, 31, 22)',
+              textShadow: '0 1px 3px rgba(247,242,232,0.55)',
               flexShrink: 0,
               letterSpacing: '3px',
             }}
@@ -236,13 +269,13 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
             <span
               style={{
                 display: 'block',
-                marginTop: 'calc(1.8% + 2px)',
+                marginTop: isDesktop ? 'calc(1.6% + 0px)' : (isNarrow ? 5 : 3),
                 fontFamily: GHOST_MYUNGJO_FONT,
-                fontSize: 12,
-                color: 'rgb(82, 67, 54)',
-                WebkitTextStroke: '0.5px rgb(82, 67, 54)',
+                fontSize: isDesktop ? 12.5 : 12,
+                color: '#584E44',
+                WebkitTextStroke: '0.2px #584E44',
                 flexShrink: 0,
-                letterSpacing: '-0.2px',
+                letterSpacing: '0.8px',
               }}
             >
               ({cardNameSub})
@@ -252,8 +285,8 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
           {result && !error && (
             <>
               {/* 장식 구분선 */}
-              <div className="flex items-center justify-center" style={{ marginTop: 'calc(5% + 16px)', gap: 8, width: '60%', flexShrink: 0 }}>
-                <span style={{ flex: 1, height: 1, background: PARCHMENT_INK_DIM, opacity: 0.4 }} />
+              <div className="flex items-center justify-center" style={{ marginTop: isDesktop ? 'calc(5% + 16px)' : (isNarrow ? 'calc(5% + 8px)' : 'calc(5% + 12px)'), gap: 8, width: '74%', flexShrink: 0 }}>
+                <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent 0%, ${PARCHMENT_INK_DIM} 100%)`, opacity: 0.4 }} />
                 <span
                   style={{
                     display: 'inline-block',
@@ -272,22 +305,36 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                     maskPosition: 'center',
                   }}
                 />
-                <span style={{ flex: 1, height: 1, background: PARCHMENT_INK_DIM, opacity: 0.4 }} />
+                <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${PARCHMENT_INK_DIM} 0%, transparent 100%)`, opacity: 0.4 }} />
               </div>
 
-              {/* 7월 · 이번 달 테마 라벨 — 카드 위가 아니라 여기, 하나의 줄로 */}
-              <div className="flex items-center justify-center" style={{ marginTop: 'calc(5% + 10px)', flexShrink: 0 }}>
+              {/* 7월 · 이번 달 테마 라벨 — 붓으로 슥 칠한 자국(SVG 거친 가장자리) 위에 얹음.
+                  이미지 대신 SVG feTurbulence로 만들어서 텍스트 길이가 바뀌어도 항상 자연스럽게 늘어남 */}
+              <div className="flex items-center justify-center" style={{ marginTop: isDesktop ? 'calc(5% + 14px)' : (isNarrow ? 'calc(5% + 6px)' : 'calc(5% + 10px)'), flexShrink: 0 }}>
                 <span
                   style={{
+                    position: 'relative',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     fontFamily: GHOST_MYUNGJO_FONT,
-                    fontSize: 14.5,
+                    fontSize: isDesktop ? 14.5 : (isNarrow ? 12 : 13),
                     fontWeight: 600,
-                    color: 'rgb(146 22 0)',
-                    WebkitTextStroke: '0.1px rgb(146 22 0)',
+                    color: '#FCF9EF',
+                    WebkitTextStroke: '0px #FCF9EF',
                     letterSpacing: '-0.5px',
+                    padding: isDesktop ? '11.5px 46px 10px' : '9.5px 46px 8px',
                   }}
                 >
-                  7월 · {cleanJulyTitle(julyTitle)}
+                  {/* 실제 붓터치 텍스처 에셋을 좌/중/우 3분할 background-image로 얹음 — 좌우 붓 갈라진 끝단(캡)은
+                      원본 픽셀 비율 그대로 고정되고 가운데만 늘어남. border-image 대신 background-image를 쓴 이유는
+                      "이미지 저장하기"(html-to-image)가 border-image를 캡처하지 못해 저장된 이미지에서 배경이 빠지기 때문 */}
+                  <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: -1, display: 'flex' }}>
+                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.png)', backgroundSize: '1114.48% 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat' }} />
+                    <div style={{ flex: 1, backgroundImage: 'url(/ghost-tarot/july-badge-brush.png)', backgroundSize: '121.87% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.png)', backgroundSize: '1114.48% 100%', backgroundPosition: 'right center', backgroundRepeat: 'no-repeat' }} />
+                  </div>
+                  <span style={{ position: 'relative' }}>7월 · {cleanJulyTitle(julyTitle)}</span>
                 </span>
               </div>
             </>
@@ -302,75 +349,107 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               어둠 속의 존재가 기록을 전하고 있습니다...
             </p>
           ) : (
-            <div style={{ marginTop: 'calc(4% + 2px)', width: '100%' }}>
-              {/* [&_*]:!text-inherit — DB 컨텐츠에 남아있을 수 있는 옛 다크테마용 inline color를 강제로 덮어씀
-                  메시지 두 줄을 같은 크기로 통일 — 첫줄만 키우면 두 줄이 서로 다른 요소처럼 끊겨 보임 */}
+            <div style={{ marginTop: isDesktop ? 14 : 16, width: '100%' }}>
+              {/* 메시지 두 줄을 같은 크기로 통일 — 첫줄만 키우면 두 줄이 서로 다른 요소처럼 끊겨 보임 */}
               <h2
-                className="[&_*]:!text-inherit"
                 style={{
-                  marginTop: 2,
+                  marginTop: 0,
                   fontFamily: GHOST_MYUNGJO_FONT,
-                  fontSize: isDesktop ? 34 : 30,
-                  lineHeight: 1.65,
+                  fontSize: isDesktop ? 30 : (isNarrow ? 21 : 26),
+                  lineHeight: isDesktop ? 1.6 : 1.6,
                   color: 'rgb(42, 31, 22)',
-                  WebkitTextStroke: '1.8px rgb(42, 31, 22)',
-                  letterSpacing: '-1.5px',
-                  width: 'calc(135.135% + 16px)',
-                  marginLeft: 'calc(-17.568% - 8px)',
-                  marginRight: 'calc(-17.568% - 8px)',
-                }}
-                dangerouslySetInnerHTML={{ __html: result.july_message || '' }}
-              />
-
-              <div className="flex items-center justify-center" style={{ marginTop: 'calc(4% + 6px)', gap: 8, width: '60%', flexShrink: 0, marginLeft: 'auto', marginRight: 'auto' }}>
-                <span style={{ flex: 1, height: 1, background: PARCHMENT_INK_DIM, opacity: 0.4 }} />
-                <span
-                  style={{
-                    display: 'inline-block',
-                    width: 14,
-                    height: 14,
-                    flexShrink: 0,
-                    backgroundColor: PARCHMENT_INK_DIM,
-                    opacity: 0.7,
-                    WebkitMaskImage: 'url(/ghost-tarot/chinese-knot.svg)',
-                    maskImage: 'url(/ghost-tarot/chinese-knot.svg)',
-                    WebkitMaskSize: 'contain',
-                    maskSize: 'contain',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskRepeat: 'no-repeat',
-                    WebkitMaskPosition: 'center',
-                    maskPosition: 'center',
-                  }}
-                />
-                <span style={{ flex: 1, height: 1, background: PARCHMENT_INK_DIM, opacity: 0.4 }} />
-              </div>
-
-              <div
-                style={{
-                  marginTop: 'calc(6% + 12px)',
-                  // 모바일은 프레임 끝까지 채움. 웹은 fitRef 자기 중심 축소(fitScale)를 감안해
-                  // 실측 픽셀로 역산한 desktopBoxMargin을 써서 화면에 항상 정확히 16px 여백이 보이게 함
-                  width: isDesktop && desktopBoxMargin ? `${desktopBoxMargin.widthPx}px` : '135.135%',
-                  marginLeft: isDesktop && desktopBoxMargin ? `${desktopBoxMargin.marginLeftPx}px` : '-17.568%',
-                  marginRight: isDesktop && desktopBoxMargin ? `${desktopBoxMargin.marginLeftPx}px` : '-17.568%',
-                  background: 'rgb(0 0 0 / 50%)',
-                  border: '1px solid rgb(151 138 125 / 27%)',
-                  borderRadius: 12,
-                  padding: 'calc(4% + 4px) 4%',
+                  WebkitTextStroke: isDesktop ? '1.6px rgb(42, 31, 22)' : '1.3px rgb(42, 31, 22)',
+                  textShadow: '0 1px 3px rgba(247,242,232,0.55)',
+                  letterSpacing: isDesktop ? '-0.5px' : (isNarrow ? '-0.5px' : '-1.5px'),
+                  // 좌우 12px 여백만 두고 나머지는 꽉 채움
+                  width: 'auto',
+                  marginLeft: 12,
+                  marginRight: 12,
                 }}
               >
+                <span
+                  className="[&_*]:!text-inherit"
+                  dangerouslySetInnerHTML={{ __html: result?.july_message || '' }}
+                />
+              </h2>
+
+              <div className="flex items-center justify-center" style={{ marginTop: isDesktop ? 'calc(4% + 10px)' : 'calc(4% + 6px)', width: '74%', flexShrink: 0, marginLeft: 'auto', marginRight: 'auto' }}>
+                <span style={{ width: '100%', height: 1, background: `linear-gradient(90deg, transparent 0%, ${PARCHMENT_INK_DIM} 50%, transparent 100%)`, opacity: 0.4 }} />
+              </div>
+
+              {/* 결과 요약 박스 — 모서리가 안쪽으로 둥글게 파인 이중 테두리 종이 카드 느낌 */}
+              <div
+                ref={notchBoxRef}
+                style={{
+                  position: 'relative',
+                  marginTop: isDesktop ? 'calc(6% + 12px)' : 'calc(6% + 8px)',
+                  // 웹은 종이 좌우 끝에서 16px 여백 — fitRef 자체가 이미 종이 폭과 같으므로
+                  // bleed용 음수 마진(-16.446%) 없이 100% 기준으로 직접 계산해야 실제로 인셋이 생김
+                  // 모바일은 콘텐츠 영역(fitRef) 기준 좌우 여백 (종이 배경에 안 닿게 폭 축소)
+                  // 320px급은 박스 너비 +16px(여백 -8px씩), 390px급 이상은 -16px(여백 +8px씩)
+                  width: isDesktop ? 'calc(100% - 32px)' : (isNarrow ? 'calc(100% + 4px)' : 'calc(100% - 36px)'),
+                  marginLeft: isDesktop ? 16 : (isNarrow ? -2 : 18),
+                  marginRight: isDesktop ? 16 : (isNarrow ? -2 : 18),
+                  padding: isDesktop ? 'calc(4% + 12px) 4%' : 'calc(4% + 10px) calc(4% + 10px)',
+                  filter: 'drop-shadow(0 3px 8px rgba(20,14,8,0.16))',
+                }}
+              >
+                <svg
+                  aria-hidden
+                  viewBox={`0 0 ${notchSize.w} ${notchSize.h}`}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+                >
+                  <defs>
+                    {/* 중심에서 가장자리로 갈수록 짙어지는 비대칭 그라데이션 — 낡은 종이가 고르지 않게 바랜 느낌 */}
+                    <radialGradient id="ghost-notch-fill" cx="38%" cy="32%" r="85%">
+                      <stop offset="0%" stopColor="rgba(96,74,48,0.015)" />
+                      <stop offset="50%" stopColor="rgba(84,64,42,0.04)" />
+                      <stop offset="80%" stopColor="rgba(74,56,36,0.07)" />
+                      <stop offset="100%" stopColor="rgba(64,48,30,0.1)" />
+                    </radialGradient>
+                    {/* 반대쪽 모서리에 덧대는 얼룩 — 한쪽만 바랜 느낌을 깨서 고르지 않게 헤진 느낌 강조 */}
+                    <radialGradient id="ghost-notch-stain" cx="78%" cy="82%" r="65%">
+                      <stop offset="0%" stopColor="rgba(60,44,26,0.08)" />
+                      <stop offset="55%" stopColor="rgba(60,44,26,0.025)" />
+                      <stop offset="100%" stopColor="rgba(60,44,26,0)" />
+                    </radialGradient>
+                    {/* 테두리 선도 균일하지 않게 — 진하다 옅어지길 반복해 실이 헤진 듯한 느낌 */}
+                    <linearGradient id="ghost-notch-stroke-outer" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="rgba(96,74,48,0.36)" />
+                      <stop offset="16%" stopColor="rgba(96,74,48,0.12)" />
+                      <stop offset="32%" stopColor="rgba(96,74,48,0.32)" />
+                      <stop offset="50%" stopColor="rgba(96,74,48,0.1)" />
+                      <stop offset="68%" stopColor="rgba(96,74,48,0.3)" />
+                      <stop offset="84%" stopColor="rgba(96,74,48,0.11)" />
+                      <stop offset="100%" stopColor="rgba(96,74,48,0.32)" />
+                    </linearGradient>
+                    <linearGradient id="ghost-notch-stroke-inner" x1="100%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="rgba(96,74,48,0.22)" />
+                      <stop offset="20%" stopColor="rgba(96,74,48,0.06)" />
+                      <stop offset="38%" stopColor="rgba(96,74,48,0.2)" />
+                      <stop offset="56%" stopColor="rgba(96,74,48,0.05)" />
+                      <stop offset="74%" stopColor="rgba(96,74,48,0.18)" />
+                      <stop offset="100%" stopColor="rgba(64,52,38,0.1)" />
+                    </linearGradient>
+                  </defs>
+                  <path d={notchPath(notchSize.w, notchSize.h, 3, 14)} fill="url(#ghost-notch-fill)" stroke="url(#ghost-notch-stroke-outer)" strokeWidth={isDesktop ? 0.8 : 1} />
+                  <path d={notchPath(notchSize.w, notchSize.h, 3, 14)} fill="url(#ghost-notch-stain)" />
+                  <path d={notchPath(notchSize.w, notchSize.h, 9, 11)} fill="none" stroke="url(#ghost-notch-stroke-inner)" strokeWidth={0.65} />
+                </svg>
                 <p
                   className="[&_*]:!text-inherit"
                   style={{
+                    position: 'relative',
                     fontFamily: GHOST_MYUNGJO_FONT,
-                    fontSize: 14,
-                    fontWeight: 500,
-                    lineHeight: 1.95,
-                    color: 'rgb(238, 221, 204)',
-                    WebkitTextStroke: '0.2px rgb(238, 221, 204)',
-                    letterSpacing: '-0.3px',
+                    fontSize: isDesktop ? 14.5 : (isNarrow ? 13 : 13),
+                    fontWeight: 600,
+                    lineHeight: isDesktop ? 1.75 : 1.75,
+                    color: 'rgb(42, 31, 22)',
+                    WebkitTextStroke: isDesktop ? '0.2px rgb(42, 31, 22)' : (isNarrow ? '0.1px rgb(42, 31, 22)' : '0.1px rgb(42, 31, 22)'),
+                    letterSpacing: isDesktop ? '-0.5px' : '-0.3px',
+                    marginTop: isDesktop ? 0 : 2,
                   }}
-                  dangerouslySetInnerHTML={{ __html: result.july_summary || '' }}
+                  dangerouslySetInnerHTML={{ __html: result?.july_summary || '' }}
                 />
               </div>
             </div>
@@ -495,12 +574,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
           </GhostSealButton>
         ) : (
           <>
-            <p style={{ textAlign: 'center', fontSize: 15, lineHeight: 1.85, color: 'rgb(202 186 172)', marginTop: 16, marginBottom: 8 }}>
-              여기서 끝이 아닙니다.
-              <br />
-              <span style={{ color: 'rgb(179 47 23)', fontWeight: 700 }}>사주GPT</span>에서 이어지는 귀신타로를 확인하세요.
-            </p>
-
             <div style={{ marginTop: 22 }}>
             <PressableButton
               href={appStoreUrl}
@@ -509,16 +582,16 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               onClick={() => trackSajuGPTClick('ghost_tarot', result?.id)}
               label={
                 <span className="flex items-center justify-center" style={{ gap: 8 }}>
-                  귀신타로 이어보기
+                  귀신타로 이어보기 <span style={{ position: 'relative', top: '-0.5px', fontFamily: 'Pretendard', fontSize: isDesktop ? '13.5px' : (isNarrow ? '12.5px' : '13.5px'), fontWeight: 700 }}>(사주<span style={{ fontSize: isDesktop ? '14px' : (isNarrow ? '13px' : '14px') }}>GPT</span>)</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M9 5l7 7-7 7" stroke="#f5ebe0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
               }
-              style={{ height: 52 }}
+              style={{ height: isDesktop ? 52 : (isNarrow ? 48 : 52) }}
               bgStyle={{ backgroundColor: 'rgb(179,47,23)', borderRadius: 12 }}
-              hoverBackground="rgb(148,36,17)"
-              textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: 21, fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
+              shineColor="rgba(150,39,20,0.55)"
+              textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
             />
             </div>
 
@@ -527,10 +600,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 <PressableButton
                   onClick={onReset}
                   label="테스트 다시하기"
-                  style={{ height: 52 }}
+                  style={{ height: isDesktop ? 52 : (isNarrow ? 48 : 52) }}
                   bgStyle={{ backgroundColor: 'transparent', border: '1.5px solid rgb(179,47,23)', borderRadius: 12 }}
                   hoverBackground="rgba(179,47,23,0.18)"
-                  textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: 21, fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
+                  textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
                 />
               </div>
 
@@ -538,10 +611,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 <PressableButton
                   onClick={handleSaveImage}
                   label="이미지 저장하기"
-                  style={{ height: 52 }}
+                  style={{ height: isDesktop ? 52 : (isNarrow ? 48 : 52) }}
                   bgStyle={{ backgroundColor: 'transparent', border: '1.5px solid rgb(179,47,23)', borderRadius: 12 }}
                   hoverBackground="rgba(179,47,23,0.18)"
-                  textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: 21, fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
+                  textStyle={{ fontFamily: GHOST_BRUSH_FONT, fontSize: isDesktop ? 21 : (isNarrow ? 20 : 21), fontWeight: 400, color: '#f5ebe0', letterSpacing: '1px' }}
                 />
               </div>
             </div>

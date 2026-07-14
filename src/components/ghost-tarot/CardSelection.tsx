@@ -271,6 +271,7 @@ export default function CardSelection({
               disabled={phase !== 'idle'}
               fontSize={21}
               webFontSize={23}
+              narrowFontSize={20}
             >
               {buttonLabel}
             </GhostSealButton>

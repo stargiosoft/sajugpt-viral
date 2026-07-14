@@ -12,6 +12,8 @@ interface Props {
   fontSize?: number;
   /** 웹(768px 이상)에서만 다르게 쓸 폰트 크기 — 없으면 fontSize 그대로 */
   webFontSize?: number;
+  /** 320px급 좁은 화면(360px 이하)에서만 다르게 쓸 폰트 크기 — 없으면 fontSize 그대로 */
+  narrowFontSize?: number;
   fontFamily?: string;
   disabled?: boolean;
 }
@@ -26,6 +28,18 @@ function useIsDesktop() {
     return () => window.removeEventListener('resize', update);
   }, []);
   return isDesktop;
+}
+
+// 320px급 좁은 화면(아이폰 SE 등) 전용 분기 — useIsDesktop과 별개
+function useIsNarrow() {
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const update = () => setIsNarrow(window.innerWidth <= 360);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  return isNarrow;
 }
 
 const VARIANT_STYLE = {
@@ -47,11 +61,15 @@ const VARIANT_STYLE = {
   },
 } as const;
 
-export default function GhostSealButton({ children, variant = 'primary', onClick, className, fontSize, webFontSize, fontFamily, disabled }: Props) {
+export default function GhostSealButton({ children, variant = 'primary', onClick, className, fontSize, webFontSize, narrowFontSize, fontFamily, disabled }: Props) {
   const style = VARIANT_STYLE[variant];
   const filterId = `ghost-seal-rough-${useId().replace(/[:]/g, '')}`;
   const isDesktop = useIsDesktop();
-  const resolvedFontSize = isDesktop && webFontSize ? webFontSize : (fontSize ?? style.fontSize);
+  const isNarrow = useIsNarrow();
+  const resolvedFontSize = isDesktop && webFontSize
+    ? webFontSize
+    : (!isDesktop && isNarrow && narrowFontSize !== undefined ? narrowFontSize : (fontSize ?? style.fontSize));
+  const resolvedHeight = isDesktop ? style.height : (isNarrow ? 48 : style.height);
 
   return (
     <motion.button
@@ -64,7 +82,7 @@ export default function GhostSealButton({ children, variant = 'primary', onClick
       transition={{ duration: 0.15, ease: 'easeOut' }}
       style={{
         width: '100%',
-        height: style.height,
+        height: resolvedHeight,
         padding: '0 20px',
         cursor: disabled ? 'default' : 'pointer',
         opacity: disabled ? 0.55 : 1,
@@ -96,6 +114,24 @@ export default function GhostSealButton({ children, variant = 'primary', onClick
           animate={{ backgroundPosition: ['0% 40%', '100% 60%', '40% 100%', '0% 40%'] }}
           transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
         />
+      )}
+
+      {/* 사선 빛줄기가 좌→우로 흐르는 CTA 강조 효과 (primary만, 귀신타로 이어보기 버튼과 동일) */}
+      {variant === 'primary' && (
+        <div aria-hidden style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, pointerEvents: 'none' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: '-30%',
+              left: '-55%',
+              width: '45%',
+              height: '160%',
+              transform: 'skewX(-20deg)',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(150,39,20,0.55) 50%, transparent 100%)',
+              animation: 'ghost-cta-sheen 4s linear infinite',
+            }}
+          />
+        </div>
       )}
 
       {/* 지글거리는 손그림 느낌의 테두리 (secondary만) */}

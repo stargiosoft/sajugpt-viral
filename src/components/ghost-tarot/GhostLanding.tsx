@@ -71,7 +71,7 @@ export default function GhostLanding({
           }}
         >
           <span style={{ display: 'inline-block', paddingTop: 2, fontFamily: 'Pretendard', fontSize: 14, fontWeight: 600, color: 'rgb(199 199 199)' }}>
-            7월... 내가 알려주마.
+            너의 7월을 알려주마
           </span>
         </div>
       </motion.div>
@@ -82,7 +82,7 @@ export default function GhostLanding({
         transition={{ delay: .7, duration: .5 }}
         style={{ marginTop: 15, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}
       >
-        <GhostSealButton variant="primary" onClick={onStart} fontSize={21} webFontSize={23}>
+        <GhostSealButton variant="primary" onClick={onStart} fontSize={21} webFontSize={23} narrowFontSize={20}>
           시작하기
         </GhostSealButton>
       </motion.div>

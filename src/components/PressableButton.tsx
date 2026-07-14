@@ -16,11 +16,13 @@ interface Props {
   textStyle?: CSSProperties;
   /** rgba 배경처럼 밝기(filter) 변화가 잘 안 보이는 어두운 배경용 — 호버 시 이 색으로 직접 전환 */
   hoverBackground?: string;
+  /** 지정 시 버튼 위로 사선 빛줄기가 좌→우로 흐르는 CTA 강조 효과를 추가 (색상은 이 값으로 지정) */
+  shineColor?: string;
 }
 
 // "시작하기" 버튼과 동일한 프레스/호버 효과를 내는 공용 버튼 —
 // 배경(애니메이션 레이어)과 텍스트(고정 레이어)를 분리해서 눌렀을 때 텍스트가 같이 움직이지 않는다.
-export default function PressableButton({ label, onClick, href, target, rel, disabled, style, bgStyle, textStyle, hoverBackground }: Props) {
+export default function PressableButton({ label, onClick, href, target, rel, disabled, style, bgStyle, textStyle, hoverBackground, shineColor }: Props) {
   const hoverProps = hoverBackground
     ? {
         whileHover: { backgroundColor: hoverBackground },
@@ -50,6 +52,31 @@ export default function PressableButton({ label, onClick, href, target, rel, dis
           ...bgStyle,
         }}
       />
+      {shineColor && (
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'hidden',
+            borderRadius: bgStyle?.borderRadius,
+            pointerEvents: 'none',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: '-30%',
+              left: '-55%',
+              width: '45%',
+              height: '160%',
+              transform: 'skewX(-20deg)',
+              background: `linear-gradient(90deg, transparent 0%, ${shineColor} 50%, transparent 100%)`,
+              animation: 'ghost-cta-sheen 4s linear infinite',
+            }}
+          />
+        </div>
+      )}
       <div
         style={{
           position: 'absolute',

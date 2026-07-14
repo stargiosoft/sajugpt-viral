@@ -98,3 +98,9 @@ input[type='number'] {
     --hero-title-size: 25px;
   }
 }
+
+/* 귀신타로 이어보기 CTA: 사선 빛줄기가 좌→우로 흐르는 하이라이트 */
+@keyframes ghost-cta-sheen {
+  0% { left: -55%; }
+  100% { left: 145%; }
+}

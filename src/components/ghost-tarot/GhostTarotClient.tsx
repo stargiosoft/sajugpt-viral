@@ -154,14 +154,14 @@ export default function GhostTarotClient({ resultId }: Props) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center text-white" style={{ background: '#07050B' }}>
+      <div className="fixed top-0 left-0 right-0 flex items-center justify-center text-white" style={{ height: '100dvh', background: '#07050B' }}>
         명부 불러오는 중...
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 flex justify-center" style={{ background: GHOST_PALETTE.bg }}>
+    <div className="fixed top-0 left-0 right-0 flex justify-center" style={{ height: '100dvh', background: GHOST_PALETTE.bg }}>
       <div className="w-full h-full flex flex-col max-w-[440px] md:max-w-[600px]">
         <div className="flex-1 overflow-auto">
           <TestTopNav bgColor="rgba(7, 5, 11, 0.55)" onBack={handleBack} />
