@@ -1,12 +1,9 @@
 'use client';
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useState, } from 'react';
 
 import { AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 
 import GhostLanding from './GhostLanding';
 import CardSelection from './CardSelection';
@@ -23,10 +20,21 @@ const FALLBACK_GHOST_CARDS: GhostCardData[] = [
   { id: '5a4cfc5e-7e62-488c-86de-ab870a72a321', card_name: '해원상생 (축제의 굿판)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/36_Sangsaeng.webp' },
   { id: '7108a8c7-0074-4974-b86c-b3492ea7b878', card_name: '당산나무 (절대 안전 구역)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/26_Dangsan.webp' },
   { id: '819edd7e-8c08-48ed-9a31-d579d8828594', card_name: '환생꽃 (새로운 피어남)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/31_RebirthFlower.webp' },
+  { id: '89bf2958-1f3a-48bc-bb41-b2f8fd48fb3d', card_name: '동자신 (순수한 영감)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/33_Dongja.webp' },
+  { id: '95c712a7-8166-4b18-99ce-f9935919771b', card_name: '무지개 다리 (순조로운 도약)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/32_RainbowBridge.webp' },
   { id: 'a670073e-f949-491c-ab8d-a2a4fb197795', card_name: '손각시 (집착의 굴레)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/09_Songaksi.webp' },
   { id: 'c6c8f6fd-48f4-4d6c-8e20-00b47236fcd6', card_name: '악귀 (원한의 형상)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/07_Akgwi.webp' },
   { id: 'e10f5ea5-ccdc-4cbc-9afb-c03fa5452fdf', card_name: '도깨비 (어둠의 브로커)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/06_Dokkaebi.webp' },
   { id: 'f79b6cec-4829-47df-9aa7-84a41312f69c', card_name: '생명수 (바리공주의 약수)', front_image: 'https://tdrmvbsmxcewwaeuoqdx.supabase.co/storage/v1/object/public/tarot-cards/25_LifeWater.webp' }
+];
+
+// mode=5 일 때 무조건 이 5개 안에서만 결과가 나오도록 ID 고정
+const ALLOWED_THREE_CARD_IDS = [
+  '819edd7e-8c08-48ed-9a31-d579d8828594', // 환생꽃
+  'a670073e-f949-491c-ab8d-a2a4fb197795', // 손각시
+  'c6c8f6fd-48f4-4d6c-8e20-00b47236fcd6',  // 악귀
+  '89bf2958-1f3a-48bc-bb41-b2f8fd48fb3d', // 동자신
+  '95c712a7-8166-4b18-99ce-f9935919771b' // 무지개다리
 ];
 
 type Step = 'landing' | 'selection' | 'result';
@@ -43,25 +51,29 @@ export default function GhostTarotClient({ resultId }: Props) {
   const [result, setResult] = useState<GhostResult | null>(null);
   const [resultError, setResultError] = useState(false);
 
+  const searchParams = useSearchParams();
+  const isThreeCardsMode = searchParams.get('mode') === '5';
+
   const fetchCards = async () => {
-  const { data, error } = await supabase
-    .from('ghost_tarot_results')
-    .select(`
-      id,
-      card_name,
-      front_image
-    `)
-    .limit(10);
+    setCardsLoading(true);
+    const { data, error } = await supabase
+      .from('ghost_tarot_results')
+      .select(`
+        id,
+        card_name,
+        front_image
+      `)
+      .limit(10);
 
-  if (error) {
-    setCards(FALLBACK_GHOST_CARDS);
+    if (error) {
+      setCards(FALLBACK_GHOST_CARDS);
+      setCardsLoading(false);
+      return;
+    }
+
+    setCards(data ?? []);
     setCardsLoading(false);
-    return;
-  }
-
-  setCards(data ?? []);
-  setCardsLoading(false);
-};
+  };
 
   useEffect(() => {
     fetchCards();
@@ -94,7 +106,26 @@ export default function GhostTarotClient({ resultId }: Props) {
   }, [resultId]);
 
   const handleCardSelect = useCallback(async (cardId: string) => {
-    const card = cards.find(item => item.id === cardId);
+    let targetCardId = cardId;
+    let card = cards.find(item => item.id === targetCardId);
+
+    // mode=5 모드일 때 무조건 5개 지정 풀 안에서만 무작위 추출되도록 수정
+    if (isThreeCardsMode) {
+      const totalPool = [...cards, ...FALLBACK_GHOST_CARDS];
+      
+      // 합쳐진 전체 데이터 중 ALLOWED_THREE_CARD_IDS에 포함된 카드만 필터링합니다.
+      const filteredPool = totalPool.filter(item => ALLOWED_THREE_CARD_IDS.includes(item.id));
+      // 중복된 데이터 제거
+      const finalPool = filteredPool.filter((item, index, self) =>
+        self.findIndex(t => t.id === item.id) === index
+      );
+
+      if (finalPool.length > 0) {
+        const randomFakeCard = finalPool[Math.floor(Math.random() * finalPool.length)];
+        targetCardId = randomFakeCard.id;
+        card = randomFakeCard;
+      }
+    }
 
     if (!card) {
       console.error('선택 카드 없음');
@@ -110,7 +141,7 @@ export default function GhostTarotClient({ resultId }: Props) {
       const { data, error } = await supabase
         .from('ghost_tarot_results')
         .select('*')
-        .eq('id', cardId)
+        .eq('id', targetCardId)
         .maybeSingle();
 
       if (error) throw error;
@@ -124,7 +155,7 @@ export default function GhostTarotClient({ resultId }: Props) {
       console.error('귀신 카드 조회 실패:', e);
       setResultError(true);
     }
-  }, [cards]);
+  }, [cards, isThreeCardsMode]);
 
   const handleReset = useCallback(() => {
     setSelectedCard(null);
