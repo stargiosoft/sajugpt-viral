@@ -49,6 +49,7 @@ export function initViralAnalytics(): void {
     window.gtag = function gtag(...args: unknown[]) {
       window.dataLayer.push(args);
     };
+    window.gtag('consent', 'default', { analytics_storage: 'granted' });
     window.gtag('js', new Date());
     window.gtag('config', GA_ID);
   }

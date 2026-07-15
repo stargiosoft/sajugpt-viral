@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import MoaMoaWordmark from '@/components/MoaMoaWordmark';
+import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
 
 const MotionLink = motion.create(Link);
 
@@ -53,7 +54,7 @@ export default function Footer() {
                 key={link.label}
                 href={link.href}
                 whileHover={{ opacity: 0.9 }}
-                whileTap={{ scale: 0.995, backgroundColor: link.variant === 'solid' ? '#E8600A' : '#E4E4E8' }}
+                whileTap={{ scale: 0.995, backgroundColor: link.variant === 'solid' ? MOAMOA_ORANGE_DARK : '#E4E4E8' }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
                 className="flex items-center justify-center flex-1 sm:flex-none sm:w-[84px] transform-gpu"
                 style={{
@@ -64,7 +65,7 @@ export default function Footer() {
                   borderRadius: '14px',
                   padding: '9px 0',
                   ...(link.variant === 'solid'
-                    ? { color: '#ffffff', backgroundColor: '#FF7A1A' }
+                    ? { color: '#ffffff', backgroundColor: MOAMOA_ORANGE }
                     : { color: '#777', backgroundColor: 'transparent', border: '1px solid #D9D9DC' }),
                 }}
               >

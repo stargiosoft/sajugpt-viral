@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { SAJUGPT_URL } from '@/constants/links';
 
 interface Slide {
   id: string;
@@ -12,8 +13,6 @@ interface Slide {
   href: string;
   external?: boolean;
 }
-
-const SAJUGPT_URL = 'https://www.sajugpt.co.kr/';
 
 // 비쥬얼 배너 3장 — 전부 이미지 자체에 타이틀/카피가 있어 앱이 덧씌우는 하단 텍스트는 비움
 const SLIDES: Slide[] = [

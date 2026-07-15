@@ -7,13 +7,12 @@ import MoaMoaHeader from './home/MoaMoaHeader';
 import HeroBanner from './home/HeroBanner';
 import RankingPanel from './home/RankingPanel';
 import AdBannerStrip from './home/AdBannerStrip';
-import EditorPickSection from './home/EditorPickSection';
-import NewTestsSection from './home/NewTestsSection';
+import TestGridSection from './home/TestGridSection';
 import Footer from './home/Footer';
 import { TEST_CATALOG } from '@/constants/testCatalog';
 import type { TestCatalogItem } from '@/types/testCatalog';
-
-const SAJUGPT_URL = 'https://www.sajugpt.co.kr/';
+import { SAJUGPT_URL } from '@/constants/links';
+import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
 
 // 모아모아 홈 — 오케스트레이터. 데이터/스타일 세부사항은 하위 컴포넌트가 소유하고,
 // 여기서는 조립만 담당한다.
@@ -47,13 +46,13 @@ export default function ViralHub() {
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ opacity: 0.9 }}
-                whileTap={{ scale: 0.995, backgroundColor: '#E8600A' }}
+                whileTap={{ scale: 0.995, backgroundColor: MOAMOA_ORANGE_DARK }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
                 className="flex items-center justify-center shrink-0 transform-gpu"
                 style={{
                   height: '48px',
                   borderRadius: '16px',
-                  backgroundColor: '#FF7A1A',
+                  backgroundColor: MOAMOA_ORANGE,
                   color: '#ffffff',
                   fontSize: '13px',
                   fontWeight: 700,
@@ -95,9 +94,24 @@ export default function ViralHub() {
             />
           </div>
 
-          <EditorPickSection items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
+          <TestGridSection
+            title="에디터 추천"
+            items={TEST_CATALOG}
+            filter={(item) => item.editorPick}
+            paddingBottom={4}
+            onSelect={handleSelectItem}
+            selectedId={selectedId}
+          />
 
-          <NewTestsSection items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
+          <TestGridSection
+            title="새로 올라온 테스트"
+            items={TEST_CATALOG}
+            filter={(item) => item.isNew}
+            isNew
+            paddingBottom={200}
+            onSelect={handleSelectItem}
+            selectedId={selectedId}
+          />
 
           <div className="px-3 md:px-6 lg:px-8 pb-6">
             <Footer />

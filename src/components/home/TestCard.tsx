@@ -3,12 +3,13 @@
 import { motion } from 'framer-motion';
 import type { TestCatalogItem, TestColorTheme } from '@/types/testCatalog';
 import { CATEGORIES } from '@/constants/categories';
+import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
 
 // White / Gray 스케일 / 홈 화면 브랜드 오렌지만 사용하는 썸네일 컬러 팔레트
 const THEME_STYLES: Record<TestColorTheme, { bg: string; fg: string }> = {
-  orange: { bg: '#FF7A1A', fg: '#ffffff' },
-  orangeDark: { bg: '#E8600A', fg: '#ffffff' },
-  orangeLight: { bg: '#FFF1E6', fg: '#FF7A1A' },
+  orange: { bg: MOAMOA_ORANGE, fg: '#ffffff' },
+  orangeDark: { bg: MOAMOA_ORANGE_DARK, fg: '#ffffff' },
+  orangeLight: { bg: '#FFF1E6', fg: MOAMOA_ORANGE },
   graphite: { bg: '#3F3F46', fg: '#ffffff' },
   slate: { bg: '#6B7280', fg: '#ffffff' },
   mist: { bg: '#E5E5EA', fg: '#52525B' },
@@ -76,7 +77,7 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
             fontSize: '11px',
             fontWeight: 700,
             color: isNew ? '#ffffff' : '#0d0d0d',
-            backgroundColor: isNew ? '#FF7A1A' : 'rgba(255,255,255,0.92)',
+            backgroundColor: isNew ? MOAMOA_ORANGE : 'rgba(255,255,255,0.92)',
             padding: '4.5px 9px 4px',
             borderRadius: '20px',
             letterSpacing: '-0.2px',

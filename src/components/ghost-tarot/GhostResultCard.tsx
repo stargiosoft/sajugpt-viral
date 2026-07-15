@@ -28,7 +28,7 @@ const DOCK_START_MS = FLIP_DONE_MS;
 const BG_FADE_START_MS = DOCK_START_MS + DOCK_DURATION_MS;
 const REVEAL_DURATION_MS = BG_FADE_START_MS + BG_FADE_DURATION_MS;
 
-const IOS_APP_URL = 'https://apps.apple.com/us/app/fortune-gpt/id1547399137';
+const IOS_APP_URL = 'https://apps.apple.com/kr/app/fortune-gpt/id1547399137';
 const ANDROID_APP_URL = 'https://play.google.com/store/apps/details?id=kr.semaphore.sajugpt';
 
 // 요약 박스 모서리를 안쪽으로 오목하게 파낸(concave notch) 패스 — 실제 박스 px 크기(w,h) 기준으로 그려서

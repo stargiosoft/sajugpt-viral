@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from 'react';
 
 import GhostIconButton from './GhostIconButton';
-import { copyToClipboard } from '@/lib/share';
+import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import { GHOST_BRUSH_FONT, GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
 
@@ -37,6 +37,21 @@ export default function GhostShareRow({
     }
   }, [shareLink, resultId]);
 
+  const handleKakaoShare = useCallback(() => {
+    const origin = window.location.origin;
+    const link = shareLink ?? `${origin}/ghost-tarot`;
+    const ok = shareKakao({
+      title: '👻 귀신 타로',
+      description: '당신에게 붙은 존재가 이번 달 운세를 속삭입니다',
+      link,
+      buttonText: '나도 카드 열어보기',
+    });
+    if (ok) {
+      trackEvent('ghost_tarot_share_test_kakao');
+      trackShare('ghost_tarot', 'kakao', resultId);
+    }
+  }, [shareLink, resultId]);
+
   const handleXShare = useCallback(() => {
     const origin = window.location.origin;
     const link = shareLink ?? `${origin}/ghost-tarot`;
@@ -54,6 +69,15 @@ export default function GhostShareRow({
       </span>
 
       <div className="flex items-center" style={{ gap: 16, marginTop: 18 }}>
+        <GhostIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 3C6.477 3 2 6.477 2 10.667c0 2.7 1.828 5.07 4.59 6.42-.203.75-.735 2.7-.843 3.12-.132.523.192.516.404.375.166-.11 2.64-1.8 3.71-2.53.694.1 1.41.152 2.14.152 5.523 0 10-3.477 10-7.537C22 6.477 17.523 3 12 3z"
+              fill={GHOST_PALETTE.ink}
+            />
+          </svg>
+        </GhostIconButton>
+
         <GhostIconButton ariaLabel="X에 공유" onClick={handleXShare}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path
