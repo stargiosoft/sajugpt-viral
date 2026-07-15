@@ -39,8 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin="anonymous"
           async
         />
-        {/* Google Tag Manager — GA4 gtag.js가 브라우저에서 히트를 전송하지 않는 문제를
-            디버깅하기 위해 GTM 미리보기 모드로 원인을 추적하는 중 (임시) */}
+        {/* Google Tag Manager — 직접 gtag.js를 로드하면 이 계정에서 브라우저발 GA4
+            히트가 전송되지 않아 GTM 경유로 전환함(원인 미상이지만 GTM 경유는 정상 동작 확인됨) */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-WK59VS2L');`,

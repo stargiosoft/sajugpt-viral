@@ -6,11 +6,9 @@ import { getFingerprint } from '@/lib/fingerprint';
 declare global {
   interface Window {
     dataLayer: unknown[];
-    gtag: (...args: unknown[]) => void;
   }
 }
 
-const GA_ID = process.env.NEXT_PUBLIC_VIRAL_GA_ID;
 const AMPLITUDE_KEY = process.env.NEXT_PUBLIC_VIRAL_AMPLITUDE_KEY;
 
 let analyticsInitialized = false;
@@ -39,9 +37,8 @@ export function initViralAnalytics(): void {
     amplitude.track('page_view', { path: window.location.pathname, ...capturedUTM });
   }
 
-  // GA4는 layout.tsx에 설치된 Google 태그 관리자(GTM-WK59VS2L)가 담당 — 브라우저발
-  // gtag.js 히트가 전송되지 않는 문제를 GTM 미리보기 모드로 추적하기 위해 직접 로드는 비활성화
-  void GA_ID;
+  // GA4는 layout.tsx에 설치된 Google 태그 관리자(GTM-WK59VS2L)가 담당 — 직접 gtag.js를
+  // 로드하는 방식은 이 계정에서 브라우저발 히트가 전송되지 않는 문제가 있어 GTM으로 전환함
 }
 
 function sendToThirdParty(eventName: string, properties?: Record<string, unknown>): void {
@@ -49,8 +46,10 @@ function sendToThirdParty(eventName: string, properties?: Record<string, unknown
   if (AMPLITUDE_KEY) {
     amplitude.track(eventName, mergedProperties);
   }
-  if (GA_ID && typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', eventName, mergedProperties);
+  // GTM의 "GA4 이벤트" 태그(트리거: 커스텀 이벤트 .*)가 이 dataLayer 이벤트를 GA4로 전달함
+  if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: eventName, ...mergedProperties });
   }
 }
 
