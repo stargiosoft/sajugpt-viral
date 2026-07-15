@@ -51,7 +51,7 @@ export function initViralAnalytics(): void {
     };
     window.gtag('consent', 'default', { analytics_storage: 'granted' });
     window.gtag('js', new Date());
-    window.gtag('config', GA_ID);
+    window.gtag('config', GA_ID, { debug_mode: true });
   }
 }
 
