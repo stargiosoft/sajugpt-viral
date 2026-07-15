@@ -39,20 +39,9 @@ export function initViralAnalytics(): void {
     amplitude.track('page_view', { path: window.location.pathname, ...capturedUTM });
   }
 
-  if (GA_ID) {
-    const script = document.createElement('script');
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
-    script.async = true;
-    document.head.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function gtag(...args: unknown[]) {
-      window.dataLayer.push(args);
-    };
-    window.gtag('consent', 'default', { analytics_storage: 'granted' });
-    window.gtag('js', new Date());
-    window.gtag('config', GA_ID, { debug_mode: true });
-  }
+  // GA4는 layout.tsx에 설치된 Google 태그 관리자(GTM-WK59VS2L)가 담당 — 브라우저발
+  // gtag.js 히트가 전송되지 않는 문제를 GTM 미리보기 모드로 추적하기 위해 직접 로드는 비활성화
+  void GA_ID;
 }
 
 function sendToThirdParty(eventName: string, properties?: Record<string, unknown>): void {
