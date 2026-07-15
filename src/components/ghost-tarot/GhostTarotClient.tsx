@@ -63,7 +63,7 @@ export default function GhostTarotClient({ resultId }: Props) {
         card_name,
         front_image
       `)
-      .limit(10);
+      .limit(15);
 
     if (error) {
       setCards(FALLBACK_GHOST_CARDS);
