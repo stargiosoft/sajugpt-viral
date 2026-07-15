@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from 'react';
 import GhostTarotClient from '@/components/ghost-tarot/GhostTarotClient';
 
 export const metadata: Metadata = {
@@ -18,5 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default function GhostTarotPage() {
-  return <GhostTarotClient />;
+  return (
+    <Suspense>
+      <GhostTarotClient />
+    </Suspense>
+  );
 }
