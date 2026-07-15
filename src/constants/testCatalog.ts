@@ -2,6 +2,8 @@ import type { TestCatalogItem } from '@/types/testCatalog';
 
 // 모아모아 홈 화면의 단일 데이터 소스 (기존 ViralHub 인라인 ITEMS 대체)
 // participantLabel / isNew / popularityRank는 큐레이션된 정적 데이터.
+// 2026-07-15: 귀신타로만 노출하기로 결정 — 나머지는 데이터를 지우지 않고 visibleOnHome만 false로 내림.
+// 다시 노출하려면 해당 항목의 visibleOnHome을 true로 되돌리면 됨.
 export const TEST_CATALOG: TestCatalogItem[] = [
   {
     id: 'sexy-battle',
@@ -17,6 +19,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     popularityRank: 2,
     editorPick: true,
     ready: true,
+    visibleOnHome: false,
   },
   {
     id: 'autopsy',
@@ -31,6 +34,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     isNew: true,
     popularityRank: 3,
     ready: true,
+    visibleOnHome: false,
   },
   {
     id: 'stock',
@@ -45,6 +49,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     isNew: false,
     editorPick: true,
     ready: true,
+    visibleOnHome: false,
   },
   {
     id: 'night-manual',
@@ -59,6 +64,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     isNew: false,
     editorPick: true,
     ready: true,
+    visibleOnHome: false,
   },
   {
     id: 'dating-sim',
@@ -73,6 +79,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     isNew: true,
     editorPick: true,
     ready: true,
+    visibleOnHome: false,
   },
   {
     id: 'ghost-tarot',
@@ -87,5 +94,6 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     isNew: true,
     popularityRank: 1,
     ready: true,
+    visibleOnHome: true,
   },
 ];

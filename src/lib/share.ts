@@ -94,6 +94,10 @@ async function logImageFetchDiagnostics(images: HTMLImageElement[]) {
 // (https://bugs.webkit.org/show_bug.cgi?id=201243). modern-screenshot은 이를 fixSvgXmlDecode
 // 옵션(기본 활성화)으로 Safari에서 drawImage를 여러 번 재시도해 우회하므로 라이브러리를 교체함
 export async function captureCardImage(element: HTMLElement): Promise<Blob> {
+  // Bookk Myungjo(@font-face)/East Sea Dokdo(Google Fonts)가 아직 파싱 중일 때 캡처하면
+  // 폴백 시스템 폰트로 렌더링된 화면이 그대로 굳어버림 — 캡처 전 폰트 로딩 완료를 보장
+  await document.fonts.ready;
+
   const rect = element.getBoundingClientRect();
   // 모바일 bleed용 음수 마진은 화면상 부모 패딩을 상쇄하기 위한 것이라 고립된 캡처에서는
   // 의미가 없고, 오히려 콘텐츠를 좌측으로 밀어 우측에 투명 여백을 남긴다 — 캡처 시엔 0으로 리셋
@@ -131,8 +135,8 @@ export async function captureCardImage(element: HTMLElement): Promise<Blob> {
   }
 }
 
-export async function saveImage(element: HTMLElement, filename = '색기배틀_결과.png'): Promise<void> {
-  const blob = await captureCardImage(element);
+export async function saveImage(element: HTMLElement, filename = '색기배틀_결과.png', preCapturedBlob?: Blob): Promise<void> {
+  const blob = preCapturedBlob ?? await captureCardImage(element);
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

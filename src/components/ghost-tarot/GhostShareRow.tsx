@@ -23,11 +23,11 @@ export default function GhostShareRow({
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  const getLink = useCallback(() => shareLink ?? `${window.location.origin}/ghost-tarot`, [shareLink]);
+
   // 링크 복사는 URL만 복사 — 설명 문구가 같이 복사되면 주소창에 그대로 붙여넣기가 안 됨
   const handleCopy = useCallback(async () => {
-    const origin = window.location.origin;
-    const link = shareLink ?? `${origin}/ghost-tarot`;
-    const ok = await copyToClipboard(link);
+    const ok = await copyToClipboard(getLink());
     if (ok) {
       setCopied(true);
       clearTimeout(timerRef.current);
@@ -35,32 +35,28 @@ export default function GhostShareRow({
       trackEvent('ghost_tarot_share_test_clipboard');
       trackShare('ghost_tarot', 'clipboard', resultId);
     }
-  }, [shareLink, resultId]);
+  }, [getLink, resultId]);
 
   const handleKakaoShare = useCallback(() => {
-    const origin = window.location.origin;
-    const link = shareLink ?? `${origin}/ghost-tarot`;
     const ok = shareKakao({
       title: '👻 귀신 타로',
       description: '당신에게 붙은 존재가 이번 달 운세를 속삭입니다',
-      link,
+      link: getLink(),
       buttonText: '나도 카드 열어보기',
     });
     if (ok) {
       trackEvent('ghost_tarot_share_test_kakao');
       trackShare('ghost_tarot', 'kakao', resultId);
     }
-  }, [shareLink, resultId]);
+  }, [getLink, resultId]);
 
   const handleXShare = useCallback(() => {
-    const origin = window.location.origin;
-    const link = shareLink ?? `${origin}/ghost-tarot`;
     const text = encodeURIComponent(shareText);
-    const url = encodeURIComponent(link);
+    const url = encodeURIComponent(getLink());
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer');
     trackEvent('ghost_tarot_share_test_x');
     trackShare('ghost_tarot', 'x', resultId);
-  }, [shareText, shareLink, resultId]);
+  }, [shareText, getLink, resultId]);
 
   return (
     <div className="flex flex-col items-center" style={{ marginTop: 40 }}>

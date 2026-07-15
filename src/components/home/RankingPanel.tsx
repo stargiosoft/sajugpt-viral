@@ -2,6 +2,9 @@
 
 import type { TestCatalogItem } from '@/types/testCatalog';
 import { CATEGORIES } from '@/constants/categories';
+import PlaceholderRankingRow from './PlaceholderRankingRow';
+
+const RANKING_SIZE = 5;
 
 interface RankingPanelProps {
   items: TestCatalogItem[];
@@ -17,7 +20,8 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
       if (b.popularityRank) return 1;
       return parseFloat(b.participantLabel) - parseFloat(a.participantLabel);
     })
-    .slice(0, 5);
+    .slice(0, RANKING_SIZE);
+  const placeholderCount = Math.max(0, RANKING_SIZE - ranked.length);
 
   return (
     <div
@@ -98,6 +102,9 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
           </button>
           );
         })}
+        {Array.from({ length: placeholderCount }, (_, i) => (
+          <PlaceholderRankingRow key={`placeholder-${i}`} rank={ranked.length + i + 1} />
+        ))}
       </div>
     </div>
   );

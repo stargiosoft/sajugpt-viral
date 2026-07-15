@@ -10,6 +10,9 @@ declare global {
 }
 
 const AMPLITUDE_KEY = process.env.NEXT_PUBLIC_VIRAL_AMPLITUDE_KEY;
+// 로컬 개발 서버(localhost)에서의 테스트가 실제 운영 Amplitude/GA4 데이터에 섞이지 않도록 차단
+// (layout.tsx의 GTM 스크립트 렌더링도 이 값을 그대로 가져다 씀 — 두 곳이 따로 판단하면 어긋날 수 있음)
+export const IS_PROD = process.env.NODE_ENV === 'production';
 
 let analyticsInitialized = false;
 let capturedUTM: UTMParams | null = null;
@@ -18,7 +21,7 @@ let capturedUTM: UTMParams | null = null;
  * 전체 바이럴 테스트 공용 GA4 + Amplitude 초기화 (feature_type으로 테스트별 구분)
  */
 export function initViralAnalytics(): void {
-  if (analyticsInitialized || typeof window === 'undefined') return;
+  if (analyticsInitialized || typeof window === 'undefined' || !IS_PROD) return;
   analyticsInitialized = true;
 
   capturedUTM = parseUTM();
@@ -42,6 +45,7 @@ export function initViralAnalytics(): void {
 }
 
 function sendToThirdParty(eventName: string, properties?: Record<string, unknown>): void {
+  if (!IS_PROD) return;
   const mergedProperties = { ...capturedUTM, ...properties };
   if (AMPLITUDE_KEY) {
     amplitude.track(eventName, mergedProperties);

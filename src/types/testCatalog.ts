@@ -31,4 +31,7 @@ export interface TestCatalogItem {
   /** 에디터 추천 섹션 노출 여부 — 실시간 인기 순위(참여자 수 기준)와 겹치지 않도록 카테고리 다양성 기준으로 선정 */
   editorPick?: boolean;
   ready: boolean;
+  /** 모아모아 홈에 실제 카드로 노출할지 여부. false면 카드 자체를 렌더링하지 않음(썸네일 요청도 발생 안 함) —
+   * 데이터는 삭제하지 않고 이 값만 다시 true로 바꾸면 재노출됨. ready(눌러도 안 열림)와는 별개 축. */
+  visibleOnHome: boolean;
 }

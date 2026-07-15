@@ -72,6 +72,9 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   const [bgFading, setBgFading] = useState(false);
   const dockTargetRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
+  // 캡처 결과가 아니라 "진행 중인 캡처 자체"를 캐싱 — 미리보기 effect와 클릭 핸들러가
+  // 동시에 이 값을 참조하면 항상 같은 promise를 기다리게 되어 캡처가 중복 실행되지 않음
+  const blobPromiseRef = useRef<Promise<Blob> | null>(null);
   const fitRef = useRef<HTMLDivElement>(null);
   const [fitScale, setFitScale] = useState(1);
   const [appStoreUrl, setAppStoreUrl] = useState(IOS_APP_URL);
@@ -119,6 +122,27 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
       clearTimeout(hideTimer);
     };
   }, [error]);
+
+  // 진행 중인 캡처가 있으면 그 promise를 그대로 반환 — 미리보기 effect와 클릭 핸들러가
+  // 동시에 호출해도 캡처가 한 번만 실행됨(경쟁 상태 방지). 실패 시 캐시를 비워 재시도 가능하게 함
+  const startOrGetCapture = (el: HTMLElement): Promise<Blob> => {
+    if (!blobPromiseRef.current) {
+      blobPromiseRef.current = captureCardImage(el).catch((err) => {
+        blobPromiseRef.current = null;
+        throw err;
+      });
+    }
+    return blobPromiseRef.current;
+  };
+
+  // "이미지 저장하기" 클릭 시점에 캡처(폰트 대기 포함)를 기다리면 안드로이드 Chrome에서
+  // navigator.share() 호출 전 user activation이 만료돼 조용히 다운로드로 폴백되는 문제가 있어,
+  // 카드가 완전히 자리잡은 직후 미리 캡처해 캐싱해둠 — 클릭 시엔 캐시된 blob으로 즉시 공유 시도.
+  // result가 아직 없으면(로딩 문구가 떠 있는 상태) 캡처하지 않고 결과가 도착한 뒤에만 캡처함
+  useEffect(() => {
+    if (error || revealing || !result || !captureRef.current) return;
+    startOrGetCapture(captureRef.current).catch(() => { /* 실패해도 클릭 시점에 다시 시도하므로 무시 */ });
+  }, [error, revealing, result]);
 
   // 내용이 빈 종이 영역보다 길어지는 카드(글자수 긴 메시지/요약)를 위해 전체를 살짝 축소해서 항상 안에 들어오도록 함
   useEffect(() => {
@@ -170,13 +194,27 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
     const filename = `${cardName}_귀신타로.png`;
     setSaveState('saving');
 
+    // 이미 진행 중이거나 완료된 캡처가 있으면 그 promise를 그대로 기다림(중복 캡처 방지) —
+    // 캐시가 이미 끝나 있으면 이 await가 즉시 반환되므로 아래 navigator.share() 호출이
+    // 클릭 이벤트의 user activation 유효 시간 안에 들어가 안드로이드에서도 정상 동작함
+    let blob: Blob;
+    try {
+      blob = await startOrGetCapture(captureRef.current);
+    } catch {
+      setSaveState('idle');
+      setSaveError('이미지 저장에 실패했어요. 다시 시도해주세요.');
+      setTimeout(() => setSaveError(null), 2500);
+      return;
+    }
+
     if (isMobileDevice() && navigator.share) {
       try {
-        const blob = await captureCardImage(captureRef.current);
         const file = new File([blob], filename, { type: 'image/png' });
-        await navigator.share({ files: [file] });
-        showSavedState();
-        return;
+        if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file] });
+          showSavedState();
+          return;
+        }
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
           // 사용자가 공유 시트를 취소함 — 실패가 아니므로 다운로드로 폴백하지 않고 그대로 원상태 복귀
@@ -188,7 +226,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
     }
 
     try {
-      await saveImage(captureRef.current, filename);
+      await saveImage(captureRef.current, filename, blob);
       showSavedState();
     } catch {
       setSaveState('idle');

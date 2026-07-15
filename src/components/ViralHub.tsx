@@ -40,7 +40,7 @@ export default function ViralHub() {
           <div className="pt-1 px-3 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
             <HeroBanner />
             <div className="flex flex-col mt-4 lg:mt-0" style={{ gap: '12px' }}>
-              <RankingPanel items={TEST_CATALOG} onSelect={handleSelectItem} selectedId={selectedId} />
+              <RankingPanel items={TEST_CATALOG.filter((item) => item.visibleOnHome)} onSelect={handleSelectItem} selectedId={selectedId} />
               <motion.a
                 href={SAJUGPT_URL}
                 target="_blank"
@@ -97,7 +97,7 @@ export default function ViralHub() {
           <TestGridSection
             title="에디터 추천"
             items={TEST_CATALOG}
-            filter={(item) => item.editorPick}
+            filter={(item) => item.visibleOnHome && item.editorPick}
             paddingBottom={4}
             onSelect={handleSelectItem}
             selectedId={selectedId}
@@ -106,11 +106,12 @@ export default function ViralHub() {
           <TestGridSection
             title="새로 올라온 테스트"
             items={TEST_CATALOG}
-            filter={(item) => item.isNew}
+            filter={(item) => item.visibleOnHome && item.isNew}
             isNew
             paddingBottom={200}
             onSelect={handleSelectItem}
             selectedId={selectedId}
+            minCount={4}
           />
 
           <div className="px-3 md:px-6 lg:px-8 pb-6">
