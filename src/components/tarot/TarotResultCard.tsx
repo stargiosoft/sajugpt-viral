@@ -4,17 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 
-import GhostSealButton from './GhostSealButton';
-import GhostCTAButton from './GhostCTAButton';
-import GhostShareRow from './GhostShareRow';
+import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
+import GhostCTAButton from '@/components/ghost-tarot/GhostCTAButton';
+import TarotShareRow from './TarotShareRow';
 import Toast from '@/components/Toast';
 import { saveImage, captureCardImage, isMobileDevice } from '@/lib/share';
 import { trackSajuGPTClick } from '@/lib/analytics';
-import { GHOST_MYUNGJO_FONT, GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
 import { useIsDesktop, useIsNarrow, NARROW_BREAKPOINT } from '@/lib/ghost-tarot/useBreakpoint';
-import { GhostCardData, GhostResult } from '@/types/ghost-tarot';
+import type { TarotCardData, TarotConfig, TarotResult } from '@/types/tarot';
 
-// 파피루스(양피지) 배경 위에 얹는 글자용 색 — GHOST_PALETTE.ink/inkDim은
+// 파피루스(양피지) 배경 위에 얹는 글자용 색 — palette.ink/inkDim은
 // 어두운 배경(#050403) 전용이라 밝은 종이 위에서는 대비가 안 나옴
 const PARCHMENT_INK = '#2a1f16';
 const PARCHMENT_INK_DIM = '#6b5842';
@@ -27,9 +26,6 @@ const BG_FADE_DURATION_MS = 450;
 const DOCK_START_MS = FLIP_DONE_MS;
 const BG_FADE_START_MS = DOCK_START_MS + DOCK_DURATION_MS;
 const REVEAL_DURATION_MS = BG_FADE_START_MS + BG_FADE_DURATION_MS;
-
-const IOS_APP_URL = 'https://apps.apple.com/kr/app/fortune-gpt/id1547399137';
-const ANDROID_APP_URL = 'https://play.google.com/store/apps/details?id=kr.semaphore.sajugpt';
 
 // 요약 박스 모서리를 안쪽으로 오목하게 파낸(concave notch) 패스 — 실제 박스 px 크기(w,h) 기준으로 그려서
 // 가로로 긴 박스에도 모서리 원호가 찌그러지지 않고 항상 정원으로 유지됨
@@ -53,8 +49,9 @@ function notchPath(w: number, h: number, inset: number, cr: number) {
 }
 
 interface Props {
-  card: GhostCardData;
-  result: GhostResult | null;
+  config: TarotConfig;
+  card: TarotCardData;
+  result: TarotResult | null;
   error?: boolean;
   onReset: () => void;
 }
@@ -66,7 +63,8 @@ interface DockRect {
   height: number;
 }
 
-export default function GhostResultCard({ card, result, error, onReset }: Props) {
+export default function TarotResultCard({ config, card, result, error, onReset }: Props) {
+  const { palette, myungjoFont } = config.theme;
   const [revealing, setRevealing] = useState(!error);
   const [dockRect, setDockRect] = useState<DockRect | null>(null);
   const [bgFading, setBgFading] = useState(false);
@@ -77,7 +75,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   const blobPromiseRef = useRef<Promise<Blob> | null>(null);
   const fitRef = useRef<HTMLDivElement>(null);
   const [fitScale, setFitScale] = useState(1);
-  const [appStoreUrl, setAppStoreUrl] = useState(IOS_APP_URL);
+  const [appStoreUrl, setAppStoreUrl] = useState(config.copy.ctaAppUrlIOS);
   const isDesktop = useIsDesktop();
   const isNarrow = useIsNarrow();
   const notchBoxRef = useRef<HTMLDivElement>(null);
@@ -95,9 +93,9 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   // 기기별로 앱스토어/플레이스토어로 자동 분기 (SSR 시점엔 navigator가 없어 iOS를 기본값으로 두고, 마운트 후 안드로이드면 교체)
   useEffect(() => {
     if (/Android/i.test(navigator.userAgent)) {
-      setAppStoreUrl(ANDROID_APP_URL);
+      setAppStoreUrl(config.copy.ctaAppUrlAndroid);
     }
-  }, []);
+  }, [config.copy.ctaAppUrlAndroid]);
 
   useEffect(() => {
     if (error) {
@@ -180,18 +178,18 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
   }, [result, error]);
 
   const cardName = result?.card_name || card.card_name || '이름 없는 존재';
-  const julyTitle = result?.july_title || '';
+  const resultTitle = result?.title || '';
   const frontImage = card.front_image && card.front_image.trim() !== '' ? card.front_image : null;
 
   // 공유 링크는 내 결과 페이지가 아니라 첫 시작 화면으로 — 받은 사람이 직접 뽑아보게 유도
-  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/ghost-tarot`;
-  const shareText = `👻 ${cardName}\n나에게 붙은 존재가 남긴 기록...\n${julyTitle}\n너에게 찾아온 귀신도 확인해봐`;
+  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/${config.slug}`;
+  const shareText = config.copy.shareText(cardName, resultTitle);
 
   // 모바일은 <a download>가 사진앱에 바로 저장되지 않고 파일앱/새 탭으로 빠지므로
   // Web Share API로 "사진에 저장" 옵션이 있는 네이티브 공유 시트를 띄움 (지원 안 하거나 취소되면 다운로드로 폴백)
   const handleSaveImage = async () => {
     if (!captureRef.current || saveState === 'saving') return;
-    const filename = `${cardName}_귀신타로.png`;
+    const filename = `${cardName}${config.copy.filenameSuffix}`;
     setSaveState('saving');
 
     // 이미 진행 중이거나 완료된 캡처가 있으면 그 promise를 그대로 기다림(중복 캡처 방지) —
@@ -235,13 +233,6 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
     }
   };
 
-  // "🚨 통장에 구멍난다" → "통장에 구멍난다" — 앞에 붙은 이모지만 제거
-  const cleanJulyTitle = (title: string) =>
-    title
-      .replace(/^[^\p{L}\p{N}]+/u, '')
-      .replace(/^7월\s*[:：]?\s*/, '')
-      .trim();
-
   // "해원상생 (축제의 굿판)" → 메인 이름 / 괄호 부제 분리해서 크기 차등
   const cardNameMatch = cardName.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
   const cardNameMain = cardNameMatch ? cardNameMatch[1] : cardName;
@@ -252,7 +243,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
       style={{
         minHeight: '100dvh',
         padding: '0px 16px 140px',
-        background: GHOST_PALETTE.bg,
+        background: palette.bg,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -268,7 +259,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
           ...(isDesktop ? {} : { width: 'calc(100% + 32px)', marginLeft: -16, marginRight: -16 }),
         }}
       >
-        <Image src={isDesktop ? '/ghost-tarot/result-bg.png' : '/ghost-tarot/result-bg-mobile.png'} alt="" fill priority className="object-contain" />
+        <Image src={isDesktop ? config.assets.resultBg : config.assets.resultBgMobile} alt="" fill priority className="object-contain" />
 
         {/* 빈 종이 영역 안쪽에 결과 정보 배치 (퍼센트 기반이라 액자와 함께 스케일됨) — 리빌 연출 뒤에 이미 완성된 채로 드러남
             모바일 전용 배경(result-bg-mobile.png)의 종이 폭 실측값 기준으로 좌우 인셋 계산 */}
@@ -322,7 +313,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
           <h1
             style={{
               marginTop: isDesktop ? 'calc(7% - 6px)' : 'calc(7% + 0px)',
-              fontFamily: GHOST_MYUNGJO_FONT,
+              fontFamily: myungjoFont,
               fontSize: isDesktop ? 22 : (isNarrow ? 17 : 18),
               lineHeight: 1.2,
               color: PARCHMENT_INK,
@@ -341,7 +332,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               style={{
                 display: 'block',
                 marginTop: isDesktop ? 'calc(1.6% + 0px)' : (isNarrow ? 5 : 3),
-                fontFamily: GHOST_MYUNGJO_FONT,
+                fontFamily: myungjoFont,
                 fontSize: isDesktop ? 12.5 : 12,
                 color: '#584E44',
                 WebkitTextStroke: '0.2px #584E44',
@@ -355,7 +346,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
             </span>
           )}
 
-          {result && !error && (
+          {result && !error && config.copy.badgeLabel && (
             <>
               <div className="flex items-center justify-center" style={{ marginTop: isDesktop ? 'calc(5% + 16px)' : (isNarrow ? 'calc(5% + 8px)' : 'calc(5% + 12px)'), gap: 8, width: '74%', flexShrink: 0 }}>
                 <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent 0%, ${PARCHMENT_INK_DIM} 100%)`, opacity: 0.4 }} />
@@ -367,8 +358,8 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                     flexShrink: 0,
                     backgroundColor: PARCHMENT_INK_DIM,
                     opacity: 0.7,
-                    WebkitMaskImage: 'url(/ghost-tarot/chinese-knot.svg)',
-                    maskImage: 'url(/ghost-tarot/chinese-knot.svg)',
+                    WebkitMaskImage: `url(${config.assets.chineseKnot})`,
+                    maskImage: `url(${config.assets.chineseKnot})`,
                     WebkitMaskSize: 'contain',
                     maskSize: 'contain',
                     WebkitMaskRepeat: 'no-repeat',
@@ -380,7 +371,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                 <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${PARCHMENT_INK_DIM} 0%, transparent 100%)`, opacity: 0.4 }} />
               </div>
 
-              {/* 7월 · 이번 달 테마 라벨 — 붓으로 슥 칠한 자국(SVG 거친 가장자리) 위에 얹음.
+              {/* 월간/타입 테마 라벨 — 붓으로 슥 칠한 자국(SVG 거친 가장자리) 위에 얹음.
                   이미지 대신 SVG feTurbulence로 만들어서 텍스트 길이가 바뀌어도 항상 자연스럽게 늘어남 */}
               <div className="flex items-center justify-center" style={{ marginTop: isDesktop ? 'calc(5% + 14px)' : (isNarrow ? 'calc(5% + 6px)' : 'calc(5% + 10px)'), flexShrink: 0 }}>
                 <span
@@ -389,7 +380,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontFamily: GHOST_MYUNGJO_FONT,
+                    fontFamily: myungjoFont,
                     fontSize: isDesktop ? 14.5 : (isNarrow ? 12 : 13),
                     fontWeight: 600,
                     color: '#FCF9EF',
@@ -401,11 +392,13 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   {/* 실제 붓터치 텍스처 에셋을 좌/중/우 3분할 background-image로 얹음 — 좌우 붓 갈라진 끝단(캡)은
                       원본 픽셀 비율 그대로 고정되고 가운데만 늘어남. border-image 대신 background-image를 쓴 이유는
                       "이미지 저장하기"(html-to-image)가 border-image를 캡처하지 못해 저장된 이미지에서 배경이 빠지기 때문 */}
-                  <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: -1, display: 'flex' }}>
-                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.webp)', backgroundSize: '1114.48% 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat' }} />
-                    <div style={{ flex: 1, backgroundImage: 'url(/ghost-tarot/july-badge-brush.webp)', backgroundSize: '121.87% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
-                    <div style={{ width: 34, flexShrink: 0, backgroundImage: 'url(/ghost-tarot/july-badge-brush.webp)', backgroundSize: '1114.48% 100%', backgroundPosition: 'right center', backgroundRepeat: 'no-repeat' }} />
-                  </div>
+                  {config.assets.badgeBrush && (
+                    <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: -1, display: 'flex' }}>
+                      <div style={{ width: 34, flexShrink: 0, backgroundImage: `url(${config.assets.badgeBrush})`, backgroundSize: '1114.48% 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat' }} />
+                      <div style={{ flex: 1, backgroundImage: `url(${config.assets.badgeBrush})`, backgroundSize: '121.87% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />
+                      <div style={{ width: 34, flexShrink: 0, backgroundImage: `url(${config.assets.badgeBrush})`, backgroundSize: '1114.48% 100%', backgroundPosition: 'right center', backgroundRepeat: 'no-repeat' }} />
+                    </div>
+                  )}
                   <span
                     style={{
                       position: 'relative',
@@ -413,7 +406,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                       transform: 'translateZ(0)',
                     }}
                   >
-                    7월 · {cleanJulyTitle(julyTitle)}
+                    {config.copy.badgeLabel(resultTitle)}
                   </span>
                 </span>
               </div>
@@ -422,7 +415,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
 
           {error ? (
             <div style={{ marginTop: '6%' }}>
-              <p style={{ color: GHOST_PALETTE.red, fontSize: 'clamp(11px, 2.6vw, 13px)' }}>기록을 불러오지 못했습니다.</p>
+              <p style={{ color: palette.red, fontSize: 'clamp(11px, 2.6vw, 13px)' }}>기록을 불러오지 못했습니다.</p>
             </div>
           ) : !result ? (
             <p className="animate-pulse" style={{ marginTop: '6%', color: PARCHMENT_INK_DIM, fontSize: 'clamp(11px, 2.6vw, 13px)' }}>
@@ -434,7 +427,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               <h2
                 style={{
                   marginTop: 0,
-                  fontFamily: GHOST_MYUNGJO_FONT,
+                  fontFamily: myungjoFont,
                   fontSize: isDesktop ? 30 : (isNarrow ? 21 : 26),
                   lineHeight: 1.6,
                   color: PARCHMENT_INK,
@@ -452,7 +445,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               >
                 <span
                   className="[&_*]:!text-inherit"
-                  dangerouslySetInnerHTML={{ __html: result?.july_message || '' }}
+                  dangerouslySetInnerHTML={{ __html: result?.message || '' }}
                 />
               </h2>
 
@@ -482,18 +475,18 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
                 >
                   <defs>
-                    <radialGradient id="ghost-notch-fill" cx="38%" cy="32%" r="85%">
+                    <radialGradient id="tarot-notch-fill" cx="38%" cy="32%" r="85%">
                       <stop offset="0%" stopColor="rgba(96,74,48,0.015)" />
                       <stop offset="50%" stopColor="rgba(84,64,42,0.04)" />
                       <stop offset="80%" stopColor="rgba(74,56,36,0.07)" />
                       <stop offset="100%" stopColor="rgba(64,48,30,0.1)" />
                     </radialGradient>
-                    <radialGradient id="ghost-notch-stain" cx="78%" cy="82%" r="65%">
+                    <radialGradient id="tarot-notch-stain" cx="78%" cy="82%" r="65%">
                       <stop offset="0%" stopColor="rgba(60,44,26,0.08)" />
                       <stop offset="55%" stopColor="rgba(60,44,26,0.025)" />
                       <stop offset="100%" stopColor="rgba(60,44,26,0)" />
                     </radialGradient>
-                    <linearGradient id="ghost-notch-stroke-outer" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <linearGradient id="tarot-notch-stroke-outer" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="rgba(96,74,48,0.36)" />
                       <stop offset="16%" stopColor="rgba(96,74,48,0.12)" />
                       <stop offset="32%" stopColor="rgba(96,74,48,0.32)" />
@@ -502,7 +495,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                       <stop offset="84%" stopColor="rgba(96,74,48,0.11)" />
                       <stop offset="100%" stopColor="rgba(96,74,48,0.32)" />
                     </linearGradient>
-                    <linearGradient id="ghost-notch-stroke-inner" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <linearGradient id="tarot-notch-stroke-inner" x1="100%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" stopColor="rgba(96,74,48,0.22)" />
                       <stop offset="20%" stopColor="rgba(96,74,48,0.06)" />
                       <stop offset="38%" stopColor="rgba(96,74,48,0.2)" />
@@ -511,15 +504,15 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                       <stop offset="100%" stopColor="rgba(64,52,38,0.1)" />
                     </linearGradient>
                   </defs>
-                  <path d={notchPath(notchSize.w, notchSize.h, 3, 14)} fill="url(#ghost-notch-fill)" stroke="url(#ghost-notch-stroke-outer)" strokeWidth={isDesktop ? 0.8 : 1} />
-                  <path d={notchPath(notchSize.w, notchSize.h, 3, 14)} fill="url(#ghost-notch-stain)" />
-                  <path d={notchPath(notchSize.w, notchSize.h, 9, 11)} fill="none" stroke="url(#ghost-notch-stroke-inner)" strokeWidth={0.65} />
+                  <path d={notchPath(notchSize.w, notchSize.h, 3, 14)} fill="url(#tarot-notch-fill)" stroke="url(#tarot-notch-stroke-outer)" strokeWidth={isDesktop ? 0.8 : 1} />
+                  <path d={notchPath(notchSize.w, notchSize.h, 3, 14)} fill="url(#tarot-notch-stain)" />
+                  <path d={notchPath(notchSize.w, notchSize.h, 9, 11)} fill="none" stroke="url(#tarot-notch-stroke-inner)" strokeWidth={0.65} />
                 </svg>
                 <p
                   className="[&_*]:!text-inherit"
                   style={{
                     position: 'relative',
-                    fontFamily: GHOST_MYUNGJO_FONT,
+                    fontFamily: myungjoFont,
                     fontSize: isDesktop ? 14.5 : 13,
                     fontWeight: 600,
                     lineHeight: 1.75,
@@ -528,7 +521,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                     letterSpacing: isDesktop ? '-0.5px' : '-0.3px',
                     marginTop: isDesktop ? 0 : 2,
                   }}
-                  dangerouslySetInnerHTML={{ __html: result?.july_summary || '' }}
+                  dangerouslySetInnerHTML={{ __html: result?.summary || '' }}
                 />
               </div>
             </div>
@@ -547,7 +540,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
             exit={{ opacity: 0 }}
             transition={{ duration: BG_FADE_DURATION_MS / 1000, ease: 'easeInOut' }}
             className={dockRect ? '' : 'flex items-center justify-center'}
-            style={{ position: 'fixed', inset: 0, background: GHOST_PALETTE.bg, zIndex: 10 }}
+            style={{ position: 'fixed', inset: 0, background: palette.bg, zIndex: 10 }}
           >
             <motion.div
               layout
@@ -566,7 +559,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                   position: 'absolute',
                   inset: '10%',
                   borderRadius: '50%',
-                  background: `radial-gradient(circle, ${GHOST_PALETTE.red}, transparent 70%)`,
+                  background: `radial-gradient(circle, ${palette.red}, transparent 70%)`,
                   filter: 'blur(24px)',
                   zIndex: -1,
                 }}
@@ -608,7 +601,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
                       WebkitBackfaceVisibility: 'hidden',
                     }}
                   >
-                    <Image src="/ghost-tarot/card-back.png" alt="" fill className="object-cover" />
+                    <Image src={config.assets.backImage} alt="" fill className="object-cover" />
                   </div>
 
                   <div
@@ -650,10 +643,10 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
               href={appStoreUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackSajuGPTClick('ghost_tarot', result?.id)}
+              onClick={() => trackSajuGPTClick(config.featureType, result?.id)}
               label={
                 <span className="flex items-center justify-center" style={{ gap: 8 }}>
-                  귀신타로 이어보기 <span style={{ position: 'relative', top: isDesktop ? '-0.5px' : '0px', fontFamily: 'Pretendard', fontSize: isDesktop ? '13.5px' : (isNarrow ? '12.5px' : '13.5px'), fontWeight: 700 }}>(사주<span style={{ fontSize: isDesktop ? '14px' : (isNarrow ? '13px' : '14px') }}>GPT</span>)</span>
+                  {config.copy.ctaLabel} <span style={{ position: 'relative', top: isDesktop ? '-0.5px' : '0px', fontFamily: 'Pretendard', fontSize: isDesktop ? '13.5px' : (isNarrow ? '12.5px' : '13.5px'), fontWeight: 700 }}>(사주<span style={{ fontSize: isDesktop ? '14px' : (isNarrow ? '13px' : '14px') }}>GPT</span>)</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M9 5l7 7-7 7" stroke="#f5ebe0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -704,7 +697,7 @@ export default function GhostResultCard({ card, result, error, onReset }: Props)
             </div>
 
             <div style={{ marginTop: 28 }}>
-              <GhostShareRow shareText={shareText} shareLink={shareUrl} resultId={result?.id} />
+              <TarotShareRow config={config} shareText={shareText} shareLink={shareUrl} resultId={result?.id} />
             </div>
           </>
         )}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from 'react';
-import GhostTarotClient from '@/components/ghost-tarot/GhostTarotClient';
+import TarotClient from '@/components/tarot/TarotClient';
+import { ghostTarotConfig } from '@/lib/tarot/configs/ghost-tarot.config';
 
 export const metadata: Metadata = {
   title: "귀신 타로",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 export default function GhostTarotPage() {
   return (
     <Suspense>
-      <GhostTarotClient />
+      <TarotClient slug={ghostTarotConfig.slug} />
     </Suspense>
   );
 }

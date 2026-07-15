@@ -1,19 +1,21 @@
 'use client';
 
 import Image from 'next/image';
-import type { GhostCard as GhostCardType } from '@/types/ghost-tarot';
+import type { TarotCardData } from '@/types/tarot';
 
 interface Props {
-  card: GhostCardType;
+  card: TarotCardData;
   onClick: () => void;
-  backImage?: string;
+  backImage: string;
+  backAlt: string;
   glow?: boolean;
 }
 
-export default function GhostCard({
+export default function TarotCard({
   card,
   onClick,
-  backImage = '/ghost-tarot/card-back.png',
+  backImage,
+  backAlt,
   glow = false,
 }: Props) {
   if (!card) return null;
@@ -48,7 +50,7 @@ export default function GhostCard({
       >
         <Image
           src={backImage}
-          alt="봉인된 귀신 카드 뒷면"
+          alt={backAlt}
           fill
           sizes="80px"
           priority={true}

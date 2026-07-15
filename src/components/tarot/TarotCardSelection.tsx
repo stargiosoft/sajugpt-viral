@@ -2,14 +2,14 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
-import type { GhostCardData } from '@/types/ghost-tarot';
-import GhostCard from './GhostCard';
-import GhostSealButton from './GhostSealButton';
-import { GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
+import type { TarotCardData, TarotConfig } from '@/types/tarot';
+import TarotCard from './TarotCard';
+import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
 import { DESKTOP_BREAKPOINT } from '@/lib/ghost-tarot/useBreakpoint';
 
 interface Props {
-  cards: GhostCardData[];
+  config: TarotConfig;
+  cards: TarotCardData[];
   loading?: boolean;
   onSelect: (cardId: string) => void;
 }
@@ -25,7 +25,7 @@ const ANGLE_RANGE = 84;
 type CardPos = { left: number; top: number; rotate: number };
 type ShufflePhase = 'mixing' | 'gathered' | 'spreading' | 'idle';
 
-// 실제 앱 프레임 너비(GhostTarotClient의 max-w-[440px] md:max-w-[600px]와 동일 breakpoint)
+// 실제 앱 프레임 너비(TarotClient의 max-w-[440px] md:max-w-[600px]와 동일 breakpoint)
 // 기준 좌우 16px 인셋에 딱 맞는 너비 — 카드가 그 안에 꽉 차게 펼쳐짐, 화면 밖으로 안 넘침
 function getContainerWidth(windowWidth: number) {
   const frameMax = windowWidth >= DESKTOP_BREAKPOINT ? 600 : 440;
@@ -33,11 +33,13 @@ function getContainerWidth(windowWidth: number) {
   return Math.max(260, frame - 32);
 }
 
-export default function CardSelection({
+export default function TarotCardSelection({
+  config,
   cards,
   loading,
   onSelect,
 }: Props) {
+  const { palette } = config.theme;
   const [containerWidth, setContainerWidth] = useState(() => getContainerWidth(typeof window !== 'undefined' ? window.innerWidth : 400));
   const [phase, setPhase] = useState<ShufflePhase>('mixing');
   const [mixingPositions, setMixingPositions] = useState<CardPos[]>([]);
@@ -156,7 +158,7 @@ export default function CardSelection({
       style={{
         minHeight: '100dvh',
         padding: '40px 16px 60px',
-        background: `${GHOST_PALETTE.bg} url(/ghost-tarot/bg-texture.png) center / 100% 100% no-repeat`,
+        background: `${palette.bg} url(${config.assets.bgTexture}) center / 100% 100% no-repeat`,
         position: 'relative',
       }}
     >
@@ -176,12 +178,12 @@ export default function CardSelection({
         style={{
           marginTop: 20,
           textAlign: 'center',
-          color: GHOST_PALETTE.inkDim,
+          color: palette.inkDim,
           fontSize: 15,
           fontWeight: 600,
         }}
       >
-        봉인된 카드 한 장을 선택하세요
+        {config.copy.selectionPrompt}
       </p>
 
       {loading && count === 0 ? (
@@ -190,7 +192,7 @@ export default function CardSelection({
           style={{
             marginTop: 60,
             textAlign: 'center',
-            color: GHOST_PALETTE.inkDim,
+            color: palette.inkDim,
             fontSize: 14,
           }}
         >
@@ -212,7 +214,7 @@ export default function CardSelection({
                 width: cardWidth * 0.92,
                 height: cardHeight * 0.92,
                 borderRadius: 6 * scale,
-                border: `1.5px dashed ${GHOST_PALETTE.gold}`,
+                border: `1.5px dashed ${palette.gold}`,
               }}
             />
 
@@ -251,8 +253,10 @@ export default function CardSelection({
                   whileHover={canClick && !isSelected ? { top: pos.top - 14 * scale } : undefined}
                   whileTap={canClick ? { scale: 0.97 } : undefined}
                 >
-                  <GhostCard
+                  <TarotCard
                     card={card}
+                    backImage={config.assets.backImage}
+                    backAlt={config.copy.cardBackAlt}
                     glow={isSelected}
                     onClick={() => {
                       if (!canClick) return;

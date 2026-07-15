@@ -3,17 +3,21 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-import GhostSealButton from './GhostSealButton';
-import GhostShareRow from './GhostShareRow';
-import { GHOST_PALETTE } from '@/lib/ghost-tarot/theme';
+import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
+import TarotShareRow from './TarotShareRow';
+import type { TarotConfig } from '@/types/tarot';
 
 interface Props {
+  config: TarotConfig;
   onStart: () => void;
 }
 
-export default function GhostLanding({
+export default function TarotLanding({
+  config,
   onStart,
 }: Props) {
+  const { palette } = config.theme;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -22,7 +26,7 @@ export default function GhostLanding({
       style={{
         minHeight: '100dvh',
         paddingBottom: 60,
-        background: `${GHOST_PALETTE.bg} url(/ghost-tarot/bg-texture.png) center top / 100% 100% no-repeat`,
+        background: `${palette.bg} url(${config.assets.bgTexture}) center top / 100% 100% no-repeat`,
         overflow: 'hidden',
         position: 'relative',
       }}
@@ -34,8 +38,8 @@ export default function GhostLanding({
         style={{ position: 'relative', width: '100%', aspectRatio: '1448 / 1086' }}
       >
         <Image
-          src="/ghost-tarot/hero.png"
-          alt="귀신 타로"
+          src={config.assets.heroImage}
+          alt={config.copy.heroAlt}
           fill
           priority
           style={{
@@ -69,7 +73,7 @@ export default function GhostLanding({
           }}
         >
           <span style={{ display: 'inline-block', paddingTop: 2, fontFamily: 'Pretendard', fontSize: 14, fontWeight: 600, color: 'rgb(199 199 199)' }}>
-            너의 7월을 알려주마
+            {config.copy.landingBadge}
           </span>
         </div>
       </motion.div>
@@ -81,7 +85,7 @@ export default function GhostLanding({
         style={{ marginTop: 15, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}
       >
         <GhostSealButton variant="primary" onClick={onStart} fontSize={21} webFontSize={23} narrowFontSize={20}>
-          시작하기
+          {config.copy.landingCta}
         </GhostSealButton>
       </motion.div>
 
@@ -91,7 +95,7 @@ export default function GhostLanding({
         transition={{ delay: .9, duration: .5 }}
         style={{ position: 'relative', zIndex: 2 }}
       >
-        <GhostShareRow />
+        <TarotShareRow config={config} />
       </motion.div>
     </motion.div>
   );
