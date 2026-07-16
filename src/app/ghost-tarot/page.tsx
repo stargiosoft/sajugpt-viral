@@ -4,7 +4,7 @@ import TarotClient from '@/components/tarot/TarotClient';
 import { ghostTarotConfig } from '@/lib/tarot/configs/ghost-tarot.config';
 
 export const metadata: Metadata = {
-  title: "귀신타로(운세편)",
+  title: "귀신 타로 (운세편)",
   description: "당신에게 붙은 귀신이 전하는 이번 달 운세",
   openGraph: {
     title: "7월 귀신타로(운세편)",
