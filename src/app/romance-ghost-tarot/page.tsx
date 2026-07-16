@@ -4,7 +4,7 @@ import TarotClient from '@/components/tarot/TarotClient';
 import { romanceTarotConfig } from '@/lib/tarot/configs/romance-tarot.config';
 
 export const metadata: Metadata = {
-  title: "귀신 타로 연애편",
+  title: "귀신 타로 (연애편)",
   description: "당신에게 붙은 존재가 인연의 신호를 속삭입니다",
   openGraph: {
     title: "7월 귀신타로 (연애편)",
