@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
+import GhostCommentSection from '@/components/ghost-tarot/GhostCommentSection';
+import type { CommentFeatureType } from '@/lib/ghost-tarot/comments';
 import TarotShareRow from './TarotShareRow';
 import type { TarotConfig } from '@/types/tarot';
 
@@ -97,6 +99,12 @@ export default function TarotLanding({
       >
         <TarotShareRow config={config} />
       </motion.div>
+
+      {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (
+        <div style={{ marginTop: 80, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}>
+          <GhostCommentSection featureType={config.featureType as CommentFeatureType} />
+        </div>
+      )}
     </motion.div>
   );
 }

@@ -7,5 +7,5 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #12462 | 2:43 PM | 🔵 | Next.js dynamic OG image pattern exists in autopsy feature for Ghost Tarot reference | ~386 |
+| #12299 | 8:15 AM | ✅ | Ghost Tarot result card box styling enhanced with worn/faded gradient effects | ~383 |
 </claude-mem-context>

@@ -40,6 +40,7 @@ export interface TarotAssets {
   resultBgMobile: string;
   chineseKnot: string;
   badgeBrush?: string;
+  shareBoxBg?: string;
 }
 
 export interface TarotCopy {
@@ -59,6 +60,15 @@ export interface TarotCopy {
   kakaoButtonText: string;
   /** 결과 카드 상단, 카드명 아래 뱃지 라벨. 없으면 뱃지 자체를 숨김 */
   badgeLabel?: (title: string) => string;
+  /** 결과 화면 공유 섹션을 액자형 박스로 꾸밀 때 쓰는 문구. 없으면 기존 심플 레이아웃 유지 */
+  shareBox?: {
+    headline: string;
+    /** headline 안에서 강조색으로 하이라이트할 부분 문자열(선택) */
+    headlineHighlight?: string;
+    subtextBefore: string;
+    subtextHighlight: string;
+    subtextAfter: string;
+  };
 }
 
 export interface TarotConfig {

@@ -55,6 +55,7 @@ export const ghostTarotConfig: TarotConfig = {
     resultBgMobile: '/ghost-tarot/result-bg-mobile.png',
     chineseKnot: '/ghost-tarot/chinese-knot.svg',
     badgeBrush: '/ghost-tarot/july-badge-brush.webp',
+    shareBoxBg: '/ghost-tarot/share-bg.png',
   },
   copy: {
     heroAlt: '귀신 타로',
@@ -72,6 +73,13 @@ export const ghostTarotConfig: TarotConfig = {
     kakaoDescription: '당신에게 붙은 존재가 이번 달 운세를 속삭입니다',
     kakaoButtonText: '나도 카드 열어보기',
     badgeLabel: (title) => `7월 · ${cleanJulyTitle(title)}`,
+    shareBox: {
+      headline: '귀신이 아직\n당신을 보고 있습니다.',
+      headlineHighlight: '보고',
+      subtextBefore: '공유하면 ',
+      subtextHighlight: '관심',
+      subtextAfter: '이 다른 곳으로 향할지도...',
+    },
   },
   toResultContent: (row) => ({
     title: (row.july_title as string) ?? '',

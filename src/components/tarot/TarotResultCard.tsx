@@ -6,6 +6,8 @@ import Image from 'next/image';
 
 import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
 import GhostCTAButton from '@/components/ghost-tarot/GhostCTAButton';
+import GhostCommentSection from '@/components/ghost-tarot/GhostCommentSection';
+import type { CommentFeatureType } from '@/lib/ghost-tarot/comments';
 import TarotShareRow from './TarotShareRow';
 import Toast from '@/components/Toast';
 import { saveImage, captureCardImage, isMobileDevice } from '@/lib/share';
@@ -639,6 +641,10 @@ export default function TarotResultCard({ config, card, result, error, onReset }
         ) : (
           <>
             <div style={{ marginTop: 22 }}>
+              <TarotShareRow config={config} shareText={shareText} shareLink={shareUrl} resultId={result?.id} variant="boxed" />
+            </div>
+
+            <div style={{ marginTop: 28 }}>
             <GhostCTAButton
               href={appStoreUrl}
               target="_blank"
@@ -696,9 +702,11 @@ export default function TarotResultCard({ config, card, result, error, onReset }
                 />
             </div>
 
-            <div style={{ marginTop: 28 }}>
-              <TarotShareRow config={config} shareText={shareText} shareLink={shareUrl} resultId={result?.id} />
-            </div>
+            {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (
+              <div style={{ marginTop: 44 }}>
+                <GhostCommentSection featureType={config.featureType as CommentFeatureType} />
+              </div>
+            )}
           </>
         )}
       </motion.div>

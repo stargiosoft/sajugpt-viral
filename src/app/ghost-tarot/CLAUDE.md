@@ -7,8 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #12466 | 2:47 PM | ✅ | Added metadataBase URL configuration to root layout for OG image resolution | ~234 |
+| #12467 | 2:47 PM | 🟣 | Ghost Tarot metadata configured with social media preview images | ~313 |
 | #12461 | 2:43 PM | 🔵 | Ghost Tarot missing Open Graph images for social media sharing | ~294 |
-| #12315 | 8:24 AM | ✅ | Ghost tarot CTA button gradient animation direction reversed | ~246 |
-| #12302 | 8:16 AM | ✅ | Ghost Tarot gradient UI changes successfully compiled and hot-reloaded | ~298 |
+| #12424 | 11:30 AM | 🟣 | Ghost Tarot image save with state management and error handling | ~322 |
 </claude-mem-context>

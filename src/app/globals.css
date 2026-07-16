@@ -104,3 +104,73 @@ input[type='number'] {
   0% { left: -55%; }
   100% { left: 145%; }
 }
+
+/* 귀신타로 공유 박스: 하단 좌우에서 은은하게 피어오르는 안개 */
+@keyframes ghost-fog-drift-left {
+  0% { transform: translate(-6%, 4%) scale(1); opacity: 0; }
+  50% { opacity: 0.07; }
+  100% { transform: translate(6%, -6%) scale(1.08); opacity: 0; }
+}
+
+@keyframes ghost-fog-drift-right {
+  0% { transform: translate(6%, 4%) scale(1); opacity: 0; }
+  50% { opacity: 0.07; }
+  100% { transform: translate(-6%, -6%) scale(1.08); opacity: 0; }
+}
+
+.ghost-fog-layer {
+  position: absolute;
+  bottom: -60px;
+  width: 240px;
+  height: 180px;
+  border-radius: 50%;
+  filter: blur(28px);
+  background-repeat: repeat, no-repeat;
+  background-blend-mode: overlay;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.ghost-fog-layer--left {
+  left: -60px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(closest-side, rgba(122, 33, 48, 0.55), rgba(122, 33, 48, 0) 70%);
+  animation: ghost-fog-drift-left 8s ease-in-out infinite;
+}
+
+.ghost-fog-layer--right {
+  right: -60px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(closest-side, rgba(122, 33, 48, 0.55), rgba(122, 33, 48, 0) 70%);
+  animation: ghost-fog-drift-right 9.5s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghost-fog-layer { animation: none; opacity: 0.04; }
+}
+
+/* 귀신타로 공유 박스: 강조 텍스트("보고"/"관심")가 은은하게 숨쉬듯 빛나는 효과 */
+@keyframes ghost-text-glow {
+  0%, 100% { text-shadow: 0 0 4px rgba(179,47,23,0.35), 0 2px 6px rgba(0,0,0,0.9); }
+  50% { text-shadow: 0 0 16px rgba(179,47,23,0.9), 0 2px 6px rgba(0,0,0,0.9); }
+}
+
+.ghost-glow-text {
+  animation: ghost-text-glow 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghost-glow-text { animation: none; }
+}
+
+/* 귀신타로 댓글 입력창 플레이스홀더 크기 + 위치(텍스트만 2px 아래로) */
+.ghost-comment-textarea::placeholder {
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-block;
+  transform: translateY(2px);
+}
+
