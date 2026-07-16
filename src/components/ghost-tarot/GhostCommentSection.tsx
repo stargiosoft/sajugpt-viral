@@ -318,6 +318,10 @@ export default function GhostCommentSection({ colors: colorOverrides, featureTyp
   useEffect(() => {
     load(sort);
     setVisibleCount(5);
+    // 정렬이 바뀌면 목록 순서가 재배치되므로, 열려 있던 답글 입력창은 닫아서
+    // 엉뚱한 댓글 아래에 붙어 있는 것처럼 보이지 않게 함
+    setOpenPanelId(null);
+    setReplyText('');
   }, [sort, load]);
 
   // 상대 시간("3분 전" 등) 표시를 1분마다 갱신
