@@ -47,6 +47,14 @@ interface Props {
   sheetTextColor?: string;
   dragHandleColor?: string;
   hoverBgClass?: string;
+  selectedBgColor?: string;
+  selectedTextColor?: string;
+  fontSize?: string;
+  arrowColor?: string;
+  sheetTitleFontWeight?: number;
+  sheetTitleTextStrokeWidth?: string;
+  sheetTitleLetterSpacing?: string;
+  height?: string;
 }
 
 // 태어난 시간을 12띠시 단위로 고르는 공용 바텀시트 — 모든 테스트가 이 컴포넌트로 시간을 입력받는다.
@@ -63,6 +71,14 @@ export default function TimeSelectSheet({
   sheetTextColor = '#ffffff',
   dragHandleColor = 'rgba(255,255,255,0.2)',
   hoverBgClass = 'hover:bg-white/10',
+  selectedBgColor = `${accentColor}22`,
+  selectedTextColor = accentColor,
+  fontSize = '16px',
+  arrowColor = placeholderColor,
+  sheetTitleFontWeight = 700,
+  sheetTitleTextStrokeWidth,
+  sheetTitleLetterSpacing,
+  height = '56px',
 }: Props) {
   const [open, setOpen] = useState(false);
   const dragControls = useDragControls();
@@ -83,7 +99,7 @@ export default function TimeSelectSheet({
         onClick={() => setOpen(true)}
         className="relative w-full flex items-center justify-between"
         style={{
-          height: '56px',
+          height,
           borderRadius: '16px',
           border: borderColor,
           backgroundColor: bgColor,
@@ -93,7 +109,7 @@ export default function TimeSelectSheet({
       >
         <span
           style={{
-            fontSize: '16px',
+            fontSize,
             lineHeight: '20px',
             letterSpacing: '-0.45px',
             color: selected ? textColor : placeholderColor,
@@ -102,7 +118,7 @@ export default function TimeSelectSheet({
           {selected ? (selected.isUnknown ? '모름' : `${selected.label} (${selected.range})`) : '태어난 시간을 선택해 주세요'}
         </span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, position: 'relative', top: '2px' }}>
-          <path d="M6 9l6 6 6-6" stroke={placeholderColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M6 9l6 6 6-6" stroke={arrowColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
@@ -152,7 +168,18 @@ export default function TimeSelectSheet({
               >
                 <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: dragHandleColor }} />
               </div>
-              <p style={{ fontSize: '22px', fontWeight: 700, color: sheetTextColor, textAlign: 'left', padding: '30px 20px 14px', flexShrink: 0 }}>
+              <p
+                style={{
+                  fontSize: '24px',
+                  fontWeight: sheetTitleFontWeight,
+                  color: sheetTextColor,
+                  textAlign: 'left',
+                  padding: '30px 20px 14px',
+                  flexShrink: 0,
+                  ...(sheetTitleLetterSpacing ? { letterSpacing: sheetTitleLetterSpacing } : {}),
+                  ...(sheetTitleTextStrokeWidth ? { WebkitTextStroke: `${sheetTitleTextStrokeWidth} ${sheetTextColor}` } : {}),
+                }}
+              >
                 태어난 시간을 선택해 주세요
               </p>
               <div className="overflow-y-auto" style={{ padding: '0 12px 12px' }}>
@@ -168,15 +195,15 @@ export default function TimeSelectSheet({
                         padding: '14px',
                         borderRadius: '12px',
                         border: 'none',
-                        backgroundColor: isSelected ? `${accentColor}22` : undefined,
+                        backgroundColor: isSelected ? selectedBgColor : undefined,
                         cursor: 'pointer',
                       }}
                     >
                       <span
                         style={{
                           fontSize: '15px',
-                          fontWeight: block.isUnknown ? 700 : 500,
-                          color: isSelected ? accentColor : sheetTextColor,
+                          fontWeight: 500,
+                          color: isSelected ? selectedTextColor : sheetTextColor,
                           letterSpacing: '-0.3px',
                         }}
                       >

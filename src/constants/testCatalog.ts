@@ -110,4 +110,18 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     ready: true,
     visibleOnHome: true,
   },
+  {
+    id: 'deang-saju',
+    title: '댕댕사주',
+    description: '사주를 강아지로 번역, 나는 무슨 견종일까?',
+    href: '/deang-saju',
+    emoji: '🐾',
+    imageSrc: '/home/thumbnails/deang-saju.jpg',
+    category: 'analysis',
+    colorTheme: 'orange',
+    participantLabel: '0',
+    isNew: true,
+    ready: true,
+    visibleOnHome: true,
+  },
 ];

@@ -11,11 +11,14 @@ interface Props {
   bgColor?: string;
   textColor?: string;
   borderColor?: string;
+  borderWidth?: string;
   errorColor?: string;
   errorGap?: string;
   errorOverlay?: boolean;
   errorFontSize?: string;
   errorIconSize?: number;
+  fontSize?: string;
+  height?: string;
 }
 
 export default function BirthInput({
@@ -27,11 +30,14 @@ export default function BirthInput({
   bgColor = '#fff',
   textColor = '#151515',
   borderColor = '#e7e7e7',
+  borderWidth = '1.5px',
   errorColor = '#FF0000',
   errorGap = '4px',
   errorOverlay = false,
   errorFontSize = '13px',
   errorIconSize = 16,
+  fontSize = '16px',
+  height = '56px',
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
@@ -76,9 +82,9 @@ export default function BirthInput({
       <div
         className="relative w-full"
         style={{
-          height: '56px',
+          height,
           borderRadius: '16px',
-          border: error ? `1.5px solid ${errorColor}` : isFocused ? `1.5px solid ${accentColor}` : `1.5px solid ${borderColor}`,
+          border: error ? `${borderWidth} solid ${errorColor}` : isFocused ? `${borderWidth} solid ${accentColor}` : `${borderWidth} solid ${borderColor}`,
           backgroundColor: bgColor,
           transition: 'border-color 0.2s',
         }}
@@ -98,7 +104,7 @@ export default function BirthInput({
             onBlur={() => setIsFocused(false)}
             className="flex-1 outline-none bg-transparent w-full"
             style={{
-              fontSize: '16px',
+              fontSize,
               lineHeight: '20px',
               letterSpacing: '-0.45px',
               color: textColor,

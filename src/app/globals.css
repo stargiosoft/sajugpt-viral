@@ -9,6 +9,14 @@
 }
 
 @font-face {
+  font-family: 'Cafe24 Dongdong';
+  src: url('/fonts/Cafe24Dongdong-v2.0.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Bookk Myungjo';
   src: url('/fonts/BookkMyungjo-Light.ttf') format('truetype');
   font-weight: 300;
