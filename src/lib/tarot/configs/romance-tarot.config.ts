@@ -1,10 +1,10 @@
 import type { TarotConfig } from '@/types/tarot';
 
-// "🚨 통장에 구멍난다" → "통장에 구멍난다" — 앞에 붙은 이모지와 "7월:" 접두어만 제거 (귀신타로와 동일 로직)
-function cleanJulyTitle(title: string) {
+// "🚨 통장에 구멍난다" → "통장에 구멍난다" — 앞에 붙은 이모지와 "N월:" 접두어만 제거 (귀신타로와 동일 로직)
+function cleanMonthTitle(title: string) {
   return title
     .replace(/^[^\p{L}\p{N}]+/u, '')
-    .replace(/^7월\s*[:：]?\s*/, '')
+    .replace(/^\d{1,2}월\s*[:：]?\s*/, '')
     .trim();
 }
 
@@ -59,7 +59,7 @@ export const romanceTarotConfig: TarotConfig = {
   },
   copy: {
     heroAlt: '귀신 타로 연애편',
-    landingBadge: '너의 8월을 알려주마',
+    landingBadge: '너의 이번 달을 알려주마',
     landingCta: '시작하기',
     selectionPrompt: '봉인된 카드 한 장을 선택하세요',
     cardBackAlt: '봉인된 귀신 카드 뒷면',
@@ -72,7 +72,7 @@ export const romanceTarotConfig: TarotConfig = {
     kakaoTitle: '👻 귀신 타로 연애편',
     kakaoDescription: '당신에게 붙은 존재가 인연의 신호를 속삭입니다',
     kakaoButtonText: '나도 카드 열어보기',
-    badgeLabel: (title) => `8월 · ${cleanJulyTitle(title)}`,
+    badgeLabel: (title) => `이번 달 · ${cleanMonthTitle(title)}`,
     shareBox: {
       headline: '귀신이 아직\n당신을 보고 있습니다.',
       headlineHighlight: '보고',
