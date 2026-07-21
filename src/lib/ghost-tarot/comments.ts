@@ -12,8 +12,8 @@ export interface GhostComment {
 
 export type CommentSort = 'latest' | 'likes';
 
-/** 귀신타로/연애귀신타로 댓글을 한 테이블에서 분리해서 보관하는 기준 컬럼 */
-export type CommentFeatureType = 'ghost_tarot' | 'romance_tarot';
+/** 귀신타로/연애귀신타로/댕댕사주 댓글을 한 테이블에서 분리해서 보관하는 기준 컬럼 */
+export type CommentFeatureType = 'ghost_tarot' | 'romance_tarot' | 'deang_saju';
 
 const SELECT_COLUMNS = 'id, content, likes, dislikes, reports, parent_id, created_at';
 

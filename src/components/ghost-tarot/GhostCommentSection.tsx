@@ -41,6 +41,14 @@ export interface CommentSectionColors {
   dimStrong: string;
   /** 좋아요/싫어요 아이콘의 비활성(안 누른) fill 색상 */
   faint: string;
+  /** 댓글 입력창(작성/답글) 배경색 */
+  inputBg: string;
+  /** 입력창 플레이스홀더 텍스트 색상 */
+  placeholder: string;
+  /** 전송 버튼 비활성 상태 배경색 */
+  sendDisabledBg: string;
+  /** 입력창 테두리 색상 */
+  inputBorder: string;
 }
 
 export const DEFAULT_COMMENT_COLORS: CommentSectionColors = {
@@ -49,6 +57,10 @@ export const DEFAULT_COMMENT_COLORS: CommentSectionColors = {
   dim: '#8e8e8e',
   dimStrong: 'rgb(117,117,117)',
   faint: '#4a4a4a',
+  inputBg: 'rgb(19,19,19)',
+  placeholder: '#6b6b6b',
+  sendDisabledBg: '#1c1c1c',
+  inputBorder: 'transparent',
 };
 
 const THUMB_BASE_PATH =
@@ -88,24 +100,25 @@ const SendButton = ({
     whileHover={disabled ? undefined : { backgroundColor: active ? colors.accent : 'rgba(255,255,255,0.2)' }}
     transition={{ duration: 0.15 }}
     style={{
-      width: 30,
-      height: 30,
+      width: 34,
+      height: 34,
       flexShrink: 0,
-      borderRadius: 10,
+      borderRadius: 12,
       border: 'none',
-      backgroundColor: active ? colors.accent : '#1c1c1c',
+      backgroundColor: active ? colors.accent : colors.sendDisabledBg,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       paddingBottom: 2,
+      marginTop: 1,
       cursor: disabled ? 'default' : 'pointer',
     }}
   >
-    <svg width="30" height="30" viewBox="0 0 34 34">
+    <svg width="32" height="32" viewBox="0 0 34 34">
       <path
         d="M17 22v-9M12.5 17.5 17 13l4.5 4.5"
         fill="none"
-        stroke={active ? '#f5ebe0' : '#5a5a5a'}
+        stroke={active ? '#FFFFFF' : '#c4c4c4'}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -153,7 +166,7 @@ function CommentComposer({
   const active = !submitting && value.trim().length > 0;
 
   return (
-    <div className="flex items-end" style={{ gap: 6, borderRadius: 12, backgroundColor: 'rgb(19,19,19)', padding: '6px 8px 8px 16px', ...style }}>
+    <div className="flex items-end" style={{ gap: 6, borderRadius: 16, backgroundColor: colors.inputBg, border: `1.5px solid ${colors.inputBorder}`, boxSizing: 'border-box', padding: '5px 8px 7px 16px', ...style }}>
       <textarea
         ref={textareaRef}
         autoFocus={autoFocus}
@@ -163,7 +176,22 @@ function CommentComposer({
         rows={1}
         placeholder={placeholder}
         className="ghost-comment-textarea"
-        style={{ flex: 1, resize: 'none', border: 'none', outline: 'none', background: 'transparent', color: colors.text, fontSize: 16, fontWeight: 500, lineHeight: 1.4, fontFamily: 'inherit', maxHeight: 120, padding: '6px 0' }}
+        style={{
+          flex: 1,
+          resize: 'none',
+          border: 'none',
+          outline: 'none',
+          background: 'transparent',
+          color: colors.text,
+          fontSize: 16,
+          fontWeight: 500,
+          letterSpacing: '-0.2px',
+          lineHeight: 1.4,
+          fontFamily: 'inherit',
+          maxHeight: 120,
+          padding: '6px 0',
+          ['--comment-placeholder-color' as string]: colors.placeholder,
+        }}
       />
       <SendButton active={active} disabled={disabled} onClick={onSubmit} colors={colors} />
     </div>
@@ -203,25 +231,26 @@ function CommentRow({
   return (
     <div
       style={{
-        padding: isReply ? '8px 4px 8px 20px' : '9px 4px',
-        borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+        padding: isReply ? '0px 12px 0px 24px' : '12px 12px',
+        borderBottom: isReply || isLast ? 'none' : '1px solid rgba(0,0,0,0.06)',
       }}
     >
       <div className="flex items-center">
         {isReply && <span style={{ color: colors.dim, fontSize: 12.5, fontWeight: 500, marginRight: 9 }}>└</span>}
         <div className="flex items-center" style={{ gap: 5 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'rgb(63,63,63)' }}>익명</span>
-          <span style={{ fontSize: 11, fontWeight: 500, color: 'rgb(63,63,63)' }}>·</span>
-          <span style={{ fontSize: 12, fontWeight: 500, color: 'rgb(63,63,63)' }}>{formatRelativeTime(comment.created_at)}</span>
+          <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '-0.2px', color: 'rgb(171, 171, 171)' }}>익명</span>
+          <span style={{ fontSize: 11, fontWeight: 500, color: 'rgb(171, 171, 171)' }}>·</span>
+          <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '-0.2px', color: 'rgb(171, 171, 171)' }}>{formatRelativeTime(comment.created_at)}</span>
         </div>
       </div>
 
       <p
         style={{
-          marginTop: 2,
+          marginTop: 5,
           paddingLeft: isReply ? 22 : 0,
           fontSize: 15,
           fontWeight: 500,
+          letterSpacing: '-0.2px',
           lineHeight: 1.5,
           color: colors.text,
           whiteSpace: 'pre-wrap',
@@ -231,7 +260,7 @@ function CommentRow({
         {comment.content}
       </p>
 
-      <div className="flex items-center justify-between" style={{ marginTop: isReply ? 5 : 9, paddingLeft: 6, paddingRight: 13 }}>
+      <div className="flex items-center justify-between" style={{ marginTop: isReply ? 6 : 10 }}>
         {isReply ? (
           <span />
         ) : (
@@ -240,7 +269,7 @@ function CommentRow({
             onClick={onTogglePanel}
             whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
             transition={{ duration: 0.15 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 13.5, fontWeight: 500, color: panelOpen ? colors.accent : 'rgb(101,101,101)', backgroundColor: 'transparent', borderRadius: 8, border: 'none', cursor: 'pointer', padding: '4px 6px 4px 10px', margin: '-4px -6px -4px -10px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 13, fontWeight: 500, letterSpacing: '-0.2px', color: panelOpen ? colors.accent : 'rgb(101,101,101)', backgroundColor: 'transparent', borderRadius: 8, border: 'none', cursor: 'pointer', padding: '6px 6px 6px 10px', margin: '-6px -6px -6px -10px' }}
           >
             {`답글 ${replyCount ?? 0}`}
             <ChevronIcon up={panelOpen} />
@@ -253,12 +282,10 @@ function CommentRow({
             onClick={() => onLike(comment.id)}
             whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
             transition={{ duration: 0.15 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12.5, color: liked ? colors.accent : colors.dim, backgroundColor: 'transparent', borderRadius: 8, border: 'none', cursor: 'pointer', padding: '6px 7px 6px 8px', margin: '-6px -7px -6px -8px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 13, letterSpacing: '-0.2px', color: liked ? colors.accent : 'rgb(150, 150, 150)', backgroundColor: 'transparent', borderRadius: 8, border: 'none', cursor: 'pointer', padding: '6px 7px 6px 8px', margin: '-6px -7px -6px -8px' }}
           >
-            <span style={{ position: 'relative', top: -2, display: 'inline-flex' }}>
-              <ThumbsUpIcon active={liked} colors={colors} />
-            </span>
-            {comment.likes > 0 && <span style={{ lineHeight: 1 }}>{comment.likes}</span>}
+            <ThumbsUpIcon active={liked} colors={colors} />
+            {comment.likes > 0 && <span style={{ lineHeight: 1, fontWeight: 500 }}>{comment.likes}</span>}
           </motion.button>
 
           <motion.button
@@ -266,10 +293,12 @@ function CommentRow({
             onClick={() => onDislike(comment.id)}
             whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
             transition={{ duration: 0.15 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12.5, color: disliked ? colors.accent : colors.dim, backgroundColor: 'transparent', borderRadius: 8, border: 'none', cursor: 'pointer', padding: '6px 8px 6px 8px', margin: '-6px -8px -6px -8px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 13, letterSpacing: '-0.2px', color: disliked ? colors.accent : 'rgb(150, 150, 150)', backgroundColor: 'transparent', borderRadius: 8, border: 'none', cursor: 'pointer', padding: '6px 8px 6px 8px', margin: '-6px -8px -6px -8px' }}
           >
-            <ThumbsDownIcon active={disliked} colors={colors} />
-            {comment.dislikes > 0 && <span style={{ lineHeight: 1 }}>{comment.dislikes}</span>}
+            <span style={{ position: 'relative', top: 2, display: 'inline-flex' }}>
+              <ThumbsDownIcon active={disliked} colors={colors} />
+            </span>
+            {comment.dislikes > 0 && <span style={{ lineHeight: 1, fontWeight: 500 }}>{comment.dislikes}</span>}
           </motion.button>
         </div>
       </div>
@@ -280,9 +309,18 @@ function CommentRow({
 interface GhostCommentSectionProps {
   colors?: Partial<CommentSectionColors>;
   featureType?: CommentFeatureType;
+  placeholder?: string;
+  replyPlaceholder?: string;
+  fontFamily?: string;
 }
 
-export default function GhostCommentSection({ colors: colorOverrides, featureType = 'ghost_tarot' }: GhostCommentSectionProps = {}) {
+export default function GhostCommentSection({
+  colors: colorOverrides,
+  featureType = 'ghost_tarot',
+  placeholder = '너 생각이 궁금해!',
+  replyPlaceholder = '너 생각이 궁금해!',
+  fontFamily,
+}: GhostCommentSectionProps = {}) {
   const colors: CommentSectionColors = { ...DEFAULT_COMMENT_COLORS, ...colorOverrides };
   const [comments, setComments] = useState<GhostComment[]>([]);
   const [sort, setSort] = useState<CommentSort>('latest');
@@ -437,13 +475,13 @@ export default function GhostCommentSection({ colors: colorOverrides, featureTyp
   };
 
   const renderReplyInput = (parentId: string) => (
-    <div style={{ margin: '12px 4px 20px 4px' }}>
+    <div style={{ margin: '24px 4px 20px 4px' }}>
       <CommentComposer
         value={replyText}
         onValueChange={setReplyText}
         onSubmit={() => handleReplySubmit(parentId)}
         submitting={replySubmitting}
-        placeholder="너 생각이 궁금해!"
+        placeholder={replyPlaceholder}
         autoFocus
         textareaRef={replyTextareaRef}
         colors={colors}
@@ -452,12 +490,12 @@ export default function GhostCommentSection({ colors: colorOverrides, featureTyp
   );
 
   return (
-    <div>
-      <div className="flex items-center justify-between" style={{ marginBottom: 8, paddingLeft: 2, paddingRight: 2 }}>
-        <span style={{ fontSize: 16, fontWeight: 700, color: colors.text }}>
+    <div style={fontFamily ? { fontFamily } : undefined}>
+      <div className="flex items-center justify-between" style={{ marginBottom: 8, paddingLeft: 10, paddingRight: 10 }}>
+        <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.2px', color: colors.text }}>
           댓글 <span style={{ fontWeight: 900, color: colors.accent }}>{comments.length}</span>
         </span>
-        <div className="flex items-center" style={{ gap: 10, paddingRight: 2 }}>
+        <div className="flex items-center" style={{ gap: 10 }}>
           {(['latest', 'likes'] as const).map((s) => (
             <motion.button
               key={s}
@@ -467,13 +505,14 @@ export default function GhostCommentSection({ colors: colorOverrides, featureTyp
               transition={{ duration: 0.15 }}
               style={{
                 fontSize: 13,
-                fontWeight: 400,
+                fontWeight: 600,
+                letterSpacing: '-0.2px',
                 backgroundColor: 'transparent',
                 borderRadius: 8,
                 border: 'none',
                 padding: '4px 6px 4px 7px',
                 margin: '-4px -6px -4px -7px',
-                color: sort === s ? colors.accent : colors.dimStrong,
+                color: sort === s ? colors.accent : 'rgb(165, 165, 165)',
                 cursor: 'pointer',
               }}
             >
@@ -489,7 +528,7 @@ export default function GhostCommentSection({ colors: colorOverrides, featureTyp
         onValueChange={setText}
         onSubmit={handleSubmit}
         submitting={submitting}
-        placeholder="너 생각이 궁금해!"
+        placeholder={placeholder}
         textareaRef={textareaRef}
         style={{ marginBottom: 24 }}
         colors={colors}
@@ -531,8 +570,8 @@ export default function GhostCommentSection({ colors: colorOverrides, featureTyp
                     style={{ overflow: 'hidden' }}
                   >
                     <AnimatePresence initial={false}>
-                      {replies.map((r) => (
-                        <motion.div key={r.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
+                      {replies.map((r, i) => (
+                        <motion.div key={r.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }} style={i === 0 ? { marginTop: 18 } : undefined}>
                           <CommentRow
                             comment={r}
                             isReply
@@ -571,7 +610,7 @@ export default function GhostCommentSection({ colors: colorOverrides, featureTyp
             marginTop: 8,
             padding: '11px 0',
             fontSize: 12,
-            fontWeight: 500,
+            fontWeight: 600,
             color: colors.dim,
             backgroundColor: 'rgba(255,255,255,0.03)',
             border: 'none',

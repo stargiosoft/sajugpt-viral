@@ -94,7 +94,8 @@ export type FeatureType =
   | 'dating'
   | 'saju_stock'
   | 'ghost_tarot'
-  | 'romance_tarot';
+  | 'romance_tarot'
+  | 'deang_saju';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

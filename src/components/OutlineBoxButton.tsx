@@ -12,11 +12,13 @@ interface Props {
   height?: string;
   borderRadius?: string;
   fontSize?: string;
+  fontWeight?: number;
   href?: string;
   target?: string;
   rel?: string;
   onClick?: (e: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   className?: string;
+  hoverBackground?: string;
 }
 
 // 결과 화면 하단 보조 버튼("다시 해보기", "링크 복사" 등) 공용 박스 버튼 —
@@ -29,12 +31,22 @@ export default function OutlineBoxButton({
   height = '48px',
   borderRadius = '12px',
   fontSize = '14px',
+  fontWeight = 600,
   href,
   target,
   rel,
   onClick,
   className,
+  hoverBackground,
 }: Props) {
+  const hoverProps = hoverBackground
+    ? {
+        whileHover: { backgroundColor: hoverBackground },
+        whileTap: { backgroundColor: hoverBackground, filter: 'brightness(0.88)', scale: 0.998 },
+        transition: PRESS_HOVER_PROPS.transition,
+      }
+    : PRESS_HOVER_PROPS;
+
   const style: CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -46,7 +58,7 @@ export default function OutlineBoxButton({
     border,
     color,
     fontSize,
-    fontWeight: 600,
+    fontWeight,
     textDecoration: 'none',
     cursor: 'pointer',
     transition: 'filter 0.15s',
@@ -61,7 +73,7 @@ export default function OutlineBoxButton({
         onClick={onClick} 
         className={className} 
         style={style} 
-        {...PRESS_HOVER_PROPS}
+        {...hoverProps}
       >
         {children}
       </motion.a>
@@ -73,7 +85,7 @@ export default function OutlineBoxButton({
       onClick={onClick} 
       className={className} 
       style={style} 
-      {...PRESS_HOVER_PROPS}
+      {...hoverProps}
     >
       {children}
     </motion.button>
