@@ -59,7 +59,7 @@ export const romanceTarotConfig: TarotConfig = {
   },
   copy: {
     heroAlt: '귀신 타로 연애편',
-    landingBadge: '너의 7월을 알려주마',
+    landingBadge: '너의 8월을 알려주마',
     landingCta: '시작하기',
     selectionPrompt: '봉인된 카드 한 장을 선택하세요',
     cardBackAlt: '봉인된 귀신 카드 뒷면',
@@ -72,7 +72,7 @@ export const romanceTarotConfig: TarotConfig = {
     kakaoTitle: '👻 귀신 타로 연애편',
     kakaoDescription: '당신에게 붙은 존재가 인연의 신호를 속삭입니다',
     kakaoButtonText: '나도 카드 열어보기',
-    badgeLabel: (title) => `7월 · ${cleanJulyTitle(title)}`,
+    badgeLabel: (title) => `8월 · ${cleanJulyTitle(title)}`,
     shareBox: {
       headline: '귀신이 아직\n당신을 보고 있습니다.',
       headlineHighlight: '보고',
@@ -83,8 +83,8 @@ export const romanceTarotConfig: TarotConfig = {
   },
   // ghost_tarot_results를 그대로 읽으므로 어댑터도 귀신타로와 동일하게 july_* 컬럼을 매핑
   toResultContent: (row) => ({
-    title: (row.july_title as string) ?? '',
-    message: (row.july_message as string) ?? '',
-    summary: (row.july_summary as string) ?? '',
+    title: (row.august_title as string) ?? '',
+    message: (row.august_message as string) ?? '',
+    summary: (row.august_summary as string) ?? '',
   }),
 };

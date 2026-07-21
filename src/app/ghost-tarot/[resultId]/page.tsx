@@ -21,7 +21,7 @@ export async function generateMetadata({
   try {
     const { data } = await supabase
       .from(ghostTarotConfig.table)
-      .select('card_name, july_title, july_summary')
+      .select('card_name, august_title, august_summary')
       .eq('id', resultId)
       .single();
 

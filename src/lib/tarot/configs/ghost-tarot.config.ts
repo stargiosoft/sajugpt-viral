@@ -1,10 +1,10 @@
 import type { TarotConfig } from '@/types/tarot';
 
-// "🚨 통장에 구멍난다" → "통장에 구멍난다" — 앞에 붙은 이모지와 "7월:" 접두어만 제거
+// "🚨 통장에 구멍난다" → "통장에 구멍난다" — 앞에 붙은 이모지와 "8월:" 접두어만 제거
 function cleanJulyTitle(title: string) {
   return title
     .replace(/^[^\p{L}\p{N}]+/u, '')
-    .replace(/^7월\s*[:：]?\s*/, '')
+    .replace(/^8월\s*[:：]?\s*/, '')
     .trim();
 }
 
@@ -59,7 +59,7 @@ export const ghostTarotConfig: TarotConfig = {
   },
   copy: {
     heroAlt: '귀신 타로',
-    landingBadge: '너의 7월을 알려주마',
+    landingBadge: '너의 8월을 알려주마',
     landingCta: '시작하기',
     selectionPrompt: '봉인된 카드 한 장을 선택하세요',
     cardBackAlt: '봉인된 귀신 카드 뒷면',
@@ -72,7 +72,7 @@ export const ghostTarotConfig: TarotConfig = {
     kakaoTitle: '👻 귀신 타로',
     kakaoDescription: '당신에게 붙은 존재가 이번 달 운세를 속삭입니다',
     kakaoButtonText: '나도 카드 열어보기',
-    badgeLabel: (title) => `7월 · ${cleanJulyTitle(title)}`,
+    badgeLabel: (title) => `8월 · ${cleanJulyTitle(title)}`,
     shareBox: {
       headline: '귀신이 아직\n당신을 보고 있습니다.',
       headlineHighlight: '보고',
@@ -82,8 +82,8 @@ export const ghostTarotConfig: TarotConfig = {
     },
   },
   toResultContent: (row) => ({
-    title: (row.july_title as string) ?? '',
-    message: (row.july_message as string) ?? '',
-    summary: (row.july_summary as string) ?? '',
+    title: (row.august_title as string) ?? '',
+    message: (row.august_message as string) ?? '',
+    summary: (row.august_summary as string) ?? '',
   }),
 };
