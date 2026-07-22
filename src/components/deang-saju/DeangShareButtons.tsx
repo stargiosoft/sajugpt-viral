@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, type RefObject } from 'react';
-import { toPng } from 'html-to-image';
+import { saveImage } from '@/lib/share';
 import { trackShare } from '@/lib/analytics';
-import { DEANG_COLORS as C } from '@/constants/deangTheme';
 
 interface Props {
   cardRef: RefObject<HTMLDivElement | null>;
@@ -22,11 +21,7 @@ export default function DeangShareButtons({ cardRef, resultId, breedName }: Prop
     if (!cardRef.current || saving) return;
     setSaving(true);
     try {
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, backgroundColor: C.cardBg });
-      const link = document.createElement('a');
-      link.download = `댕댕사주_${breedName}.png`;
-      link.href = dataUrl;
-      link.click();
+      await saveImage(cardRef.current, `댕댕사주_${breedName}.png`);
       trackShare('deang_saju', 'image_save', resultId);
     } catch {
     } finally {
