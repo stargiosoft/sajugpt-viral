@@ -22,6 +22,14 @@ function PawIcon({ flipped }: { flipped?: boolean }) {
 
 export default function DeangProfile({ breed, quip }: Props) {
   const isNarrow = useIsNarrow();
+
+  // 방어 코드: breed 또는 hashtags가 전달되지 않을 경우 기본값 처리
+  const breedName = breed?.breedName || '댕댕이';
+  const title = breed?.title ? breed.title.replace(breedName, '').trim() : breedName;
+  const hashtagsText = Array.isArray(breed?.hashtags) ? breed.hashtags.join('   ') : '';
+  const imageKey = breed?.key || 'gap';
+  const displayQuip = quip ? quip.replace(/\.$/, '') : '오늘도 행복한 하루!';
+
   return (
     <div className="flex flex-col" style={{ gap: '8px' }}>
       <DeangOutlineBox
@@ -48,7 +56,7 @@ export default function DeangProfile({ breed, quip }: Props) {
               paddingTop: '24px',
             }}
           >
-            {breed.title.slice(0, -breed.breedName.length).trim()}
+            {title}
           </p>
           <p
             style={{
@@ -60,13 +68,13 @@ export default function DeangProfile({ breed, quip }: Props) {
               marginTop: isNarrow ? '-4px' : '-6px',
             }}
           >
-            {breed.breedName}
+            {breedName}
           </p>
         </div>
         <div className="flex justify-center" style={{ marginTop: '-2px' }}>
           <DeangOutlineBox radius={999} strokeWidth={2} strokeColor="rgb(202, 230, 218)" backgroundColor="#FFFFFF" style={{ padding: isNarrow ? '2px 10px 2px' : '4px 12px 3px' }}>
             <span style={{ fontSize: isNarrow ? '13.5px' : '15.5px', letterSpacing: '-0.3px', color: 'rgb(45, 117, 81)', fontWeight: 500, whiteSpace: 'nowrap', WebkitTextStroke: '0.1px rgb(45, 117, 81)' }}>
-              {breed.hashtags.join('   ')}
+              {hashtagsText}
             </span>
           </DeangOutlineBox>
         </div>
@@ -79,7 +87,7 @@ export default function DeangProfile({ breed, quip }: Props) {
               transition={{ duration: 0.5, ease: 'easeOut' }}
               style={{ position: 'relative', width: isNarrow ? '210px' : '260px', height: isNarrow ? '210px' : '260px', marginTop: '4px', marginBottom: '8px' }}
             >
-              <Image src={`/deang-saju/breeds/${breed.key}.png`} alt={breed.breedName} fill unoptimized style={{ objectFit: 'contain' }} />
+              <Image src={`/deang-saju/breeds/${imageKey}.png`} alt={breedName} fill unoptimized style={{ objectFit: 'contain' }} />
             </motion.div>
           </div>
 
@@ -108,7 +116,7 @@ export default function DeangProfile({ breed, quip }: Props) {
             <div className="flex items-center justify-center" style={{ gap: '8px' }}>
               <PawIcon />
               <p style={{ fontSize: '18px', letterSpacing: '-0.5px', color: '#FFFFFF', fontWeight: 500, WebkitTextStroke: '0.2px #FFFFFF', lineHeight: '1.5' }}>
-                &ldquo; {quip.replace(/\.$/, '')} &rdquo;
+                &ldquo; {displayQuip} &rdquo;
               </p>
               <PawIcon flipped />
             </div>

@@ -14,7 +14,17 @@ export type DayStemKey =
   | 'im'
   | 'gye';
 
-export type DeangElement = 'wood' | 'fire' | 'earth' | 'metal' | 'water';
+export type DogCode =
+  | 'jindo'
+  | 'pomeranian'
+  | 'welsh_corgi'
+  | 'papillon'
+  | 'great_pyrenees'
+  | 'shiba'
+  | 'doberman'
+  | 'maltese'
+  | 'golden_retriever'
+  | 'poodle';
 
 export interface DeangStats {
   leadership: number;
@@ -25,12 +35,11 @@ export interface DeangStats {
 }
 
 export interface DeangBreed {
+  code: DogCode;
   key: DayStemKey;
   stemName: string;
   breedName: string;
-  element: DeangElement;
   title: string;
-  emoji: string;
   hashtags: string[];
   baseStats: DeangStats;
   temperament: string;

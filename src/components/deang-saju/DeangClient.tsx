@@ -14,7 +14,7 @@ import DeangShareButtons from './DeangShareButtons';
 import DeangShareRow from './DeangShareRow';
 import DeangCTA from './DeangCTA';
 import DeangCommentSection from './DeangCommentSection';
-import { generateDeangResult } from '@/lib/deangSaju';
+import { generateDeangResult, fetchDeangResultById } from '@/lib/deangSaju';
 import { trackEvent } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { DEANG_COLORS as C } from '@/constants/deangTheme';
@@ -24,7 +24,7 @@ interface Props {
   resultId?: string;
 }
 
-export default function DeangClient({ resultId: _resultId }: Props) {
+export default function DeangClient({ resultId }: Props) {
   const isNarrow = useIsNarrow();
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
@@ -37,6 +37,7 @@ export default function DeangClient({ resultId: _resultId }: Props) {
 
   const resultCardRef = useRef<HTMLDivElement>(null);
 
+  // 캐시된 사주 정보 로드
   useEffect(() => {
     const cached = loadSelfSaju();
     if (cached) {
@@ -46,6 +47,32 @@ export default function DeangClient({ resultId: _resultId }: Props) {
       if (cached.gender) setGender(cached.gender);
     }
   }, []);
+
+  // resultId가 URL 경로로 넘어왔을 경우 DB에서 결과 조회
+  useEffect(() => {
+    if (!resultId) return;
+
+    let isMounted = true;
+    setStep('analyzing');
+
+    fetchDeangResultById(resultId)
+      .then((data) => {
+        if (isMounted && data) {
+          setResult(data);
+          setStep('result');
+        } else if (isMounted) {
+          setStep('landing');
+        }
+      })
+      .catch((err) => {
+        console.error('결과 조회 실패:', err);
+        if (isMounted) setStep('landing');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [resultId]);
 
   useEffect(() => {
     saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
@@ -88,16 +115,24 @@ export default function DeangClient({ resultId: _resultId }: Props) {
 
     try {
       const [generated] = await Promise.all([
-        Promise.resolve(
-          generateDeangResult(birthDate, effectiveUnknownTime ? '오후 12:00' : birthTime, effectiveUnknownTime, gender),
+        generateDeangResult(
+          birthDate,
+          effectiveUnknownTime ? '오후 12:00' : birthTime,
+          effectiveUnknownTime,
+          gender
         ),
         minDelay,
       ]);
 
+      if (!generated || !generated.profile) {
+        throw new Error('올바른 결과를 받아오지 못했습니다.');
+      }
+
       setResult(generated);
       trackEvent('deang_saju_result', { breed: generated.profile.breed.breedName });
       setStep('result');
-    } catch {
+    } catch (err) {
+      console.error('댕댕사주 분석 실패:', err);
       setError('분석 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
       setStep('input');
     }

@@ -116,7 +116,7 @@ export default function DeangResultContent({ profile }: Props) {
                 <Image src="/deang-saju/icons/bone.svg" alt="" width={isNarrow ? 20 : 22} height={isNarrow ? 20 : 22} />
                 {section.title}
               </p>
-              <p style={{ fontSize: '16.5px', letterSpacing: '-0.5px', color: 'rgb(52, 52, 52)', lineHeight: '1.5', marginLeft: '38px', paddingLeft: '1px' }}>{section.body}</p>
+              <p style={{ fontSize: '16.5px', letterSpacing: '-0.5px', color: 'rgb(52, 52, 52)', lineHeight: '1.5', marginLeft: '38px', paddingLeft: '1px', whiteSpace: 'pre-line' }}>{section.body}</p>
             </div>
           ))}
         </div>

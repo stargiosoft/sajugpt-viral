@@ -25,6 +25,7 @@ export default function DeangLanding({ onStart }: Props) {
           alt="댕BTI — 사주로 보는 내 안의 강아지"
           fill
           priority
+          sizes="(max-width: 440px) 100vw, (max-width: 768px) 440px, 600px"
           style={{ objectFit: 'cover' }}
         />
       </div>
