@@ -4,10 +4,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface Props {
   message: string | null;
+  paddingY?: string;
 }
 
 // 화면 하단 고정 토스트 — 링크 복사 등 짧은 성공 피드백용 공용 컴포넌트
-export default function Toast({ message }: Props) {
+export default function Toast({ message, paddingY = '12px' }: Props) {
   return (
     <AnimatePresence>
       {message && (
@@ -25,7 +26,7 @@ export default function Toast({ message }: Props) {
               color: '#fff',
               fontSize: '14px',
               fontWeight: 600,
-              padding: '12px 20px',
+              padding: `${paddingY} 20px`,
               borderRadius: '12px',
               whiteSpace: 'nowrap',
               boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
