@@ -42,12 +42,14 @@ export default function DeangShareRow() {
   const [copied, setCopied] = useState(false);
 
   const shareLink = typeof window !== 'undefined' ? `${window.location.origin}/deang-saju` : '';
+  const shareImage = typeof window !== 'undefined' ? `${window.location.origin}/deang-saju/og-share.png` : '';
   const shareText = '🐾 사주를 강아지로 번역해드립니다 — 나는 무슨 견종일까? 댕댕사주 해보기';
 
   const handleKakaoShare = useCallback(() => {
     const ok = shareKakao({
       title: '댕댕사주',
       description: '사주를 강아지로 번역해드립니다 🐾',
+      imageUrl: shareImage,
       link: shareLink,
       buttonText: '나도 해보기',
     });
@@ -55,7 +57,7 @@ export default function DeangShareRow() {
       trackEvent('deang_saju_share', { method: 'kakao' });
       trackShare('deang_saju', 'kakao');
     }
-  }, [shareLink]);
+  }, [shareLink, shareImage]);
 
   const handleXShare = useCallback(() => {
     const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareLink)}`;
