@@ -83,6 +83,7 @@ export default function DeangProfile({ breed, quip }: Props) {
           </div>
 
           <DeangOutlineBox
+            className="deang-quip-badge"
             radius={18}
             strokeWidth={0}
             backgroundColor="rgb(88, 184, 136)"
