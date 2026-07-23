@@ -80,6 +80,7 @@ export default function TarotShareRow({
     const ok = shareKakao({
       title: config.copy.kakaoTitle,
       description: config.copy.kakaoDescription,
+      imageUrl: `${window.location.origin}/${config.slug}/og-share.png`,
       link: getLink(),
       buttonText: config.copy.kakaoButtonText,
     });
