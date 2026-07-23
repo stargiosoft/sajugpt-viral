@@ -83,7 +83,6 @@ export default function DeangProfile({ breed, quip }: Props) {
           </div>
 
           <DeangOutlineBox
-            className="deang-quip-badge"
             radius={18}
             strokeWidth={0}
             backgroundColor="rgb(88, 184, 136)"
@@ -101,6 +100,8 @@ export default function DeangProfile({ breed, quip }: Props) {
               padding: '12px 24px',
               textAlign: 'center',
               overflow: 'visible',
+              minHeight: '78px',
+              boxSizing: 'border-box',
             }}
           >
             <p style={{ fontSize: '18px', letterSpacing: '-0.5px', color: '#FFFFFF', fontWeight: 500, WebkitTextStroke: '0.2px #FFFFFF', lineHeight: '1.5', wordBreak: 'keep-all' }}>
