@@ -12,12 +12,6 @@ export const metadata: Metadata = {
     images: [{ url: "/romance-ghost-tarot/og-share.png", width: 1200, height: 600 }],
     type: "website",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "귀신타로 (연애편)",
-    description: "이번달, 당신의 연애 기운을 확인하세요.",
-    images: [{ url: "/romance-ghost-tarot/og-share.png", width: 1200, height: 600 }],
-  },
 };
 
 export default function RomanceGhostTarotPage() {
