@@ -93,61 +93,10 @@ async function logImageFetchDiagnostics(images: HTMLImageElement[]) {
 // 디코딩이 끝나지 않아 이미지 영역이 흰 채로 캡처되는 고질적 버그가 있음
 // (https://bugs.webkit.org/show_bug.cgi?id=201243). modern-screenshot은 이를 fixSvgXmlDecode
 // 옵션(기본 활성화)으로 Safari에서 drawImage를 여러 번 재시도해 우회하므로 라이브러리를 교체함
-const CAPTURE_DEBUG_SELECTOR = '.deang-quip-badge, .deang-quip-text';
-
-// 원본 라이브 DOM의 실측값을 콘솔에 남김 — 캡처(clone) 시점의 값과 직접 비교하기 위한 진단용
-function logOriginalDebugTargets(element: HTMLElement) {
-  const targets = element.querySelectorAll<HTMLElement>(CAPTURE_DEBUG_SELECTOR);
-  targets.forEach((el) => {
-    const rect = el.getBoundingClientRect();
-    const cs = getComputedStyle(el);
-    console.log(`[captureDebug:original:${el.className}]`, {
-      boundingClientRect: { width: rect.width, height: rect.height },
-      clientWidth: el.clientWidth,
-      scrollWidth: el.scrollWidth,
-      offsetWidth: el.offsetWidth,
-      fontSize: cs.fontSize,
-      lineHeight: cs.lineHeight,
-      letterSpacing: cs.letterSpacing,
-      padding: cs.padding,
-      whiteSpace: cs.whiteSpace,
-      transform: cs.transform,
-      width: cs.width,
-      maxWidth: cs.maxWidth,
-      fontFamily: cs.fontFamily,
-    });
-  });
-}
-
-// clone된(=캡처에 실제 사용되는) 노드에 얼려진 인라인 스타일 값을 콘솔에 남김 — clone은
-// document에 붙어있지 않아 getBoundingClientRect는 항상 0이므로 style 값 자체를 비교 대상으로 삼음
-function logClonedDebugTargets(clone: Node, label: string) {
-  if (!(clone instanceof HTMLElement)) return;
-  const targets = clone.matches?.(CAPTURE_DEBUG_SELECTOR)
-    ? [clone, ...Array.from(clone.querySelectorAll<HTMLElement>(CAPTURE_DEBUG_SELECTOR))]
-    : Array.from(clone.querySelectorAll<HTMLElement>(CAPTURE_DEBUG_SELECTOR));
-  targets.forEach((el) => {
-    console.log(`[captureDebug:${label}:${el.className}]`, {
-      width: el.style.width,
-      maxWidth: el.style.maxWidth,
-      height: el.style.height,
-      fontSize: el.style.fontSize,
-      lineHeight: el.style.lineHeight,
-      letterSpacing: el.style.letterSpacing,
-      padding: el.style.padding,
-      whiteSpace: el.style.whiteSpace,
-      transform: el.style.transform,
-      fontFamily: el.style.fontFamily,
-    });
-  });
-}
-
 export async function captureCardImage(element: HTMLElement): Promise<Blob> {
   // Bookk Myungjo(@font-face)/East Sea Dokdo(Google Fonts)가 아직 파싱 중일 때 캡처하면
   // 폴백 시스템 폰트로 렌더링된 화면이 그대로 굳어버림 — 캡처 전 폰트 로딩 완료를 보장
   await document.fonts.ready;
-
-  logOriginalDebugTargets(element);
 
   const rect = element.getBoundingClientRect();
   // 모바일 bleed용 음수 마진은 화면상 부모 패딩을 상쇄하기 위한 것이라 고립된 캡처에서는
@@ -173,8 +122,6 @@ export async function captureCardImage(element: HTMLElement): Promise<Blob> {
       width: rect.width,
       height: rect.height,
       fetch: { bypassingCache: true },
-      onCloneNode: (clone) => logClonedDebugTargets(clone, 'clonedBeforeFontEmbed'),
-      onEmbedNode: (clone) => logClonedDebugTargets(clone, 'clonedAfterFontEmbed'),
     });
     console.log('[captureCardImage] domToBlob resolved', { size: blob.size });
     return blob;
