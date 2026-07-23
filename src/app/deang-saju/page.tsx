@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '사주로 알아보는 나의 댕댕이 유형 🐶',
     description: '생년월일시로 알아보는 나와 꼭 닮은 강아지',
-    images: [{ url: '/deang-saju/share-square.png', width: 1254, height: 1254 }],
+    images: [{ url: '/deang-saju/og-share.png', width: 1200, height: 600 }],
     type: 'website',
     siteName: '사주GPT',
   },

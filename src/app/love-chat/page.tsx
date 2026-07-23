@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     title: '카톡만 봐도 연애 성격 다 나옴',
     description: '답장만 봐도 연애 스타일이 보인다!',
     type: 'website',
+    images: [{ url: '/love-chat/og-share.png', width: 1200, height: 600 }],
   },
 };
 

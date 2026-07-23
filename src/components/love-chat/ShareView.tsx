@@ -55,6 +55,7 @@ export default function ShareView({ character, cardRef, onReset }: Props) {
             title: `💌 나의 카톡 연애 캐릭터는 "${character.name}"`,
             description: character.oneLiner,
             shareUrl,
+            imageUrl: `${origin}/love-chat/og-share.png`,
           }}
         />
       </div>

@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `나의 카톡 연애 캐릭터는 "${character.name}"`,
       description: character.oneLiner,
+      images: [{ url: '/love-chat/og-share.png', width: 1200, height: 600 }],
     },
   };
 }
