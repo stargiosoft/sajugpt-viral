@@ -144,7 +144,7 @@ export default function DeangResultContent({ profile }: Props) {
               <div className="relative" style={{ width: '82%', aspectRatio: '1 / 1', marginTop: '8px', marginBottom: '-8px' }}>
                 <Image src={item.image} alt={item.breed.breedName} fill unoptimized style={{ objectFit: 'contain' }} />
               </div>
-              <p style={{ fontFamily: 'Cafe24 Dongdong, sans-serif', fontSize: isNarrow ? '15.5px' : '17px', color: '#000000', WebkitTextStroke: '0.2px #000000', textAlign: 'center' }}>
+              <p style={{ fontFamily: 'Cafe24 Dongdong, sans-serif', fontSize: isNarrow ? '15.5px' : '17px', color: '#000000', WebkitTextStroke: '0.2px #000000', textAlign: 'center', wordBreak: 'keep-all' }}>
                 {item.breed.breedName}
               </p>
             </DeangOutlineBox>

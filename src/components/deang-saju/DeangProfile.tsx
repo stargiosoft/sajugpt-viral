@@ -99,9 +99,10 @@ export default function DeangProfile({ breed, quip }: Props) {
               zIndex: 5,
               padding: '12px 24px',
               textAlign: 'center',
+              overflow: 'visible',
             }}
           >
-            <p style={{ fontSize: '18px', letterSpacing: '-0.5px', color: '#FFFFFF', fontWeight: 500, WebkitTextStroke: '0.2px #FFFFFF', lineHeight: '1.5' }}>
+            <p style={{ fontSize: '18px', letterSpacing: '-0.5px', color: '#FFFFFF', fontWeight: 500, WebkitTextStroke: '0.2px #FFFFFF', lineHeight: '1.5', wordBreak: 'keep-all' }}>
               &ldquo; {displayQuip} &rdquo;
             </p>
           </DeangOutlineBox>
