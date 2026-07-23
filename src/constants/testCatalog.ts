@@ -124,4 +124,18 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     ready: true,
     visibleOnHome: true,
   },
+  {
+    id: 'love-chat',
+    title: '카톡 연애도감',
+    description: '카톡 습관만 봐도 연애 스타일이 보인다, 내 연애 카톡 캐릭터는?',
+    href: '/love-chat',
+    emoji: '💌',
+    imageSrc: '/love-chat/thumbnail-v2.png',
+    category: 'love',
+    colorTheme: 'orange',
+    participantLabel: '0',
+    isNew: true,
+    ready: true,
+    visibleOnHome: true,
+  },
 ];
