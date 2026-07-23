@@ -33,6 +33,10 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
   const currentQuestion = QUESTIONS[questionIndex];
 
   useEffect(() => {
+    if (step === 'quiz') window.scrollTo(0, 0);
+  }, [step, questionIndex]);
+
+  useEffect(() => {
     if (step !== 'analyzing') return;
     const timer = setTimeout(() => {
       const result = matchCharacter(answers);
@@ -120,7 +124,7 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
                     color: '#3D6FE0',
                     textAlign: 'center',
                     marginTop: '2px',
-                    marginBottom: '22px',
+                    marginBottom: '16px',
                   }}
                 >
                   {questionIndex + 1} / {QUESTIONS.length}

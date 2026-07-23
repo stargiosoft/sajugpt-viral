@@ -27,12 +27,12 @@ export default function Landing({ onStart }: Props) {
         <Image src="/love-chat/thumbnail-v2.png" alt="카톡 습관만 봐도 연애 스타일이 보인다" fill style={{ objectFit: 'cover' }} priority />
       </div>
 
-      <div style={{ padding: '20px 24px 40px' }}>
-        <p style={{ fontSize: '16px', color: '#8A93A6', textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
+      <div style={{ padding: '20px 16px 40px' }}>
+        <p style={{ fontSize: '14px', color: '#8A93A6', textAlign: 'center', marginTop: '0px', marginBottom: '18px' }}>
           질문 5~7개 · 소요시간 약 1분
         </p>
 
-        <div style={{ marginBottom: '48px' }}>
+        <div style={{ marginBottom: '28px' }}>
           <LandingCTAButton
             onClick={onStart}
             label={<span style={{ fontFamily: "'Ongeulip Minmi', sans-serif", fontSize: '24px', fontWeight: 500 }}>시작하기</span>}
@@ -41,7 +41,7 @@ export default function Landing({ onStart }: Props) {
           />
         </div>
 
-        <div style={{ marginBottom: '48px' }}>
+        <div style={{ marginBottom: '28px' }}>
           <ShareIconRow
             shareContent={{
               featureType: 'love_chat',

@@ -123,7 +123,7 @@ export default function Question({ question, onAnswer, direction = 1 }: Props) {
               >
                 {option.choice}
               </span>
-              <span style={{ fontSize: '17px', fontWeight: 500, color: '#26314D', lineHeight: 1.35, letterSpacing: '-0.1px' }}>
+              <span style={{ fontSize: '17px', fontWeight: 500, color: '#26314D', lineHeight: 1.5, letterSpacing: '-0.1px' }}>
                 {option.text}
               </span>
             </motion.button>

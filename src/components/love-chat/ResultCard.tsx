@@ -32,10 +32,10 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(function ResultCard({ chara
         }}
       >
         <p style={{ textAlign: 'center' }}>
-          <span style={{ display: 'block', fontSize: '18px', color: 'rgb(232, 232, 232)', lineHeight: 1.5, marginBottom: '6px' }}>
+          <span style={{ display: 'block', fontSize: '18px', color: '#FFFFFF', lineHeight: 1.5, marginBottom: '6px' }}>
             {character.name}은 시작일 뿐이에요.
           </span>
-          <span style={{ display: 'block', fontSize: '23px', color: 'rgb(232, 232, 232)', lineHeight: 1.5, marginBottom: '4px' }}>
+          <span style={{ display: 'block', fontSize: '23px', color: '#FFFFFF', lineHeight: 1.5, marginBottom: '4px' }}>
             내 진짜 사주, 심층 분석 받아보기
           </span>
         </p>

@@ -137,6 +137,22 @@ export async function captureCardImage(element: HTMLElement): Promise<Blob> {
 
 export async function saveImage(element: HTMLElement, filename = '색기배틀_결과.png', preCapturedBlob?: Blob): Promise<void> {
   const blob = preCapturedBlob ?? await captureCardImage(element);
+
+  // 모바일(특히 iOS Safari)은 <a download>가 새 탭으로 열리거나 조용히 실패하는 경우가 많아
+  // 사진첩에 바로 저장할 수 있는 파일 공유 시트(navigator.share)를 우선 시도한다.
+  if (isMobileDevice() && navigator.canShare) {
+    const file = new File([blob], filename, { type: 'image/png' });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return;
+      } catch (err) {
+        // AbortError = 사용자가 공유 시트를 취소한 경우 — 다운로드 폴백으로 넘어가지 않고 그대로 종료
+        if (err instanceof Error && err.name === 'AbortError') return;
+      }
+    }
+  }
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
