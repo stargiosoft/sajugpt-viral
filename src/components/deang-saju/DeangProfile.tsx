@@ -96,7 +96,7 @@ export default function DeangProfile({ breed, quip }: Props) {
             style={{
               marginTop: '-59px',
               width: 'max-content',
-              maxWidth: 'calc(100vw - 64px)',
+              maxWidth: '100%',
               zIndex: 5,
               padding: '12px 24px',
               textAlign: 'center',
