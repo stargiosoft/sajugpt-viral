@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     title: "귀신타로(운세편)",
     description: "이번 달, 당신을 찾아올 경고를 확인하세요.",
     images: [{ url: "/ghost-tarot/og-share.png", width: 1200, height: 600 }],
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
