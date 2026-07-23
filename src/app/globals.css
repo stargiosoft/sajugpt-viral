@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 @font-face {
+  font-family: 'Pretendard Variable';
+  src: url('/fonts/PretendardVariable.woff2') format('woff2-variations');
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Jalnan';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.2/JalnanOTF00.woff') format('woff');
   font-weight: normal;
@@ -28,6 +36,14 @@
   font-family: 'Bookk Myungjo';
   src: url('/fonts/BookkMyungjo-Bold.ttf') format('truetype');
   font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ongeulip Minmi';
+  src: url('/fonts/OngeulipMinmi.ttf') format('truetype');
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
