@@ -17,6 +17,8 @@ interface Props {
   emojiFontSize?: string;
   /** 지정하면 펄싱 링+이모지 대신 이 색으로 재색칠한 Lottie 로딩 애니메이션을 사용 */
   lottieColor?: string;
+  /** 지정하면 기본 내장 애니메이션 대신 이 Lottie JSON을 그대로 사용 (색상은 이미 파일에 반영돼 있다고 가정, lottieColor 무시) */
+  animationData?: object;
   lottieSize?: string;
   /** 레이어별 투명도(0~1, data.layers 순서 대응) — 톤온톤 그라데이션용. 기본값은 위(0.4)에서 아래(1)로 진해짐 */
   lottieLayerOpacities?: number[];
@@ -41,6 +43,7 @@ export default function AnalyzingScreen({
   ringBorderWidth = '3px',
   emojiFontSize = '40px',
   lottieColor,
+  animationData,
   lottieSize = '160px',
   lottieLayerOpacities = DEFAULT_LOTTIE_LAYER_OPACITIES,
   messageColor = '#666',
@@ -54,8 +57,8 @@ export default function AnalyzingScreen({
   repeat = false,
 }: Props) {
   const lottieData = useMemo(
-    () => (lottieColor ? recolorLottie(squareShapeLoading, lottieColor, lottieLayerOpacities) : null),
-    [lottieColor, lottieLayerOpacities]
+    () => animationData ?? (lottieColor ? recolorLottie(squareShapeLoading, lottieColor, lottieLayerOpacities) : null),
+    [animationData, lottieColor, lottieLayerOpacities]
   );
 
   const [round, setRound] = useState(0);
