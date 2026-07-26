@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import LoveChatClient from '@/components/love-chat/LoveChatClient';
+import ReferralTracker from '@/components/ReferralTracker';
 import { CHARACTERS, getCharacterById } from '@/data/characters';
 
 interface Props {
@@ -39,5 +40,10 @@ export default async function LoveChatResultPage({ params }: Props) {
     notFound();
   }
 
-  return <LoveChatClient sharedCharacter={character} />;
+  return (
+    <>
+      <ReferralTracker featureType="love_chat" referrerId={resultId} />
+      <LoveChatClient sharedCharacter={character} />
+    </>
+  );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import LoveChatClient from '@/components/love-chat/LoveChatClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '카톡 연애도감 — 내 연애 카톡 캐릭터는?',
@@ -13,5 +14,5 @@ export const metadata: Metadata = {
 };
 
 export default function LoveChatPage() {
-  return <LoveChatClient />;
+  return (<><LandingTracker featureType="love_chat" /><LoveChatClient /></>);
 }

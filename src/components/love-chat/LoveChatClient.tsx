@@ -14,6 +14,7 @@ import ShareView from './ShareView';
 import CommentBoard from './CommentBoard';
 import { QUESTIONS } from '@/data/questions';
 import { matchCharacter } from '@/lib/matcher';
+import { trackEvent } from '@/lib/analytics';
 import type { Answers, Choice, LoveChatCharacter } from '@/types/love-chat';
 
 type Step = 'landing' | 'quiz' | 'analyzing' | 'result';
@@ -42,11 +43,13 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
       const result = matchCharacter(answers);
       setCharacter(result.character);
       setStep('result');
+      trackEvent('love_chat_result', { characterId: result.character.id, characterName: result.character.name });
     }, 1400);
     return () => clearTimeout(timer);
   }, [step, answers]);
 
   const handleStart = useCallback(() => {
+    trackEvent('love_chat_quiz_start');
     setStep('quiz');
     setQuestionIndex(0);
     setAnswers({});
