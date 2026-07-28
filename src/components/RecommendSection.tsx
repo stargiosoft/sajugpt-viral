@@ -89,7 +89,9 @@ export default function RecommendSection({ excludeId, titleText = '추천 테스
           touchAction: 'pan-x',
           userSelect: 'none',
           scrollbarWidth: 'none',
-          scrollSnapType: isDragging ? 'none' : 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          // mandatory는 터치 드래그 도중에도 스냅을 강제해서 특히 역방향 스와이프에서 버벅임 유발 — proximity로 완화
+          scrollSnapType: isDragging ? 'none' : 'x proximity',
         }}
       >
         {items.map((item) => (
