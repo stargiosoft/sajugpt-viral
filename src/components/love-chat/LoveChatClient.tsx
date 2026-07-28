@@ -12,6 +12,8 @@ import KakaoResultHeader from './KakaoResultHeader';
 import ResultCard from './ResultCard';
 import ShareView from './ShareView';
 import CommentBoard from './CommentBoard';
+import RecommendSection from '@/components/RecommendSection';
+import SajuGPTBanner from '@/components/SajuGPTBanner';
 import { QUESTIONS } from '@/data/questions';
 import { matchCharacter } from '@/lib/matcher';
 import { trackEvent } from '@/lib/analytics';
@@ -88,7 +90,7 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
 
   return (
     <div style={{ background: '#F5F8FD', minHeight: '100dvh', fontFamily: "'Ongeulip Minmi', sans-serif", fontWeight: 500 }}>
-      <div className="w-full" style={{ maxWidth: '768px', margin: '0 auto', position: 'relative' }}>
+      <div className="w-full max-w-[440px] md:max-w-[600px]" style={{ margin: '0 auto', position: 'relative' }}>
         <AnimatePresence mode="wait">
           {step === 'landing' && <Landing key="landing" onStart={handleStart} />}
 
@@ -168,7 +170,18 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
                 <div style={{ marginTop: '16px', padding: '0 16px' }}>
                   <ShareView character={character} cardRef={cardRef} onReset={handleReset} />
                 </div>
-                <div style={{ marginTop: '16px', padding: '0 16px 80px' }}>
+                <div style={{ marginTop: '24px', padding: '0 16px' }}>
+                  <RecommendSection
+                    excludeId="love-chat"
+                    titleStyle={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontSize: '16px', fontWeight: 700, color: '#1C2333', letterSpacing: '-0.5px', paddingLeft: '2px' }}
+                    cardBg="#FFFFFF"
+                    cardTitleColor="#1C2333"
+                  />
+                </div>
+                <div style={{ marginTop: '12px', padding: '0 16px' }}>
+                  <SajuGPTBanner featureType="love_chat" />
+                </div>
+                <div style={{ marginTop: '24px', padding: '0 16px 80px' }}>
                   <CommentBoard />
                 </div>
               </div>

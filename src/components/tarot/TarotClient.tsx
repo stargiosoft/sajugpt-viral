@@ -87,7 +87,6 @@ export default function TarotClient({ slug, resultId }: Props) {
     let targetCardId = cardId;
     let card = cards.find(item => item.id === targetCardId);
 
-    // ?mode=5 레거시 A/B 훅 — modeOverridePool이 설정된 타로에서만 동작(예: 귀신타로)
     if (isModeOverride && config.modeOverridePool) {
       const totalPool = [...cards, ...config.fallbackCards];
       const filteredPool = totalPool.filter(item => config.modeOverridePool!.includes(item.id));

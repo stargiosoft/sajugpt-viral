@@ -8,13 +8,11 @@ import ChatSimulation from './ChatSimulation';
 
 interface Props {
   character: LoveChatCharacter;
-  onSajuGPTClick?: () => void;
 }
 
-const ResultCard = forwardRef<HTMLDivElement, Props>(function ResultCard({ character, onSajuGPTClick }, ref) {
+const ResultCard = forwardRef<HTMLDivElement, Props>(function ResultCard({ character }, ref) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
-      {/* 저장/공유 이미지 캡처 범위 — 아래 사주GPT CTA 배너는 캡처에서 제외하기 위해 ref 밖에 둔다 */}
       <div ref={ref} style={{ background: '#D1E0F5', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <ResultContent character={character} />
         <ChatSimulation character={character} />
@@ -41,7 +39,6 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(function ResultCard({ chara
         </p>
         <PressableButton
           label="사주GPT로 더 알아보기 →"
-          onClick={onSajuGPTClick}
           href="https://sajugpt.co.kr"
           target="_blank"
           rel="noopener noreferrer"

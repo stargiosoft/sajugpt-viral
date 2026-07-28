@@ -38,6 +38,7 @@ export default function GenderSelect({ value, onChange, accentColor = '#7A38D8',
               padding: '12px 20px',
               backgroundColor: 'transparent',
               border: 'none',
+              outline: 'none',
               cursor: 'pointer',
             }}
           >

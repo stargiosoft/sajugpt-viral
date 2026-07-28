@@ -23,6 +23,10 @@ interface Props {
 // "시작하기" 버튼과 동일한 프레스/호버 효과를 내는 공용 버튼 —
 // 배경(애니메이션 레이어)과 텍스트(고정 레이어)를 분리해서 눌렀을 때 텍스트가 같이 움직이지 않는다.
 export default function PressableButton({ label, onClick, href, target, rel, disabled, style, bgStyle, textStyle, hoverBackground, shineColor }: Props) {
+  // whileHover/whileTap로 애니메이션된 backgroundColor는 제스처가 끝나도 스스로 원래 값으로 돌아가지 않음 —
+  // bgStyle이 바뀔 때(예: 등록 후 비활성화 색으로 전환)도 항상 이 값으로 복귀하도록 animate에 명시.
+  const restingBackground = bgStyle?.backgroundColor ?? bgStyle?.background;
+
   const hoverProps = hoverBackground
     ? {
         whileHover: { backgroundColor: hoverBackground },
@@ -42,11 +46,13 @@ export default function PressableButton({ label, onClick, href, target, rel, dis
         onClick={onClick}
         disabled={href ? undefined : disabled}
         className="transform-gpu w-full h-full"
+        animate={restingBackground !== undefined ? { backgroundColor: restingBackground } : undefined}
         {...(disabled ? {} : hoverProps)}
         style={{
           position: 'absolute',
           inset: 0,
           border: 'none',
+          outline: 'none',
           cursor: disabled ? 'not-allowed' : 'pointer',
           textDecoration: 'none',
           ...bgStyle,

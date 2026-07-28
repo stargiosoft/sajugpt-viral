@@ -31,7 +31,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   } catch (_e) {
     console.error('[generateMetadata] Supabase 조회 실패:', _e);
-    // DB 조회 실패 시 기본값 사용
   }
 
   return {

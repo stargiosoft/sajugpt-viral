@@ -23,7 +23,6 @@ interface Props {
   hoverBackground?: string;
 }
 
-// 공유 행의 원형 아이콘 버튼(X 공유 / 링크 복사)이 공유하는 호버·탭 모션
 export default function GhostIconButton({ ariaLabel, onClick, children, style, hoverBackground }: Props) {
   return (
     <motion.button

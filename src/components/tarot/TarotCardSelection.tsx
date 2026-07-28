@@ -14,7 +14,6 @@ interface Props {
   onSelect: (cardId: string) => void;
 }
 
-// 나다운세 TarotGame.tsx의 부채꼴/셔플 로직을 참고해 이식 + 반응형 스케일링
 const BASE_CONTAINER_WIDTH = 340;
 const BASE_CARD_WIDTH = 46;
 const BASE_CARD_HEIGHT = 69;
@@ -25,8 +24,6 @@ const ANGLE_RANGE = 84;
 type CardPos = { left: number; top: number; rotate: number };
 type ShufflePhase = 'mixing' | 'gathered' | 'spreading' | 'idle';
 
-// 실제 앱 프레임 너비(TarotClient의 max-w-[440px] md:max-w-[600px]와 동일 breakpoint)
-// 기준 좌우 16px 인셋에 딱 맞는 너비 — 카드가 그 안에 꽉 차게 펼쳐짐, 화면 밖으로 안 넘침
 function getContainerWidth(windowWidth: number) {
   const frameMax = windowWidth >= DESKTOP_BREAKPOINT ? 600 : 440;
   const frame = Math.min(windowWidth, frameMax);
@@ -59,8 +56,6 @@ export default function TarotCardSelection({
   const fanAreaHeight = maxArcHeight + cardHeight;
   const containerHeight = fanAreaHeight + gap + cardHeight;
 
-  // 카드가 회전하면 실제 차지하는 폭/높이가 원래보다 커짐 — 대각선 기준 여유 마진을 둬서
-  // 부채꼴(idle)이든 셔플 중(mixing, 임의 회전)이든 프레임 밖으로 넘치지 않게 함
   const diagonal = Math.sqrt(cardWidth * cardWidth + cardHeight * cardHeight);
   const marginX = Math.max(0, (diagonal - cardWidth) / 2);
   const marginY = Math.max(0, (diagonal - cardHeight) / 2);
@@ -85,7 +80,6 @@ export default function TarotCardSelection({
     });
   }, [count, containerWidth, cardWidth, maxArcHeight, marginX]);
 
-  // 카드를 모을 때 사선(-45deg)이 아니라 수직으로 똑바르게
   const gatheredPosition: CardPos = useMemo(() => ({
     left: (containerWidth - cardWidth) / 2,
     top: (fanAreaHeight - cardHeight) / 2,
@@ -132,8 +126,8 @@ export default function TarotCardSelection({
   useEffect(() => {
     if (count === 0) return;
     return runShuffle();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
+
 
   const buttonLabel = phase !== 'idle'
     ? '섞는 중...'
@@ -162,7 +156,6 @@ export default function TarotCardSelection({
         position: 'relative',
       }}
     >
-      {/* 좌측 상단이 배경 텍스처 특성상 허옇게 뜨는 걸 완화하는 검정 비네트 */}
       <div
         aria-hidden
         style={{
@@ -201,8 +194,6 @@ export default function TarotCardSelection({
       ) : (
         <>
           <div style={{ position: 'relative', width: containerWidth, height: containerHeight, margin: '62px auto 0' }}>
-            {/* 뽑은 카드가 놓일 점선 슬롯 — 카드 크기에 비례해서 살짝만 작게 (카드가 얹혔을 때 점선이 안 보이는 선에서)
-                셔플이 끝나고 부채꼴로 다 펼쳐진 뒤(phase === 'idle')에만 자연스럽게 페이드인 */}
             <motion.div
               initial={false}
               animate={{ opacity: phase === 'idle' ? 0.55 : 0 }}

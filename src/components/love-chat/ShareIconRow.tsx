@@ -4,7 +4,6 @@ import Toast from '@/components/Toast';
 import GhostIconButton from '@/components/ghost-tarot/GhostIconButton';
 import { useShare, type ShareContent } from '@/lib/useShare';
 
-// 댕댕사주 DeangShareRow와 동일한 아이콘/색상 — 카카오 💬(#FEE500), X(#000), 링크(파랑)
 const ICON_STYLE = { width: 42, height: 42, border: 'none' };
 
 function KakaoIcon({ color }: { color: string }) {
@@ -45,7 +44,6 @@ interface Props {
   shareContent: ShareContent;
 }
 
-// 카카오톡/X/링크복사 원형 아이콘 3종 — 시작화면과 결과화면이 공유하는 공용 컴포넌트
 export default function ShareIconRow({ shareContent }: Props) {
   const { shareToKakao, shareToX, copyLink, copied, toastMessage } = useShare(shareContent);
 

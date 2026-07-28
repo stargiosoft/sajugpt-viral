@@ -201,7 +201,7 @@ export function getShareText(headcount: number, battleId: string): string {
 export function isMobileDevice(): boolean {
   if (typeof window === 'undefined') return false;
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-    || ('ontouchstart' in window && navigator.maxTouchPoints > 1);
+    || window.innerWidth < 600;
 }
 
 export async function shareNative(element: HTMLElement, headcount: number, battleId?: string): Promise<boolean> {

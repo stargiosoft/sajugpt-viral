@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import type { DeangProfileData, DeangStats } from '@/types/deang-saju';
-import DeangOutlineBox from './DeangOutlineBox';
+import DeangOutlineBox, { DeangCardBox, DeangStitchBadge } from './DeangOutlineBox';
 import useIsNarrow from '@/hooks/useIsNarrow';
 
 interface Section {
@@ -12,6 +13,8 @@ interface Section {
 interface Props {
   profile: DeangProfileData;
 }
+
+const SECTION_TITLE_STYLE: CSSProperties = { fontFamily: 'Cafe24 Dongdong, sans-serif', fontSize: '23px', letterSpacing: '-0.5px', color: '#000000', WebkitTextStroke: '0.6px #000000', marginBottom: '18px' };
 
 const STAT_LABELS: Record<keyof DeangStats, string> = {
   leadership: '리더십',
@@ -35,16 +38,12 @@ export default function DeangResultContent({ profile }: Props) {
 
   return (
     <div className="flex flex-col" style={{ gap: '8px', marginTop: '8px' }}>
-      <DeangOutlineBox
-        radius={20}
-        backgroundColor="rgb(247, 250, 245)"
-        stitch
-        stitchColor="rgb(202, 230, 218)"
+      <DeangCardBox
         style={{
           padding: '36px 36px 40px',
         }}
       >
-        <p style={{ fontFamily: 'Cafe24 Dongdong, sans-serif', fontSize: '23px', letterSpacing: '-0.5px', color: '#000000', WebkitTextStroke: '0.6px #000000', marginBottom: '18px' }}>
+        <p style={SECTION_TITLE_STYLE}>
           댕댕 능력치
         </p>
         <div className="flex flex-col" style={{ gap: '14px' }}>
@@ -103,7 +102,7 @@ export default function DeangResultContent({ profile }: Props) {
           <line x1="0" y1="1" x2="100%" y2="1" stroke="rgb(202, 230, 218)" strokeOpacity="0.65" strokeWidth="1.9" strokeDasharray="16 8" strokeLinecap="round" />
         </svg>
 
-        <p style={{ fontFamily: 'Cafe24 Dongdong, sans-serif', fontSize: '23px', letterSpacing: '-0.5px', color: '#000000', WebkitTextStroke: '0.6px #000000', marginBottom: '18px' }}>
+        <p style={SECTION_TITLE_STYLE}>
           댕댕 분석
         </p>
         <div className="flex flex-col" style={{ gap: '16px' }}>
@@ -120,7 +119,7 @@ export default function DeangResultContent({ profile }: Props) {
             </div>
           ))}
         </div>
-      </DeangOutlineBox>
+      </DeangCardBox>
 
       <div className="flex" style={{ gap: '12px', padding: '0px' }}>
         {[
@@ -148,16 +147,7 @@ export default function DeangResultContent({ profile }: Props) {
                 {item.breed.breedName}
               </p>
             </DeangOutlineBox>
-            <DeangOutlineBox
-              radius={16}
-              strokeWidth={0}
-              backgroundColor="rgb(88, 184, 136)"
-              stitch
-              stitchInset={6}
-              stitchRadius={12}
-              stitchWidth={1.5}
-              stitchColor="rgb(58, 148, 108)"
-              stitchDasharray="8 5"
+            <DeangStitchBadge
               style={{
                 position: 'absolute',
                 top: '24px',
@@ -168,7 +158,7 @@ export default function DeangResultContent({ profile }: Props) {
               }}
             >
               <span style={{ fontFamily: 'Cafe24 Dongdong, sans-serif', fontSize: isNarrow ? '15.5px' : '15px', color: '#FFFFFF', WebkitTextStroke: '0.3px #FFFFFF' }}>{item.label}</span>
-            </DeangOutlineBox>
+            </DeangStitchBadge>
           </div>
         ))}
       </div>

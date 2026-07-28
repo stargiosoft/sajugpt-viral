@@ -13,6 +13,7 @@ interface Props {
   borderRadius?: string;
   fontSize?: string;
   fontWeight?: number;
+  letterSpacing?: string;
   href?: string;
   target?: string;
   rel?: string;
@@ -32,6 +33,7 @@ export default function OutlineBoxButton({
   borderRadius = '12px',
   fontSize = '14px',
   fontWeight = 600,
+  letterSpacing,
   href,
   target,
   rel,
@@ -59,8 +61,10 @@ export default function OutlineBoxButton({
     color,
     fontSize,
     fontWeight,
+    letterSpacing,
     textDecoration: 'none',
     cursor: 'pointer',
+    outline: 'none',
     transition: 'filter 0.15s',
   };
 

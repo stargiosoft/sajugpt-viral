@@ -14,6 +14,8 @@ import DeangShareButtons from './DeangShareButtons';
 import DeangShareRow from './DeangShareRow';
 import DeangCTA from './DeangCTA';
 import DeangCommentSection from './DeangCommentSection';
+import RecommendSection from '@/components/RecommendSection';
+import SajuGPTBanner from '@/components/SajuGPTBanner';
 import { generateDeangResult, fetchDeangResultById } from '@/lib/deangSaju';
 import { trackEvent } from '@/lib/analytics';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
@@ -37,7 +39,6 @@ export default function DeangClient({ resultId }: Props) {
 
   const resultCardRef = useRef<HTMLDivElement>(null);
 
-  // 캐시된 사주 정보 로드
   useEffect(() => {
     const cached = loadSelfSaju();
     if (cached) {
@@ -48,7 +49,6 @@ export default function DeangClient({ resultId }: Props) {
     }
   }, []);
 
-  // resultId가 URL 경로로 넘어왔을 경우 DB에서 결과 조회
   useEffect(() => {
     if (!resultId) return;
 
@@ -195,7 +195,20 @@ export default function DeangClient({ resultId }: Props) {
                     </div>
                   </div>
                   <DeangShareRow />
-                  <DeangCommentSection />
+                  <div style={{ marginTop: '4px' }}>
+                    <RecommendSection
+                      excludeId="deang-saju"
+                      titleStyle={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontSize: '16px', fontWeight: 700, letterSpacing: '-0.9px', color: '#000000', paddingLeft: '2px' }}
+                      cardBg={C.cardBg}
+                      cardTitleColor="#000000"
+                    />
+                  </div>
+                  <div style={{ marginTop: '-4px' }}>
+                    <SajuGPTBanner featureType="deang_saju" resultId={result.resultId} />
+                  </div>
+                  <div style={{ marginTop: '4px' }}>
+                    <DeangCommentSection />
+                  </div>
                 </div>
               </motion.div>
             )}

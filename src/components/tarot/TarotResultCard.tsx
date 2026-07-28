@@ -7,6 +7,8 @@ import Image from 'next/image';
 import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
 import GhostCTAButton from '@/components/ghost-tarot/GhostCTAButton';
 import GhostCommentSection from '@/components/ghost-tarot/GhostCommentSection';
+import RecommendSection from '@/components/RecommendSection';
+import SajuGPTBanner from '@/components/SajuGPTBanner';
 import type { CommentFeatureType } from '@/lib/ghost-tarot/comments';
 import TarotShareRow from './TarotShareRow';
 import Toast from '@/components/Toast';
@@ -15,13 +17,9 @@ import { trackSajuGPTClick } from '@/lib/analytics';
 import { useIsDesktop, useIsNarrow, NARROW_BREAKPOINT } from '@/lib/ghost-tarot/useBreakpoint';
 import type { TarotCardData, TarotConfig, TarotResult } from '@/types/tarot';
 
-// 파피루스(양피지) 배경 위에 얹는 글자용 색 — palette.ink/inkDim은
-// 어두운 배경(#050403) 전용이라 밝은 종이 위에서는 대비가 안 나옴
 const PARCHMENT_INK = '#2a1f16';
 const PARCHMENT_INK_DIM = '#6b5842';
 
-// 쫀득하게 커지며 한 번 두근(0~1.7s) → 뒤집힘(1.7~2.35s) → 실제 결과지 카드 위치로 도킹(2.35~2.85s)
-// → 배경만 페이드아웃(2.85~3.3s)돼 이미 자리잡은 결과지가 자연스럽게 드러남
 const FLIP_DONE_MS = 2350;
 const DOCK_DURATION_MS = 500;
 const BG_FADE_DURATION_MS = 450;
@@ -29,8 +27,6 @@ const DOCK_START_MS = FLIP_DONE_MS;
 const BG_FADE_START_MS = DOCK_START_MS + DOCK_DURATION_MS;
 const REVEAL_DURATION_MS = BG_FADE_START_MS + BG_FADE_DURATION_MS;
 
-// 요약 박스 모서리를 안쪽으로 오목하게 파낸(concave notch) 패스 — 실제 박스 px 크기(w,h) 기준으로 그려서
-// 가로로 긴 박스에도 모서리 원호가 찌그러지지 않고 항상 정원으로 유지됨
 function notchPath(w: number, h: number, inset: number, cr: number) {
   const x0 = inset;
   const y0 = inset;
@@ -72,8 +68,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
   const [bgFading, setBgFading] = useState(false);
   const dockTargetRef = useRef<HTMLDivElement>(null);
   const captureRef = useRef<HTMLDivElement>(null);
-  // 캡처 결과가 아니라 "진행 중인 캡처 자체"를 캐싱 — 미리보기 effect와 클릭 핸들러가
-  // 동시에 이 값을 참조하면 항상 같은 promise를 기다리게 되어 캡처가 중복 실행되지 않음
   const blobPromiseRef = useRef<Promise<Blob> | null>(null);
   const fitRef = useRef<HTMLDivElement>(null);
   const [fitScale, setFitScale] = useState(1);
@@ -85,6 +79,20 @@ export default function TarotResultCard({ config, card, result, error, onReset }
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveResetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const messageRef = useRef<HTMLHeadingElement>(null);
+  const [messageWrapped, setMessageWrapped] = useState(false);
+
+  // 메시지가 2줄 이상으로 꺾일 때만 폰트를 살짝 줄여서 한 줄일 때의 큼직한 임팩트는 그대로 유지
+  useEffect(() => {
+    const el = messageRef.current;
+    if (!el || !result?.message) return;
+    setMessageWrapped(false);
+    const raf = requestAnimationFrame(() => {
+      const lineHeight = parseFloat(getComputedStyle(el).lineHeight);
+      setMessageWrapped(el.scrollHeight > lineHeight * 1.5);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [result?.message, isDesktop, isNarrow]);
 
   const showSavedState = () => {
     setSaveState('saved');
@@ -92,7 +100,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
     saveResetTimerRef.current = setTimeout(() => setSaveState('idle'), 2500);
   };
 
-  // 기기별로 앱스토어/플레이스토어로 자동 분기 (SSR 시점엔 navigator가 없어 iOS를 기본값으로 두고, 마운트 후 안드로이드면 교체)
   useEffect(() => {
     if (/Android/i.test(navigator.userAgent)) {
       setAppStoreUrl(config.copy.ctaAppUrlAndroid);
@@ -123,8 +130,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
     };
   }, [error]);
 
-  // 진행 중인 캡처가 있으면 그 promise를 그대로 반환 — 미리보기 effect와 클릭 핸들러가
-  // 동시에 호출해도 캡처가 한 번만 실행됨(경쟁 상태 방지). 실패 시 캐시를 비워 재시도 가능하게 함
   const startOrGetCapture = (el: HTMLElement): Promise<Blob> => {
     if (!blobPromiseRef.current) {
       blobPromiseRef.current = captureCardImage(el).catch((err) => {
@@ -135,16 +140,11 @@ export default function TarotResultCard({ config, card, result, error, onReset }
     return blobPromiseRef.current;
   };
 
-  // "이미지 저장하기" 클릭 시점에 캡처(폰트 대기 포함)를 기다리면 안드로이드 Chrome에서
-  // navigator.share() 호출 전 user activation이 만료돼 조용히 다운로드로 폴백되는 문제가 있어,
-  // 카드가 완전히 자리잡은 직후 미리 캡처해 캐싱해둠 — 클릭 시엔 캐시된 blob으로 즉시 공유 시도.
-  // result가 아직 없으면(로딩 문구가 떠 있는 상태) 캡처하지 않고 결과가 도착한 뒤에만 캡처함
   useEffect(() => {
     if (error || revealing || !result || !captureRef.current) return;
-    startOrGetCapture(captureRef.current).catch(() => { /* 실패해도 클릭 시점에 다시 시도하므로 무시 */ });
+    startOrGetCapture(captureRef.current).catch(() => {});
   }, [error, revealing, result]);
 
-  // 내용이 빈 종이 영역보다 길어지는 카드(글자수 긴 메시지/요약)를 위해 전체를 살짝 축소해서 항상 안에 들어오도록 함
   useEffect(() => {
     const el = fitRef.current;
     if (!el || !result) return;
@@ -153,7 +153,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
 
     const recompute = () => {
       const raw = el.scrollHeight;
-      // 320px급 좁은 화면은 줄바꿈이 늘어 꽉 채운 스케일이 되기 쉬워 바닥에 붙어 보임 — 여유 16px 확보
       const avail = outer.clientHeight - (window.innerWidth <= NARROW_BREAKPOINT ? 16 : 0);
       const scale = raw > avail ? Math.max(avail / raw, 0.5) : 1;
       setFitScale(scale);
@@ -168,7 +167,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
     };
   }, [result, error]);
 
-  // 요약 박스의 실제 렌더 px 크기를 측정 — notchPath가 이 크기를 그대로 써서 모서리 원호가 찌그러지지 않게 함
   useEffect(() => {
     const el = notchBoxRef.current;
     if (!el) return;
@@ -183,20 +181,14 @@ export default function TarotResultCard({ config, card, result, error, onReset }
   const resultTitle = result?.title || '';
   const frontImage = card.front_image && card.front_image.trim() !== '' ? card.front_image : null;
 
-  // 공유 링크는 내 결과 페이지가 아니라 첫 시작 화면으로 — 받은 사람이 직접 뽑아보게 유도
   const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/${config.slug}`;
   const shareText = config.copy.shareText(cardName, resultTitle);
 
-  // 모바일은 <a download>가 사진앱에 바로 저장되지 않고 파일앱/새 탭으로 빠지므로
-  // Web Share API로 "사진에 저장" 옵션이 있는 네이티브 공유 시트를 띄움 (지원 안 하거나 취소되면 다운로드로 폴백)
   const handleSaveImage = async () => {
     if (!captureRef.current || saveState === 'saving') return;
     const filename = `${cardName}${config.copy.filenameSuffix}`;
     setSaveState('saving');
 
-    // 이미 진행 중이거나 완료된 캡처가 있으면 그 promise를 그대로 기다림(중복 캡처 방지) —
-    // 캐시가 이미 끝나 있으면 이 await가 즉시 반환되므로 아래 navigator.share() 호출이
-    // 클릭 이벤트의 user activation 유효 시간 안에 들어가 안드로이드에서도 정상 동작함
     let blob: Blob;
     try {
       blob = await startOrGetCapture(captureRef.current);
@@ -217,11 +209,9 @@ export default function TarotResultCard({ config, card, result, error, onReset }
         }
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
-          // 사용자가 공유 시트를 취소함 — 실패가 아니므로 다운로드로 폴백하지 않고 그대로 원상태 복귀
           setSaveState('idle');
           return;
         }
-        /* 파일 공유 미지원 등 진짜 실패 — 아래 다운로드로 폴백 */
       }
     }
 
@@ -235,7 +225,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
     }
   };
 
-  // "해원상생 (축제의 굿판)" → 메인 이름 / 괄호 부제 분리해서 크기 차등
   const cardNameMatch = cardName.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
   const cardNameMain = cardNameMatch ? cardNameMatch[1] : cardName;
   const cardNameSub = cardNameMatch ? cardNameMatch[2] : null;
@@ -257,14 +246,11 @@ export default function TarotResultCard({ config, card, result, error, onReset }
         style={{
           position: 'relative',
           aspectRatio: '863 / 1823',
-          // 모바일만 부모의 좌우 16px 패딩을 상쇄해 이미지가 화면 끝까지 닿게 함 (버튼 영역 패딩은 그대로 유지)
           ...(isDesktop ? {} : { width: 'calc(100% + 32px)', marginLeft: -16, marginRight: -16 }),
         }}
       >
         <Image src={isDesktop ? config.assets.resultBg : config.assets.resultBgMobile} alt="" fill priority className="object-contain" />
 
-        {/* 빈 종이 영역 안쪽에 결과 정보 배치 (퍼센트 기반이라 액자와 함께 스케일됨) — 리빌 연출 뒤에 이미 완성된 채로 드러남
-            모바일 전용 배경(result-bg-mobile.png)의 종이 폭 실측값 기준으로 좌우 인셋 계산 */}
         <div
           style={{
             position: 'absolute',
@@ -276,7 +262,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
             transform: `translateY(${isDesktop ? 44 : 4}px)`,
           }}
         >
-          {/* 내용이 긴 카드는 이 래퍼 전체를 축소해서 빈 종이 영역 안에 항상 들어오도록 함 */}
           <div
             ref={fitRef}
             className="flex flex-col items-center text-center"
@@ -306,12 +291,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
             </div>
           </div>
 
-          {/* 카드 이름 — 괄호 부제는 따로 작게
-              모바일(iOS Safari)에서 -webkit-text-stroke가 조상(fitRef)의 transform: scale()에 딸려
-              한 비트맵으로 합성되면 스트로크 안티앨리어싱이 깨져 거칠어 보임 →
-              translateZ(0)로 별도 레이어로 분리해 자체 해상도로 다시 래스터라이즈되게 함
-              (font-smoothing: antialiased는 저장 이미지 대비 브라우저 스트로크가 과하게 쨍해 보이는
-              원인이라 제외 — 기본값이 더 부드러움) */}
           <h1
             style={{
               marginTop: isDesktop ? 'calc(7% - 6px)' : 'calc(7% + 0px)',
@@ -373,8 +352,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
                 <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${PARCHMENT_INK_DIM} 0%, transparent 100%)`, opacity: 0.4 }} />
               </div>
 
-              {/* 월간/타입 테마 라벨 — 붓으로 슥 칠한 자국(SVG 거친 가장자리) 위에 얹음.
-                  이미지 대신 SVG feTurbulence로 만들어서 텍스트 길이가 바뀌어도 항상 자연스럽게 늘어남 */}
               <div className="flex items-center justify-center" style={{ marginTop: isDesktop ? 'calc(5% + 14px)' : (isNarrow ? 'calc(5% + 6px)' : 'calc(5% + 10px)'), flexShrink: 0 }}>
                 <span
                   style={{
@@ -391,9 +368,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
                     padding: isDesktop ? '11.5px 46px 10px' : '9.5px 46px 8px',
                   }}
                 >
-                  {/* 실제 붓터치 텍스처 에셋을 좌/중/우 3분할 background-image로 얹음 — 좌우 붓 갈라진 끝단(캡)은
-                      원본 픽셀 비율 그대로 고정되고 가운데만 늘어남. border-image 대신 background-image를 쓴 이유는
-                      "이미지 저장하기"(html-to-image)가 border-image를 캡처하지 못해 저장된 이미지에서 배경이 빠지기 때문 */}
                   {config.assets.badgeBrush && (
                     <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: -1, display: 'flex' }}>
                       <div style={{ width: 34, flexShrink: 0, backgroundImage: `url(${config.assets.badgeBrush})`, backgroundSize: '1114.48% 100%', backgroundPosition: 'left center', backgroundRepeat: 'no-repeat' }} />
@@ -425,18 +399,16 @@ export default function TarotResultCard({ config, card, result, error, onReset }
             </p>
           ) : (
             <div style={{ marginTop: isDesktop ? 14 : 16, width: '100%' }}>
-              {/* 메시지 두 줄을 같은 크기로 통일 — 첫줄만 키우면 두 줄이 서로 다른 요소처럼 끊겨 보임 */}
               <h2
+                ref={messageRef}
                 style={{
                   marginTop: 0,
                   fontFamily: myungjoFont,
-                  fontSize: isDesktop ? 30 : (isNarrow ? 21 : 26),
+                  fontSize: (isDesktop ? 30 : (isNarrow ? 21 : 26)) * (messageWrapped ? 0.88 : 1),
                   lineHeight: 1.6,
                   color: PARCHMENT_INK,
                   WebkitTextStroke: isDesktop ? `1.6px ${PARCHMENT_INK}` : `1.3px ${PARCHMENT_INK}`,
                   textShadow: '0 1px 3px rgba(247,242,232,0.55)',
-                  // 기존 모바일(390px대) -1.5px는 데스크탑(-0.5px)의 3배로 과도하게 좁아서
-                  // 두꺼운 스트로크와 맞물려 글자끼리 겹쳐 보였음 — 데스크탑/320px대와 동일하게 통일
                   letterSpacing: '-0.5px',
                   width: 'auto',
                   marginLeft: 12,
@@ -460,10 +432,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
                 style={{
                   position: 'relative',
                   marginTop: isDesktop ? 'calc(6% + 12px)' : 'calc(6% + 8px)',
-                  // 웹은 종이 좌우 끝에서 16px 여백 — fitRef 자체가 이미 종이 폭과 같으므로
-                  // bleed용 음수 마진(-16.446%) 없이 100% 기준으로 직접 계산해야 실제로 인셋이 생김
-                  // 모바일은 콘텐츠 영역(fitRef) 기준 좌우 여백 (종이 배경에 안 닿게 폭 축소)
-                  // 320px급은 박스 너비 +16px(여백 -8px씩), 390px급 이상은 -16px(여백 +8px씩)
                   width: isDesktop ? 'calc(100% - 32px)' : (isNarrow ? 'calc(100% + 4px)' : 'calc(100% - 36px)'),
                   marginLeft: isDesktop ? 16 : (isNarrow ? -2 : 18),
                   marginRight: isDesktop ? 16 : (isNarrow ? -2 : 18),
@@ -533,7 +501,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
 
       </div>
 
-      {/* 리빌 연출 오버레이 — 액자(스크롤로 넘칠 수 있음)가 아니라 화면(뷰포트) 기준 position:fixed로 정중앙 고정 */}
       <AnimatePresence>
         {revealing && (
           <motion.div
@@ -704,7 +671,18 @@ export default function TarotResultCard({ config, card, result, error, onReset }
 
             {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (
               <div style={{ marginTop: 44 }}>
-                <GhostCommentSection featureType={config.featureType as CommentFeatureType} />
+                <RecommendSection
+                  excludeId={config.slug}
+                  titleStyle={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontSize: 16, fontWeight: 700, color: palette.ink, letterSpacing: '-0.8px', paddingLeft: '2px' }}
+                  cardBg="rgb(19,19,19)"
+                  cardTitleColor="#d5d5d5"
+                />
+                <div style={{ marginTop: 20 }}>
+                  <SajuGPTBanner featureType={config.featureType} resultId={result?.id} />
+                </div>
+                <div style={{ marginTop: 36 }}>
+                  <GhostCommentSection featureType={config.featureType as CommentFeatureType} />
+                </div>
               </div>
             )}
           </>

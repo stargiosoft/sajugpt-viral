@@ -10,7 +10,6 @@ function toChoiceKeys(answers: Answers): Set<ChoiceKey> {
   return keys;
 }
 
-// 8.4 매칭 프로세스: 필수 선택지 확인 → 필수 조건 만족 캐릭터 추출 → 보조 선택지 일치 개수 계산 → 최고 우선순위 캐릭터 선정
 export function matchCharacter(answers: Answers): MatchResult {
   const given = toChoiceKeys(answers);
 
@@ -30,7 +29,6 @@ export function matchCharacter(answers: Answers): MatchResult {
     return { character, priority, matchedOptionalCount: best.matchedOptionalCount };
   }
 
-  // Fallback: 필수 선택지를 만족하는 캐릭터가 없을 때, 필수+보조 전체 중 가장 많이 겹치는 캐릭터로 매칭
   const scored = candidates.map(c => {
     const totalOverlap = (given.has(c.rule.essential) ? 1 : 0) + c.matchedOptionalCount;
     return { ...c, totalOverlap };

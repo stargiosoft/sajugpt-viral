@@ -29,25 +29,15 @@ import {
   unmarkLiked,
 } from '@/lib/ghost-tarot/commentUtils';
 
-// 색상만 바꾸면 다른 테마(다른 타로/기능)에도 그대로 재사용할 수 있도록 팔레트를 prop으로 분리
 export interface CommentSectionColors {
-  /** 강조색 — 좋아요/싫어요/선택된 정렬 탭/전송 버튼 활성 색상 */
   accent: string;
-  /** 댓글 본문 등 기본 텍스트 색상 */
   text: string;
-  /** 닉네임/시간/비선택 상태 텍스트 색상 */
   dim: string;
-  /** dim보다 살짝 더 어두운 톤 — 비선택 정렬 탭 등에 사용 */
   dimStrong: string;
-  /** 좋아요/싫어요 아이콘의 비활성(안 누른) fill 색상 */
   faint: string;
-  /** 댓글 입력창(작성/답글) 배경색 */
   inputBg: string;
-  /** 입력창 플레이스홀더 텍스트 색상 */
   placeholder: string;
-  /** 전송 버튼 비활성 상태 배경색 */
   sendDisabledBg: string;
-  /** 입력창 테두리 색상 */
   inputBorder: string;
 }
 
@@ -133,7 +123,6 @@ const ChevronIcon = ({ up }: { up: boolean }) => (
   </svg>
 );
 
-// 메인 댓글 입력창과 답글 입력창이 서로 다르게 동작하지 않도록 하나의 컴포넌트로 통일
 function CommentComposer({
   value,
   onValueChange,
@@ -356,13 +345,10 @@ export default function GhostCommentSection({
   useEffect(() => {
     load(sort);
     setVisibleCount(5);
-    // 정렬이 바뀌면 목록 순서가 재배치되므로, 열려 있던 답글 입력창은 닫아서
-    // 엉뚱한 댓글 아래에 붙어 있는 것처럼 보이지 않게 함
     setOpenPanelId(null);
     setReplyText('');
   }, [sort, load]);
 
-  // 상대 시간("3분 전" 등) 표시를 1분마다 갱신
   useEffect(() => {
     const timer = setInterval(() => forceTick((n) => n + 1), 60_000);
     return () => clearInterval(timer);
@@ -453,9 +439,7 @@ export default function GhostCommentSection({
     setLikedIds(getLikedIds());
     try {
       await (alreadyLiked ? unlikeComment(id) : likeComment(id));
-    } catch {
-      // 낙관적 업데이트 유지 — 실패해도 사용자 경험에 영향 없음
-    }
+    } catch {}
   };
 
   const handleDislike = async (id: string) => {
@@ -469,9 +453,7 @@ export default function GhostCommentSection({
     setDislikedIds(getDislikedIds());
     try {
       await (alreadyDisliked ? undislikeComment(id) : dislikeComment(id));
-    } catch {
-      // 낙관적 업데이트 유지 — 실패해도 사용자 경험에 영향 없음
-    }
+    } catch {}
   };
 
   const renderReplyInput = (parentId: string) => (
@@ -522,7 +504,6 @@ export default function GhostCommentSection({
         </div>
       </div>
 
-      {/* 입력창 */}
       <CommentComposer
         value={text}
         onValueChange={setText}
@@ -538,7 +519,6 @@ export default function GhostCommentSection({
         <p style={{ marginTop: 6, fontSize: 11.5, color: '#ffb199', textAlign: 'center' }}>{notice}</p>
       )}
 
-      {/* 댓글 목록 — 카드 없이 타임스탬프+본문만 촘촘히 쌓는 채팅 로그 스타일 */}
       <div style={{ marginTop: 8 }}>
         <AnimatePresence initial={false}>
         {topLevel.slice(0, visibleCount).map((c, i, visible) => {

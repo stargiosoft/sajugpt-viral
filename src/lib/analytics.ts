@@ -10,9 +10,11 @@ declare global {
 }
 
 const AMPLITUDE_KEY = process.env.NEXT_PUBLIC_VIRAL_AMPLITUDE_KEY;
-// 로컬 개발 서버(localhost)에서의 테스트가 실제 운영 Amplitude/GA4 데이터에 섞이지 않도록 차단
+// 로컬 개발 서버 + Vercel 프리뷰 배포에서의 테스트가 실제 운영 Amplitude/GA4 데이터에 섞이지 않도록 차단
 // (layout.tsx의 GTM 스크립트 렌더링도 이 값을 그대로 가져다 씀 — 두 곳이 따로 판단하면 어긋날 수 있음)
-export const IS_PROD = process.env.NODE_ENV === 'production';
+// NODE_ENV는 next build 시 프리뷰/프로덕션 모두 'production'이라 이것만으로는 구분이 안 됨 —
+// NEXT_PUBLIC_VERCEL_ENV(next.config.ts에서 주입)로 프리뷰 배포만 추가로 걸러낸다.
+export const IS_PROD = process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_VERCEL_ENV !== 'preview';
 
 let analyticsInitialized = false;
 let capturedUTM: UTMParams | null = null;
@@ -96,7 +98,9 @@ export type FeatureType =
   | 'ghost_tarot'
   | 'romance_tarot'
   | 'deang_saju'
-  | 'love_chat';
+  | 'love_chat'
+  | 'mental_worldcup'
+  | 'money_timeline';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

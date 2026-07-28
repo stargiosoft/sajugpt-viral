@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import GhostIconButton from '@/components/ghost-tarot/GhostIconButton';
 import { copyToClipboard, shareKakao } from '@/lib/share';
-import { trackEvent, trackShare } from '@/lib/analytics';
+import { trackEvent, trackShare, type ShareMethod } from '@/lib/analytics';
 import { DEANG_COLORS as C } from '@/constants/deangTheme';
 import DeangOutlineBox from './DeangOutlineBox';
 
@@ -45,6 +45,11 @@ export default function DeangShareRow() {
   const shareImage = typeof window !== 'undefined' ? `${window.location.origin}/deang-saju/og-share.png` : '';
   const shareText = '🐾 사주를 강아지로 번역해드립니다 — 나는 무슨 견종일까? 댕댕사주 해보기';
 
+  const recordShare = (method: ShareMethod) => {
+    trackEvent('deang_saju_share', { method });
+    trackShare('deang_saju', method);
+  };
+
   const handleKakaoShare = useCallback(() => {
     const ok = shareKakao({
       title: '댕댕사주',
@@ -54,24 +59,21 @@ export default function DeangShareRow() {
       buttonText: '나도 해보기',
     });
     if (ok) {
-      trackEvent('deang_saju_share', { method: 'kakao' });
-      trackShare('deang_saju', 'kakao');
+      recordShare('kakao');
     }
   }, [shareLink, shareImage]);
 
   const handleXShare = useCallback(() => {
     const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareLink)}`;
     window.open(intent, '_blank', 'noopener,noreferrer');
-    trackEvent('deang_saju_share', { method: 'x' });
-    trackShare('deang_saju', 'x');
+    recordShare('x');
   }, [shareLink]);
 
   const handleCopy = useCallback(async () => {
     const ok = await copyToClipboard(shareLink);
     if (ok) {
       setCopied(true);
-      trackEvent('deang_saju_share', { method: 'clipboard' });
-      trackShare('deang_saju', 'clipboard');
+      recordShare('clipboard');
       setTimeout(() => setCopied(false), 1500);
     }
   }, [shareLink]);

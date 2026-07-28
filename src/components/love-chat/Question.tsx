@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import type { Choice, Question as QuestionType } from '@/types/love-chat';
+import { kakaoBubbleRadius } from './shared';
 
 interface Props {
   question: QuestionType;
@@ -73,7 +74,7 @@ export default function Question({ question, onAnswer, direction = 1 }: Props) {
                   fontWeight: 500,
                   lineHeight: 1.6,
                   whiteSpace: 'nowrap',
-                  borderRadius: '4px 14px 14px 14px',
+                  borderRadius: kakaoBubbleRadius(14),
                   paddingTop: '7px',
                   paddingBottom: '5px',
                   paddingLeft: '15px',

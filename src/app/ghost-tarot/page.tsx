@@ -17,8 +17,6 @@ export const metadata: Metadata = {
 export default function GhostTarotPage() {
   return (
     <>
-      {/* 검색엔진(특히 자바스크립트 렌더링을 잘 못하는 네이버)이 읽을 수 있도록
-          서버에서부터 내려주는 텍스트 — 화면에는 보이지 않음(sr-only) */}
       <h1 className="sr-only">귀신 타로 (운세편)</h1>
       <p className="sr-only">
         당신에게 붙은 귀신이 전하는 이번 달 운세를 확인하세요. 무료로 즐기는 귀신타로,

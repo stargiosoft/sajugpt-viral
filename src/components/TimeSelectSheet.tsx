@@ -102,6 +102,7 @@ export default function TimeSelectSheet({
           height,
           borderRadius: '16px',
           border: borderColor,
+          outline: 'none',
           backgroundColor: bgColor,
           padding: '0 16px',
           cursor: 'pointer',

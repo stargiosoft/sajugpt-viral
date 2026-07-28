@@ -1,9 +1,10 @@
 'use client';
 
 import type { LoveChatCharacter } from '@/types/love-chat';
+import { CARD_SHADOW, SectionTitle, kakaoBubbleRadius } from './shared';
 
 function demoTime(index: number) {
-  const totalMinutes = index; // 메시지마다 1분씩 자연스럽게 증가
+  const totalMinutes = index;
   const hour = 2 + Math.floor(totalMinutes / 60);
   const minute = totalMinutes % 60;
   return `오후 ${hour}:${String(minute).padStart(2, '0')}`;
@@ -23,18 +24,10 @@ function renderSystemNote(note: string) {
 
 export default function ChatSimulation({ character }: { character: LoveChatCharacter }) {
   return (
-    <div style={{ background: '#FFFFFF', borderRadius: '4px 16px 16px 16px', padding: '18px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
-      <div className="flex items-center" style={{ gap: '8px', marginBottom: '14px' }}>
-        <span
-          className="flex items-center justify-center"
-          style={{ width: '32px', height: '32px', flexShrink: 0 }}
-        >
-          <img src="/love-chat/icons/section-chat.svg" alt="" width={20} height={20} />
-        </span>
-        <p style={{ fontSize: '22px', fontWeight: 500, color: '#1C2333', fontFamily: "'Ongeulip Minmi', sans-serif" }}>
-          우리 카톡은 이런 느낌
-        </p>
-      </div>
+    <div style={{ background: '#FFFFFF', borderRadius: kakaoBubbleRadius(16), padding: '18px', boxShadow: CARD_SHADOW }}>
+      <SectionTitle icon="/love-chat/icons/section-chat.svg" gap="8px" marginBottom="14px">
+        우리 카톡은 이런 느낌
+      </SectionTitle>
 
       <div style={{ background: 'rgb(230, 237, 255)', borderRadius: '14px', paddingTop: '17px', paddingBottom: '14px', paddingLeft: '17px', paddingRight: '17px', marginBottom: '12px', marginTop: '12px' }}>
         <div className="flex flex-col" style={{ gap: '0px' }}>
@@ -50,7 +43,7 @@ export default function ChatSimulation({ character }: { character: LoveChatChara
                     fontWeight: 500,
                     lineHeight: 1.5,
                     padding: '9px 13px',
-                    borderRadius: isMe ? '14px 4px 14px 14px' : '4px 14px 14px 14px',
+                    borderRadius: kakaoBubbleRadius(14, isMe),
                     background: isMe ? '#FEE500' : '#FFFFFF',
                     color: '#333333',
                   }}

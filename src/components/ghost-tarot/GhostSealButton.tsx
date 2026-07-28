@@ -11,9 +11,7 @@ interface Props {
   onClick?: MouseEventHandler<HTMLButtonElement>;
   className?: string;
   fontSize?: number;
-  /** 웹(768px 이상)에서만 다르게 쓸 폰트 크기 — 없으면 fontSize 그대로 */
   webFontSize?: number;
-  /** 320px급 좁은 화면(360px 이하)에서만 다르게 쓸 폰트 크기 — 없으면 fontSize 그대로 */
   narrowFontSize?: number;
   fontFamily?: string;
   disabled?: boolean;

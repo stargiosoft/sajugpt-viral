@@ -4,32 +4,16 @@ import Image from 'next/image';
 import { CHARACTERS } from '@/data/characters';
 import type { LoveChatCharacter } from '@/types/love-chat';
 import CharacterProfile from './CharacterProfile';
+import { CARD_SHADOW, SectionTitle, kakaoBubbleRadius } from './shared';
 
-function SectionTitle({ icon, iconSize = 16, children }: { icon: string; iconSize?: number; children: string }) {
-  return (
-    <div className="flex items-center" style={{ gap: '4px', marginBottom: '4px' }}>
-      <span
-        className="flex items-center justify-center"
-        style={{ width: '32px', height: '32px', flexShrink: 0 }}
-      >
-        <img src={icon} alt="" width={iconSize + 4} height={iconSize + 4} />
-      </span>
-      <p style={{ fontSize: '22px', fontWeight: 500, color: '#1C2333', fontFamily: "'Ongeulip Minmi', sans-serif" }}>
-        {children}
-      </p>
-    </div>
-  );
-}
-
-function Bubble({ children, hug, backgroundImage }: { children: React.ReactNode; hug?: boolean; backgroundImage?: string }) {
+function Bubble({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        width: hug ? 'fit-content' : undefined,
-        background: backgroundImage ? `#FFFFFF url(${backgroundImage}) center / cover no-repeat` : '#FFFFFF',
-        borderRadius: '4px 16px 16px 16px',
+        background: '#FFFFFF',
+        borderRadius: kakaoBubbleRadius(16),
         padding: '18px',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        boxShadow: CARD_SHADOW,
       }}
     >
       {children}
@@ -112,9 +96,9 @@ export default function ResultContent({ character }: { character: LoveChatCharac
         style={{
           background: '#FFFFFF',
           border: '1.5px solid #C7D9F5',
-          borderRadius: '4px 20px 20px 20px',
+          borderRadius: kakaoBubbleRadius(20),
           padding: '20px',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+          boxShadow: CARD_SHADOW,
         }}
       >
         <CharacterProfile character={character} />
@@ -156,7 +140,7 @@ export default function ResultContent({ character }: { character: LoveChatCharac
 
         <div
           className="flex"
-          style={{ borderRadius: '4px 16px 16px 16px', overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+          style={{ borderRadius: kakaoBubbleRadius(16), overflow: 'hidden', boxShadow: CARD_SHADOW }}
         >
           <div className="flex-1" style={{ background: 'rgb(252, 250, 244)', padding: '18px' }}>
             <MatchCard label="찰떡" emoji={character.goodMatch.emoji} image={goodMatch?.image} name={goodMatch?.name ?? character.goodMatch.label} tone="good" />

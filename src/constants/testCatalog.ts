@@ -138,4 +138,18 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     ready: true,
     visibleOnHome: true,
   },
+  {
+    id: 'money-timeline',
+    title: '내 돈복 테스트',
+    description: '생년월일만 입력하면 평생의 재물운 흐름을 그래프 하나로 확인해요',
+    href: '/money-timeline',
+    emoji: '💰',
+    imageSrc: '/money-timeline/thumbnail-v3.png',
+    category: 'money',
+    colorTheme: 'orange',
+    participantLabel: '0',
+    isNew: true,
+    ready: true,
+    visibleOnHome: true,
+  },
 ];

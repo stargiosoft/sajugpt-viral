@@ -48,6 +48,30 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Hakgyoansim Jayusigan';
+  src: url('/fonts/HakgyoansimJayusiganR.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tmoney RoundWind';
+  src: url('/fonts/TmoneyRoundWindRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tmoney RoundWind';
+  src: url('/fonts/TmoneyRoundWindExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-brand-primary: #7A38D8;
   --color-brand-dark: #6B2FC2;

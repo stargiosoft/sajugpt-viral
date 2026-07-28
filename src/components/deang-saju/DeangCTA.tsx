@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import PressableButton from '@/components/PressableButton';
 import { trackEvent, trackSajuGPTClick } from '@/lib/analytics';
-import DeangOutlineBox from './DeangOutlineBox';
+import { DeangCardBox } from './DeangOutlineBox';
 import useIsNarrow from '@/hooks/useIsNarrow';
 
 interface Props {
@@ -14,12 +14,7 @@ interface Props {
 export default function DeangCTA({ resultId, breedName }: Props) {
   const isNarrow = useIsNarrow();
   return (
-    <DeangOutlineBox
-      radius={20}
-      strokeWidth={2.3}
-      stitch
-      stitchColor="rgb(202, 230, 218)"
-      backgroundColor="rgb(247, 250, 245)"
+    <DeangCardBox
       style={{
         padding: '40px 36px 36px',
         textAlign: 'center',
@@ -54,6 +49,6 @@ export default function DeangCTA({ resultId, breedName }: Props) {
         hoverBackground="#4ba679"
         textStyle={{ color: '#FFFFFF', fontWeight: 500, fontSize: '17px', WebkitTextStroke: '0.3px #FFFFFF' }}
       />
-    </DeangOutlineBox>
+    </DeangCardBox>
   );
 }

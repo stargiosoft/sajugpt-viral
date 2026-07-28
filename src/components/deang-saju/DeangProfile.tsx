@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import type { DeangBreed } from '@/types/deang-saju';
-import DeangOutlineBox from './DeangOutlineBox';
+import DeangOutlineBox, { DeangStitchBadge } from './DeangOutlineBox';
 import useIsNarrow from '@/hooks/useIsNarrow';
 
 interface Props {
@@ -14,7 +14,6 @@ interface Props {
 export default function DeangProfile({ breed, quip }: Props) {
   const isNarrow = useIsNarrow();
 
-  // 방어 코드: breed 또는 hashtags가 전달되지 않을 경우 기본값 처리
   const breedName = breed?.breedName || '댕댕이';
   const title = breed?.title ? breed.title.replace(breedName, '').trim() : breedName;
   const hashtagsText = Array.isArray(breed?.hashtags) ? breed.hashtags.join('   ') : '';
@@ -82,16 +81,8 @@ export default function DeangProfile({ breed, quip }: Props) {
             </motion.div>
           </div>
 
-          <DeangOutlineBox
+          <DeangStitchBadge
             radius={18}
-            strokeWidth={0}
-            backgroundColor="rgb(88, 184, 136)"
-            stitch
-            stitchInset={6}
-            stitchRadius={12}
-            stitchWidth={1.5}
-            stitchColor="rgb(58, 148, 108)"
-            stitchDasharray="8 5"
             style={{
               marginTop: '-59px',
               width: 'max-content',
@@ -104,7 +95,7 @@ export default function DeangProfile({ breed, quip }: Props) {
             <p style={{ fontSize: '18px', letterSpacing: '-0.5px', color: '#FFFFFF', fontWeight: 500, WebkitTextStroke: '0.2px #FFFFFF', lineHeight: '1.5', wordBreak: 'keep-all' }}>
               &ldquo; {displayQuip} &rdquo;
             </p>
-          </DeangOutlineBox>
+          </DeangStitchBadge>
         </div>
       </DeangOutlineBox>
     </div>

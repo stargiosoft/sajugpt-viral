@@ -74,3 +74,49 @@ export default function DeangOutlineBox({
     </div>
   );
 }
+
+interface DeangCardBoxProps {
+  children: ReactNode;
+  style?: CSSProperties;
+  strokeWidth?: number;
+}
+
+export function DeangCardBox({ children, style, strokeWidth }: DeangCardBoxProps) {
+  return (
+    <DeangOutlineBox
+      radius={20}
+      strokeWidth={strokeWidth}
+      backgroundColor="rgb(247, 250, 245)"
+      stitch
+      stitchColor="rgb(202, 230, 218)"
+      style={style}
+    >
+      {children}
+    </DeangOutlineBox>
+  );
+}
+
+interface DeangStitchBadgeProps {
+  children: ReactNode;
+  radius?: number;
+  style?: CSSProperties;
+}
+
+export function DeangStitchBadge({ children, radius = 16, style }: DeangStitchBadgeProps) {
+  return (
+    <DeangOutlineBox
+      radius={radius}
+      strokeWidth={0}
+      backgroundColor="rgb(88, 184, 136)"
+      stitch
+      stitchInset={6}
+      stitchRadius={12}
+      stitchWidth={1.5}
+      stitchColor="rgb(58, 148, 108)"
+      stitchDasharray="8 5"
+      style={style}
+    >
+      {children}
+    </DeangOutlineBox>
+  );
+}

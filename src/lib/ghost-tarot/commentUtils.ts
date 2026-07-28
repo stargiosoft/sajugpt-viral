@@ -1,5 +1,3 @@
-// 귀신타로 댓글: 로그인 없이 브라우저에 저장되는 익명 식별자 + 스팸/도배 방지 유틸
-
 const CLIENT_ID_KEY = 'ghost_tarot_client_id';
 const LIKED_KEY = 'ghost_tarot_liked_comments';
 const DISLIKED_KEY = 'ghost_tarot_disliked_comments';
@@ -45,7 +43,6 @@ export const getDislikedIds = () => readIdSet(DISLIKED_KEY);
 export const markDisliked = (id: string) => addToIdSet(DISLIKED_KEY, id);
 export const unmarkDisliked = (id: string) => removeFromIdSet(DISLIKED_KEY, id);
 
-// 최소한의 금칙어 필터 — 완전한 욕설 차단은 아니지만 노골적인 케이스는 걸러냄
 const BANNED_WORDS = [
   '시발', '씨발', '씨팔', '개새끼', '병신', '지랄', '좆', '느금', '엠창', 'ㅅㅂ', 'ㅄ',
   'fuck', 'shit', 'bitch', 'asshole',
@@ -62,7 +59,6 @@ export function isBlankOrTooLong(text: string): 'blank' | 'too_long' | null {
   return null;
 }
 
-// "방금 전" / "3분 전" / "1시간 전" / "2일 전"
 export function formatRelativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diffMs / 60_000);

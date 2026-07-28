@@ -8,7 +8,7 @@ import TimeSelectSheet from '@/components/TimeSelectSheet';
 import FieldLabel from '@/components/FieldLabel';
 import PressableButton from '@/components/PressableButton';
 import { DEANG_COLORS as C } from '@/constants/deangTheme';
-import DeangOutlineBox from './DeangOutlineBox';
+import { DeangCardBox } from './DeangOutlineBox';
 import useIsNarrow from '@/hooks/useIsNarrow';
 
 const ACCENT = '#16C17E';
@@ -46,7 +46,7 @@ export default function DeangInput({
       exit={{ opacity: 0 }}
       style={{ padding: '12px 12px 48px' }}
     >
-      <DeangOutlineBox radius={20} backgroundColor="rgb(247, 250, 245)" stitch stitchColor="rgb(202, 230, 218)" style={{ padding: '28px 32px' }}>
+      <DeangCardBox style={{ padding: '28px 32px' }}>
       <div className="flex flex-col items-center">
         <h1
           style={{
@@ -74,10 +74,10 @@ export default function DeangInput({
           생년월일시로 나와 닮은 강아지를 찾아보세요
         </p>
       </div>
-      </DeangOutlineBox>
+      </DeangCardBox>
 
       <div style={{ marginTop: '8px' }}>
-      <DeangOutlineBox radius={20} backgroundColor="rgb(247, 250, 245)" stitch stitchColor="rgb(202, 230, 218)" style={{ padding: '36px 32px 40px' }}>
+      <DeangCardBox style={{ padding: '36px 32px 40px' }}>
       <motion.div
         className="flex flex-col"
         initial="hidden"
@@ -179,7 +179,7 @@ export default function DeangInput({
           </motion.div>
         )}
       </motion.div>
-      </DeangOutlineBox>
+      </DeangCardBox>
       </div>
     </motion.div>
   );

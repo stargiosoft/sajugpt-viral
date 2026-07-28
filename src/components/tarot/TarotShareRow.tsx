@@ -13,7 +13,6 @@ interface Props {
   shareText?: string;
   shareLink?: string;
   resultId?: string;
-  /** 'boxed'는 config.copy.shareBox가 있을 때만 의미 있음 — 없으면 자동으로 simple로 폴백 */
   variant?: 'simple' | 'boxed';
 }
 
@@ -64,7 +63,6 @@ export default function TarotShareRow({
 
   const getLink = useCallback(() => shareLink ?? `${window.location.origin}/${config.slug}`, [shareLink, config.slug]);
 
-  // 링크 복사는 URL만 복사 — 설명 문구가 같이 복사되면 주소창에 그대로 붙여넣기가 안 됨
   const handleCopy = useCallback(async () => {
     const ok = await copyToClipboard(getLink());
     if (ok) {
@@ -132,11 +130,9 @@ export default function TarotShareRow({
             : { background: 'rgba(179,47,23,0.16)' }),
         }}
       >
-        {/* 하단 좌우에서 은은하게 피어오르는 안개 — 콘텐츠보다 뒤(z-index) */}
         <span className="ghost-fog-layer ghost-fog-layer--left" style={{ zIndex: 0 }} aria-hidden="true" />
         <span className="ghost-fog-layer ghost-fog-layer--right" style={{ zIndex: 0 }} aria-hidden="true" />
 
-        {/* 그룹 1: 타이틀 + 부제 — 한 메시지로 읽히도록 촘촘하게 */}
         <h3
           style={{
             position: 'relative',

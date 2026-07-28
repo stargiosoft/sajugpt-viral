@@ -18,7 +18,6 @@ interface Props {
   shineColor?: string;
 }
 
-// 결과 화면 하단 CTA("귀신타로 이어보기" / "이미지 저장하기")가 공유하는 높이·타이포 고정 래퍼
 export default function GhostCTAButton({ label, onClick, href, target, rel, disabled, bgStyle, hoverBackground, shineColor }: Props) {
   const isDesktop = useIsDesktop();
   const isNarrow = useIsNarrow();
