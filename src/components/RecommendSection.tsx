@@ -36,7 +36,9 @@ export default function RecommendSection({ excludeId, titleText = '추천 테스
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     const scroller = scrollerRef.current;
-    if (!scroller || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    // 터치는 브라우저 네이티브 스크롤에 맡긴다 — JS로 scrollLeft를 같이 건드리면 네이티브 관성 스크롤과
+    // 충돌해서 뚝뚝 끊기므로, 마우스 드래그(데스크탑)에서만 커스텀 드래그를 사용
+    if (!scroller || e.pointerType !== 'mouse' || e.button !== 0) return;
     dragRef.current = { active: true, pointerId: e.pointerId, startX: e.clientX, startScrollLeft: scroller.scrollLeft, moved: false };
     setIsDragging(true);
   };
@@ -83,7 +85,7 @@ export default function RecommendSection({ excludeId, titleText = '추천 테스
           paddingLeft: '2px',
           paddingRight: '2px',
           cursor: isDragging ? 'grabbing' : 'grab',
-          touchAction: 'pan-y',
+          touchAction: 'pan-x',
           userSelect: 'none',
           scrollbarWidth: 'none',
           scrollSnapType: isDragging ? 'none' : 'x mandatory',

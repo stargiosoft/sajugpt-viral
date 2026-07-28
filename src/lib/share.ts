@@ -140,9 +140,11 @@ export async function saveImage(element: HTMLElement, filename = '색기배틀_�
 
   // 모바일(특히 iOS Safari)은 <a download>가 새 탭으로 열리거나 조용히 실패하는 경우가 많아
   // 사진첩에 바로 저장할 수 있는 파일 공유 시트(navigator.share)를 우선 시도한다.
-  if (isMobileDevice() && navigator.canShare) {
+  // navigator.canShare가 없는 일부 모바일 브라우저도 있어 canShare 자체를 게이트로 걸지 않고,
+  // 존재하면 파일 공유 가능 여부만 확인 후 진행 (귀신타로 handleSaveImage와 동일 조건)
+  if (isMobileDevice() && navigator.share) {
     const file = new File([blob], filename, { type: 'image/png' });
-    if (navigator.canShare({ files: [file] })) {
+    if (!navigator.canShare || navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file] });
         return;

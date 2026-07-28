@@ -39,7 +39,7 @@ export const GHOST_SHARED_COPY = {
   ctaAppUrlIOS: 'https://apps.apple.com/kr/app/fortune-gpt/id1547399137',
   ctaAppUrlAndroid: 'https://play.google.com/store/apps/details?id=kr.semaphore.sajugpt',
   kakaoButtonText: '나도 카드 열어보기',
-  badgeLabel: (title: string) => `이번 달 · ${cleanMonthTitle(title)}`,
+  badgeLabel: (title: string) => cleanMonthTitle(title),
   shareBox: {
     headline: '귀신이 아직\n당신을 보고 있습니다.',
     headlineHighlight: '보고',
