@@ -68,7 +68,7 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
                     fontWeight: 700,
                     color: '#fc3e4d',
                     backgroundColor: '#FFE9EC',
-                    padding: '6.5px 11px 5px',
+                    padding: '5.5px 11px 5px',
                     borderRadius: '6px',
                     letterSpacing: '-0.1px',
                     whiteSpace: 'nowrap',

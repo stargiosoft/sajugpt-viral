@@ -272,8 +272,8 @@ export default function HeroBanner() {
       <span
         className="absolute inline-flex items-center"
         style={{
-          right: '18px',
-          bottom: '20px',
+          right: '14px',
+          bottom: '16px',
           backgroundColor: 'rgba(30,30,30,0.55)',
           borderRadius: '999px',
           overflow: 'hidden',

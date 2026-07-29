@@ -123,9 +123,11 @@ input[type='number'] {
 
 /* RankingPanel: 모바일 전체 폭 vs lg 사이드바(235px) 폭 차이로 인한 반응형 폰트 크기 */
 .ranking-panel {
-  --rp-heading-size: 16px;
+  --rp-heading-size: 18px;
   --rp-title-size: 14px;
   --rp-sub-size: 12px;
+  --rp-padding-bottom: 21px;
+  --rp-title-gap: 12px;
 }
 
 @media (min-width: 1024px) {
@@ -133,6 +135,8 @@ input[type='number'] {
     --rp-heading-size: 15px;
     --rp-title-size: 12.5px;
     --rp-sub-size: 11px;
+    --rp-padding-bottom: 19px;
+    --rp-title-gap: 10px;
   }
 }
 

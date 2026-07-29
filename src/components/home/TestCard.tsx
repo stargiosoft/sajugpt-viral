@@ -102,7 +102,7 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
         <p
           style={{
             fontSize: '13.5px',
-            fontWeight: 700,
+            fontWeight: 600,
             color: '#0d0d0d',
             letterSpacing: '-0.3px',
             lineHeight: '1.3',

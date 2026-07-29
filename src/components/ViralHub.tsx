@@ -58,7 +58,7 @@ export default function ViralHub() {
 
           <div className="pt-1 px-3 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
             <HeroBanner />
-            <div className="flex flex-col mt-4 lg:mt-0" style={{ gap: '12px' }}>
+            <div className="flex flex-col mt-3 lg:mt-0" style={{ gap: '12px' }}>
               <RankingPanel items={catalog.filter((item) => item.visibleOnHome)} onSelect={handleSelectItem} selectedId={selectedId} />
               <motion.a
                 href={SAJUGPT_URL}
@@ -67,13 +67,11 @@ export default function ViralHub() {
                 whileHover={{ opacity: 0.9 }}
                 whileTap={{ scale: 0.995, backgroundColor: MOAMOA_ORANGE_DARK }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
-                className="flex items-center justify-center shrink-0 transform-gpu"
+                className="flex items-center justify-center shrink-0 transform-gpu h-[52px] lg:h-[48px] text-[14px] lg:text-[13px]"
                 style={{
-                  height: '48px',
                   borderRadius: '16px',
                   backgroundColor: MOAMOA_ORANGE,
                   color: '#ffffff',
-                  fontSize: '13px',
                   fontWeight: 700,
                   letterSpacing: '0',
                   textDecoration: 'none',

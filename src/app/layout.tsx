@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: '7월 귀신타로',
   description: '이번 달, 당신을 찾아올 경고를 확인하세요.',
   icons: { icon: '/favicon.svg' },
+  formatDetection: { telephone: false, email: false, address: false, date: false },
   openGraph: {
     title: '7월 귀신타로',
     description: '이번 달, 당신을 찾아올 경고를 확인하세요.',
