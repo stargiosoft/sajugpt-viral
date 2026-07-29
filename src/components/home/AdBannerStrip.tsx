@@ -32,7 +32,7 @@ export default function AdBannerStrip({ backgroundColor = '#F5F5F6', title, subt
           right: '12px',
           fontSize: '10px',
           fontWeight: 700,
-          color: hasContent ? '#B0793F' : '#aaa',
+          color: hasContent ? 'rgb(134 134 134)' : '#aaa',
           backgroundColor: hasContent ? 'rgba(255,255,255,0.85)' : 'transparent',
           padding: hasContent ? '3px 9px' : 0,
           borderRadius: '999px',

@@ -3,6 +3,7 @@
 import { useState, type RefObject } from 'react';
 import { saveImage } from '@/lib/share';
 import { trackShare } from '@/lib/analytics';
+import { incrementTestStat } from '@/lib/testStats';
 
 interface Props {
   cardRef: RefObject<HTMLDivElement | null>;
@@ -23,6 +24,7 @@ export default function DeangShareButtons({ cardRef, resultId, breedName }: Prop
     try {
       await saveImage(cardRef.current, `댕댕사주_${breedName}.png`);
       trackShare('deang_saju', 'image_save', resultId);
+      incrementTestStat('deang-saju', 'share');
     } catch {
     } finally {
       setSaving(false);

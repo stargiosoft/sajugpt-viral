@@ -16,6 +16,7 @@ import RecommendSection from '@/components/RecommendSection';
 import SajuGPTBanner from '@/components/SajuGPTBanner';
 import { generateMoneyTimelineResult, fetchMoneyTimelineResultById } from '@/lib/moneyTimeline';
 import { trackEvent } from '@/lib/analytics';
+import { incrementTestStat } from '@/lib/testStats';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { MONEY_COLORS as C, FADE_UP } from '@/constants/moneyTimelineTheme';
 
@@ -139,6 +140,14 @@ export default function MoneyClient({ resultId }: Props) {
     setError(null);
     setStep('landing');
   };
+
+  // 플레이 카운트: 실제로 생년월일을 입력해 결과를 생성했을 때만 1회 기록
+  // (resultId로 진입한 공유 링크 조회는 다른 사람의 결과를 "보는" 것일 뿐이라 제외)
+  useEffect(() => {
+    if (resultId) return;
+    if (step !== 'result' || !result) return;
+    incrementTestStat('money-timeline', 'play');
+  }, [step, result, resultId]);
 
   return (
     <div className="h-dvh flex justify-center" style={{ backgroundColor: C.pageBg, fontFamily: "'Tmoney RoundWind', sans-serif" }}>

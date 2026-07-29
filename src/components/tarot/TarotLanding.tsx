@@ -6,6 +6,7 @@ import Image from 'next/image';
 import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
 import GhostCommentSection from '@/components/ghost-tarot/GhostCommentSection';
 import type { CommentFeatureType } from '@/lib/ghost-tarot/comments';
+import { GHOST_BRUSH_FONT } from '@/lib/ghost-tarot/theme';
 import TarotShareRow from './TarotShareRow';
 import type { TarotConfig } from '@/types/tarot';
 
@@ -81,6 +82,17 @@ export default function TarotLanding({
       </motion.div>
 
       <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: .65, duration: .5 }}
+        style={{ marginTop: 10, position: 'relative', zIndex: 2, textAlign: 'center' }}
+      >
+        <span style={{ fontFamily: GHOST_BRUSH_FONT, fontSize: 22.5, fontWeight: 500, color: 'rgb(255 255 255 / 75%)', letterSpacing: '-0.2px' }}>
+          같은 달에 본 운명을 다시 탐하지 마라
+        </span>
+      </motion.div>
+
+      <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: .7, duration: .5 }}
@@ -94,10 +106,10 @@ export default function TarotLanding({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: .9, duration: .5 }}
+        transition={{ delay: 1, duration: .5 }}
         style={{ position: 'relative', zIndex: 2 }}
       >
-        <TarotShareRow config={config} />
+        <TarotShareRow config={config} hideLabel />
       </motion.div>
 
       {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import PolicyLayout, { PolicyArticle } from '@/components/policy/PolicyLayout';
 
 export const metadata: Metadata = {
-  title: '이용약관 | 모아모아',
+  title: '이용약관 | 광필연구소',
 };
 
 export default function TermsPage() {
@@ -12,7 +12,7 @@ export default function TermsPage() {
         no={1}
         title="목적"
         paragraphs={[
-          '이 약관은 (주)스타지오소프트(이하 "회사")가 제공하는 사주·심리·성향 등을 소재로 한 바이럴 콘텐츠 서비스 "모아모아"(이하 "서비스")의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.',
+          '이 약관은 (주)스타지오소프트(이하 "회사")가 제공하는 사주·심리·성향 등을 소재로 한 바이럴 콘텐츠 서비스 "광필연구소"(이하 "서비스")의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.',
         ]}
       />
       <PolicyArticle

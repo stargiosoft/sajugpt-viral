@@ -5,6 +5,7 @@ import OutlineBoxButton from '@/components/OutlineBoxButton';
 import PressableButton from '@/components/PressableButton';
 import ShareIconRow from './ShareIconRow';
 import { saveImage } from '@/lib/share';
+import { incrementTestStat } from '@/lib/testStats';
 import type { LoveChatCharacter } from '@/types/love-chat';
 
 interface Props {
@@ -24,6 +25,7 @@ export default function ShareView({ character, cardRef, onReset }: Props) {
     setSaving(true);
     try {
       await saveImage(cardRef.current, `카톡연애도감_${character.name}.png`);
+      incrementTestStat('love-chat', 'share');
     } finally {
       setSaving(false);
     }
@@ -51,6 +53,7 @@ export default function ShareView({ character, cardRef, onReset }: Props) {
         <ShareIconRow
           shareContent={{
             featureType: 'love_chat',
+            testId: 'love-chat',
             resultId: character.id,
             title: `💌 나의 카톡 연애 캐릭터는 "${character.name}"`,
             description: character.oneLiner,

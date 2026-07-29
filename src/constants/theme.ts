@@ -1,6 +1,6 @@
 // 모아모아 홈 화면 전용 브랜드 오렌지 — CTA 배경/포인트 컬러로 여러 컴포넌트가 공유
-export const MOAMOA_ORANGE = '#FF7A1A';
-export const MOAMOA_ORANGE_DARK = '#E8600A';
+export const MOAMOA_ORANGE = '#fc3e4d';
+export const MOAMOA_ORANGE_DARK = '#E0303F';
 
 // 숨긴 테스트 자리를 채우는 "준비 중" 카드/행이 공유하는 톤 —
 // PlaceholderTestCard(그리드)와 PlaceholderRankingRow(순위 리스트)가 함께 씀

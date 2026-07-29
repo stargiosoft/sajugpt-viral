@@ -67,6 +67,10 @@ export default function HeroBanner() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const trackIndexRef = useRef(trackIndex);
+  const rafIdRef = useRef<number | null>(null);
+  const latestDxRef = useRef(0);
   const dragRef = useRef<DragState>({
     active: false,
     pointerId: null,
@@ -77,6 +81,10 @@ export default function HeroBanner() {
   });
 
   const index = (trackIndex - 1 + SLIDES.length) % SLIDES.length;
+
+  useEffect(() => {
+    trackIndexRef.current = trackIndex;
+  }, [trackIndex]);
 
   useEffect(() => {
     if (paused || isDragging) return;
@@ -143,7 +151,16 @@ export default function HeroBanner() {
 
     e.preventDefault();
     drag.lastX = e.clientX;
-    setDragOffset(dx);
+    latestDxRef.current = dx;
+
+    if (rafIdRef.current == null) {
+      rafIdRef.current = requestAnimationFrame(() => {
+        rafIdRef.current = null;
+        if (!trackRef.current) return;
+        const baseStep = 100 / EXTENDED_SLIDES.length;
+        trackRef.current.style.transform = `translate3d(calc(${-trackIndexRef.current * baseStep}% + ${latestDxRef.current}px), 0, 0)`;
+      });
+    }
   }, []);
 
   const endDrag = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
@@ -156,6 +173,11 @@ export default function HeroBanner() {
 
     if (drag.pointerId !== null && containerRef.current?.hasPointerCapture?.(drag.pointerId)) {
       containerRef.current.releasePointerCapture(drag.pointerId);
+    }
+
+    if (rafIdRef.current != null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
     }
 
     setIsDragging(false);
@@ -196,11 +218,12 @@ export default function HeroBanner() {
       }}
     >
       <div
+        ref={trackRef}
         onTransitionEnd={handleTrackTransitionEnd}
         className="absolute inset-0 flex h-full"
         style={{
           width: `${EXTENDED_SLIDES.length * 100}%`,
-          transform: `translateX(calc(${-trackIndex * (100 / EXTENDED_SLIDES.length)}% + ${dragOffset}px))`,
+          transform: `translate3d(calc(${-trackIndex * (100 / EXTENDED_SLIDES.length)}% + ${dragOffset}px), 0, 0)`,
           transition: isDragging || !transitionEnabled ? 'none' : 'transform 600ms cubic-bezier(0.65, 0, 0.35, 1)',
         }}
       >
@@ -278,12 +301,12 @@ export default function HeroBanner() {
             />
           ) : (
             <span className="flex items-center" style={{ gap: '3px' }}>
-              <span aria-hidden style={{ width: '1.5px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
-              <span aria-hidden style={{ width: '1.5px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
+              <span aria-hidden style={{ width: '3px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
+              <span aria-hidden style={{ width: '3px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
             </span>
           )}
         </span>
-        <span style={{ width: '1px', height: '10px', backgroundColor: 'rgba(255,255,255,0.28)', marginLeft: '2px', marginRight: '4px' }} />
+        <span style={{ width: '1.5px', height: '8px', backgroundColor: 'rgba(255,255,255,0.18)', marginLeft: '2px', marginRight: '4px' }} />
         <span
           className="flex items-center justify-center shrink-0"
           style={{

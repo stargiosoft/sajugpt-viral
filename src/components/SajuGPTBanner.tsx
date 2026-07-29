@@ -113,13 +113,15 @@ export default function SajuGPTBanner({ featureType, resultId }: Props) {
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onDragStart={(e) => e.preventDefault()}
-      className="relative block w-full transform-gpu"
-      style={{ aspectRatio: '1800 / 450', borderRadius: '20px', overflow: 'hidden', backgroundColor: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', touchAction: 'pan-y', userSelect: 'none' }}
+      className="relative block w-full"
+      style={{ aspectRatio: '1800 / 450', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', touchAction: 'pan-y', userSelect: 'none' }}
     >
       <div
         onTransitionEnd={handleTrackTransitionEnd}
         className="absolute inset-0 flex h-full"
         style={{
+          borderRadius: 'inherit',
+          overflow: 'hidden',
           width: `${EXTENDED_IMAGES.length * 100}%`,
           transform: `translateX(calc(${-trackIndex * (100 / EXTENDED_IMAGES.length)}% + ${dragOffsetPx}px))`,
           transition: isDragging || !transitionEnabled ? 'none' : 'transform 0.45s ease-in-out',

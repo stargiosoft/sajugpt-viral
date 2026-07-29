@@ -13,9 +13,9 @@ export default function MoaMoaHeader() {
         WebkitBackdropFilter: 'blur(5px)',
       }}
     >
-      <img src="/home/fire.svg" alt="" style={{ width: '26px', height: '26px', marginRight: '6px' }} />
+      <img src="/home/symbol.svg" alt="" style={{ width: '22px', height: '22px', marginRight: '6px', position: 'relative', top: '1px' }} />
       <h1>
-        <MoaMoaWordmark fontSize="22px" letterSpacing="-0.55px" />
+        <MoaMoaWordmark fontSize="19px" letterSpacing="-0.55px" top="2.5px" />
       </h1>
     </div>
   );

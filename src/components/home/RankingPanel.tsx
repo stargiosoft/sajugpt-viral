@@ -1,8 +1,8 @@
 'use client';
 
 import type { TestCatalogItem } from '@/types/testCatalog';
-import { CATEGORIES } from '@/constants/categories';
 import PlaceholderRankingRow from './PlaceholderRankingRow';
+import SectionStats from './SectionStats';
 
 const RANKING_SIZE = 5;
 
@@ -30,15 +30,15 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
         borderRadius: '20px',
         backgroundColor: '#ffffff',
         border: '1px solid #E5E5E9',
-        padding: '14px 18px 18px',
+        padding: '12px 18px 21px',
       }}
     >
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ marginBottom: '8px' }}>
         <h2 style={{ fontSize: 'var(--rp-heading-size)', fontWeight: 800, color: '#0d0d0d', letterSpacing: '-0.3px', padding: '3px 0 1px' }}>
-          실시간 인기 순위
+          인기 테스트
         </h2>
       </div>
-      <div className="flex flex-col" style={{ gap: '13px' }}>
+      <div className="flex flex-col" style={{ gap: '7px' }}>
         {ranked.map((item, i) => {
           const isDimmed = !!selectedId && selectedId !== item.id;
           return (
@@ -59,7 +59,7 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
           >
             <span
               className="relative block shrink-0 overflow-hidden aspect-[4/3]"
-              style={{ width: '60px', borderRadius: '9px' }}
+              style={{ width: '68px', borderRadius: '9px' }}
             >
               <span className="block w-full h-full transition-transform duration-200 ease-out group-hover:scale-110">
                 {item.imageSrc ? (
@@ -77,12 +77,12 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
                   left: 0,
                   minWidth: '15px',
                   height: '15px',
-                  padding: '1px 4px',
+                  padding: '2px 4px 1px',
                   borderTopLeftRadius: '9px',
                   borderTopRightRadius: 0,
                   borderBottomLeftRadius: 0,
                   borderBottomRightRadius: '6px',
-                  backgroundColor: 'rgba(20,20,20,0.72)',
+                  backgroundColor: '#fc3e4d',
                   fontSize: '9px',
                   fontWeight: 700,
                   color: '#ffffff',
@@ -92,12 +92,10 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
               </span>
             </span>
             <span className="flex-1 min-w-0" style={{ position: 'relative', top: '1.5px' }}>
-              <span className="block truncate" style={{ fontSize: 'var(--rp-title-size)', fontWeight: 600, color: '#0d0d0d', letterSpacing: '-0.2px', marginBottom: '2px' }}>
+              <span className="block truncate" style={{ fontSize: 'var(--rp-title-size)', fontWeight: 600, color: '#0d0d0d', letterSpacing: '-0.2px', marginBottom: '3px' }}>
                 {item.title}
               </span>
-              <span className="block truncate" style={{ fontSize: 'var(--rp-sub-size)', fontWeight: 500, color: '#757474', letterSpacing: '-0.2px', paddingLeft: '1px' }}>
-                {CATEGORIES.find((c) => c.key === item.category)?.label ?? ''} · 참여 {item.participantLabel}
-              </span>
+              <SectionStats plays={item.participantLabel} shares={item.shareLabel ?? '0'} />
             </span>
           </button>
           );

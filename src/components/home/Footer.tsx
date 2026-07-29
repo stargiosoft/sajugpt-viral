@@ -13,7 +13,7 @@ const SUPPORT_EMAIL = 'support@stargio.co.kr';
 const TEXT_LINKS: { label: string; href?: string }[] = [
   { label: '이용약관', href: '/terms' },
   { label: '개인정보처리방침', href: '/privacy' },
-  { label: '모아모아 소개', href: '/about' },
+  { label: '광필연구소 소개', href: '/about' },
 ];
 
 const ACTION_LINKS: { label: string; href: string; variant: 'outline' | 'solid' }[] = [
@@ -38,14 +38,14 @@ export default function Footer() {
       <div
         style={{
           borderRadius: '20px',
-          backgroundColor: '#F9F9F9',
+          backgroundColor: '#F4F4F5',
           padding: '24px',
         }}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between" style={{ gap: '16px' }}>
           <div className="flex items-center" style={{ gap: '6px' }}>
-            <img src="/home/fire.svg" alt="" style={{ width: '28px', height: '28px' }} />
-            <MoaMoaWordmark />
+            <img src="/home/symbol.svg" alt="" style={{ width: '20px', height: '20px', position: 'relative', top: '2px' }} />
+            <MoaMoaWordmark top="3px" />
           </div>
 
           <div className="flex items-center" style={{ gap: '6px' }}>
@@ -53,7 +53,7 @@ export default function Footer() {
               <MotionLink
                 key={link.label}
                 href={link.href}
-                whileHover={{ opacity: 0.9 }}
+                whileHover={link.variant === 'solid' ? { opacity: 0.9 } : { backgroundColor: '#EAEAEC' }}
                 whileTap={{ scale: 0.995, backgroundColor: link.variant === 'solid' ? MOAMOA_ORANGE_DARK : '#E4E4E8' }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
                 className="flex items-center justify-center flex-1 sm:flex-none sm:w-[84px] transform-gpu"
@@ -79,18 +79,18 @@ export default function Footer() {
 
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end" style={{ gap: '18px' }}>
           <div>
-            <p style={{ fontSize: '12px', fontWeight: 700, color: '#555', letterSpacing: '-0.2px', marginBottom: '12px', paddingLeft: '3px' }}>
+            <p style={{ fontSize: '13px', fontWeight: 700, color: '#555', letterSpacing: '-0.2px', marginBottom: '12px', paddingLeft: '3px' }}>
               사업자 정보
             </p>
             <div className="grid grid-cols-[auto_auto]" style={{ columnGap: '32px', rowGap: '9px', paddingLeft: '5px' }}>
               {BUSINESS_INFO.map(([label, value]) => (
                 <Fragment key={label}>
                   <span
-                    style={{ fontSize: '11.5px', color: '#777', fontWeight: 500, letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}
+                    style={{ fontSize: '11.5px', color: '#666', fontWeight: 700, letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}
                   >
                     {label}
                   </span>
-                  <span style={{ fontSize: '11.5px', color: '#888', letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: '11.5px', color: '#777', fontWeight: 600, letterSpacing: '-0.1px', whiteSpace: 'nowrap' }}>
                     {value}
                   </span>
                 </Fragment>
@@ -105,7 +105,8 @@ export default function Footer() {
               {TEXT_LINKS.map(({ label, href }, i) => {
                 const linkStyle = {
                   fontSize: '12px',
-                  color: '#888',
+                  color: '#777',
+                  fontWeight: 600,
                   letterSpacing: '-0.2px',
                   padding: '4px 6px',
                   margin: '-4px -6px',
@@ -136,7 +137,7 @@ export default function Footer() {
               })}
             </div>
 
-            <p style={{ fontSize: '11px', color: '#999999', letterSpacing: '-0.1px', paddingRight: '2px' }}>
+            <p style={{ fontSize: '10px', color: 'rgb(164 164 164)', fontWeight: 600, letterSpacing: '-0.1px', paddingRight: '2px' }}>
               © 2026 (주)스타지오소프트. ALL RIGHTS RESERVED.
             </p>
           </div>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import type { TestCatalogItem, TestColorTheme } from '@/types/testCatalog';
 import { CATEGORIES } from '@/constants/categories';
 import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
+import SectionStats from './SectionStats';
 
 // White / Gray 스케일 / 홈 화면 브랜드 오렌지만 사용하는 썸네일 컬러 팔레트
 const THEME_STYLES: Record<TestColorTheme, { bg: string; fg: string }> = {
@@ -46,14 +47,14 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
       <motion.div
         whileTap={item.ready ? { filter: 'brightness(1.05)' } : undefined}
         transition={{ duration: 0.15, ease: 'easeOut' }}
-        className="relative transform-gpu w-full aspect-[4/3]"
+        className="relative w-full aspect-[4/3]"
         style={{
           borderRadius: '16px',
-          backgroundColor: theme.bg,
+          backgroundColor: item.imageSrc ? undefined : theme.bg,
           overflow: 'hidden',
         }}
       >
-        <div className="w-full h-full transition-transform duration-200 ease-out group-hover:scale-110">
+        <div className="w-full h-full transition-transform duration-200 ease-out group-hover:scale-110 transform-gpu" style={{ borderRadius: 'inherit', overflow: 'hidden' }}>
           {item.imageSrc ? (
             <img
               src={item.imageSrc}
@@ -74,16 +75,16 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
             position: 'absolute',
             left: '8px',
             bottom: '8px',
-            fontSize: '11px',
+            fontSize: '10px',
             fontWeight: 700,
             color: isNew ? '#ffffff' : '#0d0d0d',
             backgroundColor: isNew ? MOAMOA_ORANGE : 'rgba(255,255,255,0.92)',
-            padding: '4.5px 9px 4px',
+            padding: '2px 6px 1.5px',
             borderRadius: '20px',
             letterSpacing: '-0.2px',
           }}
         >
-          {isNew ? 'NEW' : `${item.participantLabel} 참여`}
+          {isNew ? 'New' : `${item.participantLabel} 참여`}
         </span>
 
         {!item.ready && (
@@ -105,12 +106,17 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
             color: '#0d0d0d',
             letterSpacing: '-0.3px',
             lineHeight: '1.3',
-            marginBottom: '-1px',
+            marginBottom: '3px',
+            paddingBottom: '4px',
           }}
         >
           {item.title}
         </p>
-        <span style={{ fontSize: '11px', fontWeight: 500, color: '#757474', letterSpacing: '-0.2px' }}>{categoryLabel}</span>
+        {isNew ? (
+          <SectionStats plays={item.participantLabel} shares={item.shareLabel ?? '0'} />
+        ) : (
+          <span style={{ fontSize: '11px', fontWeight: 500, color: '#757474', letterSpacing: '-0.2px' }}>{categoryLabel}</span>
+        )}
       </div>
     </motion.div>
   );

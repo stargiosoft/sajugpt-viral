@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import PolicyLayout, { PolicyArticle } from '@/components/policy/PolicyLayout';
 
 export const metadata: Metadata = {
-  title: '개인정보처리방침 | 모아모아',
+  title: '개인정보처리방침 | 광필연구소',
 };
 
 export default function PrivacyPage() {

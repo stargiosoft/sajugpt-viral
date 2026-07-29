@@ -1,13 +1,16 @@
 'use client';
 
+import Link from 'next/link';
+import MoaMoaWordmark from './MoaMoaWordmark';
+
 interface Props {
   bgColor?: string;
   logoColor?: string;
   onBack?: () => void;
 }
 
-// 모든 테스트 상단에 고정 노출되는 모아모아 x 사주GPT 크로스 브랜딩 네비
-// 모아모아 사이트는 아직 비공개라 클릭 시 사주GPT 본 사이트로 이동
+// 모든 테스트 상단에 고정 노출되는 광필연구소 x 사주GPT 크로스 브랜딩 네비
+// 광필연구소 로고 클릭 시 광필연구소 홈으로, 사주GPT 로고 클릭 시 사주GPT 본 사이트로 이동
 export default function TestTopNav({ bgColor = '#0d0d0d', logoColor = '#ffffff', onBack }: Props) {
   return (
     <div
@@ -34,7 +37,18 @@ export default function TestTopNav({ bgColor = '#0d0d0d', logoColor = '#ffffff',
         )}
       </div>
 
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+      <div className="flex items-center" style={{ flex: 1, justifyContent: 'center', gap: '6px' }}>
+        <Link
+          href="/"
+          aria-label="광필연구소 홈으로"
+          className="flex items-center"
+          style={{ padding: '4px' }}
+        >
+          <MoaMoaWordmark fontSize="17px" color={logoColor} top="0px" />
+        </Link>
+
+        <span style={{ fontSize: '12px', fontWeight: 600, color: logoColor, opacity: 0.5 }}>x</span>
+
         <button
           type="button"
           onClick={() => { window.open('https://www.sajugpt.co.kr/', '_blank', 'noopener,noreferrer'); }}
@@ -47,8 +61,8 @@ export default function TestTopNav({ bgColor = '#0d0d0d', logoColor = '#ffffff',
             aria-label="사주GPT"
             style={{
               display: 'inline-block',
-              height: '20px',
-              width: '66px',
+              height: '16px',
+              width: '53px',
               backgroundColor: logoColor,
               WebkitMaskImage: 'url(/sajugpt-logo.svg)',
               maskImage: 'url(/sajugpt-logo.svg)',

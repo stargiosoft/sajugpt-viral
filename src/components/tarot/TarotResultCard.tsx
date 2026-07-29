@@ -14,6 +14,7 @@ import TarotShareRow from './TarotShareRow';
 import Toast from '@/components/Toast';
 import { saveImage, captureCardImage, isMobileDevice } from '@/lib/share';
 import { trackSajuGPTClick } from '@/lib/analytics';
+import { incrementTestStat } from '@/lib/testStats';
 import { useIsDesktop, useIsNarrow, NARROW_BREAKPOINT } from '@/lib/ghost-tarot/useBreakpoint';
 import type { TarotCardData, TarotConfig, TarotResult } from '@/types/tarot';
 
@@ -98,6 +99,7 @@ export default function TarotResultCard({ config, card, result, error, onReset }
     setSaveState('saved');
     clearTimeout(saveResetTimerRef.current);
     saveResetTimerRef.current = setTimeout(() => setSaveState('idle'), 2500);
+    incrementTestStat(config.slug, 'share');
   };
 
   useEffect(() => {

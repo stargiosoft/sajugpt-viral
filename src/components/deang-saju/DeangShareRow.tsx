@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import GhostIconButton from '@/components/ghost-tarot/GhostIconButton';
 import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare, type ShareMethod } from '@/lib/analytics';
+import { incrementTestStat } from '@/lib/testStats';
 import { DEANG_COLORS as C } from '@/constants/deangTheme';
 import DeangOutlineBox from './DeangOutlineBox';
 
@@ -48,6 +49,7 @@ export default function DeangShareRow() {
   const recordShare = (method: ShareMethod) => {
     trackEvent('deang_saju_share', { method });
     trackShare('deang_saju', method);
+    incrementTestStat('deang-saju', 'share');
   };
 
   const handleKakaoShare = useCallback(() => {

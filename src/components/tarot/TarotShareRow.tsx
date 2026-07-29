@@ -6,6 +6,7 @@ import GhostIconButton from '@/components/ghost-tarot/GhostIconButton';
 import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import { useIsDesktop, useIsNarrow } from '@/lib/ghost-tarot/useBreakpoint';
+import { incrementTestStat } from '@/lib/testStats';
 import type { TarotConfig } from '@/types/tarot';
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
   shareLink?: string;
   resultId?: string;
   variant?: 'simple' | 'boxed';
+  /** 'simple' variant에서 "공유하기" 텍스트 라벨만 숨기고 아이콘 버튼은 그대로 노출 */
+  hideLabel?: boolean;
 }
 
 const KakaoIcon = ({ color }: { color: string }) => (
@@ -51,6 +54,7 @@ export default function TarotShareRow({
   shareLink,
   resultId,
   variant = 'simple',
+  hideLabel = false,
 }: Props) {
   const { palette, brushFont, myungjoFont } = config.theme;
   const isDesktop = useIsDesktop();
@@ -71,8 +75,9 @@ export default function TarotShareRow({
       timerRef.current = setTimeout(() => setCopied(false), 2000);
       trackEvent(`${config.featureType}_share_test_clipboard`);
       trackShare(config.featureType, 'clipboard', resultId);
+      incrementTestStat(config.slug, 'share');
     }
-  }, [getLink, resultId, config.featureType]);
+  }, [getLink, resultId, config.featureType, config.slug]);
 
   const handleKakaoShare = useCallback(() => {
     const ok = shareKakao({
@@ -85,8 +90,9 @@ export default function TarotShareRow({
     if (ok) {
       trackEvent(`${config.featureType}_share_test_kakao`);
       trackShare(config.featureType, 'kakao', resultId);
+      incrementTestStat(config.slug, 'share');
     }
-  }, [getLink, resultId, config.featureType, config.copy]);
+  }, [getLink, resultId, config.featureType, config.copy, config.slug]);
 
   const handleXShare = useCallback(() => {
     const text = encodeURIComponent(resolvedShareText);
@@ -94,7 +100,8 @@ export default function TarotShareRow({
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer');
     trackEvent(`${config.featureType}_share_test_x`);
     trackShare(config.featureType, 'x', resultId);
-  }, [resolvedShareText, getLink, resultId, config.featureType]);
+    incrementTestStat(config.slug, 'share');
+  }, [resolvedShareText, getLink, resultId, config.featureType, config.slug]);
 
   if (resolvedVariant === 'boxed' && shareBox) {
     const headlineHighlightIndex = shareBox.headlineHighlight ? shareBox.headline.indexOf(shareBox.headlineHighlight) : -1;
@@ -178,11 +185,13 @@ export default function TarotShareRow({
 
   return (
     <div className="flex flex-col items-center" style={{ marginTop: 40 }}>
-      <span style={{ fontFamily: brushFont, fontSize: 21, color: 'rgb(166 166 166)', letterSpacing: '1px' }}>
-        공유하기
-      </span>
+      {!hideLabel && (
+        <span style={{ fontFamily: brushFont, fontSize: 21, color: 'rgb(166 166 166)', letterSpacing: '1px' }}>
+          공유하기
+        </span>
+      )}
 
-      <div className="flex items-center" style={{ gap: 16, marginTop: 18 }}>
+      <div className="flex items-center" style={{ gap: 16, marginTop: hideLabel ? 0 : 18 }}>
         <GhostIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare}>
           <KakaoIcon color={palette.ink} />
         </GhostIconButton>

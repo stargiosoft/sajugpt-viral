@@ -17,6 +17,7 @@ import SajuGPTBanner from '@/components/SajuGPTBanner';
 import { QUESTIONS } from '@/data/questions';
 import { matchCharacter } from '@/lib/matcher';
 import { trackEvent } from '@/lib/analytics';
+import { incrementTestStat } from '@/lib/testStats';
 import type { Answers, Choice, LoveChatCharacter } from '@/types/love-chat';
 
 type Step = 'landing' | 'quiz' | 'analyzing' | 'result';
@@ -73,6 +74,14 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
     setCharacter(null);
     setStep('landing');
   }, []);
+
+  // 플레이 카운트: 실제로 퀴즈를 풀어 결과에 도달했을 때만 1회 기록
+  // (sharedCharacter로 진입한 공유 링크 조회는 다른 사람의 결과를 "보는" 것일 뿐이라 제외)
+  useEffect(() => {
+    if (sharedCharacter) return;
+    if (step !== 'result' || !character) return;
+    incrementTestStat('love-chat', 'play');
+  }, [step, character, sharedCharacter]);
 
   const handleQuizBack = useCallback(() => {
     if (questionIndex === 0) {

@@ -39,7 +39,7 @@ interface Props {
 export default function AnalyzingScreen({
   messages,
   emoji = '🔥',
-  ringColor = '#FF7A1A',
+  ringColor = '#fc3e4d',
   ringBorderWidth = '3px',
   emojiFontSize = '40px',
   lottieColor,

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 const labelStyle = { fontSize: '14px', fontWeight: 600, color: '#0d0d0d', letterSpacing: '-0.2px' } as const;
 
 function fieldBorder(focused: boolean) {
-  return focused ? '1px solid #FF7A1A' : '1px solid #e7e7e7';
+  return focused ? '1px solid #fc3e4d' : '1px solid #e7e7e7';
 }
 
 interface InquiryInputProps {
@@ -211,14 +211,14 @@ export function InquirySelect({ label, value, options, onChange }: InquirySelect
                   style={{
                     fontSize: '14.5px',
                     letterSpacing: '-0.2px',
-                    color: selected ? '#FF7A1A' : '#151515',
+                    color: selected ? '#fc3e4d' : '#151515',
                     fontWeight: selected ? 700 : 400,
                     borderRadius: '10px',
                     padding: '11px 12px',
-                    backgroundColor: selected ? '#FFF1E6' : 'transparent',
+                    backgroundColor: selected ? '#FFE9EC' : 'transparent',
                   }}
                   onMouseEnter={(e) => {
-                    if (!selected) e.currentTarget.style.backgroundColor = '#FFF1E6';
+                    if (!selected) e.currentTarget.style.backgroundColor = '#FFE9EC';
                   }}
                   onMouseLeave={(e) => {
                     if (!selected) e.currentTarget.style.backgroundColor = 'transparent';
@@ -227,7 +227,7 @@ export function InquirySelect({ label, value, options, onChange }: InquirySelect
                   {option}
                   {selected && (
                     <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="#FF7A1A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M5 13l4 4L19 7" stroke="#fc3e4d" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   )}
                 </li>

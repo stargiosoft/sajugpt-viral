@@ -5,6 +5,7 @@ import OutlineBoxButton from '@/components/OutlineBoxButton';
 import PressableButton from '@/components/PressableButton';
 import ShareIconRow from './ShareIconRow';
 import { saveImage } from '@/lib/share';
+import { incrementTestStat } from '@/lib/testStats';
 import { MONEY_COLORS as C } from '@/constants/moneyTimelineTheme';
 import type { MoneyTimelineProfile } from '@/types/money-timeline';
 
@@ -26,6 +27,7 @@ export default function ShareView({ resultId, profile, cardRef, onReset }: Props
     setSaving(true);
     try {
       await saveImage(cardRef.current, `내돈복그래프_${profile.overallScore}점.png`);
+      incrementTestStat('money-timeline', 'share');
     } finally {
       setSaving(false);
     }
@@ -65,6 +67,7 @@ export default function ShareView({ resultId, profile, cardRef, onReset }: Props
         <ShareIconRow
           shareContent={{
             featureType: 'money_timeline',
+            testId: 'money-timeline',
             resultId,
             title: '💰 내 돈복 테스트 💰',
             description: '내 사주 속 돈의 흐름을 분석해 드려요.',

@@ -26,10 +26,10 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#FAFAFA' }}>
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#F4F4F5' }}>
       <div className="w-full max-w-[680px] h-full flex flex-col">
         <div className="flex-1 overflow-auto w-full">
-          <div className="sticky top-0 z-20 flex items-center px-3 py-2 md:px-8" style={{ backgroundColor: '#FAFAFA' }}>
+          <div className="sticky top-0 z-20 flex items-center px-3 py-2 md:px-8" style={{ backgroundColor: '#F4F4F5' }}>
             <button
               type="button"
               onClick={handleBack}
@@ -44,8 +44,8 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
                 height: '38px',
                 marginLeft: '-4px',
                 borderRadius: '999px',
-                backgroundColor: backHovered ? '#FFF1E6' : 'transparent',
-                color: backHovered ? '#FF7A1A' : '#0d0d0d',
+                backgroundColor: backHovered ? '#FFE9EC' : 'transparent',
+                color: backHovered ? '#fc3e4d' : '#0d0d0d',
                 transform: backPressed ? 'scale(0.9)' : 'scale(1)',
                 transition: 'background-color 0.15s, color 0.15s, transform 0.1s',
               }}
@@ -66,10 +66,10 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
                   style={{
                     fontSize: '11px',
                     fontWeight: 700,
-                    color: '#FF7A1A',
-                    backgroundColor: '#FFF1E6',
-                    padding: '5px 11px',
-                    borderRadius: '999px',
+                    color: '#fc3e4d',
+                    backgroundColor: '#FFE9EC',
+                    padding: '6.5px 11px 5px',
+                    borderRadius: '6px',
                     letterSpacing: '-0.1px',
                     whiteSpace: 'nowrap',
                   }}
@@ -116,7 +116,7 @@ export function PolicyArticle({ no, title, paragraphs }: PolicyArticleProps) {
   return (
     <section>
       <h2 style={{ fontSize: '16px', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: '11px' }}>
-        <span style={{ color: '#FF7A1A' }}>제{no}조</span>{' '}
+        <span style={{ color: '#fc3e4d' }}>제{no}조</span>{' '}
         <span style={{ color: '#0d0d0d' }}>({title})</span>
       </h2>
       <div className="flex flex-col" style={{ gap: '9px' }}>
@@ -140,7 +140,7 @@ export function InfoSection({ title, paragraphs }: InfoSectionProps) {
   return (
     <section>
       <h2 className="flex items-center" style={{ gap: '8px', fontSize: '16.5px', fontWeight: 700, color: '#0d0d0d', letterSpacing: '-0.3px', marginBottom: '11px' }}>
-        <span aria-hidden style={{ width: '6px', height: '6px', borderRadius: '999px', backgroundColor: '#FF7A1A', flexShrink: 0 }} />
+        <span aria-hidden style={{ width: '6px', height: '6px', borderRadius: '999px', backgroundColor: '#fc3e4d', flexShrink: 0 }} />
         {title}
       </h2>
       <div className="flex flex-col" style={{ gap: '10px' }}>

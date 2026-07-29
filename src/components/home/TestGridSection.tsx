@@ -32,12 +32,12 @@ export default function TestGridSection({ title, items, filter, isNew, paddingBo
           fontWeight: 800,
           color: '#0d0d0d',
           letterSpacing: '-0.4px',
-          marginBottom: '14px',
+          marginBottom: '12px',
         }}
       >
         {title}
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 px-3 md:px-6 lg:px-8" style={{ columnGap: '12px', rowGap: '16px' }}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 px-3 md:px-6 lg:px-8" style={{ columnGap: '8px', rowGap: '20px' }}>
         {filtered.map((item) => (
           <TestCard key={item.id} item={item} isNew={isNew} onSelect={onSelect} selectedId={selectedId} />
         ))}

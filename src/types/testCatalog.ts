@@ -25,6 +25,8 @@ export interface TestCatalogItem {
   colorTheme: TestColorTheme;
   /** 예: "12.4만" — 참여자 수 표기 (뒤에 "명 참여" 등을 붙여 사용) */
   participantLabel: string;
+  /** 예: "1.1만" — 공유 수 표기. 실시간 인기 순위 등 개별 테스트 타이틀 아래 통계 뱃지에 사용 */
+  shareLabel?: string;
   isNew: boolean;
   /** 1~3위인 경우에만 부여 (인기 테스트 정렬 순서 결정) */
   popularityRank?: 1 | 2 | 3;

@@ -11,6 +11,7 @@ import TarotResultCard from './TarotResultCard';
 import TestTopNav from '@/components/TestTopNav';
 import { supabase } from '@/lib/supabase';
 import { getTarotConfig } from '@/lib/tarot/configs';
+import { incrementTestStat } from '@/lib/testStats';
 import type { TarotCardData, TarotResult } from '@/types/tarot';
 
 type Step = 'landing' | 'selection' | 'result';
@@ -137,6 +138,13 @@ export default function TarotClient({ slug, resultId }: Props) {
     setResultError(false);
     setStep('landing');
   }, []);
+
+  // 플레이 카운트: 실제로 카드를 뽑아 결과 화면에 도달했을 때만 1회 기록
+  // (공유 링크로 들어온 [resultId] 페이지는 TarotResultShareView를 별도로 렌더링하므로 여기 포함되지 않음)
+  useEffect(() => {
+    if (step !== 'result' || !selectedCard) return;
+    incrementTestStat(config.slug, 'play');
+  }, [step, selectedCard, config.slug]);
 
   const handleBack = step === 'selection'
     ? () => setStep('landing')

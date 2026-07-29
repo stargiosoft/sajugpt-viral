@@ -21,7 +21,7 @@ export default function PartnerForm() {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    const subject = '[모아모아] 제휴 문의';
+    const subject = '[광필연구소] 제휴 문의';
     const body = [`회신 이메일: ${email}`, '', message].join('\n');
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
@@ -44,7 +44,7 @@ export default function PartnerForm() {
         style={{
           height: '54px',
           borderRadius: '16px',
-          backgroundColor: canSubmit ? '#FF7A1A' : '#F2F2F2',
+          backgroundColor: canSubmit ? '#fc3e4d' : '#F2F2F2',
           color: canSubmit ? '#ffffff' : '#c7c7c7',
           fontSize: '15px',
           fontWeight: 600,
