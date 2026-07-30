@@ -32,7 +32,7 @@ export default function PlaceholderRankingRow({ rank }: Props) {
           {rank}
         </span>
       </span>
-      <span className="flex-1 min-w-0" style={{ position: 'relative', top: '1.5px' }}>
+      <span className="flex-1 min-w-0">
         <span className="block truncate" style={{ fontSize: 'calc(var(--rp-title-size) - 0.5px)', fontWeight: 600, color: PLACEHOLDER_TEXT_FAINT, letterSpacing: '-0.2px', marginBottom: '2px' }}>
           다음 테스트
         </span>

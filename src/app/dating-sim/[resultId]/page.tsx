@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import DatingSimClient from '@/components/dating-sim/DatingSimClient';
 import ReferralTracker from '@/components/ReferralTracker';
 
@@ -19,12 +19,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { resultId } = await params;
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { persistSession: false } },
-    );
-
     const { data } = await supabase
       .from('dating_results')
       .select('character_id, total_score, user_rank, total_count')

@@ -69,23 +69,47 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
           )}
         </div>
 
-        {/* 좌측 하단 오버레이: NEW 라벨 또는 참여 수 */}
-        <span
-          style={{
-            position: 'absolute',
-            left: '8px',
-            bottom: '8px',
-            fontSize: '10px',
-            fontWeight: 700,
-            color: isNew ? '#ffffff' : '#0d0d0d',
-            backgroundColor: isNew ? MOAMOA_ORANGE : 'rgba(255,255,255,0.92)',
-            padding: '2px 6px 1.5px',
-            borderRadius: '20px',
-            letterSpacing: '-0.2px',
-          }}
+        {/* 좌측 하단 오버레이: NEW 라벨(+사주GPT 뱃지) 또는 참여 수 */}
+        <div
+          className="flex items-center"
+          style={{ position: 'absolute', left: '8px', bottom: '8px', gap: '4px' }}
         >
-          {isNew ? 'New' : `${item.participantLabel} 참여`}
-        </span>
+          <span
+            className="inline-flex items-center"
+            style={{
+              fontSize: '10px',
+              lineHeight: 1,
+              fontWeight: 700,
+              color: isNew ? '#ffffff' : '#0d0d0d',
+              backgroundColor: isNew ? MOAMOA_ORANGE : 'rgba(255,255,255,0.92)',
+              padding: '0 6px',
+              borderRadius: '6px',
+              letterSpacing: '-0.2px',
+              height: '19px',
+            }}
+          >
+            {isNew ? 'New' : `${item.participantLabel} 참여`}
+          </span>
+          {isNew && item.sajugptBadge && (
+            <span
+              className="inline-flex items-center"
+              style={{
+                fontSize: '9.5px',
+                fontWeight: 700,
+                color: '#ffffff',
+                backgroundColor: '#7A38D8',
+                padding: '0 6px',
+                borderRadius: '6px',
+                letterSpacing: '-0.2px',
+                height: '19px',
+              }}
+            >
+              {/* 한글+영문 혼용 글자가 lineHeight:1만으로는 살짝 위로 떠 보여, 위쪽에 1px 패딩을 줘
+                  전체를 반 픽셀만큼 아래로 내려 광학적으로 가운데에 오도록 보정 */}
+              <span style={{ display: 'block', lineHeight: 1, paddingTop: '1px' }}>사주GPT</span>
+            </span>
+          )}
+        </div>
 
         {!item.ready && (
           <div

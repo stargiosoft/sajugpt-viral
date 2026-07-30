@@ -6,6 +6,7 @@ import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import CountUpNumber from '@/components/CountUpNumber';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 
 interface Props {
   onStart: () => void;
@@ -224,6 +225,7 @@ export default function DatingLanding({ onStart }: Props) {
             링크가 복사됐어요!
           </p>
         )}
+        <SajuGPTLinkButton featureType="dating" color="#848484" hoverColor="#FF4D8D" />
       </motion.div>
 
       {/* ── Disclaimer ── */}

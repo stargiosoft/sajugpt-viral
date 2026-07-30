@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
+import CourtShareRow from './CourtShareRow';
 
 interface Props {
   onStart: () => void;
@@ -629,6 +631,27 @@ export default function CourtLanding({ onStart }: Props) {
         <p style={{ fontSize: '13px', color: C.textMuted, letterSpacing: '-0.26px' }}>
           <span style={{ color: C.primaryLight, fontWeight: 600 }}>87,342</span>명 기소 완료
         </p>
+      </motion.div>
+
+      {/* ── 공유하기 ── */}
+      <motion.div
+        className="w-full"
+        style={{ padding: '32px 12px 0' }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <CourtShareRow
+          shareContent={{
+            featureType: 'saju_court',
+            title: '연애 못한 죄, 징역 몇 년?',
+            description: '사주로 당신의 연애 죄목을 기소하고 검사와 변호사가 실시간 재판합니다',
+            shareUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/court`,
+            imageUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/home/thumbnails/court.jpg`,
+          }}
+        />
+        <SajuGPTLinkButton featureType="saju_court" color={C.textMuted} hoverColor={C.primaryLight} />
       </motion.div>
 
       {/* ── 면책 ── */}

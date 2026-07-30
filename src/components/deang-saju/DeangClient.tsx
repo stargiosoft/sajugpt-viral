@@ -157,7 +157,7 @@ export default function DeangClient({ resultId }: Props) {
     <div className="h-dvh flex justify-center" style={{ backgroundColor: C.pageBg, fontFamily: 'Cafe24 Dongdong, sans-serif' }}>
       <div className="w-full h-full flex flex-col max-w-[440px] md:max-w-[600px]">
         <div className="flex-1 overflow-auto w-full">
-          <TestTopNav bgColor={C.pageBg} logoColor={C.borderInk} />
+          <TestTopNav bgColor={C.pageBg} logoColor={C.borderInk} xColor="#0d0d0d" />
           <AnimatePresence mode="wait">
             {step === 'landing' && <DeangLanding key="landing" onStart={() => setStep('input')} />}
 

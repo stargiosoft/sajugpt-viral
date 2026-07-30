@@ -10,11 +10,13 @@ interface Props {
   resultId?: string;
 }
 
-// 크리에이티브 3장을 /public/ads/sajugpt-banner-1~3.png 로 교체하면 5개 테스트 전체에 동일하게 반영됨
+// 캐릭터 크리에이티브(사주GPT 유도 카피 포함)와 사주GPT 앱 홍보 크리에이티브 5종, 전달받은 파일명(banner_1~5) 순서 그대로
 const BANNER_IMAGES = [
-  '/ads/sajugpt-banner-1.png',
-  '/ads/sajugpt-banner-2.png',
-  '/ads/sajugpt-banner-3.png',
+  '/ads/sajugpt-banner-baekbal-witch-v2.png',
+  '/ads/sajugpt-banner-app-1.png',
+  '/ads/sajugpt-banner-kim-taeyang-v2.png',
+  '/ads/sajugpt-banner-namgi-tarot-v2.png',
+  '/ads/sajugpt-banner-app-2.png',
 ];
 
 // 양 끝에 클론 슬라이드를 붙여, 마지막→처음으로 넘어갈 때도 역방향으로 되감기지 않고 항상 좌→우로 흐르게 함.

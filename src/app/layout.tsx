@@ -5,15 +5,16 @@ import { IS_PROD } from '@/lib/analytics';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://sajugpt-viral.vercel.app'),
-  title: '7월 귀신타로',
-  description: '이번 달, 당신을 찾아올 경고를 확인하세요.',
+  title: '광필연구소 | 재밌는 심리·운세 테스트 모음',
+  description: '매일 새로운 심리테스트와 사주·타로 콘텐츠를 만나보세요.',
   icons: { icon: '/favicon.svg' },
   formatDetection: { telephone: false, email: false, address: false, date: false },
   openGraph: {
-    title: '7월 귀신타로',
-    description: '이번 달, 당신을 찾아올 경고를 확인하세요.',
+    title: '광필연구소 | 재밌는 심리·운세 테스트 모음',
+    description: '매일 새로운 심리테스트와 사주·타로 콘텐츠를 만나보세요.',
     type: 'website',
     siteName: '사주GPT',
+    images: [{ url: '/og-image.png', width: 1200, height: 600 }],
   },
 };
 

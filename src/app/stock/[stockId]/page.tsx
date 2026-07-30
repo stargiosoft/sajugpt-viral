@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import StockClient from '@/components/stock/StockClient';
 import ReferralTracker from '@/components/ReferralTracker';
 
@@ -11,11 +11,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { stockId } = await params;
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    );
-
     const { data } = await supabase
       .from('saju_stocks')
       .select('current_price, fair_value, investment_opinion, analyst_comment')

@@ -8,6 +8,7 @@ import GhostCommentSection from '@/components/ghost-tarot/GhostCommentSection';
 import type { CommentFeatureType } from '@/lib/ghost-tarot/comments';
 import { GHOST_BRUSH_FONT } from '@/lib/ghost-tarot/theme';
 import TarotShareRow from './TarotShareRow';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import type { TarotConfig } from '@/types/tarot';
 
 interface Props {
@@ -110,6 +111,7 @@ export default function TarotLanding({
         style={{ position: 'relative', zIndex: 2 }}
       >
         <TarotShareRow config={config} hideLabel />
+        <SajuGPTLinkButton featureType={config.featureType} color="rgb(166 166 166)" hoverColor="rgb(199 199 199)" />
       </motion.div>
 
       {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (

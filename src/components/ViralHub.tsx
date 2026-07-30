@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import MoaMoaHeader from './home/MoaMoaHeader';
+import AdBanner from './home/AdBanner';
 import HeroBanner from './home/HeroBanner';
 import RankingPanel from './home/RankingPanel';
 import TestGridSection from './home/TestGridSection';
@@ -53,12 +54,13 @@ export default function ViralHub() {
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#ffffff' }}>
       <div className="w-full max-w-[768px] md:max-w-[900px] lg:max-w-[1040px] h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+        <AdBanner />
         <div className="flex-1 overflow-auto w-full">
           <MoaMoaHeader />
 
           <div className="pt-1 px-3 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
             <HeroBanner />
-            <div className="flex flex-col mt-3 lg:mt-0" style={{ gap: '12px' }}>
+            <div className="flex flex-col mt-3 lg:mt-0" style={{ gap: '11px' }}>
               <RankingPanel items={catalog.filter((item) => item.visibleOnHome)} onSelect={handleSelectItem} selectedId={selectedId} />
               <motion.a
                 href={SAJUGPT_URL}

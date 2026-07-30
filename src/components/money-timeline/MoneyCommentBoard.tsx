@@ -85,7 +85,7 @@ export default function MoneyCommentBoard() {
 
   return (
     <div style={{ backgroundColor: C.panelBg, borderRadius: '18px', boxShadow: '0 8px 24px rgba(124, 92, 252, 0.16)', padding: '20px' }}>
-      <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, marginBottom: '10px', paddingLeft: '2px' }}>
+      <p style={{ fontSize: '18px', fontWeight: 700, color: '#000000', marginBottom: '10px', paddingLeft: '2px' }}>
         다녀간 사람들의 한마디
       </p>
 

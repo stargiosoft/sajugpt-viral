@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 
 interface PolicyLayoutProps {
   title: string;
@@ -27,7 +28,12 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
 
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#F4F4F5' }}>
-      <div className="w-full max-w-[680px] h-full flex flex-col">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: 'easeOut' }}
+        className="w-full max-w-[680px] h-full flex flex-col"
+      >
         <div className="flex-1 overflow-auto w-full">
           <div className="sticky top-0 z-20 flex items-center px-3 py-2 md:px-8" style={{ backgroundColor: '#F4F4F5' }}>
             <button
@@ -100,7 +106,7 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
             <div style={{ height: '60px' }} />
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -132,15 +138,14 @@ export function PolicyArticle({ no, title, paragraphs }: PolicyArticleProps) {
 
 interface InfoSectionProps {
   title: string;
-  paragraphs: string[];
+  paragraphs: ReactNode[];
 }
 
 // 소개 페이지 등 조항 번호 없이 제목+본문만 필요한 섹션 렌더링
 export function InfoSection({ title, paragraphs }: InfoSectionProps) {
   return (
     <section>
-      <h2 className="flex items-center" style={{ gap: '8px', fontSize: '16.5px', fontWeight: 700, color: '#0d0d0d', letterSpacing: '-0.3px', marginBottom: '11px' }}>
-        <span aria-hidden style={{ width: '6px', height: '6px', borderRadius: '999px', backgroundColor: '#fc3e4d', flexShrink: 0 }} />
+      <h2 style={{ fontSize: '16.5px', fontWeight: 700, color: '#0d0d0d', letterSpacing: '-0.3px', marginBottom: '11px' }}>
         {title}
       </h2>
       <div className="flex flex-col" style={{ gap: '10px' }}>

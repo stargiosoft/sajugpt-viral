@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { SAJUGPT_URL } from '@/constants/links';
 
@@ -14,85 +14,78 @@ interface Slide {
   external?: boolean;
 }
 
-// 비쥬얼 배너 3장 — 전부 이미지 자체에 타이틀/카피가 있어 앱이 덧씌우는 하단 텍스트는 비움
+// 비쥬얼 배너 5장 — 전부 이미지 자체에 타이틀/카피가 있어 앱이 덧씌우는 하단 텍스트는 비움
 const SLIDES: Slide[] = [
   {
-    id: 'ghost-tarot',
+    id: 'sajugpt-baekbal-witch',
     title: '',
     category: '',
-    image: '/home/hero-slides/slide5.jpg',
-    href: '/ghost-tarot',
-  },
-  {
-    id: 'sajugpt-male',
-    title: '',
-    category: '',
-    image: '/home/hero-slides/slide6.jpg',
+    image: '/home/hero-slides/baekbal-witch.jpg',
     href: SAJUGPT_URL,
     external: true,
   },
   {
-    id: 'sajugpt-female',
+    id: 'sajugpt-kim-taeyang',
     title: '',
     category: '',
-    image: '/home/hero-slides/slide7.jpg',
+    image: '/home/hero-slides/kim-taeyang.jpg',
+    href: SAJUGPT_URL,
+    external: true,
+  },
+  {
+    id: 'sajugpt-luca',
+    title: '',
+    category: '',
+    image: '/home/hero-slides/luca.jpg',
+    href: SAJUGPT_URL,
+    external: true,
+  },
+  {
+    id: 'sajugpt-yujeong',
+    title: '',
+    category: '',
+    image: '/home/hero-slides/yujeong-tarot.jpg',
+    href: SAJUGPT_URL,
+    external: true,
+  },
+  {
+    id: 'sajugpt-love-chat',
+    title: '',
+    category: '',
+    image: '/home/hero-slides/love-chat.jpg',
     href: SAJUGPT_URL,
     external: true,
   },
 ];
 
 const AUTOPLAY_MS = 4500;
-const TAP_THRESHOLD_PX = 8;
-const SWIPE_THRESHOLD_PX = 50;
-
-interface DragState {
-  active: boolean;
-  pointerId: number | null;
-  startX: number;
-  startY: number;
-  lastX: number;
-  direction: 'none' | 'horizontal' | 'vertical';
-}
 
 // 양 끝에 클론 슬라이드를 붙여 무한 롤링처럼 이어지게 하는 트랙 인덱스.
 // trackIndex 0 = 마지막 슬라이드의 클론, 1..N = 실제 슬라이드, N+1 = 첫 슬라이드의 클론.
 const EXTENDED_SLIDES: Slide[] = [SLIDES[SLIDES.length - 1], ...SLIDES, SLIDES[0]];
 
-// 스와이프/드래그로 넘길 수 있는 히어로 캐러셀 — 탭은 이동, 드래그는 슬라이드로 분리 처리
+// 자동재생 히어로 배너 — 스와이프 없이 탭으로만 이동 (드래그 트랙 동기화 버그로 제거)
 export default function HeroBanner() {
   const router = useRouter();
   const [trackIndex, setTrackIndex] = useState(1);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
   const [paused, setPaused] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const trackIndexRef = useRef(trackIndex);
-  const rafIdRef = useRef<number | null>(null);
-  const latestDxRef = useRef(0);
-  const dragRef = useRef<DragState>({
-    active: false,
-    pointerId: null,
-    startX: 0,
-    startY: 0,
-    lastX: 0,
-    direction: 'none',
-  });
+  const [hoverTooltip, setHoverTooltip] = useState(false);
+  const [overIndicator, setOverIndicator] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const isAnimatingRef = useRef(false);
 
   const index = (trackIndex - 1 + SLIDES.length) % SLIDES.length;
 
   useEffect(() => {
-    trackIndexRef.current = trackIndex;
-  }, [trackIndex]);
-
-  useEffect(() => {
-    if (paused || isDragging) return;
+    if (paused) return;
     const timer = setInterval(() => {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
       setTrackIndex((i) => i + 1);
     }, AUTOPLAY_MS);
     return () => clearInterval(timer);
-  }, [paused, isDragging]);
+  }, [paused]);
 
   // 클론 위치에 도달한 뒤 전환 없이 실제 슬라이드 위치로 순간 이동시켜 끊김 없이 이어지게 한다.
   useEffect(() => {
@@ -103,6 +96,7 @@ export default function HeroBanner() {
   }, [transitionEnabled]);
 
   const handleTrackTransitionEnd = useCallback(() => {
+    isAnimatingRef.current = false;
     if (trackIndex === 0) {
       setTransitionEnabled(false);
       setTrackIndex(SLIDES.length);
@@ -122,109 +116,76 @@ export default function HeroBanner() {
     }
   }, [router]);
 
-  const handlePointerDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    dragRef.current = {
-      active: true,
-      pointerId: e.pointerId,
-      startX: e.clientX,
-      startY: e.clientY,
-      lastX: e.clientX,
-      direction: 'none',
-    };
-    setIsDragging(true);
+  // 배너 진입 시 한 번만 getBoundingClientRect()로 좌표 기준을 캐싱 — 매 mousemove마다
+  // 레이아웃을 다시 읽지 않도록 (호버 중엔 배너 위치/크기가 바뀌지 않으므로 안전)
+  const tooltipRectRef = useRef<DOMRect | null>(null);
+
+  const handleMouseEnter = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
+    tooltipRectRef.current = e.currentTarget.getBoundingClientRect();
     setPaused(true);
+    setHoverTooltip(true);
   }, []);
 
-  const handlePointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag.active) return;
-
-    const dx = e.clientX - drag.startX;
-    const dy = e.clientY - drag.startY;
-
-    if (drag.direction === 'none' && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
-      drag.direction = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
-    }
-
-    if (drag.direction === 'vertical') return;
-
-    e.preventDefault();
-    drag.lastX = e.clientX;
-    latestDxRef.current = dx;
-
-    if (rafIdRef.current == null) {
-      rafIdRef.current = requestAnimationFrame(() => {
-        rafIdRef.current = null;
-        if (!trackRef.current) return;
-        const baseStep = 100 / EXTENDED_SLIDES.length;
-        trackRef.current.style.transform = `translate3d(calc(${-trackIndexRef.current * baseStep}% + ${latestDxRef.current}px), 0, 0)`;
-      });
-    }
+  const handleMouseMove = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
+    const rect = tooltipRectRef.current;
+    if (!rect) return;
+    setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   }, []);
-
-  const endDrag = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag.active) return;
-
-    const dx = drag.lastX - drag.startX;
-    const wasVertical = drag.direction === 'vertical';
-    drag.active = false;
-
-    if (drag.pointerId !== null && containerRef.current?.hasPointerCapture?.(drag.pointerId)) {
-      containerRef.current.releasePointerCapture(drag.pointerId);
-    }
-
-    if (rafIdRef.current != null) {
-      cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
-
-    setIsDragging(false);
-    setDragOffset(0);
-
-    if (!wasVertical) {
-      if (Math.abs(dx) < TAP_THRESHOLD_PX) {
-        navigateTo(slide);
-      } else if (Math.abs(dx) > SWIPE_THRESHOLD_PX) {
-        const dir = dx < 0 ? 1 : -1;
-        setTrackIndex((i) => i + dir);
-      }
-      // 문턱값 사이의 애매한 드래그는 스냅백만 하고 아무 동작도 하지 않는다.
-    }
-
-    if (e.pointerType === 'touch') {
-      setPaused(false);
-    }
-  }, [navigateTo, slide]);
 
   return (
     <div
-      ref={containerRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => { if (!dragRef.current.active) setPaused(false); }}
+      onClick={() => navigateTo(slide)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => { setPaused(false); setHoverTooltip(false); setOverIndicator(false); }}
+      onMouseMove={handleMouseMove}
       className="relative w-full shrink-0 overflow-hidden transform-gpu"
       style={{
         borderRadius: '20px',
         aspectRatio: '16 / 9',
         maxHeight: '410px',
-        cursor: isDragging ? 'grabbing' : 'pointer',
-        touchAction: 'pan-y',
-        userSelect: 'none',
+        cursor: 'pointer',
       }}
     >
+      {hoverTooltip && !overIndicator && (
+        <span
+          aria-hidden
+          style={{
+            position: 'absolute',
+            left: `${tooltipPos.x + 14}px`,
+            top: `${tooltipPos.y + 14}px`,
+            zIndex: 50,
+            pointerEvents: 'none',
+            backgroundColor: '#FFFFFF',
+            color: '#000000',
+            fontSize: '10px',
+            fontWeight: 600,
+            borderRadius: '6px',
+            paddingTop: '2px',
+            paddingLeft: '6px',
+            paddingBottom: '1px',
+            paddingRight: '4px',
+            border: '1px solid #E5E5E5',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+            whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+          }}
+        >
+          사주GPT 이동
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      )}
+
       <div
-        ref={trackRef}
         onTransitionEnd={handleTrackTransitionEnd}
         className="absolute inset-0 flex h-full"
         style={{
           width: `${EXTENDED_SLIDES.length * 100}%`,
-          transform: `translate3d(calc(${-trackIndex * (100 / EXTENDED_SLIDES.length)}% + ${dragOffset}px), 0, 0)`,
-          transition: isDragging || !transitionEnabled ? 'none' : 'transform 600ms cubic-bezier(0.65, 0, 0.35, 1)',
+          transform: `translate3d(${-trackIndex * (100 / EXTENDED_SLIDES.length)}%, 0, 0)`,
+          transition: !transitionEnabled ? 'none' : 'transform 600ms cubic-bezier(0.65, 0, 0.35, 1)',
         }}
       >
         {EXTENDED_SLIDES.map((s, i) => (
@@ -236,92 +197,122 @@ export default function HeroBanner() {
               onDragStart={(e) => e.preventDefault()}
               className="w-full h-full"
               style={{ objectFit: 'cover' }}
+              loading="eager"
+              decoding="async"
+              fetchPriority={i <= 2 ? 'high' : 'auto'}
             />
           </div>
         ))}
       </div>
 
-      {/* 하단 텍스트 가독성용 그라디언트 — 이미지 자체에 타이틀이 이미 있는 슬라이드(title 없음)는
-          불필요하게 원본을 어둡게 덮으므로 건너뜀 */}
-      {slide.title && (
-        <>
-          <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.2) 42%, rgba(0,0,0,0) 65%)' }}
+      {/* 하단 오버레이 — 그라디언트/타이틀/로고/인디케이터를 absolute 레이어 하나로 묶고,
+          내부 배치는 전부 flex(justify-between/gap)로 처리 — 각 요소를 개별 left/right/bottom
+          px로 흩어놓지 않아 폰트 렌더링 차이에 흔들리지 않는다. */}
+      <div className="absolute inset-0 flex flex-col justify-end" style={{ padding: '16px 14px 14px 18px' }}>
+        {slide.title && (
+          <>
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.2) 42%, rgba(0,0,0,0) 65%)' }}
+            />
+            <div style={{ marginBottom: '14px' }}>
+              <p
+                className="hero-banner-title"
+                style={{
+                  fontSize: 'var(--hero-title-size)',
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  letterSpacing: '-0.4px',
+                  lineHeight: '1.3',
+                  marginBottom: '7px',
+                }}
+              >
+                {slide.title}
+              </p>
+              <span style={{ fontSize: '13px', fontWeight: 600, lineHeight: 1, color: 'rgba(255,255,255,0.8)' }}>{slide.category}</span>
+            </div>
+          </>
+        )}
+
+        <div className="flex items-center justify-between">
+          <span
+            role="img"
+            aria-label="사주GPT"
+            className="hero-banner-logo"
+            style={{
+              display: 'inline-block',
+              height: 'var(--hero-logo-height)',
+              width: 'var(--hero-logo-width)',
+              backgroundColor: '#ffffff',
+              WebkitMaskImage: 'url(/sajugpt-logo.svg)',
+              maskImage: 'url(/sajugpt-logo.svg)',
+              WebkitMaskSize: 'contain',
+              maskSize: 'contain',
+              WebkitMaskRepeat: 'no-repeat',
+              maskRepeat: 'no-repeat',
+              WebkitMaskPosition: 'left center',
+              maskPosition: 'left center',
+            }}
           />
 
-          <div className="absolute" style={{ left: '22px', right: '80px', bottom: '20px' }}>
-            <p
-              className="hero-banner-title"
+          <span
+            onClick={(e) => e.stopPropagation()}
+            onMouseEnter={(e) => { e.stopPropagation(); setOverIndicator(true); }}
+            onMouseLeave={(e) => { e.stopPropagation(); setOverIndicator(false); }}
+            onMouseMove={(e) => e.stopPropagation()}
+            className="flex items-center shrink-0"
+            style={{
+              backgroundColor: 'rgba(30,30,30,0.55)',
+              borderRadius: '999px',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              paddingLeft: '2px',
+              paddingRight: '3px',
+            }}
+          >
+            <span
+              className="flex items-center justify-center shrink-0"
+              style={{ width: '26px', height: '28px', paddingLeft: '2px', boxSizing: 'content-box' }}
+            >
+              {paused ? (
+                <span
+                  aria-hidden
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderTop: '5px solid transparent',
+                    borderBottom: '5px solid transparent',
+                    borderLeft: '8px solid #ffffff',
+                    borderRadius: '2px',
+                    marginLeft: '1px',
+                  }}
+                />
+              ) : (
+                <span className="flex items-center" style={{ gap: '3px' }}>
+                  <span aria-hidden style={{ width: '3px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
+                  <span aria-hidden style={{ width: '3px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
+                </span>
+              )}
+            </span>
+            <span style={{ width: '1.5px', height: '8px', backgroundColor: 'rgba(255,255,255,0.18)', marginLeft: '2px', marginRight: '4px' }} />
+            <span
+              className="flex items-center justify-center shrink-0"
               style={{
-                fontSize: 'var(--hero-title-size)',
-                fontWeight: 800,
+                width: '38px',
+                padding: '7px 4px 7px 2px',
+                boxSizing: 'content-box',
+                fontSize: '12px',
+                fontWeight: 700,
+                lineHeight: 1,
                 color: '#ffffff',
-                letterSpacing: '-0.4px',
-                lineHeight: '1.3',
-                marginBottom: '7px',
+                fontVariantNumeric: 'tabular-nums',
               }}
             >
-              {slide.title}
-            </p>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{slide.category}</span>
-          </div>
-        </>
-      )}
-
-      <span
-        className="absolute inline-flex items-center"
-        style={{
-          right: '14px',
-          bottom: '16px',
-          backgroundColor: 'rgba(30,30,30,0.55)',
-          borderRadius: '999px',
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          paddingLeft: '2px',
-          paddingRight: '3px',
-        }}
-      >
-        <span
-          className="flex items-center justify-center shrink-0"
-          style={{ width: '26px', height: '28px', paddingLeft: '2px', boxSizing: 'content-box' }}
-        >
-          {paused ? (
-            <span
-              aria-hidden
-              style={{
-                width: 0,
-                height: 0,
-                borderTop: '5px solid transparent',
-                borderBottom: '5px solid transparent',
-                borderLeft: '8px solid #ffffff',
-                borderRadius: '2px',
-                marginLeft: '1px',
-              }}
-            />
-          ) : (
-            <span className="flex items-center" style={{ gap: '3px' }}>
-              <span aria-hidden style={{ width: '3px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
-              <span aria-hidden style={{ width: '3px', height: '10px', borderRadius: '1px', backgroundColor: '#ffffff' }} />
+              {index + 1} / {SLIDES.length}
             </span>
-          )}
-        </span>
-        <span style={{ width: '1.5px', height: '8px', backgroundColor: 'rgba(255,255,255,0.18)', marginLeft: '2px', marginRight: '4px' }} />
-        <span
-          className="flex items-center justify-center shrink-0"
-          style={{
-            width: '38px',
-            padding: '7px 4px 7px 2px',
-            boxSizing: 'content-box',
-            fontSize: '12px',
-            fontWeight: 700,
-            color: '#ffffff',
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {index + 1} / {SLIDES.length}
-        </span>
-      </span>
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

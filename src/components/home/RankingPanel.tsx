@@ -91,7 +91,7 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
                 {i + 1}
               </span>
             </span>
-            <span className="flex-1 min-w-0" style={{ position: 'relative', top: '1.5px' }}>
+            <span className="flex-1 min-w-0">
               <span className="block truncate pb-[2px] lg:pb-0" style={{ fontSize: 'var(--rp-title-size)', fontWeight: 600, color: '#0d0d0d', letterSpacing: '-0.2px', marginBottom: '3px' }}>
                 {item.title}
               </span>

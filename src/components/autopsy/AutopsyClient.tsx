@@ -18,7 +18,9 @@ import AnalyzingAutopsy from '@/components/autopsy/AnalyzingAutopsy';
 import AutopsyCard from '@/components/autopsy/AutopsyCard';
 import DeathCertificate from '@/components/autopsy/DeathCertificate';
 import AutopsyShareButtons from '@/components/autopsy/AutopsyShareButtons';
+import AutopsyLandingShareRow from '@/components/autopsy/AutopsyLandingShareRow';
 import MorgueView from '@/components/autopsy/MorgueView';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import { callEdgeFunction } from '@/lib/fetchWithRetry';
 import { supabase } from '@/lib/supabase';
 import { parseUTM, trackEvent } from '@/lib/analytics';
@@ -454,6 +456,25 @@ export default function AutopsyClient({ autopsyId }: Props) {
                     </p>
                   </div>
                 ))}
+              </motion.div>
+
+              {/* 공유하기 */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                style={{ marginTop: '32px' }}
+              >
+                <AutopsyLandingShareRow
+                  shareContent={{
+                    featureType: 'saju_autopsy',
+                    title: '전남친 사주 부검실',
+                    description: '사주로 증명해 줄게. 생년월일만 넣어봐.',
+                    shareUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/autopsy`,
+                    imageUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/home/thumbnails/autopsy.jpg`,
+                  }}
+                />
+                <SajuGPTLinkButton featureType="saju_autopsy" color="#b7b7b7" hoverColor="#7A38D8" />
               </motion.div>
 
               {/* 안내 문구 */}

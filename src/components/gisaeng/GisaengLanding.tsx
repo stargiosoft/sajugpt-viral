@@ -3,6 +3,8 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
+import GisaengLandingShareRow from './GisaengLandingShareRow';
 
 interface Props {
   onStart: () => void;
@@ -423,6 +425,27 @@ export default function GisaengLanding({ onStart }: Props) {
             </div>
           </motion.div>
         ))}
+      </motion.div>
+
+      {/* ── 공유하기 ── */}
+      <motion.div
+        className="relative z-10 w-full"
+        style={{ padding: '36px 12px 0' }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <GisaengLandingShareRow
+          shareContent={{
+            featureType: 'gisaeng',
+            title: '조선시대 기생이었다면 넌 밤새 얼마를 벌었을까',
+            description: '사주로 기생 능력치를 뽑고 선비 3명을 동시에 관리해보세요',
+            shareUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/gisaeng`,
+            imageUrl: `${typeof window !== 'undefined' ? window.location.origin : ''}/home/thumbnails/gisaeng.jpg`,
+          }}
+        />
+        <SajuGPTLinkButton featureType="gisaeng" color={C.inkFaint} hoverColor={C.vermillion} />
       </motion.div>
 
       {/* ── 면책 ── */}

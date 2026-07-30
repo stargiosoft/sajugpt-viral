@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import NightManualClient from '@/components/night-manual/NightManualClient';
 import ReferralTracker from '@/components/ReferralTracker';
 
@@ -26,11 +26,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { nightManualId } = await params;
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-
     const { data } = await supabase
       .from('night_manuals')
       .select('constitution_type, total_charm, selected_servant, stats')

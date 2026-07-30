@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import SajuCourtClient from '@/components/court/SajuCourtClient';
 import ReferralTracker from '@/components/ReferralTracker';
 
@@ -11,11 +11,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { courtId } = await params;
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    );
-
     const { data } = await supabase
       .from('saju_courts')
       .select('crime_label, final_sentence, charm_score, percentile')

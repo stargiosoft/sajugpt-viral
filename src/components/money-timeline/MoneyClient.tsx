@@ -153,7 +153,7 @@ export default function MoneyClient({ resultId }: Props) {
     <div className="h-dvh flex justify-center" style={{ backgroundColor: C.pageBg, fontFamily: "'Tmoney RoundWind', sans-serif" }}>
       <div className="w-full h-full flex flex-col max-w-[440px] md:max-w-[600px]">
         <div className="flex-1 overflow-auto w-full">
-          <TestTopNav bgColor={C.pageBg} logoColor={C.text} />
+          <TestTopNav bgColor={C.pageBg} logoColor="#000000" xColor="#000000" />
           <AnimatePresence mode="wait">
             {step === 'landing' && <MoneyLanding key="landing" onStart={() => setStep('input')} />}
 

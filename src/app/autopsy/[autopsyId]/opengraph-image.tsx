@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 export const runtime = 'edge';
 export const alt = '사주 부검실 — 연애 사망진단서';
@@ -24,11 +24,6 @@ export default async function Image({ params }: { params: Promise<{ autopsyId: s
   let verdict = '';
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    );
-
     const { data } = await supabase
       .from('saju_autopsies')
       .select('cause_of_death_label, discernment_grade, regret_probability, coroner_id, card3_verdict')

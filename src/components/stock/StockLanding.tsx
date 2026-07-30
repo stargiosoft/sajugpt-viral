@@ -6,6 +6,7 @@ import { CREW_MEMBERS, CREW_ORDER } from '@/constants/stock';
 import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 
 interface Props {
   onStart: () => void;
@@ -446,6 +447,7 @@ export default function StockLanding({ onStart }: Props) {
               링크가 복사됐어요!
             </p>
           )}
+          <SajuGPTLinkButton featureType="saju_stock" color={COLOR_TEXT_SECONDARY} hoverColor={COLOR_BRAND} />
         </motion.div>
       </div>
 

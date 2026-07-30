@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import TestTopNav from '@/components/TestTopNav';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import ShareIconRow from './ShareIconRow';
 import CommentBoard from './CommentBoard';
 
@@ -21,7 +22,7 @@ export default function Landing({ onStart }: Props) {
       exit={{ opacity: 0 }}
       style={{ minHeight: '100dvh', background: 'linear-gradient(180deg,#F5F8FD 0%,#E7EFFC 100%)' }}
     >
-      <TestTopNav bgColor="rgb(245, 248, 253)" logoColor="#1C2333" />
+      <TestTopNav bgColor="rgb(245, 248, 253)" logoColor="#1C2333" xColor="#0d0d0d" />
 
       <div style={{ position: 'relative', width: '100%', aspectRatio: '1448 / 1086' }}>
         <Image src="/love-chat/thumbnail-v2.png" alt="카톡 습관만 봐도 연애 스타일이 보인다" fill style={{ objectFit: 'cover' }} priority />
@@ -51,6 +52,7 @@ export default function Landing({ onStart }: Props) {
               imageUrl: `${origin}/love-chat/thumbnail-v2.png`,
             }}
           />
+          <SajuGPTLinkButton featureType="love_chat" color="#8A93A6" hoverColor="#3D6FE0" />
         </div>
 
         <CommentBoard />

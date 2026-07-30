@@ -2,7 +2,52 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+const SUPPORT_EMAIL = 'support@stargio.co.kr';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function isValidEmail(value: string) {
+  return EMAIL_PATTERN.test(value.trim());
+}
+
+// 이메일 입력 상태 + blur 후에만 뜨는 형식 오류 메시지를 한 곳에서 관리 — 문의 폼마다 반복 구현하지 않도록
+export function useEmailField() {
+  const [value, setValue] = useState('');
+  const [touched, setTouched] = useState(false);
+  const valid = isValidEmail(value);
+  const error = touched && value.trim().length > 0 && !valid ? '이메일 주소 형식이 올바르지 않아요.' : undefined;
+
+  return { value, onChange: setValue, onBlur: () => setTouched(true), error, isValid: valid };
+}
+
 const labelStyle = { fontSize: '14px', fontWeight: 600, color: '#0d0d0d', letterSpacing: '-0.2px' } as const;
+
+export function sendInquiryMail(subject: string, bodyLines: string[]) {
+  const body = bodyLines.join('\n');
+  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+export function InquirySubmitButton({ canSubmit, onClick }: { canSubmit: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={!canSubmit}
+      className="w-full transform-gpu transition-opacity active:opacity-80 disabled:cursor-not-allowed"
+      style={{
+        height: '54px',
+        borderRadius: '16px',
+        backgroundColor: canSubmit ? '#fc3e4d' : '#F2F2F2',
+        color: canSubmit ? '#ffffff' : '#c7c7c7',
+        fontSize: '15px',
+        fontWeight: 600,
+        letterSpacing: '-0.2px',
+        marginTop: '8px',
+      }}
+    >
+      보내기
+    </button>
+  );
+}
 
 function fieldBorder(focused: boolean) {
   return focused ? '1px solid #fc3e4d' : '1px solid #e7e7e7';
@@ -14,9 +59,11 @@ interface InquiryInputProps {
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
+  error?: string;
+  onBlur?: () => void;
 }
 
-export function InquiryInput({ label, value, onChange, placeholder, type = 'text' }: InquiryInputProps) {
+export function InquiryInput({ label, value, onChange, placeholder, type = 'text', error, onBlur }: InquiryInputProps) {
   const [focused, setFocused] = useState(false);
   const isEmail = type === 'email';
 
@@ -28,7 +75,7 @@ export function InquiryInput({ label, value, onChange, placeholder, type = 'text
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onBlur={() => { setFocused(false); onBlur?.(); }}
         placeholder={placeholder}
         inputMode={isEmail ? 'email' : undefined}
         autoComplete={isEmail ? 'email' : undefined}
@@ -40,13 +87,18 @@ export function InquiryInput({ label, value, onChange, placeholder, type = 'text
           fontSize: '14.5px',
           color: '#151515',
           letterSpacing: '-0.2px',
-          border: fieldBorder(focused),
+          border: error ? '1px solid #fc3e4d' : fieldBorder(focused),
           borderRadius: '14px',
           padding: '14px 16px',
           backgroundColor: '#fff',
           transition: 'border-color 0.15s',
         }}
       />
+      {error && (
+        <span style={{ fontSize: '12.5px', fontWeight: 500, color: '#fc3e4d', letterSpacing: '-0.1px', paddingLeft: '2px' }}>
+          {error}
+        </span>
+      )}
     </div>
   );
 }

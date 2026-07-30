@@ -151,6 +151,19 @@ input[type='number'] {
   }
 }
 
+/* HeroBanner 좌측 하단 사주GPT 로고 — 모바일에서만 축소, 데스크톱은 기존 크기 유지 */
+.hero-banner-logo {
+  --hero-logo-height: 17px;
+  --hero-logo-width: 56px;
+}
+
+@media (min-width: 1024px) {
+  .hero-banner-logo {
+    --hero-logo-height: 21px;
+    --hero-logo-width: 69px;
+  }
+}
+
 /* 귀신타로 이어보기 CTA: 사선 빛줄기가 좌→우로 흐르는 하이라이트 */
 @keyframes ghost-cta-sheen {
   0% { left: -55%; }

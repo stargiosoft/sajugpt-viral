@@ -3,8 +3,10 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import PressableButton from '@/components/PressableButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import DeangShareRow from './DeangShareRow';
 import DeangCommentSection from './DeangCommentSection';
+import { DEANG_COLORS as C } from '@/constants/deangTheme';
 
 interface Props {
   onStart: () => void;
@@ -44,6 +46,11 @@ export default function DeangLanding({ onStart }: Props) {
 
         <div style={{ marginTop: '12px' }}>
           <DeangShareRow />
+          {/* DeangShareRow의 DeangOutlineBox가 아이콘 아래 12px 패딩을 이미 갖고 있어(결과 화면과 공유),
+              다른 테스트와 동일한 24px 간격을 맞추려면 그만큼 끌어올려야 한다 */}
+          <div style={{ marginTop: '-12px' }}>
+            <SajuGPTLinkButton featureType="deang_saju" color="#A8A8A8" hoverColor={C.ink} />
+          </div>
         </div>
 
         <div className="w-full" style={{ marginTop: '40px' }}>

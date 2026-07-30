@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 
 interface Props {
   onStart: () => void;
@@ -356,6 +357,7 @@ export default function NightLanding({ onStart }: Props) {
             링크가 복사됐어요!
           </p>
         )}
+        <SajuGPTLinkButton featureType="night_manual" color="rgba(234,242,255,0.4)" hoverColor="#4A9EE0" />
       </motion.div>
 
       {/* ── Disclaimer ── */}

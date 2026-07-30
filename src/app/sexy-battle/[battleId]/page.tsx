@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import SexyBattleClient from '@/components/SexyBattleClient';
 import ReferralTracker from '@/components/ReferralTracker';
 import type { ChallengerPreview, Grade } from '@/types/battle';
@@ -13,11 +13,6 @@ async function fetchChallengerData(battleId: string): Promise<{
   isCompleted: boolean;
 }> {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-
     const { data } = await supabase
       .from('sexy_battles')
       .select('challenger_headcount, challenger_grade, challenger_result, status')

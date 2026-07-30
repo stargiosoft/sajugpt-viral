@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import DeangClient from '@/components/deang-saju/DeangClient';
 import ReferralTracker from '@/components/ReferralTracker';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface Props {
   params: Promise<{ resultId: string }>;
@@ -11,10 +11,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { resultId } = await params;
 
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
     const { data } = await supabase
       .from('deang_saju_results')
       .select('profile')

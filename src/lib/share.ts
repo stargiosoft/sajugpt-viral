@@ -54,17 +54,19 @@ export function shareKakao(params: {
   return true;
 }
 
-// 캡처 대상 안의 <img>들이 실제로 로드 완료됐는지 콘솔에 남김 — 모바일 캡처 실패 원인 추적용
+// 캡처 대상 안의 <img>들이 실제로 로드 완료됐는지 콘솔에 남김 — 모바일 캡처 실패 원인 추적용 (개발 환경에서만)
 function logImageStates(element: HTMLElement, label: string) {
   const images = Array.from(element.querySelectorAll('img'));
-  images.forEach((img) => {
-    console.log(`[captureCardImage:${label}]`, {
-      src: img.currentSrc || img.src,
-      complete: img.complete,
-      naturalWidth: img.naturalWidth,
-      naturalHeight: img.naturalHeight,
+  if (process.env.NODE_ENV === 'development') {
+    images.forEach((img) => {
+      console.log(`[captureCardImage:${label}]`, {
+        src: img.currentSrc || img.src,
+        complete: img.complete,
+        naturalWidth: img.naturalWidth,
+        naturalHeight: img.naturalHeight,
+      });
     });
-  });
+  }
   return images;
 }
 
@@ -107,12 +109,14 @@ export async function captureCardImage(element: HTMLElement): Promise<Blob> {
   element.style.marginRight = '0px';
 
   const images = logImageStates(element, 'before');
-  console.log('[captureCardImage:size]', {
-    width: rect.width,
-    height: rect.height,
-    scale: 2,
-    devicePixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : null,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[captureCardImage:size]', {
+      width: rect.width,
+      height: rect.height,
+      scale: 2,
+      devicePixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : null,
+    });
+  }
 
   try {
     const blob = await domToBlob(element, {
@@ -123,7 +127,9 @@ export async function captureCardImage(element: HTMLElement): Promise<Blob> {
       height: rect.height,
       fetch: { bypassingCache: true },
     });
-    console.log('[captureCardImage] domToBlob resolved', { size: blob.size });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[captureCardImage] domToBlob resolved', { size: blob.size });
+    }
     return blob;
   } catch (err) {
     console.error('[captureCardImage] domToBlob failed', err);

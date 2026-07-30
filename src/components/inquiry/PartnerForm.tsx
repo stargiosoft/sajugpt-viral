@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { InquiryInput, InquiryTextarea } from './InquiryField';
-
-const SUPPORT_EMAIL = 'support@stargio.co.kr';
+import { InquiryInput, InquiryTextarea, InquirySubmitButton, sendInquiryMail, useEmailField } from './InquiryField';
 
 const GUIDE_PLACEHOLDER = `아래 내용을 포함해주시면 더 빠르게 확인할 수 있어요 :)
 
@@ -14,21 +12,27 @@ const GUIDE_PLACEHOLDER = `아래 내용을 포함해주시면 더 빠르게 확
 - 연락 가능한 연락처:`;
 
 export default function PartnerForm() {
-  const [email, setEmail] = useState('');
+  const email = useEmailField();
   const [message, setMessage] = useState('');
 
-  const canSubmit = email.trim().length > 0 && message.trim().length > 0;
+  const canSubmit = email.isValid && message.trim().length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    const subject = '[광필연구소] 제휴 문의';
-    const body = [`회신 이메일: ${email}`, '', message].join('\n');
-    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    sendInquiryMail('[광필연구소] 제휴 문의', [`회신 이메일: ${email.value}`, '', message]);
   };
 
   return (
     <div className="flex flex-col" style={{ gap: '24px' }}>
-      <InquiryInput label="이메일" value={email} onChange={setEmail} placeholder="회신받을 이메일을 적어주세요." type="email" />
+      <InquiryInput
+        label="이메일"
+        value={email.value}
+        onChange={email.onChange}
+        onBlur={email.onBlur}
+        placeholder="회신받을 이메일을 적어주세요."
+        type="email"
+        error={email.error}
+      />
       <InquiryTextarea
         label="제휴 및 광고 문의"
         value={message}
@@ -36,24 +40,7 @@ export default function PartnerForm() {
         placeholder={GUIDE_PLACEHOLDER}
         rows={9}
       />
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={!canSubmit}
-        className="w-full transform-gpu transition-opacity active:opacity-80 disabled:cursor-not-allowed"
-        style={{
-          height: '54px',
-          borderRadius: '16px',
-          backgroundColor: canSubmit ? '#fc3e4d' : '#F2F2F2',
-          color: canSubmit ? '#ffffff' : '#c7c7c7',
-          fontSize: '15px',
-          fontWeight: 600,
-          letterSpacing: '-0.2px',
-          marginTop: '8px',
-        }}
-      >
-        보내기
-      </button>
+      <InquirySubmitButton canSubmit={canSubmit} onClick={handleSubmit} />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import type { FeatureType } from '@/lib/analytics';
 
 export interface TarotCardData {
@@ -86,5 +85,3 @@ export interface TarotConfig {
   /** DB row(어떤 컬럼명이든) → 공용 title/message/summary로 매핑 */
   toResultContent: (row: Record<string, unknown>) => TarotResultContent;
 }
-
-export interface TarotButtonBgStyle extends CSSProperties {}

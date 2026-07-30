@@ -28,6 +28,8 @@ export interface TestCatalogItem {
   /** 예: "1.1만" — 공유 수 표기. 실시간 인기 순위 등 개별 테스트 타이틀 아래 통계 뱃지에 사용 */
   shareLabel?: string;
   isNew: boolean;
+  /** New 뱃지 옆에 보라색 "사주GPT" 뱃지를 추가로 노출할지 여부 */
+  sajugptBadge?: boolean;
   /** 1~3위인 경우에만 부여 (인기 테스트 정렬 순서 결정) */
   popularityRank?: 1 | 2 | 3;
   /** 에디터 추천 섹션 노출 여부 — 실시간 인기 순위(참여자 수 기준)와 겹치지 않도록 카테고리 다양성 기준으로 선정 */

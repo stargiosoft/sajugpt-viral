@@ -24,7 +24,7 @@ export default function TestGridSection({ title, items, filter, isNew, paddingBo
   if (filtered.length === 0 && placeholderCount === 0) return null;
 
   return (
-    <div style={{ padding: `48px 0 ${paddingBottom}px` }}>
+    <div style={{ padding: `32px 0 ${paddingBottom}px` }}>
       <h2
         className="px-3 md:px-6 lg:px-8"
         style={{

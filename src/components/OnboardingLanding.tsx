@@ -6,6 +6,7 @@ import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import CountUpNumber from '@/components/CountUpNumber';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 
 interface Props {
   onStart: () => void;
@@ -239,6 +240,7 @@ export default function OnboardingLanding({ onStart }: Props) {
             링크가 복사됐어요!
           </p>
         )}
+        <SajuGPTLinkButton featureType="sexy_battle" color="rgba(255,255,255,0.4)" hoverColor="#FF5B4D" />
       </motion.div>
 
       {/* ── Disclaimer ── */}

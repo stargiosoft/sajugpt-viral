@@ -4,7 +4,9 @@ import { Fragment } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import MoaMoaWordmark from '@/components/MoaMoaWordmark';
+import SajuGptLogoButton from '@/components/SajuGptLogoButton';
 import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
+import { SAJUGPT_URL } from '@/constants/links';
 
 const MotionLink = motion.create(Link);
 
@@ -16,9 +18,24 @@ const TEXT_LINKS: { label: string; href?: string }[] = [
   { label: '광필연구소 소개', href: '/about' },
 ];
 
-const ACTION_LINKS: { label: string; href: string; variant: 'outline' | 'solid' }[] = [
-  { label: '의견보내기', href: '/feedback', variant: 'outline' },
-  { label: '제휴 문의', href: '/partner', variant: 'solid' },
+interface ActionLink {
+  label: string;
+  href: string;
+  variant: 'outline' | 'solid';
+  external?: boolean;
+  order: number;
+  mobileOrder: number;
+  fullWidthOnMobile?: boolean;
+}
+
+// Tailwind는 클래스명을 정적으로 스캔하므로 order 값을 문자열 보간으로 만들 수 없어 룩업 테이블로 고정
+const MOBILE_ORDER_CLASS: Record<number, string> = { 1: 'order-1', 2: 'order-2', 3: 'order-3' };
+const DESKTOP_ORDER_CLASS: Record<number, string> = { 1: 'sm:order-1', 2: 'sm:order-2', 3: 'sm:order-3' };
+
+const ACTION_LINKS: ActionLink[] = [
+  { label: '사주GPT', href: SAJUGPT_URL, variant: 'outline', external: true, order: 1, mobileOrder: 3, fullWidthOnMobile: true },
+  { label: '의견보내기', href: '/feedback', variant: 'outline', order: 2, mobileOrder: 1 },
+  { label: '제휴 문의', href: '/partner', variant: 'solid', order: 3, mobileOrder: 2 },
 ];
 
 const BUSINESS_INFO: { label: string; value: string; href?: string }[] = [
@@ -44,19 +61,22 @@ export default function Footer() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between" style={{ gap: '24px' }}>
           <div className="flex items-center" style={{ gap: '6px' }}>
-            <img src="/home/symbol.svg" alt="" style={{ width: '20px', height: '20px', position: 'relative', top: '2px' }} />
-            <MoaMoaWordmark top="3px" />
+            <img src="/home/symbol.svg" alt="" style={{ width: '20px', height: '20px', display: 'block' }} />
+            <MoaMoaWordmark />
+            <span style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1, color: '#0d0d0d' }}>x</span>
+            <SajuGptLogoButton height="20px" width="56px" color="#0d0d0d" />
           </div>
 
-          <div className="flex items-center" style={{ gap: '6px' }}>
+          <div className="flex items-center flex-wrap sm:flex-nowrap" style={{ gap: '6px' }}>
             {ACTION_LINKS.map((link) => (
               <MotionLink
                 key={link.label}
                 href={link.href}
+                {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 whileHover={link.variant === 'solid' ? { opacity: 0.9 } : { backgroundColor: '#EAEAEC' }}
                 whileTap={{ scale: 0.995, backgroundColor: link.variant === 'solid' ? MOAMOA_ORANGE_DARK : '#E4E4E8' }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
-                className="flex items-center justify-center flex-1 sm:flex-none sm:w-[84px] transform-gpu"
+                className={`flex items-center justify-center ${MOBILE_ORDER_CLASS[link.mobileOrder]} ${DESKTOP_ORDER_CLASS[link.order]} ${link.fullWidthOnMobile ? 'w-full' : 'w-[calc(50%-3px)]'} sm:w-[84px] sm:flex-none transform-gpu`}
                 style={{
                   fontSize: '12px',
                   fontWeight: 700,

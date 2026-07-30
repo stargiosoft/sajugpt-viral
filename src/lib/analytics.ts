@@ -100,7 +100,8 @@ export type FeatureType =
   | 'deang_saju'
   | 'love_chat'
   | 'mental_worldcup'
-  | 'money_timeline';
+  | 'money_timeline'
+  | 'oheng';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

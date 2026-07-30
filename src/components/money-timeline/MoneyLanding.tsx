@@ -3,7 +3,9 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import MoneyCommentBoard from './MoneyCommentBoard';
+import ShareIconRow from './ShareIconRow';
 import { MONEY_COLORS as C } from '@/constants/moneyTimelineTheme';
 
 interface Props {
@@ -11,6 +13,8 @@ interface Props {
 }
 
 export default function MoneyLanding({ onStart }: Props) {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -40,6 +44,20 @@ export default function MoneyLanding({ onStart }: Props) {
             hoverBackground={C.goldHover}
             textStyle={{ fontWeight: 500, fontSize: '16px', WebkitTextStroke: `0.6px ${C.textOnGold}` }}
           />
+        </div>
+
+        <div className="w-full" style={{ marginBottom: '28px' }}>
+          <ShareIconRow
+            shareContent={{
+              featureType: 'money_timeline',
+              testId: 'money-timeline',
+              title: '내 돈복 테스트',
+              description: '내 사주 속 돈의 흐름을 분석해 드려요.',
+              shareUrl: `${origin}/money-timeline`,
+              imageUrl: `${origin}/money-timeline/og-share.png`,
+            }}
+          />
+          <SajuGPTLinkButton featureType="money_timeline" color={C.textTertiary} hoverColor={C.gold} />
         </div>
 
         <div className="w-full">
