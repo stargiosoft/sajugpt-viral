@@ -136,7 +136,7 @@ export default function SajuGPTBanner({ featureType, resultId }: Props) {
               alt="사주GPT로 더 알아보기"
               draggable={false}
               fill
-              priority={i <= 2}
+              priority
               sizes="600px"
               style={{ objectFit: 'cover' }}
             />

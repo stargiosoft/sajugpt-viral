@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { TEST_CATALOG } from '@/constants/testCatalog';
 import { trackEvent } from '@/lib/analytics';
 
-// money-timeline(내 돈복 테스트)은 아직 API 연결 전이라 추천 목록에서 임시로 제외
+// money-timeline(내 돈복 테스트)은 API 수정 중이라 추천 목록에서 임시로 제외
 const ALL_IDS = ['ghost-tarot', 'romance-ghost-tarot', 'deang-saju', 'love-chat'];
 const GAP_PX = 6;
 // 모바일은 2.5개만 보여서 오른쪽 카드가 살짝 잘려 "더 있다"는 게 드러나고, 데스크탑은 기존대로 4개 꽉 차게
