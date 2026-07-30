@@ -120,6 +120,7 @@ Deno.serve(async (req: Request) => {
 
       // ─── Stargio API 파싱 및 디버그 로그 출력 ────────────────
       if (sajuData) {
+        console.log('🔍 [Stargio API Raw Data]:', JSON.stringify(sajuData, null, 2));
         let ilganChar: string | null = null;
         // 사주 배열 순서: [시주, 일주, 월주, 년주] -> index 1 이 일주 (예: "己丑")
         // 일간은 일주의 첫 글자 (예: "己丑" -> "己")

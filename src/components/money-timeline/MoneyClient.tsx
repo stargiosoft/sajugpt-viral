@@ -28,6 +28,7 @@ export default function MoneyClient({ resultId }: Props) {
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [unknownTime, setUnknownTime] = useState(false);
+  const [timeSelected, setTimeSelected] = useState(false);
   const [gender, setGender] = useState<Gender>('female');
 
   const [step, setStep] = useState<MoneyTimelineStep>('landing');
@@ -40,9 +41,17 @@ export default function MoneyClient({ resultId }: Props) {
     const cached = loadSelfSaju();
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
-      if (cached.birthTime) setBirthTime(cached.birthTime);
-      if (cached.unknownTime !== undefined) setUnknownTime(cached.unknownTime);
-      if (cached.gender) setGender(cached.gender);
+      if (cached.birthTime) {
+            setBirthTime(cached.birthTime);
+            setTimeSelected(true);
+          }
+          if (cached.unknownTime !== undefined) {
+            setUnknownTime(cached.unknownTime);
+            if (cached.unknownTime) {
+              setTimeSelected(true);
+            }
+          }
+        if (cached.gender) setGender(cached.gender);
     }
   }, []);
 
@@ -56,6 +65,7 @@ export default function MoneyClient({ resultId }: Props) {
       .then((data) => {
         if (isMounted && data) {
           setResult(data);
+          setTimeSelected(true);
           setStep('result');
         } else if (isMounted) {
           setStep('landing');
@@ -85,11 +95,12 @@ export default function MoneyClient({ resultId }: Props) {
     if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
     const date = new Date(year, month - 1, day);
     if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return false;
-    if (!birthTime && !unknownTime) return false;
+    if (!timeSelected) return false;
     return true;
   };
 
   const handleTimeSelect = useCallback((displayTime: string, isUnknown: boolean) => {
+    setTimeSelected(true);
     setUnknownTime(isUnknown);
     setBirthTime(displayTime);
   }, []);
@@ -121,8 +132,12 @@ export default function MoneyClient({ resultId }: Props) {
         minDelay,
       ]);
 
-      if (!generated || !generated.profile) {
-        throw new Error('올바른 결과를 받아오지 못했습니다.');
+      if (
+          !generated ||
+          !generated.profile ||
+          !generated.stargioRaw
+      ) {
+          throw new Error('올바른 결과를 받아오지 못했습니다.');
       }
 
       setResult(generated);
@@ -138,11 +153,13 @@ export default function MoneyClient({ resultId }: Props) {
   const handleReset = () => {
     setResult(null);
     setError(null);
+    setTimeSelected(false);
+    setBirthTime('');
+    setUnknownTime(false);
     setStep('landing');
   };
 
   // 플레이 카운트: 실제로 생년월일을 입력해 결과를 생성했을 때만 1회 기록
-  // (resultId로 진입한 공유 링크 조회는 다른 사람의 결과를 "보는" 것일 뿐이라 제외)
   useEffect(() => {
     if (resultId) return;
     if (step !== 'result' || !result) return;
@@ -151,7 +168,7 @@ export default function MoneyClient({ resultId }: Props) {
 
   return (
     <div className="h-dvh flex justify-center" style={{ backgroundColor: C.pageBg, fontFamily: "'Tmoney RoundWind', sans-serif" }}>
-      <div className="w-full h-full flex flex-col max-w-[440px] md:max-w-[600px]">
+      <div className="w-full h-full flex flex-col max-w-110 md:max-w-150">
         <div className="flex-1 overflow-auto w-full">
           <TestTopNav bgColor={C.pageBg} logoColor="#000000" xColor="#000000" />
           <AnimatePresence mode="wait">
@@ -186,7 +203,7 @@ export default function MoneyClient({ resultId }: Props) {
                 style={{ padding: '12px 12px 48px', gap: '16px' }}
               >
                 <motion.div variants={FADE_UP}>
-                  <MoneyResultCard ref={resultCardRef} profile={result.profile} />
+                  <MoneyResultCard ref={resultCardRef} profile={result.profile} stargioRaw={result.stargioRaw} />
                 </motion.div>
                 <motion.div variants={FADE_UP}>
                   <MoneyCTA resultId={result.resultId} />

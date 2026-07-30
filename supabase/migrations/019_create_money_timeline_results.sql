@@ -4,14 +4,16 @@
 
 CREATE TABLE money_timeline_results (
   id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  share_code          TEXT UNIQUE DEFAULT encode(gen_random_bytes(6), 'hex'),
   gender              TEXT NOT NULL,
   birth_date          TEXT NOT NULL,
   birth_time          TEXT,
   calendar_type       TEXT NOT NULL DEFAULT 'solar',
-  overall_score       INTEGER NOT NULL,
+  overall_score       SMALLINT NOT NULL CHECK (overall_score BETWEEN 0 AND 100),
   best_period_label   TEXT NOT NULL,
   money_style_title   TEXT NOT NULL,
   result              JSONB NOT NULL,
+  stargio_raw         JSONB NOT NULL,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul')
 );
 

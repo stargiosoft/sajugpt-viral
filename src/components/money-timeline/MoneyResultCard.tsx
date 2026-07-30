@@ -2,7 +2,7 @@
 
 import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import type { MoneyTimelineProfile } from '@/types/money-timeline';
+import type { MoneyTimelineProfile, StargioRaw } from '@/types/money-timeline';
 import InsightCard from './InsightCard';
 import TimelineChart, { GoldenEraCard } from './TimelineChart';
 import MoneyStyleCard from './MoneyStyleCard';
@@ -10,9 +10,10 @@ import { MONEY_COLORS as C, FADE_UP } from '@/constants/moneyTimelineTheme';
 
 interface Props {
   profile: MoneyTimelineProfile;
+  stargioRaw: StargioRaw;
 }
 
-const MoneyResultCard = forwardRef<HTMLDivElement, Props>(({ profile }, ref) => {
+const MoneyResultCard = forwardRef<HTMLDivElement, Props>(({ profile, stargioRaw }, ref) => {
   return (
     <motion.div
       ref={ref}
@@ -26,19 +27,19 @@ const MoneyResultCard = forwardRef<HTMLDivElement, Props>(({ profile }, ref) => 
       variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
     >
       <motion.div variants={FADE_UP}>
-        <MoneyStyleCard moneyStyle={profile.moneyStyle} />
+        <MoneyStyleCard moneyStyle={profile.moneyStyle} stargioRaw={stargioRaw}/>
       </motion.div>
-      <div style={{ height: '10px' }} />
+      <div style={{ height: '9px' }} />
       <motion.div variants={FADE_UP}>
-        <InsightCard overallScore={profile.overallScore} summaryLine={profile.summaryLine} bestAgeLabel={profile.bestPeriod.ageLabel} />
-      </motion.div>
-      <div style={{ borderTop: '1px dashed rgb(229, 227, 249)' }} />
-      <motion.div variants={FADE_UP}>
-        <TimelineChart periods={profile.periods} />
+        <InsightCard overallScore={profile.overallScore} bestPeriod={profile.bestPeriod}/>
       </motion.div>
       <div style={{ borderTop: '1px dashed rgb(229, 227, 249)' }} />
       <motion.div variants={FADE_UP}>
-        <GoldenEraCard bestPeriod={profile.bestPeriod} />
+        <TimelineChart periods={profile.periods} stargioRaw={stargioRaw} />
+      </motion.div>
+      <div style={{ borderTop: '1px dashed rgb(229, 227, 249)' }} />
+      <motion.div variants={FADE_UP}>
+        <GoldenEraCard bestPeriod={profile.bestPeriod} stargioRaw={stargioRaw}/>
       </motion.div>
     </motion.div>
   );

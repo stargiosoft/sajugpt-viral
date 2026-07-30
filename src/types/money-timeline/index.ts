@@ -34,6 +34,24 @@ export interface MoneyTimelineProfile {
   moneyStyle: MoneyStyleInfo;
 }
 
+export interface StargioRaw {
+  성별: string;
+  나이: number;
+  만나이: number;
+  양력: unknown;
+  음력: unknown;
+  발달십성: Record<string, number>;
+  발달오행: Record<string, number>;
+  용신: any;
+  용신오행: any;
+  대운: any;
+  대운순서: any;
+  월운보기: any;
+  세운: any;
+  오늘의재물운?: any;
+  [key: string]: any;
+}
+
 export interface MoneyTimelineResult {
   resultId: string;
   birthDate: string;
@@ -41,5 +59,6 @@ export interface MoneyTimelineResult {
   unknownTime: boolean;
   gender: Gender;
   profile: MoneyTimelineProfile;
+  stargioRaw: StargioRaw;
   createdAt: string;
 }

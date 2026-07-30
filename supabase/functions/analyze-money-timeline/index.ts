@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { handleCorsPreflightRequest, jsonResponse, errorResponse } from '../server/cors.ts';
 
-// ─── 타입 ───────────────────────────────────────────────
+// ─── 타입 정의 ──────────────────────────────────────────
 
 interface RequestBody {
   birthday: string;
@@ -17,15 +17,23 @@ interface DaeunPeriod {
   ageStart: number;
   ageEnd: number;
   score: number;
+  status: string;
   categories: [SipsungCategory, SipsungCategory];
+  daeunGanji: string;
+  unsung: string;
 }
 
-// ─── STARGIO API ────────────────────────────────────────
+interface DaeunAnchor {
+  간지?: string;
+  대운기간나이?: [number, number];
+}
+
+// ─── STARGIO API 설정 ──────────────────────────────────
 
 const BROWSER_HEADERS = {
   'Accept': 'application/json, text/plain, */*',
   'Accept-Encoding': 'gzip, deflate, br',
-  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en-US;q=0.7',
   'Cache-Control': 'no-cache',
   'Connection': 'keep-alive',
   'Host': 'service.stargio.co.kr:8400',
@@ -51,16 +59,13 @@ function categoryOf(sipsung: string): SipsungCategory {
   return SIPSUNG_TO_CATEGORY[sipsung] ?? '비겁';
 }
 
-// 재물 관점 기본 가중치 (재성이 직접 재물, 식상이 재물을 만드는 힘)
 const CATEGORY_BASE_WEIGHT: Record<SipsungCategory, number> = {
-  재성: 20,
-  식상: 12,
-  관성: 4,
-  비겁: -10,
-  인성: -6,
+  재성: 24,
+  식상: 14,
+  관성: 2,
+  비겁: -12,
+  인성: -8,
 };
-
-// ─── 재물 점수 계산 (Step 3) ─────────────────────────────
 
 function yongsinBonus(
   category: SipsungCategory,
@@ -74,55 +79,188 @@ function yongsinBonus(
   return 0;
 }
 
+const TWELVE_STAGE_BONUS: Record<string, number> = {
+  '건록': 16, '제왕': 16,
+  '관대': 8, '장생': 8,
+  '목욕': 2, '양': 2,
+  '태': 0,
+  '쇠': -2,
+  '병': -8,
+  '사': -16, '묘': -16, '절': -16,
+};
+
+function normalizeStage(stage: string): string {
+  return stage
+    .replace('長生', '장생').replace('沐浴', '목욕').replace('冠帶', '관대')
+    .replace('建祿', '건록').replace('帝旺', '제왕').replace('帝王', '제왕')
+    .replace('衰', '쇠').replace('病', '병').replace('死', '사')
+    .replace('墓', '묘').replace('絶', '절').replace('胎', '태').replace('養', '양');
+}
+
+function twelveStageBonus(stage: string | undefined): number {
+  if (!stage) return 0;
+  return TWELVE_STAGE_BONUS[normalizeStage(stage)] ?? 0;
+}
+
+function comboAdjustment(catCheon: SipsungCategory, catJi: SipsungCategory): number {
+  const has = (c: SipsungCategory) => catCheon === c || catJi === c;
+  const hasBoth = (a: SipsungCategory, b: SipsungCategory) =>
+    (catCheon === a && catJi === b) || (catCheon === b && catJi === a);
+
+  if (hasBoth('식상', '재성')) return 8;
+  if (has('비겁') && has('재성')) return -8;
+  if (hasBoth('관성', '인성')) return 4;
+  if (hasBoth('재성', '관성')) return 4;
+  if (hasBoth('식상', '관성')) return -4;
+  return 0;
+}
+
+function resolveDaeunAgeStarts(
+  daeunSunseo: string[],
+  daeunCurrent: DaeunAnchor | undefined,
+  fallbackStartAge: number,
+): number[] {
+  return daeunSunseo.map((_, i) => fallbackStartAge + i * 10);
+}
+
+const SAJU_GANGYAK_BONUS: Record<string, number> = {
+  '극신약': -10, '신약': -5, '중화': 0, '신강': 5, '극신강': 10,
+};
+
+function gangyakBonus(sajuGangyak: string | undefined): number {
+  if (!sajuGangyak) return 0;
+  return SAJU_GANGYAK_BONUS[sajuGangyak] ?? 0;
+}
+
+const SPECIAL_GYEOK_KEYWORDS = ['화격', '종격', '종왕격', '종강격', '종아격', '종재격', '종살격', '종세격'];
+
+function gyeokBonus(gyeokgubun: string | undefined): number {
+  if (!gyeokgubun) return 0;
+  return SPECIAL_GYEOK_KEYWORDS.some((k) => gyeokgubun.includes(k)) ? 6 : 0;
+}
+
+const WEALTH_SINSAL_KEYWORDS = ['재고귀인'];
+
+function hasWealthSinsal(gitaSinsal: unknown): boolean {
+  if (!Array.isArray(gitaSinsal)) return false;
+  return gitaSinsal.some(
+    (pillarList) => Array.isArray(pillarList) && pillarList.some((s) => WEALTH_SINSAL_KEYWORDS.includes(s)),
+  );
+}
+
+function wealthSinsalBonus(hasJaegoGwiin: boolean): number {
+  return hasJaegoGwiin ? 8 : 0;
+}
+
+function wealthCapacityBonus(developedSipsung: Record<SipsungCategory, number>): number {
+  const capacity = (developedSipsung['재성'] ?? 0) + (developedSipsung['식상'] ?? 0);
+  return Math.round((capacity - 35) * 0.9);
+}
+
 function computeDaeunPeriods(
+  daeunSunseo: string[],
   daeunSunseoSipsung: [string, string][],
-  daeunStartAge: number,
+  daeunSunseoSipUnseong: string[],
+  daeunAgeStarts: number[],
   yongsin: Set<string>,
   huisin: Set<string>,
   gisin: Set<string>,
 ): DaeunPeriod[] {
-  const raws = daeunSunseoSipsung.map(([cheongan, jiji]) => {
-    const catCheon = categoryOf(cheongan);
-    const catJi = categoryOf(jiji);
+  return daeunSunseoSipsung.map(([cheonS, jiS], i) => {
+    const catCheon = categoryOf(cheonS);
+    const catJi = categoryOf(jiS);
+    const stage = daeunSunseoSipUnseong[i];
+
     const base = (CATEGORY_BASE_WEIGHT[catCheon] + yongsinBonus(catCheon, yongsin, huisin, gisin)) * 0.6
-      + (CATEGORY_BASE_WEIGHT[catJi] + yongsinBonus(catJi, yongsin, huisin, gisin)) * 0.4;
-    const raw = Math.max(5, Math.min(95, 50 + base));
-    return { raw, categories: [catCheon, catJi] as [SipsungCategory, SipsungCategory] };
-  });
+      + (CATEGORY_BASE_WEIGHT[catJi] + yongsinBonus(catJi, yongsin, huisin, gisin)) * 0.4
+      + twelveStageBonus(stage)
+      + comboAdjustment(catCheon, catJi);
 
-  const min = Math.min(...raws.map(r => r.raw));
-  const max = Math.max(...raws.map(r => r.raw));
+    const score = Math.round(Math.max(5, Math.min(98, 50 + base)));
 
-  return raws.map((r, i) => {
-    const score = max === min ? 60 : Math.round(22 + ((r.raw - min) / (max - min)) * 76);
+    let status = '➡️ 평탄/유지기';
+    if (score >= 78) status = '🔥 대박/골든타임';
+    else if (score >= 62) status = '📈 상승/성장기';
+    else if (score >= 48) status = '🌱 준비/기반구축기';
+    else if (score < 35) status = '⚠️ 신중/리스크 관리기';
+
     return {
-      ageStart: daeunStartAge + i * 10,
-      ageEnd: daeunStartAge + i * 10 + 9,
+      ageStart: daeunAgeStarts[i],
+      ageEnd: daeunAgeStarts[i] + 9,
       score,
-      categories: r.categories,
+      status,
+      categories: [catCheon, catJi] as [SipsungCategory, SipsungCategory],
+      daeunGanji: daeunSunseo[i] ?? '',
+      unsung: stage,
     };
   });
 }
 
-// ─── 연령대(20~70대) 버킷 매핑 (Step 4) ──────────────────
+function rescaleToPersonalRange(
+  daeunPeriods: DaeunPeriod[],
+  targetMin = 32,
+  targetMax = 92,
+): DaeunPeriod[] {
+  const scores = daeunPeriods.map((p) => p.score);
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
 
-const DECADES = [20, 30, 40, 50, 60, 70];
+  if (max === min) {
+    const mid = Math.round((targetMin + targetMax) / 2);
+    return daeunPeriods.map((p) => ({ ...p, score: mid }));
+  }
 
-function buildDisplayPeriods(daeunPeriods: DaeunPeriod[]) {
-  return DECADES.map(decade => {
+  return daeunPeriods.map((p) => ({
+    ...p,
+    score: Math.round(targetMin + ((p.score - min) / (max - min)) * (targetMax - targetMin)),
+  }));
+}
+
+function resolveDisplayDecades(currentAge: number): number[] {
+  const startDecade = Math.max(20, Math.floor(currentAge / 10) * 10);
+  if (startDecade >= 80) return [80];
+  const decades: number[] = [];
+  for (let d = startDecade; d <= 80; d += 10) decades.push(d);
+  return decades;
+}
+
+function classifyStatus(score: number): string {
+  if (score >= 78) return '🔥 대박/골든타임';
+  if (score >= 62) return '📈 상승/성장기';
+  if (score >= 48) return '🌱 준비/기반구축기';
+  return '⚠️ 신중/리스크 관리기';
+}
+
+function rescaleScoreWithTierBoost(rawScore: number): number {
+  if (rawScore >= 60) return Math.round(rawScore * 1.5);
+  if (rawScore >= 45) return Math.round(rawScore * 1.6);
+  if (rawScore >= 30) return Math.round(rawScore * 1.8);
+  if (rawScore >= 15) return Math.round(rawScore * 2.2);
+  return Math.round(rawScore * 2.8);
+}
+
+function buildDisplayPeriods(daeunPeriods: DaeunPeriod[], decades: number[]) {
+  return decades.map((decade) => {
     const repAge = decade + 5;
-    const matched = daeunPeriods.find(p => repAge >= p.ageStart && repAge <= p.ageEnd)
-      ?? (repAge < daeunPeriods[0].ageStart ? daeunPeriods[0] : daeunPeriods[daeunPeriods.length - 1]);
+    const matched = daeunPeriods.find((p) => repAge >= p.ageStart && repAge <= p.ageEnd)
+      ?? daeunPeriods.reduce((prev, curr) =>
+        Math.abs(curr.ageStart + 5 - repAge) < Math.abs(prev.ageStart + 5 - repAge) ? curr : prev,
+      );
+
+    const boostedScore = Math.min(98, rescaleScoreWithTierBoost(matched.score));
+
     return {
       ageLabel: `${decade}대`,
       ageStart: decade,
       ageEnd: decade + 9,
-      score: matched.score,
+      score: boostedScore, 
+      status: classifyStatus(boostedScore),
+      daeunGanji: matched.daeunGanji,
+      unsung: matched.unsung,
+      categories: matched.categories,
     };
   });
 }
-
-// ─── 최고의 재물 시기 (Step 5) ────────────────────────────
 
 const FEATURE_BULLETS: Record<SipsungCategory, string[]> = {
   재성: ['직접 자산을 늘리기 좋은 시기입니다.', '투자보다 실질적인 수익 활동에 집중하면 유리합니다.', '가장 큰 자산을 만들 가능성이 높은 구간입니다.'],
@@ -132,32 +270,48 @@ const FEATURE_BULLETS: Record<SipsungCategory, string[]> = {
   인성: ['전문성과 자격이 자산으로 연결되는 시기입니다.', '서두르기보다 차근차근 쌓아가면 결실을 맺습니다.', '학습과 준비가 이후 재물운의 기반이 됩니다.'],
 };
 
-function buildBestPeriod(daeunPeriods: DaeunPeriod[], yongsin: Set<string>) {
-  const candidates = daeunPeriods.filter(p => p.ageEnd >= 20 && p.ageStart <= 79);
-  const pool = candidates.length > 0 ? candidates : daeunPeriods;
-  const best = pool.reduce((a, b) => (b.score > a.score ? b : a));
-
-  const decadeBase = Math.floor(best.ageStart / 10) * 10;
-  const tens = best.ageStart - decadeBase;
-  const part = tens <= 3 ? '초반' : tens <= 6 ? '중반' : '후반';
-  const ageLabel = `${decadeBase}대 ${part}`;
-
-  const [catCheon, catJi] = best.categories;
-  const features = [...new Set([...FEATURE_BULLETS[catCheon], ...FEATURE_BULLETS[catJi]])].slice(0, 3);
-  if ((yongsin.has(catCheon) || yongsin.has(catJi)) && features.length < 3) {
-    features.push('타고난 용신과 맞아떨어지는 구간이라 흐름이 더 강하게 작용합니다.');
+function buildBestPeriod(
+  daeunPeriods: DaeunPeriod[],
+  yongsin: Set<string>,
+  hasJaegoGwiin: boolean,
+  ageWindow: { start: number; end: number },
+  forcedBestDecade?: number,
+) {
+  let best: DaeunPeriod;
+  if (typeof forcedBestDecade === 'number') {
+    const repAge = forcedBestDecade + 5;
+    best = daeunPeriods.find((p) => repAge >= p.ageStart && repAge <= p.ageEnd)
+      ?? daeunPeriods.reduce((a, b) => (b.score > a.score ? b : a));
+  } else {
+    const candidates = daeunPeriods.filter((p) => p.ageEnd >= ageWindow.start && p.ageStart <= ageWindow.end);
+    const pool = candidates.length > 0 ? candidates : daeunPeriods;
+    best = pool.reduce((a, b) => (b.score > a.score ? b : a));
   }
 
+  const decadeBase = Math.floor(best.ageStart / 10) * 10;
+  const [catCheon, catJi] = best.categories;
+  const features = [...new Set([...FEATURE_BULLETS[catCheon], ...FEATURE_BULLETS[catJi]])];
+  
+  if (yongsin.has(catCheon) || yongsin.has(catJi)) {
+    features.push('타고난 용신과 맞아떨어지는 구간이라 흐름이 더 강하게 작용합니다.');
+  }
+  if (hasJaegoGwiin) {
+    features.unshift('재고귀인의 영향으로 이 시기에 모은 재물을 오래 지키는 힘이 있습니다.');
+  }
+
+  const boostedBestScore = Math.min(98, rescaleScoreWithTierBoost(best.score));
+
   return {
-    ageLabel,
+    ageLabel: `${decadeBase}대 후반`,
     ageStart: best.ageStart,
     ageEnd: best.ageEnd,
-    score: best.score,
+    score: boostedBestScore,
+    status: classifyStatus(boostedBestScore),
     features: features.slice(0, 3),
+    daeunGanji: best.daeunGanji,
+    unsung: best.unsung,
   };
 }
-
-// ─── 돈 버는 스타일 ────────────────────────────────────────
 
 const MONEY_STYLE_TEXT: Record<SipsungCategory, { title: string; description: string }> = {
   재성: { title: '실전 자산가형', description: '눈에 보이는 성과와 실질적인 수익에 강한 스타일이에요. 직접 자산을 굴리고 관리하는 데 능숙해요.' },
@@ -168,18 +322,14 @@ const MONEY_STYLE_TEXT: Record<SipsungCategory, { title: string; description: st
 };
 
 function buildMoneyStyle(
-  daeunSunseoSipsung: [string, string][],
+  developedSipsung: Record<SipsungCategory, number>,
   yongsin: Set<string>,
   huisin: Set<string>,
   gisin: Set<string>,
 ) {
-  const counts: Record<SipsungCategory, number> = { 비겁: 0, 식상: 0, 재성: 0, 관성: 0, 인성: 0 };
-  for (const [cheongan, jiji] of daeunSunseoSipsung) {
-    counts[categoryOf(cheongan)] += 1;
-    counts[categoryOf(jiji)] += 1;
-  }
-
-  const dominant = (Object.keys(counts) as SipsungCategory[]).reduce((a, b) => (counts[b] > counts[a] ? b : a));
+  const dominant = (Object.keys(developedSipsung) as SipsungCategory[]).reduce((a, b) =>
+    developedSipsung[b] > developedSipsung[a] ? b : a,
+  );
   const style = MONEY_STYLE_TEXT[dominant];
 
   let yongsinNote: string;
@@ -196,16 +346,8 @@ function buildMoneyStyle(
   return { category: dominant, title: style.title, description: style.description, yongsinNote };
 }
 
-// ─── 종합 요약 (Step 6) ─────────────────────────────────
-
-function buildSummaryLine(overallScore: number, bestAgeLabel: string): string {
-  let tierText: string;
-  if (overallScore >= 80) tierText = '전반적으로 강한 재물운의 흐름을 타고났어요.';
-  else if (overallScore >= 60) tierText = '탄탄한 재물운 위에서 꾸준히 성장하는 흐름이에요.';
-  else if (overallScore >= 40) tierText = '굴곡은 있지만 기회를 잘 잡으면 반등할 수 있는 흐름이에요.';
-  else tierText = '신중한 관리가 필요하지만 황금기엔 확실한 기회가 와요.';
-
-  return `${bestAgeLabel}이 인생의 자산 성장 골든타임입니다. ${tierText}`;
+function buildSummaryLine(bestAgeLabel: string): string {
+  return `${bestAgeLabel}이 인생의 자산 성장 골든타임입니다.`;
 }
 
 // ─── MAIN HANDLER ────────────────────────────────────────
@@ -216,7 +358,13 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const body: RequestBody = await req.json();
+    let body: RequestBody;
+    try {
+      body = await req.json();
+    } catch {
+      return errorResponse(req, '잘못된 요청 형식입니다. JSON 본문을 확인해주세요.', 400);
+    }
+
     const { birthday, birthTime, gender, calendarType = 'solar', birthTimeUnknown } = body;
 
     if (!birthday || !gender) {
@@ -228,7 +376,6 @@ Deno.serve(async (req: Request) => {
       return errorResponse(req, '서버 설정 오류: API 키 누락', 500);
     }
 
-    // ─── 1. Stargio API 호출 ──────────────────────────
     const cleanBirthday = birthday.replace(/[^0-9]/g, '');
     let apiBirthday = cleanBirthday;
 
@@ -249,10 +396,15 @@ Deno.serve(async (req: Request) => {
     const sajuApiUrl = `https://service.stargio.co.kr:8400/StargioSaju?birthday=${apiBirthday}&lunar=${isLunar}&gender=${gender}&apiKey=${sajuApiKey}`;
 
     let sajuData: Record<string, unknown> | null = null;
+    let lastApiError = '';
+
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         const sajuResponse = await fetch(sajuApiUrl, { method: 'GET', headers: BROWSER_HEADERS });
-        if (!sajuResponse.ok) throw new Error(`HTTP ${sajuResponse.status}`);
+        if (!sajuResponse.ok) {
+          lastApiError = `Stargio API HTTP ${sajuResponse.status}`;
+          throw new Error(lastApiError);
+        }
         const rawText = await sajuResponse.text();
         const parsed = JSON.parse(rawText);
         if (parsed && Object.keys(parsed).length > 0) {
@@ -260,35 +412,85 @@ Deno.serve(async (req: Request) => {
           break;
         }
       } catch (err) {
-        console.error(`Stargio API 시도 ${attempt}/3 실패:`, err instanceof Error ? err.message : err);
-        if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
+        lastApiError = err instanceof Error ? err.message : String(err);
+        if (attempt < 3) await new Promise((r) => setTimeout(r, 1000 * attempt));
       }
     }
 
     if (!sajuData) {
-      return errorResponse(req, '사주 데이터를 가져올 수 없습니다.', 502);
+      return errorResponse(req, `사주 데이터를 가져오지 못했습니다. (${lastApiError})`, 502);
     }
 
-    // ─── 2. 대운/용신 데이터 추출 ─────────────────────────
+    const daeunSunseo = sajuData['대운순서'] as string[] | undefined;
     const daeunSunseoSipsung = sajuData['대운순서십성'] as [string, string][] | undefined;
+    const daeunSunseoSipUnseong = sajuData['대운순서십이운성'] as string[] | undefined;
     const daeunStartAge = sajuData['대운시작나이'] as number | undefined;
+    const daeunInfo = sajuData['대운'] as { 현재?: DaeunAnchor; 다음?: DaeunAnchor } | undefined;
     const yongsinData = sajuData['용신'] as { 용신?: string[]; 희신?: string[]; 기신?: string[] } | undefined;
+    const developedSipsung = sajuData['발달십성'] as Record<SipsungCategory, number> | undefined;
+    const sajuGangyak = sajuData['사주강약'] as string | undefined;
+    const gyeokgubun = sajuData['격구분'] as string | undefined;
+    const gitaSinsal = sajuData['기타신살'];
 
-    if (!daeunSunseoSipsung || !Array.isArray(daeunSunseoSipsung) || daeunSunseoSipsung.length === 0 || typeof daeunStartAge !== 'number') {
-      return errorResponse(req, '대운 데이터를 분석할 수 없습니다.', 502);
+    if (!daeunSunseo || !Array.isArray(daeunSunseo) || daeunSunseo.length === 0 || typeof daeunStartAge !== 'number') {
+      return errorResponse(req, '대운 데이터를 분석할 수 없습니다. (대운순서 또는 시작나이 누락)', 502);
+    }
+    if (!daeunSunseoSipsung || !Array.isArray(daeunSunseoSipsung) || daeunSunseoSipsung.length !== daeunSunseo.length) {
+      return errorResponse(req, '대운 십성 데이터를 분석할 수 없습니다.', 502);
+    }
+    if (!daeunSunseoSipUnseong || !Array.isArray(daeunSunseoSipUnseong) || daeunSunseoSipUnseong.length !== daeunSunseo.length) {
+      return errorResponse(req, '대운 십이운성 데이터를 분석할 수 없습니다.', 502);
+    }
+    if (!developedSipsung || (Object.keys(developedSipsung) as SipsungCategory[]).length === 0) {
+      return errorResponse(req, '발달십성 데이터를 분석할 수 없습니다.', 502);
     }
 
     const yongsin = new Set(yongsinData?.용신 ?? []);
     const huisin = new Set(yongsinData?.희신 ?? []);
     const gisin = new Set(yongsinData?.기신 ?? []);
+    const hasJaegoGwiin = hasWealthSinsal(gitaSinsal);
 
-    // ─── 3. 재물 점수 계산 (deterministic) ─────────────────
-    const daeunPeriods = computeDaeunPeriods(daeunSunseoSipsung, daeunStartAge, yongsin, huisin, gisin);
-    const periods = buildDisplayPeriods(daeunPeriods);
+    const daeunAgeStarts = resolveDaeunAgeStarts(daeunSunseo, daeunInfo?.현재, daeunStartAge);
+
+    const daeunPeriods = computeDaeunPeriods(
+      daeunSunseo, daeunSunseoSipsung, daeunSunseoSipUnseong, daeunAgeStarts, yongsin, huisin, gisin,
+    );
+
+    const currentAge = (sajuData['만나이'] as number | undefined) ?? (sajuData['나이'] as number | undefined) ?? 30;
+    const displayDecades = resolveDisplayDecades(currentAge);
+    const ageWindow = { start: displayDecades[0], end: displayDecades[displayDecades.length - 1] + 9 };
+
+    const workingAgeCandidates = daeunPeriods.filter((p) => p.ageEnd >= ageWindow.start && p.ageStart <= ageWindow.end);
+    const personalPeriods = rescaleToPersonalRange(
+      workingAgeCandidates.length > 0 ? workingAgeCandidates : daeunPeriods,
+    );
+
+    const periods = buildDisplayPeriods(daeunPeriods, displayDecades);
+
+    // 1) 골든타임 찾기
+    const bestPeriod = buildBestPeriod(personalPeriods, yongsin, hasJaegoGwiin, ageWindow);
+    const bestDecadeBase = Math.floor(bestPeriod.ageStart / 10) * 10;
+
+    // 2) 해당 연령대 점수를 최상단으로 부스트 (96점 이상)
+    periods.forEach((p) => {
+      if (p.ageStart === bestDecadeBase) {
+        p.score = Math.max(p.score, 96);
+        p.status = classifyStatus(p.score);
+      }
+    });
+
+    // 3) overallScore 재계산
     const overallScore = Math.round(periods.reduce((sum, p) => sum + p.score, 0) / periods.length);
-    const bestPeriod = buildBestPeriod(daeunPeriods, yongsin);
-    const moneyStyle = buildMoneyStyle(daeunSunseoSipsung, yongsin, huisin, gisin);
-    const summaryLine = buildSummaryLine(overallScore, bestPeriod.ageLabel);
+
+    const moneyStyle = buildMoneyStyle(developedSipsung, yongsin, huisin, gisin);
+    const summaryLine = buildSummaryLine(bestPeriod.ageLabel);
+
+    const bestDecadeIndex = periods.findIndex((p) => p.ageStart === bestDecadeBase);
+    if (bestDecadeIndex !== -1) {
+      bestPeriod.score = periods[bestDecadeIndex].score;
+      bestPeriod.status = periods[bestDecadeIndex].status;
+    }
+
 
     const profile = {
       overallScore,
@@ -296,39 +498,57 @@ Deno.serve(async (req: Request) => {
       periods,
       bestPeriod,
       moneyStyle,
+      meta: {
+        ilganStrength: sajuGangyak ?? null,
+        gyeokgubun: gyeokgubun ?? null,
+        yongsin: Array.from(yongsin),
+        huisin: Array.from(huisin),
+        gisin: Array.from(gisin),
+        hasJaegoGwiin,
+        daeunCount: daeunPeriods.length,
+        currentAge,
+        displayDecades,
+      },
     };
 
-    // ─── 4. DB 저장 ────────────────────────────────────
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    const { data: inserted, error: insertError } = await supabase
-      .from('money_timeline_results')
-      .insert({
-        gender,
-        birth_date: birthday,
-        birth_time: birthTimeUnknown ? null : (apiBirthday.length >= 12 ? apiBirthday.slice(8) : null),
-        calendar_type: calendarType,
-        overall_score: overallScore,
-        best_period_label: bestPeriod.ageLabel,
-        money_style_title: moneyStyle.title,
-        result: profile,
-      })
-      .select('id')
-      .single();
+    let resultId = crypto.randomUUID();
 
-    if (insertError) {
-      console.error('내 돈복 그래프 결과 저장 실패:', insertError);
+    if (supabaseUrl && supabaseServiceKey) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        const { data: inserted, error: insertError } = await supabase
+          .from('money_timeline_results')
+          .insert({
+            gender,
+            birth_date: birthday,
+            birth_time: birthTimeUnknown ? null : (apiBirthday.length >= 12 ? apiBirthday.slice(8) : null),
+            calendar_type: calendarType,
+            overall_score: overallScore,
+            best_period_label: bestPeriod.ageLabel,
+            money_style_title: moneyStyle.title,
+            result: profile,
+            stargio_raw: sajuData,
+          })
+          .select('id')
+          .single();
+
+        if (insertError) {
+          console.error('내 돈복 그래프 결과 저장 실패:', insertError);
+        } else if (inserted?.id) {
+          resultId = inserted.id;
+        }
+      } catch (dbErr) {
+        console.error('Supabase DB 처리 예외:', dbErr);
+      }
     }
 
-    const resultId = inserted?.id ?? crypto.randomUUID();
-
-    // ─── 5. 응답 ────────────────────────────────────
-    return jsonResponse(req, { success: true, resultId, profile });
+    return jsonResponse(req, { success: true, resultId, profile, stargioRaw: sajuData });
 
   } catch (err) {
-    console.error('analyze-money-timeline 에러:', err);
-    return errorResponse(req, '서버 오류가 발생했습니다.', 500);
+    console.error('analyze-money-timeline 에러 상세:', err instanceof Error ? err.stack : err);
+    return errorResponse(req, '서버 처리 중 오류가 발생했습니다.', 500);
   }
 });
