@@ -16,6 +16,11 @@ export const metadata: Metadata = {
     siteName: '사주GPT',
     images: [{ url: '/og-image.png', width: 1200, height: 600 }],
   },
+  verification: {
+    other: {
+      'naver-site-verification': '1ea62c31e47d7be38caf2aebe291473bbf7cea66',
+    },
+  },
 };
 
 export const viewport: Viewport = {
@@ -26,10 +31,23 @@ export const viewport: Viewport = {
   themeColor: '#1a1a2e',
 };
 
+const ORGANIZATION_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: '광필연구소',
+  url: 'https://sajugpt-viral.vercel.app',
+  logo: 'https://sajugpt-viral.vercel.app/sajugpt-logo.svg',
+  description: '사주와 심리, 성향을 소재로 한 다양한 테스트와 콘텐츠를 한곳에 모아둔 서비스',
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_JSON_LD) }}
+        />
         <script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
           integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka"
