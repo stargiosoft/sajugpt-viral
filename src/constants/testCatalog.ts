@@ -163,17 +163,18 @@ export const TEST_CATALOG: TestCatalogItem[] = [
   },
   {
     id: 'oheng',
-    title: '오행 처방전',
+    title: '인간 사용설명서',
     description: '내 사주 오행 분포로 진단하는 대표 성향과 기운 보완 처방',
     href: '/oheng',
     emoji: '🍵',
+    imageSrc: '/oheng/landing-thumbnail.png',
     category: 'analysis',
     colorTheme: 'mist',
-    participantLabel: '1,200',
-    shareLabel: '150',
+    participantLabel: '2,480',
+    shareLabel: '312',
     isNew: true,
     sajugptBadge: true,
     ready: true,
-    visibleOnHome: false, // 완성 전까지 홈 노출 보류 — 완성되면 true로
+    visibleOnHome: true,
   },
 ];

@@ -1,15 +1,22 @@
 import type { Metadata } from 'next';
 import OhengClient from '@/components/oheng/OhengClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
-  title: '내 오행 처방전 — 사주GPT',
-  description: '내 사주에 부족한 기운, 무엇으로 채워야 할까? 수호동물·음식·컬러로 알려주는 오행 처방전.',
+  title: '인간 사용설명서 — 사주GPT',
+  description: '오행으로 분석한 나의 진짜 성향을 확인해보세요.',
   openGraph: {
-    title: '내 오행 처방전',
-    description: '내 사주에 부족한 기운, 무엇으로 채워야 할까?',
+    title: '인간 사용설명서',
+    description: '오행으로 분석한 나의 진짜 성향을 확인해보세요.',
+    images: [{ url: '/oheng/og-share.jpg', width: 1200, height: 600 }],
   },
 };
 
 export default function OhengPage() {
-  return <OhengClient />;
+  return (
+    <>
+      <LandingTracker featureType="oheng" />
+      <OhengClient />
+    </>
+  );
 }

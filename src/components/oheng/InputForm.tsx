@@ -1,9 +1,13 @@
 'use client';
 
 import { useMemo } from 'react';
-import BirthInput from './BirthInput';
-import GenderSelect from './GenderSelect';
-import TimeSelectSheet from './TimeSelectSheet';
+import { motion } from 'framer-motion';
+import BirthInput from '@/components/BirthInput';
+import GenderSelect from '@/components/GenderSelect';
+import TimeSelectSheet from '@/components/TimeSelectSheet';
+import FieldLabel from '@/components/FieldLabel';
+import PressableButton from '@/components/PressableButton';
+import { OHENG_COLORS as C, FADE_UP } from '@/constants/ohengTheme';
 import type { OhengFormState } from '@/types/oheng';
 
 interface Props {
@@ -18,69 +22,93 @@ export default function InputForm({ form, onChange, onSubmit }: Props) {
   }, [form]);
 
   return (
-    <div style={{ padding: '32px 20px 40px', backgroundColor: '#F3E7C9' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#2B2013', textAlign: 'center' }}>
-        사주 정보를 적어주시게
-      </h1>
-      <p style={{ fontSize: '13px', color: '#8A5A2B', textAlign: 'center', marginTop: '6px' }}>
-        *정보는 저장되지 않습니다.
-      </p>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{ padding: '12px 16px 48px' }}
+    >
+      <div className="flex flex-col items-center" style={{ paddingTop: '12px', marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 800, color: C.text, textAlign: 'center' }}>
+          사주 정보를 입력해 주세요
+        </h1>
+        <p style={{ fontSize: '13px', color: C.textSecondary, marginTop: '6px', textAlign: 'center' }}>
+          입력한 정보는 저장되지 않습니다.
+        </p>
+      </div>
 
-      <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        <Field label="성별" checked={!!form.gender}>
-          <GenderSelect value={form.gender} onChange={g => onChange({ gender: g })} />
-        </Field>
+      <motion.div
+        className="flex flex-col"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      >
+        <motion.div className="flex flex-col w-full" variants={FADE_UP}>
+          <FieldLabel color={C.textTertiary} fontSize="13px" marginBottom="6px">성별</FieldLabel>
+          <GenderSelect
+            value={form.gender}
+            onChange={g => onChange({ gender: g })}
+            accentColor={C.blue}
+            bgColor="#F2F4F6"
+            fontSize="15px"
+            height="44px"
+            unselectedColor={C.textTertiary}
+            border="none"
+            indicatorBoxShadow="none"
+          />
+        </motion.div>
 
-        <Field label="생년월일">
-          <BirthInput value={form.birthday} onChange={v => onChange({ birthday: v })} />
-        </Field>
+        <motion.div className="flex flex-col w-full" style={{ marginTop: '24px' }} variants={FADE_UP}>
+          <FieldLabel color={C.textTertiary} fontSize="13px" marginBottom="6px">생년월일 (양력 기준으로 입력해 주세요)</FieldLabel>
+          <BirthInput
+            value={form.birthday}
+            onChange={v => onChange({ birthday: v })}
+            accentColor={C.blue}
+            bgColor="#F2F4F6"
+            borderColor="transparent"
+            textColor={C.text}
+            fontSize="16px"
+            height="52px"
+            onEnter={onSubmit}
+            autoFocus={false}
+          />
+        </motion.div>
 
-        <Field label="태어난 시간">
+        <motion.div className="flex flex-col w-full" style={{ marginTop: '24px' }} variants={FADE_UP}>
+          <FieldLabel color={C.textTertiary} fontSize="13px" marginBottom="6px">태어난 시간</FieldLabel>
           <TimeSelectSheet
             value={form.birthTime}
             unknownTime={form.birthTimeUnknown}
             onSelect={(displayTime, isUnknown) => onChange({ birthTime: displayTime, birthTimeUnknown: isUnknown })}
+            accentColor={C.blue}
+            bgColor="#F2F4F6"
+            borderColor="none"
+            textColor={C.text}
+            placeholderColor={C.textTertiary}
+            sheetBgColor="#FFFFFF"
+            sheetTextColor={C.text}
+            dragHandleColor={C.border}
+            hoverBgClass="hover:bg-black/[0.03]"
+            selectedBgColor={C.blueDim}
+            selectedTextColor={C.blue}
+            fontSize="16px"
+            height="52px"
+            arrowColor={C.textTertiary}
           />
-        </Field>
-      </div>
+        </motion.div>
 
-      <button
-        type="button"
-        disabled={!isValid}
-        onClick={onSubmit}
-        style={{
-          marginTop: '36px',
-          width: '100%',
-          height: '58px',
-          borderRadius: '16px',
-          backgroundColor: isValid ? '#2B2013' : '#C9BB98',
-          color: '#F3E7C9',
-          fontSize: '15px',
-          fontWeight: 600,
-          border: 'none',
-          cursor: isValid ? 'pointer' : 'not-allowed',
-          transition: 'background-color 0.2s',
-        }}
-      >
-        입력 완료
-      </button>
-    </div>
-  );
-}
-
-function Field({ label, checked, children }: { label: string; checked?: boolean; children: React.ReactNode }) {
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-        <p style={{ fontSize: '13px', color: '#6B5B3A' }}>{label}</p>
-        {checked && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" fill="#4C8C4A" />
-            <path d="M7.5 12.5l3 3 6-6.5" stroke="#F3E7C9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </div>
-      {children}
-    </div>
+        <motion.div style={{ marginTop: '32px' }} variants={FADE_UP}>
+          <PressableButton
+            onClick={onSubmit}
+            disabled={!isValid}
+            label="입력 완료"
+            style={{ height: '56px' }}
+            bgStyle={{ backgroundColor: isValid ? C.blue : '#EDEFF2', borderRadius: '16px', border: 'none' }}
+            hoverBackground={C.blueHover}
+            textStyle={{ color: isValid ? C.textOnBlue : C.placeholder, fontWeight: 600, fontSize: '16px' }}
+          />
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

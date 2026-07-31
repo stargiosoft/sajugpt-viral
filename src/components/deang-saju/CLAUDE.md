@@ -26,4 +26,17 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #14588 | 1:38 PM | 🔄 | Love-chat feature cleanup initiated in parallel with deang-saju | ~371 |
+
+### Jul 29, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #14925 | 2:26 PM | 🔵 | Code audit reveals duplication patterns in sajugpt-viral test verticals | ~1030 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15433 | 3:44 PM | 🔄 | DeangLanding migrated to shared CommentBoard component | ~329 |
+| #15262 | 12:08 PM | 🔄 | DeangLanding enhanced with staggered entrance animations | ~398 |
 </claude-mem-context>

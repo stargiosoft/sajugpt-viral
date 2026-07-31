@@ -1,0 +1,22 @@
+-- 오행 처방전 시드 댓글 20개 (mental_worldcup 018 패턴과 동일)
+INSERT INTO ghost_tarot_comments (content, client_id, feature_type, likes, created_at) VALUES
+  ('나 완전 화(火) 과다인데 인정함ㅋㅋ 진짜 열정 넘쳐서 탈이야', 'seed', 'oheng', 22, now()),
+  ('수 부족 나왔는데 요즘 계속 예민했던 이유가 있었네', 'seed', 'oheng', 15, now() - interval '9 minutes'),
+  ('친구랑 같이 해봤는데 둘이 완전 다른 오행 나와서 신기했음', 'seed', 'oheng', 11, now() - interval '18 minutes'),
+  ('이거 결과 진짜 소름 돋는다... 나 완전 저 성격 맞음', 'seed', 'oheng', 27, now() - interval '31 minutes'),
+  ('목 기운 부족하다는데 확실히 요즘 뭔가 시작하는 게 무서웠음', 'seed', 'oheng', 9, now() - interval '44 minutes'),
+  ('행운의 아이템 사러 가야겠다 ㅋㅋㅋ 이거 왜케 믿게 되지', 'seed', 'oheng', 14, now() - interval '58 minutes'),
+  ('토 과다 나왔는데 주변 사람들 다 나한테 의지하는 거 실화였어', 'seed', 'oheng', 8, now() - interval '1 hour 12 minutes'),
+  ('반신욕 처방 받았는데 오늘 진짜 해봐야겠다', 'seed', 'oheng', 6, now() - interval '1 hour 30 minutes'),
+  ('금 기운 강한 사람이라 그런지 결단력 얘기 완전 공감', 'seed', 'oheng', 12, now() - interval '1 hour 47 minutes'),
+  ('이거 사주GPT랑 같이 보니까 더 자세히 나와서 좋았음', 'seed', 'oheng', 19, now() - interval '2 hours 5 minutes'),
+  ('부족한 기운 채우는 법까지 알려줘서 신기하네 진짜 처방전 같음', 'seed', 'oheng', 16, now() - interval '2 hours 22 minutes'),
+  ('나만 화가 60%인 줄 알았는데 댓글 보니 다들 비슷하네ㅋㅋ', 'seed', 'oheng', 10, now() - interval '2 hours 40 minutes'),
+  ('이거 결과 캡처해서 친구들한테 보냈더니 다들 해봄', 'seed', 'oheng', 13, now() - interval '3 hours'),
+  ('오행 분포 보니까 내가 왜 그렇게 급했는지 알겠다', 'seed', 'oheng', 7, now() - interval '3 hours 20 minutes'),
+  ('수 기운 채우려고 차 마시기 시작함 진짜 효과 있는듯', 'seed', 'oheng', 5, now() - interval '3 hours 45 minutes'),
+  ('은근 중재자라는 말 완전 내 얘기라 웃겼어', 'seed', 'oheng', 9, now() - interval '4 hours 10 minutes'),
+  ('매번 사주 보면 어렵던데 이건 한눈에 보여서 좋다', 'seed', 'oheng', 11, now() - interval '4 hours 35 minutes'),
+  ('번아웃 얘기 나온 순간 뜨끔했음...', 'seed', 'oheng', 18, now() - interval '5 hours'),
+  ('행운 컬러 옷 사입었는데 기분 탓인지 좋은 일 생김', 'seed', 'oheng', 8, now() - interval '5 hours 30 minutes'),
+  ('이 테스트 은근 정확해서 계속 하게 됨', 'seed', 'oheng', 14, now() - interval '6 hours');

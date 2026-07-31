@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import type { Gender } from '@/types/battle';
 
 interface Props {
-  value: Gender;
+  value: Gender | null;
   onChange: (value: Gender) => void;
   accentColor?: string;
   bgColor?: string;

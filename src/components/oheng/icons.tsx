@@ -1,111 +1,34 @@
-type ElementKey = '木' | '火' | '土' | '金' | '水';
+import type { ElementKey } from '@/types/oheng';
 
-const ELEMENT_ICON_BG: Record<ElementKey, string> = {
-  木: '#DCE9CE',
-  火: '#F3D3C6',
-  土: '#EDDCAE',
-  金: '#EDE6C9',
-  水: '#CFDAE8',
+export const ELEMENT_ORDER: ElementKey[] = ['木', '火', '土', '金', '水'];
+
+export const ELEMENT_COLOR: Record<ElementKey, string> = {
+  木: '#34C759',
+  火: '#FF3B30',
+  土: '#FF9500',
+  金: '#FFD60A',
+  水: '#0A84FF',
+};
+
+const ELEMENT_ICON_SRC: Record<ElementKey, string> = {
+  木: '/oheng/elements/wood.png',
+  火: '/oheng/elements/fire.png',
+  土: '/oheng/elements/earth.png',
+  金: '/oheng/elements/metal.png',
+  水: '/oheng/elements/water.png',
 };
 
 export function ElementIcon({ elementKey, size = 56 }: { elementKey: ElementKey; size?: number }) {
   return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        backgroundColor: ELEMENT_ICON_BG[elementKey],
-        border: '2px solid #2B2013',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <svg width={size * 0.52} height={size * 0.52} viewBox="0 0 24 24" fill="none">
-        {elementKey === '火' && (
-          <path
-            d="M12 2c1 3-2 4-2 7a4 4 0 108 0c0-1-.5-2-1-2 .5 2-1 3-2 2 1-2-1-3-1-5 0-1 0-2-2-2z"
-            fill="#C4432B" stroke="#2B2013" strokeWidth="0.6" strokeLinejoin="round"
-          />
-        )}
-        {elementKey === '水' && (
-          <path
-            d="M12 2s6 7 6 12a6 6 0 11-12 0c0-5 6-12 6-12z"
-            fill="#2B3A67" stroke="#2B2013" strokeWidth="0.6" strokeLinejoin="round"
-          />
-        )}
-        {elementKey === '土' && (
-          <path
-            d="M4 17l4-9 4 5 3-4 5 8z"
-            fill="#8A6A3A" stroke="#2B2013" strokeWidth="0.6" strokeLinejoin="round"
-          />
-        )}
-        {elementKey === '木' && (
-          <path
-            d="M12 3c3 2 5 5 5 8a5 5 0 01-4 5v3h-2v-3a5 5 0 01-4-5c0-3 2-6 5-8z"
-            fill="#4C8C4A" stroke="#2B2013" strokeWidth="0.6" strokeLinejoin="round"
-          />
-        )}
-        {elementKey === '金' && (
-          <rect x="4" y="4" width="16" height="16" rx="3" fill="#B8860B" stroke="#2B2013" strokeWidth="0.6" />
-        )}
-      </svg>
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={ELEMENT_ICON_SRC[elementKey]}
+      alt={elementKey}
+      width={size}
+      height={size}
+      style={{ width: size, height: size, objectFit: 'contain' }}
+    />
   );
-}
-
-export function ElementPentagon({ weakest, size = 220 }: { weakest: ElementKey; size?: number }) {
-  const order: ElementKey[] = ['火', '金', '木', '水', '土'];
-  const positions = [
-    { top: '0%', left: '50%' },
-    { top: '30%', left: '92%' },
-    { top: '78%', left: '75%' },
-    { top: '78%', left: '25%' },
-    { top: '30%', left: '8%' },
-  ];
-  return (
-    <div style={{ position: 'relative', width: size, height: size }}>
-      <svg width={size} height={size} viewBox="0 0 220 220" style={{ position: 'absolute', inset: 0 }}>
-        {positions.map((_, i) =>
-          positions.slice(i + 1).map((_, j) => {
-            const a = pointAt(positions[i], size);
-            const b = pointAt(positions[i + j + 1], size);
-            return (
-              <line
-                key={`${i}-${j}`}
-                x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-                stroke="#B99A5B" strokeWidth="1" strokeDasharray="3 4"
-              />
-            );
-          })
-        )}
-      </svg>
-      {order.map((el, i) => {
-        const pos = positions[i];
-        const active = el === weakest;
-        return (
-          <div
-            key={el}
-            style={{
-              position: 'absolute',
-              top: pos.top,
-              left: pos.left,
-              transform: 'translate(-50%, -50%)',
-              opacity: active ? 1 : 0.55,
-              filter: active ? 'none' : 'grayscale(0.3)',
-            }}
-          >
-            <ElementIcon elementKey={el} size={56} />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function pointAt(pos: { top: string; left: string }, size: number) {
-  return { x: (parseFloat(pos.left) / 100) * size, y: (parseFloat(pos.top) / 100) * size };
 }
 
 export function AnimalIllustration({ animal, size = 180 }: { animal: string; size?: number }) {

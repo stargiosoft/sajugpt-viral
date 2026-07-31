@@ -1,77 +1,83 @@
 'use client';
 
-import SkyBackground from './SkyBackground';
-import ScrollFrame from './ScrollFrame';
-import { ElementIcon } from './icons';
-import LandingThumbnail from './LandingThumbnail';
-import ShareButtons from './ShareButtons';
+import { motion } from 'framer-motion';
+import ShareRow from '@/components/ShareRow';
+import CommentBoard from '@/components/CommentBoard';
+import LandingCTAButton from '@/components/LandingCTAButton';
+import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
+import { OHENG_COLORS as C } from '@/constants/ohengTheme';
 
 export default function Landing({ onStart, thumbnailSrc }: { onStart: () => void; thumbnailSrc?: string }) {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
   return (
-    <div style={{ position: 'relative', minHeight: 'calc(100vh - 52px)', padding: '48px 20px 40px' }}>
-      <SkyBackground />
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '-10px', left: '20px', zIndex: 2 }}>
-            <ElementIcon elementKey="火" size={40} />
-          </div>
-          <div style={{ position: 'absolute', top: '-14px', right: '24px', zIndex: 2 }}>
-            <ElementIcon elementKey="木" size={40} />
-          </div>
-          <ScrollFrame>
-            <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
-              <h1 style={{ fontSize: '34px', fontWeight: 800, lineHeight: 1.2, color: '#2B2013', letterSpacing: '-0.5px' }}>
-                내 오행<br />처방전
-              </h1>
-              <p style={{ fontSize: '16px', fontWeight: 600, color: '#8A5A2B', marginTop: '6px' }}>테스트</p>
-              <div style={{ margin: '18px 0' }}>
-                <LandingThumbnail imageSrc={thumbnailSrc} />
-              </div>
-              <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#5C4A2E' }}>
-                내 사주에 부족한 기운,<br />무엇으로 채워야 할까?
-              </p>
-            </div>
-          </ScrollFrame>
-        </div>
+    <div style={{ backgroundColor: '#FFFFFF' }}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="w-full"
+        style={{ position: 'relative', aspectRatio: '1448 / 1086' }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={thumbnailSrc}
+          alt="인간 사용설명서"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      </motion.div>
 
-        <div
-          style={{
-            marginTop: '28px',
-            backgroundColor: '#FBF3E1',
-            border: '1.5px solid #2B2013',
-            borderRadius: '16px',
-            padding: '14px 18px',
-            textAlign: 'center',
-            fontSize: '14px',
-            color: '#2B2013',
-          }}
+      <div style={{ padding: '20px 16px 0' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
         >
-          나와 함께 부족한 기운을 찾아볼 텐가?
-        </div>
+          <LandingCTAButton
+            onClick={onStart}
+            label="시작하기"
+            background={C.blue}
+            color={C.textOnBlue}
+            hoverBackground={C.blueHover}
+            height="56px"
+          />
+        </motion.div>
 
-        <button
-          type="button"
-          onClick={onStart}
-          style={{
-            marginTop: '14px',
-            width: '100%',
-            height: '58px',
-            borderRadius: '16px',
-            backgroundColor: '#2B2013',
-            color: '#F3E7C9',
-            fontSize: '15px',
-            fontWeight: 600,
-            border: 'none',
-            cursor: 'pointer',
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          style={{ marginTop: '28px', textAlign: 'center' }}
         >
-          시작하기
-        </button>
+          <ShareRow
+            shareContent={{
+              featureType: 'oheng',
+              title: '인간 사용설명서',
+              description: '오행으로 분석한 나의 진짜 성향을 확인해보세요.',
+              shareUrl: origin ? `${origin}/oheng` : '',
+              imageUrl: origin ? `${origin}/oheng/og-share.jpg` : '/oheng/og-share.jpg',
+              testId: 'oheng',
+            }}
+            copyColor={C.blue}
+            copyHoverColor={C.blueHover}
+            copyIconColor={C.textOnBlue}
+          />
+          <SajuGPTLinkButton featureType="oheng" color={C.textTertiary} hoverColor={C.blue} />
+        </motion.div>
 
-        <div style={{ marginTop: '36px', textAlign: 'center' }}>
-          <p style={{ fontSize: '14px', fontWeight: 700, color: '#2B2013', marginBottom: '14px' }}>테스트 공유하기</p>
-          <ShareButtons shareText="내 오행 처방전 테스트 — 내 사주에 부족한 기운은?" />
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          style={{ marginTop: '48px', marginBottom: '200px' }}
+        >
+          <CommentBoard
+            featureType="oheng"
+            storageKey="oheng_liked_comments"
+            placeholder="여러분의 대표 오행은 무엇인가요?"
+            themeColor={C.blue}
+          />
+        </motion.div>
       </div>
     </div>
   );

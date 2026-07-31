@@ -19,6 +19,7 @@ interface Props {
   errorIconSize?: number;
   fontSize?: string;
   height?: string;
+  autoFocus?: boolean;
 }
 
 export default function BirthInput({
@@ -38,6 +39,7 @@ export default function BirthInput({
   errorIconSize = 16,
   fontSize = '16px',
   height = '56px',
+  autoFocus = true,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
@@ -99,7 +101,7 @@ export default function BirthInput({
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onEnter?.(); } }}
             placeholder="예: 1992-07-15"
             autoComplete="off"
-            autoFocus
+            autoFocus={autoFocus}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             className="flex-1 outline-none bg-transparent w-full"

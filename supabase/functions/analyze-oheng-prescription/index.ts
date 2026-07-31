@@ -1,4 +1,5 @@
-import { getCorsHeaders, handleCorsPreflightRequest, jsonResponse, errorResponse } from '../server/cors.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { handleCorsPreflightRequest, jsonResponse, errorResponse } from '../server/cors.ts';
 
 // ─── 타입 ───────────────────────────────────────────────
 interface RequestBody {
@@ -10,16 +11,16 @@ interface RequestBody {
 }
 
 type ElementKey = '木' | '火' | '土' | '金' | '水';
+type Band = 'high' | 'mid' | 'low';
 
-interface ElementPrescription {
-  key: ElementKey;
-  name: string;
-  animal: string;
-  taste: string;
-  food: string;
-  color: string;
-  colorHex: string;
-  narration: string;
+interface Diagnosis {
+  title: string;
+  description: string;
+}
+
+interface Boost {
+  routine: string;
+  luckyItem: string;
 }
 
 // ─── 상수 ───────────────────────────────────────────────
@@ -43,35 +44,60 @@ const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
 };
 
-const PRESCRIPTIONS: Record<ElementKey, ElementPrescription> = {
-  '木': {
-    key: '木', name: '목(木)', animal: '토끼', taste: '신맛', food: '레몬·초록 채소',
-    color: '초록', colorHex: '#4C8C4A',
-    narration: '뻗어나가는 나무의 기운이 부족한 사주로다. 신맛과 푸른빛으로 지친 마음에 새싹을 틔우시게.',
+const ELEMENT_ORDER: ElementKey[] = ['木', '火', '土', '金', '水'];
+
+const ELEMENT_NAME: Record<ElementKey, string> = {
+  木: '목(木)', 火: '화(火)', 土: '토(土)', 金: '금(金)', 水: '수(水)',
+};
+
+// 대표 오행의 수호동물 (히어로 일러스트에 사용)
+const ELEMENT_ANIMAL: Record<ElementKey, string> = {
+  木: '토끼', 火: '여우', 土: '곰', 金: '호랑이', 水: '거북이',
+};
+
+// 대표 오행 진단: 오행 × 비중 구간(강함 45%+ / 우세 30~44% / 보통 <30%)
+const DIAGNOSIS: Record<ElementKey, Record<Band, Diagnosis>> = {
+  木: {
+    high: { title: '확장 본능 폭주 리더', description: '새로운 걸 벌이는 데 거침이 없지만, 속도가 너무 빨라 주변이 못 따라올 때가 많습니다.' },
+    mid: { title: '성장형 크리에이터', description: '아이디어와 실행력을 동시에 갖춘 타입. 한번 꽂히면 끝까지 밀어붙이는 편입니다.' },
+    low: { title: '잔잔한 새싹 마인드', description: '느리지만 꾸준하게 자라는 편. 무리한 확장보다 안정적인 성장을 선호합니다.' },
   },
-  '火': {
-    key: '火', name: '화(火)', animal: '여우', taste: '쓴맛', food: '커피·매운 음식',
-    color: '빨강', colorHex: '#C4432B',
-    narration: '타오르는 불의 기운이 부족한 사주로다. 쌉싸름한 맛과 붉은빛으로 식어버린 열정에 다시 불을 지피시게.',
+  火: {
+    high: { title: '열정 과다 도파민 리더', description: '추진력과 리더십이 뛰어나지만, 마음이 앞서 가끔 번아웃에 빠지기 쉽습니다.' },
+    mid: { title: '뜨거운 실행력 파이터', description: '결정한 건 바로 행동으로 옮기는 타입. 넘치는 에너지가 주변까지 덩달아 뜨겁게 만듭니다.' },
+    low: { title: '은은하게 타오르는 감성러', description: '화려하진 않아도 꾸준히 표현하는 편. 필요한 순간엔 확실하게 열정을 드러냅니다.' },
   },
-  '土': {
-    key: '土', name: '토(土)', animal: '곰', taste: '단맛', food: '고구마·호박',
-    color: '노랑', colorHex: '#C9992E',
-    narration: '든든한 흙의 기운이 부족한 사주로다. 달콤한 맛과 노란빛으로 흔들리는 마음에 중심을 잡으시게.',
+  土: {
+    high: { title: '책임감 과부하 살림꾼', description: '모든 걸 떠안고 챙기는 타입이라 주변이 많이 의지하지만, 정작 본인은 쉴 틈이 없습니다.' },
+    mid: { title: '믿음직한 안정형 리더', description: '약속과 신뢰를 최우선으로 여기는 편. 흔들리는 상황에서 중심을 잡아주는 존재입니다.' },
+    low: { title: '은근한 중재자', description: '튀지 않아도 묵묵히 균형을 맞추는 편. 갈등 상황에서 조용히 중재자 역할을 합니다.' },
   },
-  '金': {
-    key: '金', name: '금(金)', animal: '호랑이', taste: '매운맛', food: '견과류·양파',
-    color: '금빛', colorHex: '#B8860B',
-    narration: '단단한 쇠의 기운이 부족한 사주로다. 매콤한 맛과 반짝이는 금빛으로 무뎌진 결단력을 벼리시게.',
+  金: {
+    high: { title: '완벽주의 스틸 메탈', description: '기준이 확실하고 맺고 끊는 게 분명하지만, 스스로에게도 남에게도 엄격해 쉽게 지칠 때가 있습니다.' },
+    mid: { title: '칼같은 원칙주의자', description: '규칙과 논리를 중시하는 타입. 결단력이 필요한 순간에 가장 빛을 발합니다.' },
+    low: { title: '차분한 판단러', description: '감정에 휘둘리지 않고 담담하게 상황을 정리하는 편입니다.' },
   },
-  '水': {
-    key: '水', name: '수(水)', animal: '거북이', taste: '짠맛', food: '해조류·검은콩',
-    color: '검푸른색', colorHex: '#2B3A67',
-    narration: '깊은 물의 기운이 부족한 사주로다. 짭짤한 맛과 검푸른빛으로 메마른 마음을 적시시게.',
+  水: {
+    high: { title: '고요한 심층 몰입러', description: '생각이 깊고 신중하지만, 너무 많은 걸 혼자 고민하다 타이밍을 놓치기도 합니다.' },
+    mid: { title: '유연한 공감형 전략가', description: '상황에 맞춰 유연하게 움직이는 타입. 상대의 마음을 잘 읽어 관계를 부드럽게 풀어갑니다.' },
+    low: { title: '잔잔한 관찰자', description: '나서지 않아도 흐름을 놓치지 않는 편. 필요할 때 정확한 한마디를 던집니다.' },
   },
 };
 
-const ELEMENT_ORDER: ElementKey[] = ['木', '火', '土', '金', '水'];
+// 부족한 오행 기준 맞춤 처방 (기운 보완)
+const BOOST: Record<ElementKey, Boost> = {
+  木: { routine: '가벼운 산책과 화분 가꾸기', luckyItem: '그린 톤 소품' },
+  火: { routine: '매콤한 음식과 활동적인 취미', luckyItem: '레드 톤 아이템' },
+  土: { routine: '규칙적인 식사와 낮잠', luckyItem: '옐로우 톤 소품' },
+  金: { routine: '책상 정리와 명상', luckyItem: '화이트·실버 액세서리' },
+  水: { routine: '반신욕과 따뜻한 차 마시기', luckyItem: '네이비 톤 옷' },
+};
+
+function getBand(ratio: number): Band {
+  if (ratio >= 45) return 'high';
+  if (ratio >= 30) return 'mid';
+  return 'low';
+}
 
 // ─── MAIN HANDLER ────────────────────────────────────────
 Deno.serve(async (req: Request) => {
@@ -135,36 +161,78 @@ Deno.serve(async (req: Request) => {
       delete sajuData[key];
     }
 
-    // ─── 발달오행에서 가장 약한 원소 찾기 ─────────────────
+    // ─── 발달오행에서 대표(최댓값)/부족(최솟값) 오행 찾기 ─────
     const ohaeng = (sajuData['발달오행'] as Record<string, number> | undefined) ?? {};
-    let weakest: ElementKey = ELEMENT_ORDER[0];
-    let weakestValue = Infinity;
+    let dominant: ElementKey = ELEMENT_ORDER[0];
+    let dominantRatio = -Infinity;
+    let weak: ElementKey = ELEMENT_ORDER[0];
+    let weakRatio = Infinity;
     for (const key of ELEMENT_ORDER) {
       const value = ohaeng[key] ?? 0;
-      if (value < weakestValue) {
-        weakestValue = value;
-        weakest = key;
+      if (value > dominantRatio) {
+        dominantRatio = value;
+        dominant = key;
+      }
+      if (value < weakRatio) {
+        weakRatio = value;
+        weak = key;
       }
     }
 
-    const prescription = PRESCRIPTIONS[weakest];
     const distribution = ELEMENT_ORDER.reduce((acc, key) => {
       acc[key] = ohaeng[key] ?? 0;
       return acc;
     }, {} as Record<ElementKey, number>);
 
+    const band = getBand(dominantRatio);
+    const diagnosis = DIAGNOSIS[dominant][band];
+    const boost = BOOST[weak];
+
+    const resultPayload = {
+      name: name || '당신',
+      distribution,
+      dominantElement: dominant,
+      dominantElementName: ELEMENT_NAME[dominant],
+      dominantRatio,
+      weakElement: weak,
+      weakElementName: ELEMENT_NAME[weak],
+      weakRatio,
+      animal: ELEMENT_ANIMAL[dominant],
+      diagnosisTitle: diagnosis.title,
+      diagnosisDescription: diagnosis.description,
+      routine: boost.routine,
+      luckyItem: boost.luckyItem,
+    };
+
+    // ─── 결과 저장 (공유 링크용) ─────────────────────────
+    let resultId = crypto.randomUUID();
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      const { data: resultInsert } = await supabase
+        .from('oheng_results')
+        .insert({
+          name: name || '당신',
+          distribution,
+          dominant_element: dominant,
+          dominant_ratio: dominantRatio,
+          weak_element: weak,
+          weak_ratio: weakRatio,
+          prescription: resultPayload,
+        })
+        .select('id')
+        .maybeSingle();
+      resultId = resultInsert?.id ?? resultId;
+    } catch (err) {
+      console.error('oheng_results 저장 실패 (공유 링크 없이 진행):', err);
+    }
+
     return jsonResponse(req, {
       success: true,
-      name: name || '당신',
-      element: prescription.name,
-      elementRatio: weakestValue,
-      animal: prescription.animal,
-      taste: prescription.taste,
-      food: prescription.food,
-      color: prescription.color,
-      colorHex: prescription.colorHex,
-      narration: prescription.narration,
-      distribution,
+      resultId,
+      ...resultPayload,
     });
   } catch (err) {
     console.error('analyze-oheng-prescription 오류:', err);

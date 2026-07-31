@@ -1,15 +1,18 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import TopNav from './TopNav';
+import { useCallback, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import TestTopNav from '@/components/TestTopNav';
 import Landing from './Landing';
 import InputForm from './InputForm';
 import AnalyzingScreen from './AnalyzingScreen';
 import ResultCard from './ResultCard';
 import { supabase } from '@/lib/supabase';
+import { fetchOhengResultById } from '@/lib/oheng';
+import { OHENG_COLORS as C } from '@/constants/ohengTheme';
 import type { OhengFormState, OhengPrescription } from '@/types/oheng';
 
-type Step = 'landing' | 'input' | 'analyzing' | 'result' | 'error';
+type Step = 'loading' | 'landing' | 'input' | 'analyzing' | 'result' | 'error';
 
 const INITIAL_FORM: OhengFormState = {
   gender: null,
@@ -18,10 +21,22 @@ const INITIAL_FORM: OhengFormState = {
   birthTimeUnknown: true,
 };
 
-export default function OhengClient() {
-  const [step, setStep] = useState<Step>('landing');
+export default function OhengClient({ resultId }: { resultId?: string }) {
+  const [step, setStep] = useState<Step>(resultId ? 'loading' : 'landing');
   const [form, setForm] = useState<OhengFormState>(INITIAL_FORM);
   const [result, setResult] = useState<OhengPrescription | null>(null);
+
+  useEffect(() => {
+    if (!resultId) return;
+    fetchOhengResultById(resultId).then(saved => {
+      if (saved) {
+        setResult(saved);
+        setStep('result');
+      } else {
+        setStep('error');
+      }
+    });
+  }, [resultId]);
 
   const handleFormChange = useCallback((patch: Partial<OhengFormState>) => {
     setForm(prev => ({ ...prev, ...patch }));
@@ -44,8 +59,12 @@ export default function OhengClient() {
         minDelay,
       ]);
       if (error || !data?.success) throw new Error(error?.message || '분석 실패');
-      setResult(data as OhengPrescription);
+      const prescription = data as OhengPrescription;
+      setResult(prescription);
       setStep('result');
+      if (prescription.resultId && typeof window !== 'undefined') {
+        window.history.replaceState(null, '', `/oheng/${prescription.resultId}`);
+      }
     } catch {
       setStep('error');
     }
@@ -55,37 +74,52 @@ export default function OhengClient() {
     setForm(INITIAL_FORM);
     setResult(null);
     setStep('landing');
+    window.scrollTo(0, 0);
   }, []);
 
   const handleBack = useCallback(() => {
-    if (step === 'input') setStep('landing');
-    else if (step === 'analyzing' || step === 'result' || step === 'error') setStep('input');
+    setStep(step === 'input' ? 'landing' : 'input');
   }, [step]);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#E9E2CE', display: 'flex', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#FFFFFF', display: 'flex', justifyContent: 'center' }}>
       <div
+        className="w-full max-w-[440px] md:max-w-[600px]"
         style={{
-          width: '100%',
-          maxWidth: '440px',
           minHeight: '100vh',
-          backgroundColor: '#F3E7C9',
+          backgroundColor: '#FFFFFF',
           position: 'relative',
           boxShadow: '0 0 40px rgba(0,0,0,0.08)',
         }}
       >
-        <TopNav onBack={step === 'landing' ? undefined : handleBack} />
-        {step === 'landing' && <Landing onStart={() => setStep('input')} />}
+        <motion.div
+          animate={{ opacity: step === 'analyzing' ? 0 : 1 }}
+          transition={{ duration: 0.25 }}
+          style={{ pointerEvents: step === 'analyzing' ? 'none' : 'auto' }}
+        >
+          <TestTopNav
+            bgColor="#FFFFFF"
+            logoColor={C.text}
+            xColor={C.text}
+            onBack={step === 'input' || step === 'error' ? handleBack : undefined}
+          />
+        </motion.div>
+        {step === 'loading' && (
+          <div style={{ padding: '120px 20px', textAlign: 'center' }}>
+            <p style={{ fontSize: '14px', color: C.textSecondary }}>결과를 불러오는 중...</p>
+          </div>
+        )}
+        {step === 'landing' && <Landing onStart={() => setStep('input')} thumbnailSrc="/oheng/landing-thumbnail.png" />}
         {step === 'input' && <InputForm form={form} onChange={handleFormChange} onSubmit={handleSubmit} />}
         {step === 'analyzing' && <AnalyzingScreen />}
         {step === 'result' && result && <ResultCard result={result} onRestart={handleRestart} />}
         {step === 'error' && (
-          <div style={{ padding: '80px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            <p style={{ fontSize: '16px', color: '#2B2013', marginBottom: '20px' }}>분석 중 문제가 발생했어요. 다시 시도해 주세요.</p>
+          <div style={{ padding: '12px 20px 80px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+            <p style={{ fontSize: '16px', color: C.text, marginBottom: '20px' }}>분석 중 문제가 발생했어요. 다시 시도해 주세요.</p>
             <button
               type="button"
               onClick={handleRestart}
-              style={{ height: '52px', padding: '0 24px', borderRadius: '16px', backgroundColor: '#2B2013', color: '#F3E7C9', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}
+              style={{ height: '52px', padding: '0 24px', borderRadius: '16px', backgroundColor: C.blue, color: C.textOnBlue, border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}
             >
               처음으로
             </button>

@@ -37,4 +37,10 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #13878 | 4:12 PM | 🔵 | Multiple share UI patterns identified across test suite | ~598 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15173 | 8:03 AM | 🔵 | Stock test uses inline Toss-style design system with dark glassmorphic UI | ~416 |
 </claude-mem-context>

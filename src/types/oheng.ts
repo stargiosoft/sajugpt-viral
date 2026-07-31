@@ -1,5 +1,7 @@
 export type Gender = 'female' | 'male';
 
+export type ElementKey = '木' | '火' | '土' | '金' | '水';
+
 export interface OhengFormState {
   gender: Gender | null;
   birthday: string;       // "YYYY-MM-DD"
@@ -9,14 +11,18 @@ export interface OhengFormState {
 
 export interface OhengPrescription {
   success: boolean;
+  resultId: string;
   name: string;
-  element: string;
-  elementRatio: number;
+  distribution: Record<ElementKey, number>;
+  dominantElement: ElementKey;
+  dominantElementName: string;
+  dominantRatio: number;
+  weakElement: ElementKey;
+  weakElementName: string;
+  weakRatio: number;
   animal: string;
-  taste: string;
-  food: string;
-  color: string;
-  colorHex: string;
-  narration: string;
-  distribution: Record<'木' | '火' | '土' | '金' | '水', number>;
+  diagnosisTitle: string;
+  diagnosisDescription: string;
+  routine: string;
+  luckyItem: string;
 }

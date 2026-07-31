@@ -11,7 +11,7 @@ import MoneyAnalyzing from './MoneyAnalyzing';
 import MoneyResultCard from './MoneyResultCard';
 import MoneyCTA from './MoneyCTA';
 import ShareView from './ShareView';
-import MoneyCommentBoard from './MoneyCommentBoard';
+import CommentBoard from '@/components/CommentBoard';
 import RecommendSection from '@/components/RecommendSection';
 import SajuGPTBanner from '@/components/SajuGPTBanner';
 import { generateMoneyTimelineResult, fetchMoneyTimelineResultById } from '@/lib/moneyTimeline';
@@ -229,8 +229,15 @@ export default function MoneyClient({ resultId }: Props) {
                 <motion.div variants={FADE_UP} style={{ marginTop: '-8px' }}>
                   <SajuGPTBanner featureType="money_timeline" resultId={result.resultId} />
                 </motion.div>
-                <motion.div variants={FADE_UP} style={{ marginTop: '8px' }}>
-                  <MoneyCommentBoard />
+                <motion.div variants={FADE_UP} style={{ marginTop: '48px' }}>
+                  <CommentBoard
+                    featureType="money_timeline"
+                    storageKey="money_timeline_liked_comments"
+                    placeholder="내 돈복은 어떤가요?"
+                    themeColor="#735EF2"
+                    inputBg="#FFFFFF"
+                    disabledBg="#DCE0E5"
+                  />
                 </motion.div>
               </motion.div>
             )}

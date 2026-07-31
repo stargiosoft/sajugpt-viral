@@ -26,4 +26,17 @@
 | #13846 | 3:50 PM | 🔵 | Share functionality implementation patterns and mobile optimizations | ~316 |
 | #13845 | " | 🔵 | Test catalog registration system and component patterns analyzed | ~558 |
 | #13844 | " | 🔵 | Analyzed state machine architecture from existing multi-step viral test | ~843 |
+
+### Jul 29, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #14925 | 2:26 PM | 🔵 | Code audit reveals duplication patterns in sajugpt-viral test verticals | ~1030 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15323 | 2:51 PM | ⚖️ | Reverted ShareRow consolidation for court/gisaeng/autopsy features | ~347 |
+| #15316 | 2:47 PM | 🔄 | Deleted 4 duplicate share row components after ShareRow consolidation | ~295 |
 </claude-mem-context>

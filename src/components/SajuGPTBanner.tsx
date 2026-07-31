@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { trackEvent, trackSajuGPTClick, type FeatureType } from '@/lib/analytics';
 
 interface Props {
@@ -12,11 +11,11 @@ interface Props {
 
 // 캐릭터 크리에이티브(사주GPT 유도 카피 포함)와 사주GPT 앱 홍보 크리에이티브 5종, 전달받은 파일명(banner_1~5) 순서 그대로
 const BANNER_IMAGES = [
-  '/ads/sajugpt-banner-baekbal-witch-v2.png',
-  '/ads/sajugpt-banner-app-1.png',
-  '/ads/sajugpt-banner-kim-taeyang-v2.png',
-  '/ads/sajugpt-banner-namgi-tarot-v2.png',
-  '/ads/sajugpt-banner-app-2.png',
+  '/ads/sajugpt-banner-baekbal-witch-v2.webp',
+  '/ads/sajugpt-banner-app-1.webp',
+  '/ads/sajugpt-banner-kim-taeyang-v2.webp',
+  '/ads/sajugpt-banner-namgi-tarot-v2.webp',
+  '/ads/sajugpt-banner-app-2.webp',
 ];
 
 // 양 끝에 클론 슬라이드를 붙여, 마지막→처음으로 넘어갈 때도 역방향으로 되감기지 않고 항상 좌→우로 흐르게 함.
@@ -129,19 +128,25 @@ export default function SajuGPTBanner({ featureType, resultId }: Props) {
           transition: isDragging || !transitionEnabled ? 'none' : 'transform 0.45s ease-in-out',
         }}
       >
-        {EXTENDED_IMAGES.map((src, i) => (
-          <div key={`${src}-${i}`} className="relative h-full shrink-0" style={{ width: `${100 / EXTENDED_IMAGES.length}%` }}>
-            <Image
-              src={src}
-              alt="사주GPT로 더 알아보기"
-              draggable={false}
-              fill
-              priority
-              sizes="600px"
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
-        ))}
+        {EXTENDED_IMAGES.map((src, i) => {
+          // next/image의 최적화 파이프라인(첫 요청 시 서버에서 리사이즈)이 초기 로드 지연의 원인이라
+          // 정적 파일을 그대로 서빙하는 일반 img로 전환 — 보이는 슬라이드만 즉시, 좌우는 eager로 미리 받아둠
+          const isCurrent = i === trackIndex;
+          const isNeighbor = Math.abs(i - trackIndex) === 1;
+          return (
+            <div key={`${src}-${i}`} className="relative h-full shrink-0" style={{ width: `${100 / EXTENDED_IMAGES.length}%` }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={src}
+                alt="사주GPT로 더 알아보기"
+                draggable={false}
+                loading={isCurrent || isNeighbor ? 'eager' : 'lazy'}
+                fetchPriority={isCurrent ? 'high' : 'auto'}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          );
+        })}
       </div>
     </Link>
   );

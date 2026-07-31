@@ -6,10 +6,9 @@ import Image from 'next/image';
 
 import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
 import GhostCTAButton from '@/components/ghost-tarot/GhostCTAButton';
-import GhostCommentSection from '@/components/ghost-tarot/GhostCommentSection';
+import CommentBoard from '@/components/CommentBoard';
 import RecommendSection from '@/components/RecommendSection';
 import SajuGPTBanner from '@/components/SajuGPTBanner';
-import type { CommentFeatureType } from '@/lib/ghost-tarot/comments';
 import TarotShareRow from './TarotShareRow';
 import Toast from '@/components/Toast';
 import { saveImage, captureCardImage, isMobileDevice } from '@/lib/share';
@@ -682,8 +681,14 @@ export default function TarotResultCard({ config, card, result, error, onReset }
                 <div style={{ marginTop: 20 }}>
                   <SajuGPTBanner featureType={config.featureType} resultId={result?.id} />
                 </div>
-                <div style={{ marginTop: 36 }}>
-                  <GhostCommentSection featureType={config.featureType as CommentFeatureType} />
+                <div style={{ marginTop: 48 }}>
+                  <CommentBoard
+                    featureType={config.featureType}
+                    storageKey={`${config.featureType}_liked_comments`}
+                    placeholder="너 생각이 궁금해!"
+                    themeColor="#B32F17"
+                    dark
+                  />
                 </div>
               </div>
             )}

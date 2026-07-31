@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import LandingCTAButton from '@/components/LandingCTAButton';
 import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
-import MoneyCommentBoard from './MoneyCommentBoard';
+import CommentBoard from '@/components/CommentBoard';
 import ShareIconRow from './ShareIconRow';
 import { MONEY_COLORS as C } from '@/constants/moneyTimelineTheme';
 
@@ -16,14 +16,14 @@ export default function MoneyLanding({ onStart }: Props) {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex flex-col items-center"
-      style={{ paddingBottom: '40px' }}
-    >
-      <div className="w-full" style={{ position: 'relative', aspectRatio: '1448 / 1086' }}>
+    <div className="flex flex-col items-center" style={{ paddingBottom: '40px' }}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="w-full"
+        style={{ position: 'relative', aspectRatio: '1448 / 1086' }}
+      >
         <Image
           src="/money-timeline/thumbnail-v3.png"
           alt="내 돈복 테스트"
@@ -32,10 +32,16 @@ export default function MoneyLanding({ onStart }: Props) {
           sizes="(max-width: 440px) 100vw, (max-width: 768px) 440px, 600px"
           style={{ objectFit: 'cover' }}
         />
-      </div>
+      </motion.div>
 
       <div className="w-full flex flex-col items-center" style={{ padding: '20px 16px 0' }}>
-        <div className="w-full" style={{ marginBottom: '32px' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="w-full"
+          style={{ marginBottom: '32px' }}
+        >
           <LandingCTAButton
             onClick={onStart}
             label="시작하기"
@@ -44,9 +50,15 @@ export default function MoneyLanding({ onStart }: Props) {
             hoverBackground={C.goldHover}
             textStyle={{ fontWeight: 500, fontSize: '16px', WebkitTextStroke: `0.6px ${C.textOnGold}` }}
           />
-        </div>
+        </motion.div>
 
-        <div className="w-full" style={{ marginBottom: '28px' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          className="w-full"
+          style={{ marginBottom: '28px' }}
+        >
           <ShareIconRow
             shareContent={{
               featureType: 'money_timeline',
@@ -58,12 +70,25 @@ export default function MoneyLanding({ onStart }: Props) {
             }}
           />
           <SajuGPTLinkButton featureType="money_timeline" color={C.textTertiary} hoverColor={C.gold} />
-        </div>
+        </motion.div>
 
-        <div className="w-full">
-          <MoneyCommentBoard />
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="w-full"
+          style={{ marginTop: '20px' }}
+        >
+          <CommentBoard
+            featureType="money_timeline"
+            storageKey="money_timeline_liked_comments"
+            placeholder="내 돈복은 어떤가요?"
+            themeColor="#735EF2"
+            inputBg="#FFFFFF"
+            disabledBg="#DCE0E5"
+          />
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 }

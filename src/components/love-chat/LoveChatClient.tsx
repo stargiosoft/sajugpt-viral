@@ -11,7 +11,7 @@ import Question from './Question';
 import KakaoResultHeader from './KakaoResultHeader';
 import ResultCard from './ResultCard';
 import ShareView from './ShareView';
-import CommentBoard from './CommentBoard';
+import CommentBoard from '@/components/CommentBoard';
 import RecommendSection from '@/components/RecommendSection';
 import SajuGPTBanner from '@/components/SajuGPTBanner';
 import { QUESTIONS } from '@/data/questions';
@@ -190,8 +190,15 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
                 <div style={{ marginTop: '12px', padding: '0 16px' }}>
                   <SajuGPTBanner featureType="love_chat" />
                 </div>
-                <div style={{ marginTop: '24px', padding: '0 16px 80px' }}>
-                  <CommentBoard />
+                <div style={{ marginTop: '48px', padding: '0 16px 80px' }}>
+                  <CommentBoard
+                    featureType="love_chat"
+                    storageKey="love_chat_liked_comments"
+                    placeholder="여러분은 어떤 카톡 스타일인가요?"
+                    themeColor="#3D6FE0"
+                    inputBg="#FFFFFF"
+                    disabledBg="#DCE0E5"
+                  />
                 </div>
               </div>
             </motion.div>

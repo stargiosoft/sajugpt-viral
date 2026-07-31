@@ -8,4 +8,11 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #13875 | 4:12 PM | 🔵 | Alternative share button pattern with Kakao-first strategy | ~694 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15323 | 2:51 PM | ⚖️ | Reverted ShareRow consolidation for court/gisaeng/autopsy features | ~347 |
+| #15316 | 2:47 PM | 🔄 | Deleted 4 duplicate share row components after ShareRow consolidation | ~295 |
 </claude-mem-context>

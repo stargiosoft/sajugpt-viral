@@ -16,4 +16,16 @@
 |----|------|---|-------|------|
 | #13930 | 8:16 AM | 🟣 | Added Hakgyoansim Jayusigan font to platform font library | ~503 |
 | #13928 | 8:15 AM | 🔵 | Platform font library inventory via globals.css @font-face declarations | ~557 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15372 | 3:08 PM | 🟣 | SEO verification and structured data deployed to production | ~358 |
+| #15360 | 3:05 PM | 🟣 | SEO verification and structured data changes committed to repository | ~296 |
+| #15354 | 3:04 PM | 🟣 | Naver site verification meta tag added | ~258 |
+| #15334 | 2:57 PM | 🟣 | JSON-LD structured data added for 광필연구소 organization markup | ~267 |
+| #15318 | 2:49 PM | 🟣 | Schema.org Organization markup added for 광필연구소 | ~278 |
+| #15315 | 2:47 PM | 🔵 | Sitemap configuration already exists for sajugpt-viral | ~245 |
+| #15313 | " | 🔵 | sajugpt-viral site identified as 광필연구소 with existing SEO metadata | ~239 |
 </claude-mem-context>

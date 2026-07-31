@@ -8,4 +8,13 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #10174 | 4:33 PM | 🔄 | SajuCourtClient migrated from local convertTo24Hour to shared parseKoreanTimeTo24Hour | ~460 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15323 | 2:51 PM | ⚖️ | Reverted ShareRow consolidation for court/gisaeng/autopsy features | ~347 |
+| #15316 | 2:47 PM | 🔄 | Deleted 4 duplicate share row components after ShareRow consolidation | ~295 |
+| #15309 | 2:46 PM | 🔄 | Migrated CourtLanding to use shared ShareRow component | ~274 |
+| #15308 | " | 🔄 | Updated CourtLanding import to use shared ShareRow component | ~314 |
 </claude-mem-context>

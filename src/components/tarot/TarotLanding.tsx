@@ -4,8 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 import GhostSealButton from '@/components/ghost-tarot/GhostSealButton';
-import GhostCommentSection from '@/components/ghost-tarot/GhostCommentSection';
-import type { CommentFeatureType } from '@/lib/ghost-tarot/comments';
+import CommentBoard from '@/components/CommentBoard';
 import { GHOST_BRUSH_FONT } from '@/lib/ghost-tarot/theme';
 import TarotShareRow from './TarotShareRow';
 import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
@@ -115,8 +114,14 @@ export default function TarotLanding({
       </motion.div>
 
       {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (
-        <div style={{ marginTop: 80, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}>
-          <GhostCommentSection featureType={config.featureType as CommentFeatureType} />
+        <div style={{ marginTop: 48, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}>
+          <CommentBoard
+            featureType={config.featureType}
+            storageKey={`${config.featureType}_liked_comments`}
+            placeholder="너 생각이 궁금해!"
+            themeColor="#B32F17"
+            dark
+          />
         </div>
       )}
     </motion.div>

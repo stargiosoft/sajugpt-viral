@@ -20,4 +20,12 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #13894 | 4:15 PM | 🔵 | Comment system database schema and theme customization patterns examined | ~257 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15265 | 2:24 PM | 🔵 | Correct feature identified: oheng (인간 사용설명서) not night-manual | ~269 |
+| #15178 | 8:06 AM | 🟣 | Five Elements test theme system created | ~267 |
+| #15171 | 8:03 AM | 🔵 | Theme constants pattern for test features | ~373 |
 </claude-mem-context>

@@ -13,7 +13,7 @@ import DeangResultCard from './DeangResultCard';
 import DeangShareButtons from './DeangShareButtons';
 import DeangShareRow from './DeangShareRow';
 import DeangCTA from './DeangCTA';
-import DeangCommentSection from './DeangCommentSection';
+import CommentBoard from '@/components/CommentBoard';
 import RecommendSection from '@/components/RecommendSection';
 import SajuGPTBanner from '@/components/SajuGPTBanner';
 import { generateDeangResult, fetchDeangResultById } from '@/lib/deangSaju';
@@ -215,8 +215,13 @@ export default function DeangClient({ resultId }: Props) {
                   <div style={{ marginTop: '-4px' }}>
                     <SajuGPTBanner featureType="deang_saju" resultId={result.resultId} />
                   </div>
-                  <div style={{ marginTop: '4px' }}>
-                    <DeangCommentSection />
+                  <div style={{ marginTop: '48px' }}>
+                    <CommentBoard
+                      featureType="deang_saju"
+                      storageKey="deang_saju_liked_comments"
+                      placeholder="같이 이야기해요 :)"
+                      themeColor="#58B889"
+                    />
                   </div>
                 </div>
               </motion.div>

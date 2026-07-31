@@ -8,4 +8,16 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #13879 | 4:13 PM | 🔵 | Found 3-icon circular share pattern in TarotShareRow component | ~682 |
+
+### Jul 29, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #14925 | 2:26 PM | 🔵 | Code audit reveals duplication patterns in sajugpt-viral test verticals | ~1030 |
+
+### Jul 31, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15438 | 3:45 PM | 🔄 | Replaced GhostCommentSection with shared CommentBoard in tarot landing pages | ~343 |
 </claude-mem-context>
