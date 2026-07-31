@@ -60,11 +60,11 @@ function categoryOf(sipsung: string): SipsungCategory {
 }
 
 const CATEGORY_BASE_WEIGHT: Record<SipsungCategory, number> = {
-  재성: 24,
-  식상: 14,
-  관성: 2,
-  비겁: -12,
-  인성: -8,
+  재성: 22,
+  식상: 18,
+  관성: 13,
+  비겁: 7,
+  인성: 7,
 };
 
 function yongsinBonus(
@@ -73,20 +73,20 @@ function yongsinBonus(
   huisin: Set<string>,
   gisin: Set<string>,
 ): number {
-  if (gisin.has(category)) return -12;
-  if (yongsin.has(category)) return 14;
-  if (huisin.has(category)) return 7;
+ if(yongsin.has(category)) return 15;
+ if(huisin.has(category)) return 8;
+ if(gisin.has(category)) return -5;
   return 0;
 }
 
 const TWELVE_STAGE_BONUS: Record<string, number> = {
-  '건록': 16, '제왕': 16,
+  '건록': 12, '제왕': 12,
   '관대': 8, '장생': 8,
-  '목욕': 2, '양': 2,
-  '태': 0,
-  '쇠': -2,
-  '병': -8,
-  '사': -16, '묘': -16, '절': -16,
+  '목욕': 4, '양': 4,
+  '태': 2,
+  '쇠': 0,
+  '병': -3,
+  '사': -5, '묘': -5, '절': -5,
 };
 
 function normalizeStage(stage: string): string {
@@ -102,16 +102,65 @@ function twelveStageBonus(stage: string | undefined): number {
   return TWELVE_STAGE_BONUS[normalizeStage(stage)] ?? 0;
 }
 
-function comboAdjustment(catCheon: SipsungCategory, catJi: SipsungCategory): number {
-  const has = (c: SipsungCategory) => catCheon === c || catJi === c;
+function comboAdjustment(
+  catCheon: SipsungCategory,
+  catJi: SipsungCategory,
+): number {
+  const has = (c: SipsungCategory) =>
+    catCheon === c || catJi === c;
   const hasBoth = (a: SipsungCategory, b: SipsungCategory) =>
-    (catCheon === a && catJi === b) || (catCheon === b && catJi === a);
-
-  if (hasBoth('식상', '재성')) return 8;
-  if (has('비겁') && has('재성')) return -8;
-  if (hasBoth('관성', '인성')) return 4;
-  if (hasBoth('재성', '관성')) return 4;
-  if (hasBoth('식상', '관성')) return -4;
+    (catCheon === a && catJi === b) ||
+    (catCheon === b && catJi === a);
+  // ─── 재물 극대화 조합 ─────────────────────
+  // 식상생재 / 상관생재
+  if (hasBoth('식상', '재성'))
+    return 20;
+  // 재물 + 권한 / 사업 확장
+  if (hasBoth('재성', '관성'))
+    return 18;
+  // 재성 자체 강화
+  if (catCheon === '재성' && catJi === '재성')
+    return 20;
+  // ─── 성장/성과 조합 ─────────────────────
+  // 관인상생 (직업·전문성)
+  if (hasBoth('관성', '인성'))
+    return 12;
+  // 식상+관성 (능력 → 사회적 성과)
+  if (hasBoth('식상', '관성'))
+    return 10;
+  // 식상 발현
+  if (catCheon === '식상' && catJi === '식상')
+    return 12;
+  // 관성 안정 성장
+  if (catCheon === '관성' && catJi === '관성')
+    return 10;
+  // ─── 전문성/지식 활용 ───────────────────
+  // 인성 → 식상 (배움 활용)
+  if (hasBoth('인성', '식상'))
+    return 9;
+  // 인성 → 재성 (지식 자산화)
+  if (hasBoth('인성', '재성'))
+    return 8;
+  // ─── 경쟁/확장 조합 ─────────────────────
+  // 비겁 + 재성 (경쟁 속 돈)
+  if (hasBoth('비겁', '재성'))
+    return 8;
+  // 비겁 + 식상 (활동력)
+  if (hasBoth('비겁', '식상'))
+    return 7;
+  // 비겁 + 관성 (경쟁력)
+  if (hasBoth('비겁', '관성'))
+    return 5;
+  // 비겁 + 인성 (인맥/정보)
+  if (hasBoth('비겁', '인성'))
+    return 5;
+  // ─── 단일 성향 ─────────────────────────
+  // 비겁 과다: 독립성은 있으나 재물 변동성
+  if (catCheon === '비겁' && catJi === '비겁')
+    return 3;
+  // 인성 과다: 준비/축적형
+  if (catCheon === '인성' && catJi === '인성')
+    return 4;
   return 0;
 }
 
@@ -176,7 +225,7 @@ function computeDaeunPeriods(
       + twelveStageBonus(stage)
       + comboAdjustment(catCheon, catJi);
 
-    const score = Math.round(Math.max(5, Math.min(98, 50 + base)));
+    const score = Math.round(Math.max(5, Math.min(100, 50 + base)));
 
     let status = '➡️ 평탄/유지기';
     if (score >= 78) status = '🔥 대박/골든타임';
@@ -231,12 +280,14 @@ function classifyStatus(score: number): string {
   return '⚠️ 신중/리스크 관리기';
 }
 
-function rescaleScoreWithTierBoost(rawScore: number): number {
-  if (rawScore >= 60) return Math.round(rawScore * 1.5);
-  if (rawScore >= 45) return Math.round(rawScore * 1.6);
-  if (rawScore >= 30) return Math.round(rawScore * 1.8);
-  if (rawScore >= 15) return Math.round(rawScore * 2.2);
-  return Math.round(rawScore * 2.8);
+function rescaleScoreWithTierBoost(rawScore:number){
+  if(rawScore >= 80)
+    return Math.min(95, rawScore + 5);
+  if(rawScore >= 60)
+    return Math.min(90, rawScore + 8);
+  if(rawScore >= 40)
+    return rawScore + 10;
+  return rawScore + 5;
 }
 
 function buildDisplayPeriods(daeunPeriods: DaeunPeriod[], decades: number[]) {
@@ -247,7 +298,7 @@ function buildDisplayPeriods(daeunPeriods: DaeunPeriod[], decades: number[]) {
         Math.abs(curr.ageStart + 5 - repAge) < Math.abs(prev.ageStart + 5 - repAge) ? curr : prev,
       );
 
-    const boostedScore = Math.min(98, rescaleScoreWithTierBoost(matched.score));
+    const boostedScore = Math.min(95, rescaleScoreWithTierBoost(matched.score));
 
     return {
       ageLabel: `${decade}대`,
@@ -471,11 +522,13 @@ Deno.serve(async (req: Request) => {
     const bestPeriod = buildBestPeriod(personalPeriods, yongsin, hasJaegoGwiin, ageWindow);
     const bestDecadeBase = Math.floor(bestPeriod.ageStart / 10) * 10;
 
-    // 2) 해당 연령대 점수를 최상단으로 부스트 (96점 이상)
+    // 2) 해당 연령대 점수를 최상단으로 부스트 (100점)
     periods.forEach((p) => {
       if (p.ageStart === bestDecadeBase) {
-        p.score = Math.max(p.score, 96);
+        p.score = 100;
         p.status = classifyStatus(p.score);
+      } else {
+        p.score = Math.min(p.score, 100);
       }
     });
 
