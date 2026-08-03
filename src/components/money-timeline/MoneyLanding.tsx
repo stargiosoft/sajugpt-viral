@@ -65,7 +65,7 @@ export default function MoneyLanding({ onStart }: Props) {
               testId: 'money-timeline',
               title: '내 돈복 테스트',
               description: '내 사주 속 돈의 흐름을 분석해 드려요.',
-              shareUrl: `${origin}/money-timeline`,
+              shareUrl: `${origin}/money-timeline?v=2`,
               imageUrl: `${origin}/money-timeline/og-share.png?v=2`,
             }}
             copyColor={C.gold}

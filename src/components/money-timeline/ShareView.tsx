@@ -18,7 +18,7 @@ interface Props {
 
 export default function ShareView({ resultId, profile, cardRef, onReset }: Props) {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const shareUrl = `${origin}/money-timeline/${resultId}`;
+  const shareUrl = `${origin}/money-timeline/${resultId}?v=2`;
 
   const { saving, handleSave } = useShareActions({
     featureType: 'money_timeline',
