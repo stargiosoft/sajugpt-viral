@@ -67,6 +67,7 @@ export default function OhengClient({ resultId }: { resultId?: string }) {
 
   const handleSubmit = useCallback(async () => {
     setStep('analyzing');
+    window.scrollTo(0, 0);
     try {
       const minDelay = new Promise(resolve => setTimeout(resolve, 2200));
       const [{ data, error }] = await Promise.all([

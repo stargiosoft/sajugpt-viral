@@ -38,7 +38,7 @@ export default function ShareView({ character, cardRef, onReset }: Props) {
           label={saving ? '저장 중...' : '이미지 저장'}
           onClick={() => handleSave(cardRef)}
           disabled={saving}
-          style={{ height: '50px', flex: 1 }}
+          style={{ height: '50px', flex: 2 }}
           bgStyle={{ background: '#FEE500', borderRadius: '12px' }}
           textStyle={{ fontSize: '17px', fontWeight: 500, color: '#333333', paddingTop: '4px' }}
         />

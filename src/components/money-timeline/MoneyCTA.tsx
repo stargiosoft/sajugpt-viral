@@ -79,7 +79,7 @@ export default function MoneyCTA({ resultId }: Props) {
         style={{ height: '56px' }}
         bgStyle={{ backgroundColor: C.gold, borderRadius: '16px', border: 'none' }}
         hoverBackground={C.goldHover}
-        textStyle={{ color: C.textOnGold, fontWeight: 500, fontSize: '16px', letterSpacing: '-0.32px', WebkitTextStroke: `0.5px ${C.textOnGold}` }}
+        textStyle={{ color: C.textOnGold, fontWeight: 500, fontSize: '14px', letterSpacing: '-0.32px', WebkitTextStroke: `0.5px ${C.textOnGold}` }}
       />
       </div>
     </div>

@@ -39,7 +39,7 @@ export default function ShareView({ resultId, profile, cardRef, onReset }: Props
             height="56px"
             borderRadius="16px"
             fontWeight={500}
-            fontSize="16px"
+            fontSize="14px"
             letterSpacing="-0.32px"
             hoverBackground="rgb(212, 206, 255)"
             onClick={onReset}
@@ -51,10 +51,10 @@ export default function ShareView({ resultId, profile, cardRef, onReset }: Props
           label={saving ? '저장 중...' : '이미지 저장'}
           onClick={() => handleSave(cardRef)}
           disabled={saving}
-          style={{ height: '56px', flex: 1 }}
+          style={{ height: '56px', flex: 2 }}
           bgStyle={{ background: C.gold, borderRadius: '16px' }}
           hoverBackground={C.goldHover}
-          textStyle={{ fontSize: '16px', fontWeight: 500, letterSpacing: '-0.32px', color: C.textOnGold, paddingTop: '4px', paddingBottom: '2px', WebkitTextStroke: `0.6px ${C.textOnGold}` }}
+          textStyle={{ fontSize: '14px', fontWeight: 500, letterSpacing: '-0.32px', color: C.textOnGold, paddingTop: '4px', paddingBottom: '2px', WebkitTextStroke: `0.6px ${C.textOnGold}` }}
         />
       </div>
 

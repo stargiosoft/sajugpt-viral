@@ -49,7 +49,7 @@ export default function MoneyLanding({ onStart }: Props) {
             background={C.gold}
             color={C.textOnGold}
             hoverBackground={C.goldHover}
-            textStyle={{ fontWeight: 500, fontSize: '16px', WebkitTextStroke: `0.6px ${C.textOnGold}` }}
+            textStyle={{ fontWeight: 500, fontSize: '14px', WebkitTextStroke: `0.6px ${C.textOnGold}` }}
           />
         </motion.div>
 

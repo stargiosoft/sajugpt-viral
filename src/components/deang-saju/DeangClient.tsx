@@ -198,7 +198,7 @@ export default function DeangClient({ resultId }: Props) {
                         <span style={{ WebkitTextStroke: '0.3px rgb(55, 141, 99)' }}>다시하기</span>
                       </OutlineBoxButton>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-[2]">
                       <DeangShareButtons cardRef={resultCardRef} resultId={result.resultId} breedName={result.profile.breed.breedName} />
                     </div>
                   </div>

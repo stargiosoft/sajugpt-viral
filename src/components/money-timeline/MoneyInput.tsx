@@ -145,7 +145,7 @@ export default function MoneyInput({
             style={{ height: '56px' }}
             bgStyle={{ backgroundColor: isValid ? C.gold : '#f2f2f2', borderRadius: '16px', border: 'none' }}
             hoverBackground={C.goldHover}
-            textStyle={{ color: isValid ? C.textOnGold : C.placeholder, fontWeight: 500, fontSize: '16px', WebkitTextStroke: `0.6px ${isValid ? C.textOnGold : C.placeholder}` }}
+            textStyle={{ color: isValid ? C.textOnGold : C.placeholder, fontWeight: 500, fontSize: '14px', WebkitTextStroke: `0.6px ${isValid ? C.textOnGold : C.placeholder}` }}
           />
         </motion.div>
 

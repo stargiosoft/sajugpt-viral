@@ -52,7 +52,7 @@ export default function ResultCard({ result, onRestart }: { result: OhengPrescri
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: 'easeOut' }}
-      style={{ minHeight: 'calc(100vh - 52px)', padding: '12px 20px 48px', backgroundColor: '#FFFFFF' }}>
+      style={{ minHeight: 'calc(100vh - 52px)', padding: '12px 16px 48px', backgroundColor: '#FFFFFF' }}>
       <div ref={cardRef} style={{ backgroundColor: '#FFFFFF', padding: '4px' }}>
         <div style={{ textAlign: 'center' }}>
             <div style={{ backgroundColor: C.panelBg, borderRadius: '24px', padding: '20px', textAlign: 'left' }}>
