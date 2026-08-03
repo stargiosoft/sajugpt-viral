@@ -9,6 +9,7 @@ import AnalyzingScreen from './AnalyzingScreen';
 import ResultCard from './ResultCard';
 import { supabase } from '@/lib/supabase';
 import { fetchOhengResultById } from '@/lib/oheng';
+import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { OHENG_COLORS as C } from '@/constants/ohengTheme';
 import type { OhengFormState, OhengPrescription } from '@/types/oheng';
 
@@ -37,6 +38,28 @@ export default function OhengClient({ resultId }: { resultId?: string }) {
       }
     });
   }, [resultId]);
+
+  useEffect(() => {
+    const cached = loadSelfSaju();
+    if (cached) {
+      setForm(prev => ({
+        gender: cached.gender ?? prev.gender,
+        birthday: cached.birthDate || prev.birthday,
+        birthTime: cached.birthTime || prev.birthTime,
+        birthTimeUnknown: cached.unknownTime ?? prev.birthTimeUnknown,
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!form.gender || !form.birthday) return;
+    saveSelfSaju({
+      birthDate: form.birthday,
+      birthTime: form.birthTime,
+      unknownTime: form.birthTimeUnknown,
+      gender: form.gender,
+    });
+  }, [form]);
 
   const handleFormChange = useCallback((patch: Partial<OhengFormState>) => {
     setForm(prev => ({ ...prev, ...patch }));
@@ -71,7 +94,6 @@ export default function OhengClient({ resultId }: { resultId?: string }) {
   }, [form]);
 
   const handleRestart = useCallback(() => {
-    setForm(INITIAL_FORM);
     setResult(null);
     setStep('landing');
     window.scrollTo(0, 0);

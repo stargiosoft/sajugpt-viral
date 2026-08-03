@@ -13,15 +13,16 @@ import DeangResultCard from './DeangResultCard';
 import DeangShareButtons from './DeangShareButtons';
 import DeangShareRow from './DeangShareRow';
 import DeangCTA from './DeangCTA';
-import CommentBoard from '@/components/CommentBoard';
-import RecommendSection from '@/components/RecommendSection';
-import SajuGPTBanner from '@/components/SajuGPTBanner';
+import ResultFooterSections from '@/components/ResultFooterSections';
 import { generateDeangResult, fetchDeangResultById } from '@/lib/deangSaju';
 import { trackEvent } from '@/lib/analytics';
 import { incrementTestStat } from '@/lib/testStats';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { DEANG_COLORS as C } from '@/constants/deangTheme';
+import { RESULT_GAPS } from '@/constants/layoutGaps';
 import useIsNarrow from '@/hooks/useIsNarrow';
+
+const SHARE_ROW_HIDDEN_PADDING = 12;
 
 interface Props {
   resultId?: string;
@@ -145,8 +146,6 @@ export default function DeangClient({ resultId }: Props) {
     setStep('landing');
   };
 
-  // 플레이 카운트: 실제로 생년월일을 입력해 결과를 생성했을 때만 1회 기록
-  // (resultId로 진입한 공유 링크 조회는 다른 사람의 결과를 "보는" 것일 뿐이라 제외)
   useEffect(() => {
     if (resultId) return;
     if (step !== 'result' || !result) return;
@@ -189,11 +188,11 @@ export default function DeangClient({ resultId }: Props) {
                 style={{ padding: isNarrow ? '0px 8px 48px' : '0px 0px 48px', gap: '20px' }}
               >
                 <DeangResultCard ref={resultCardRef} profile={result.profile} />
-                <div className="flex flex-col" style={{ gap: '20px', padding: isNarrow ? '0px' : '0px 12px' }}>
+                <div className="flex flex-col" style={{ padding: isNarrow ? '0px' : '0px 12px' }}>
                   <div style={{ marginTop: isNarrow ? '-20px' : '-24px' }}>
                     <DeangCTA resultId={result.resultId} breedName={result.profile.breed.breedName} />
                   </div>
-                  <div className="flex" style={{ gap: '10px' }}>
+                  <div className="flex" style={{ gap: '10px', marginTop: RESULT_GAPS.imageToActions }}>
                     <div className="flex-1">
                       <OutlineBoxButton onClick={handleReset} height="54px" borderRadius="16px" fontSize="17px" fontWeight={500} color="rgb(55, 141, 99)" background="rgb(232, 246, 239)" border="none" hoverBackground="rgb(219, 243, 231)">
                         <span style={{ WebkitTextStroke: '0.3px rgb(55, 141, 99)' }}>다시하기</span>
@@ -203,26 +202,21 @@ export default function DeangClient({ resultId }: Props) {
                       <DeangShareButtons cardRef={resultCardRef} resultId={result.resultId} breedName={result.profile.breed.breedName} />
                     </div>
                   </div>
-                  <DeangShareRow />
-                  <div style={{ marginTop: '4px' }}>
-                    <RecommendSection
-                      excludeId="deang-saju"
-                      titleStyle={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontSize: '16px', fontWeight: 700, letterSpacing: '-0.9px', color: '#000000', paddingLeft: '2px' }}
-                      cardBg={C.cardBg}
-                      cardTitleColor="#000000"
-                    />
+                  <div style={{ marginTop: RESULT_GAPS.actionsToShare - SHARE_ROW_HIDDEN_PADDING }}>
+                    <DeangShareRow />
                   </div>
-                  <div style={{ marginTop: '-4px' }}>
-                    <SajuGPTBanner featureType="deang_saju" resultId={result.resultId} />
-                  </div>
-                  <div style={{ marginTop: '48px' }}>
-                    <CommentBoard
-                      featureType="deang_saju"
-                      storageKey="deang_saju_liked_comments"
-                      placeholder="같이 이야기해요 :)"
-                      themeColor="#58B889"
-                    />
-                  </div>
+                  <ResultFooterSections
+                    excludeId="deang-saju"
+                    titleStyle={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontSize: '16px', fontWeight: 700, letterSpacing: '-0.9px', color: '#000000', paddingLeft: '2px' }}
+                    cardBg={C.cardBg}
+                    cardTitleColor="#000000"
+                    featureType="deang_saju"
+                    resultId={result.resultId}
+                    storageKey="deang_saju_liked_comments"
+                    placeholder="같이 이야기해요 :)"
+                    themeColor="#58B889"
+                    shareToRecommendGap={RESULT_GAPS.shareToRecommend - SHARE_ROW_HIDDEN_PADDING}
+                  />
                 </div>
               </motion.div>
             )}

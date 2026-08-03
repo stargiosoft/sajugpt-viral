@@ -15,8 +15,6 @@ interface UseShareActionsOptions {
   onNative?: () => void;
 }
 
-// 결과 카드 공유 3종(복사/이미지저장/네이티브 공유)의 copied·saving state + 타이머 리셋 보일러플레이트를 통합.
-// 테스트별 trackEvent 호출은 onCopy/onSave/onNative 콜백으로 그대로 유지한다.
 export function useShareActions({
   featureType,
   resultId,
@@ -51,7 +49,6 @@ export function useShareActions({
       trackShare(featureType, 'image_save', resultId, metadata);
       onSave?.();
     } catch {
-      /* noop */
     } finally {
       setSaving(false);
     }

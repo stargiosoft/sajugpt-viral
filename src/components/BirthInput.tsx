@@ -3,10 +3,10 @@
 import { useRef, useState, useCallback } from 'react';
 
 interface Props {
-  value: string;           // "YYYY-MM-DD" 또는 중간 입력 상태
+  value: string;
   onChange: (value: string) => void;
-  onComplete?: () => void; // 8자리 완성 시 다음 필드로 포커스
-  onEnter?: () => void;    // 엔터 키 시 폼 제출
+  onComplete?: () => void;
+  onEnter?: () => void;
   accentColor?: string;
   bgColor?: string;
   textColor?: string;

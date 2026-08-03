@@ -22,8 +22,6 @@ interface Props {
   hoverBackground?: string;
 }
 
-// 결과 화면 하단 보조 버튼("다시 해보기", "링크 복사" 등) 공용 박스 버튼 —
-// 타이포(14px/600)와 프레스·호버 피드백은 고정, 배경/테두리/글자색만 테스트별로 다르게 넘긴다.
 export default function OutlineBoxButton({
   children,
   color,

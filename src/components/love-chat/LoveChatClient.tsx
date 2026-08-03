@@ -11,14 +11,15 @@ import Question from './Question';
 import KakaoResultHeader from './KakaoResultHeader';
 import ResultCard from './ResultCard';
 import ShareView from './ShareView';
-import CommentBoard from '@/components/CommentBoard';
-import RecommendSection from '@/components/RecommendSection';
-import SajuGPTBanner from '@/components/SajuGPTBanner';
+import ResultFooterSections from '@/components/ResultFooterSections';
 import { QUESTIONS } from '@/data/questions';
 import { matchCharacter } from '@/lib/matcher';
 import { trackEvent } from '@/lib/analytics';
 import { incrementTestStat } from '@/lib/testStats';
 import type { Answers, Choice, LoveChatCharacter } from '@/types/love-chat';
+import { RESULT_GAPS } from '@/constants/layoutGaps';
+
+const SHARE_ROW_HIDDEN_PADDING = 12;
 
 type Step = 'landing' | 'quiz' | 'analyzing' | 'result';
 
@@ -75,8 +76,6 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
     setStep('landing');
   }, []);
 
-  // 플레이 카운트: 실제로 퀴즈를 풀어 결과에 도달했을 때만 1회 기록
-  // (sharedCharacter로 진입한 공유 링크 조회는 다른 사람의 결과를 "보는" 것일 뿐이라 제외)
   useEffect(() => {
     if (sharedCharacter) return;
     if (step !== 'result' || !character) return;
@@ -176,28 +175,22 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
               <KakaoResultHeader onBack={handleReset} />
               <div style={{ padding: '0px' }}>
                 <ResultCard ref={cardRef} character={character} />
-                <div style={{ marginTop: '16px', padding: '0 16px' }}>
+                <div style={{ marginTop: RESULT_GAPS.imageToActions, padding: '0 16px' }}>
                   <ShareView character={character} cardRef={cardRef} onReset={handleReset} />
                 </div>
-                <div style={{ marginTop: '24px', padding: '0 16px' }}>
-                  <RecommendSection
+                <div style={{ padding: '0 16px 80px' }}>
+                  <ResultFooterSections
                     excludeId="love-chat"
                     titleStyle={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontSize: '16px', fontWeight: 700, color: '#1C2333', letterSpacing: '-0.5px', paddingLeft: '2px' }}
                     cardBg="#FFFFFF"
                     cardTitleColor="#1C2333"
-                  />
-                </div>
-                <div style={{ marginTop: '12px', padding: '0 16px' }}>
-                  <SajuGPTBanner featureType="love_chat" />
-                </div>
-                <div style={{ marginTop: '48px', padding: '0 16px 80px' }}>
-                  <CommentBoard
                     featureType="love_chat"
                     storageKey="love_chat_liked_comments"
                     placeholder="여러분은 어떤 카톡 스타일인가요?"
                     themeColor="#3D6FE0"
                     inputBg="#FFFFFF"
                     disabledBg="#DCE0E5"
+                    shareToRecommendGap={RESULT_GAPS.shareToRecommend - SHARE_ROW_HIDDEN_PADDING}
                   />
                 </div>
               </div>

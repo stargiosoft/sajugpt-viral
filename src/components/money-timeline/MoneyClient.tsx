@@ -11,14 +11,15 @@ import MoneyAnalyzing from './MoneyAnalyzing';
 import MoneyResultCard from './MoneyResultCard';
 import MoneyCTA from './MoneyCTA';
 import ShareView from './ShareView';
-import CommentBoard from '@/components/CommentBoard';
-import RecommendSection from '@/components/RecommendSection';
-import SajuGPTBanner from '@/components/SajuGPTBanner';
+import ResultFooterSections from '@/components/ResultFooterSections';
 import { generateMoneyTimelineResult, fetchMoneyTimelineResultById } from '@/lib/moneyTimeline';
 import { trackEvent } from '@/lib/analytics';
 import { incrementTestStat } from '@/lib/testStats';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { MONEY_COLORS as C, FADE_UP } from '@/constants/moneyTimelineTheme';
+import { RESULT_GAPS } from '@/constants/layoutGaps';
+
+const SHARE_ROW_HIDDEN_PADDING = 12;
 
 interface Props {
   resultId?: string;
@@ -159,7 +160,6 @@ export default function MoneyClient({ resultId }: Props) {
     setStep('landing');
   };
 
-  // 플레이 카운트: 실제로 생년월일을 입력해 결과를 생성했을 때만 1회 기록
   useEffect(() => {
     if (resultId) return;
     if (step !== 'result' || !result) return;
@@ -200,45 +200,38 @@ export default function MoneyClient({ resultId }: Props) {
                 exit={{ opacity: 0 }}
                 variants={{ visible: { transition: { staggerChildren: 0.12 } } }}
                 className="flex-1 flex flex-col"
-                style={{ padding: '12px 12px 48px', gap: '16px' }}
+                style={{ padding: '12px 12px 48px' }}
               >
                 <motion.div variants={FADE_UP}>
                   <MoneyResultCard ref={resultCardRef} profile={result.profile} stargioRaw={result.stargioRaw} />
                 </motion.div>
-                <motion.div variants={FADE_UP}>
+                <motion.div variants={FADE_UP} style={{ marginTop: '16px' }}>
                   <MoneyCTA resultId={result.resultId} />
                 </motion.div>
-                <motion.div variants={FADE_UP}>
+                <motion.div variants={FADE_UP} style={{ marginTop: RESULT_GAPS.imageToActions }}>
                   <ShareView resultId={result.resultId} profile={result.profile} cardRef={resultCardRef} onReset={handleReset} />
                 </motion.div>
-                <motion.div variants={FADE_UP} style={{ marginTop: '8px' }}>
-                  <RecommendSection
-                    excludeId="money-timeline"
-                    titleStyle={{
-                      fontFamily: "'Pretendard Variable', Pretendard, -apple-system, sans-serif",
-                      fontSize: '16px',
-                      fontWeight: 700,
-                      color: C.text,
-                      letterSpacing: '-0.5px',
-                      paddingLeft: '4px',
-                    }}
-                    cardBg={C.panelBg}
-                    cardTitleColor={C.text}
-                  />
-                </motion.div>
-                <motion.div variants={FADE_UP} style={{ marginTop: '-8px' }}>
-                  <SajuGPTBanner featureType="money_timeline" resultId={result.resultId} />
-                </motion.div>
-                <motion.div variants={FADE_UP} style={{ marginTop: '48px' }}>
-                  <CommentBoard
-                    featureType="money_timeline"
-                    storageKey="money_timeline_liked_comments"
-                    placeholder="내 돈복은 어떤가요?"
-                    themeColor="#735EF2"
-                    inputBg="#FFFFFF"
-                    disabledBg="#DCE0E5"
-                  />
-                </motion.div>
+                <ResultFooterSections
+                  excludeId="money-timeline"
+                  titleStyle={{
+                    fontFamily: "'Pretendard Variable', Pretendard, -apple-system, sans-serif",
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: C.text,
+                    letterSpacing: '-0.5px',
+                    paddingLeft: '4px',
+                  }}
+                  cardBg={C.panelBg}
+                  cardTitleColor={C.text}
+                  featureType="money_timeline"
+                  resultId={result.resultId}
+                  storageKey="money_timeline_liked_comments"
+                  placeholder="내 돈복은 어떤가요?"
+                  themeColor="#735EF2"
+                  inputBg="#FFFFFF"
+                  disabledBg="#DCE0E5"
+                  shareToRecommendGap={RESULT_GAPS.shareToRecommend - SHARE_ROW_HIDDEN_PADDING}
+                />
               </motion.div>
             )}
           </AnimatePresence>

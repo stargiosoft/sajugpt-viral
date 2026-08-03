@@ -2,12 +2,13 @@
 
 import { useCallback, useRef, useState } from 'react';
 
-import GhostIconButton from '@/components/ghost-tarot/GhostIconButton';
+import ShareIconButton from '@/components/ShareIconButton';
 import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare } from '@/lib/analytics';
 import { useIsDesktop, useIsNarrow } from '@/lib/ghost-tarot/useBreakpoint';
 import { incrementTestStat } from '@/lib/testStats';
 import type { TarotConfig } from '@/types/tarot';
+import { LANDING_GAPS } from '@/constants/layoutGaps';
 
 interface Props {
   config: TarotConfig;
@@ -15,9 +16,11 @@ interface Props {
   shareLink?: string;
   resultId?: string;
   variant?: 'simple' | 'boxed';
-  /** 'simple' variant에서 "공유하기" 텍스트 라벨만 숨기고 아이콘 버튼은 그대로 노출 */
   hideLabel?: boolean;
 }
+
+const SIMPLE_ICON_STYLE = { background: 'rgba(232,223,208,0.06)' };
+const SIMPLE_ICON_HOVER = 'rgba(232,223,208,0.18)';
 
 const KakaoIcon = ({ color }: { color: string }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -169,22 +172,22 @@ export default function TarotShareRow({
         </p>
 
         <div className="flex items-center justify-center" style={{ position: 'relative', zIndex: 1, marginTop: isDesktop ? 30 : 32, marginBottom: isDesktop ? 12 : 0, gap: 20 }}>
-          <GhostIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare} style={iconStyle} hoverBackground="rgba(179,47,23,0.34)">
+          <ShareIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare} style={iconStyle} hoverBackground="rgba(179,47,23,0.34)">
             <KakaoIcon color={palette.ink} />
-          </GhostIconButton>
-          <GhostIconButton ariaLabel="X에 공유" onClick={handleXShare} style={iconStyle} hoverBackground="rgba(179,47,23,0.34)">
+          </ShareIconButton>
+          <ShareIconButton ariaLabel="X에 공유" onClick={handleXShare} style={iconStyle} hoverBackground="rgba(179,47,23,0.34)">
             <XIcon color={palette.ink} />
-          </GhostIconButton>
-          <GhostIconButton ariaLabel="링크 복사" onClick={handleCopy} style={iconStyle} hoverBackground="rgba(179,47,23,0.34)">
+          </ShareIconButton>
+          <ShareIconButton ariaLabel="링크 복사" onClick={handleCopy} style={iconStyle} hoverBackground="rgba(179,47,23,0.34)">
             <CopyIcon color={palette.ink} copied={copied} />
-          </GhostIconButton>
+          </ShareIconButton>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center" style={{ marginTop: 40 }}>
+    <div className="flex flex-col items-center" style={{ marginTop: LANDING_GAPS.ctaToShare }}>
       {!hideLabel && (
         <span style={{ fontFamily: brushFont, fontSize: 21, color: 'rgb(166 166 166)', letterSpacing: '1px' }}>
           공유하기
@@ -192,17 +195,17 @@ export default function TarotShareRow({
       )}
 
       <div className="flex items-center" style={{ gap: 16, marginTop: hideLabel ? 0 : 18 }}>
-        <GhostIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare}>
+        <ShareIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare} style={SIMPLE_ICON_STYLE} hoverBackground={SIMPLE_ICON_HOVER}>
           <KakaoIcon color={palette.ink} />
-        </GhostIconButton>
+        </ShareIconButton>
 
-        <GhostIconButton ariaLabel="X에 공유" onClick={handleXShare}>
+        <ShareIconButton ariaLabel="X에 공유" onClick={handleXShare} style={SIMPLE_ICON_STYLE} hoverBackground={SIMPLE_ICON_HOVER}>
           <XIcon color={palette.ink} />
-        </GhostIconButton>
+        </ShareIconButton>
 
-        <GhostIconButton ariaLabel="링크 복사" onClick={handleCopy}>
+        <ShareIconButton ariaLabel="링크 복사" onClick={handleCopy} style={SIMPLE_ICON_STYLE} hoverBackground={SIMPLE_ICON_HOVER}>
           <CopyIcon color={palette.ink} copied={copied} />
-        </GhostIconButton>
+        </ShareIconButton>
       </div>
 
       {copied && (

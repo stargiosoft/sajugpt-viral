@@ -32,9 +32,6 @@ export default function InputForm({ form, onChange, onSubmit }: Props) {
         <h1 style={{ fontSize: '22px', fontWeight: 800, color: C.text, textAlign: 'center' }}>
           사주 정보를 입력해 주세요
         </h1>
-        <p style={{ fontSize: '13px', color: C.textSecondary, marginTop: '6px', textAlign: 'center' }}>
-          입력한 정보는 저장되지 않습니다.
-        </p>
       </div>
 
       <motion.div

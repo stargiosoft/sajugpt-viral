@@ -9,7 +9,6 @@ interface Props {
   resultId?: string;
 }
 
-// 캐릭터 크리에이티브(사주GPT 유도 카피 포함)와 사주GPT 앱 홍보 크리에이티브 5종, 전달받은 파일명(banner_1~5) 순서 그대로
 const BANNER_IMAGES = [
   '/ads/sajugpt-banner-baekbal-witch-v2.webp',
   '/ads/sajugpt-banner-app-1.webp',
@@ -18,8 +17,6 @@ const BANNER_IMAGES = [
   '/ads/sajugpt-banner-app-2.webp',
 ];
 
-// 양 끝에 클론 슬라이드를 붙여, 마지막→처음으로 넘어갈 때도 역방향으로 되감기지 않고 항상 좌→우로 흐르게 함.
-// trackIndex 0 = 마지막 이미지의 클론, 1..N = 실제 이미지, N+1 = 첫 이미지의 클론 (HeroBanner와 동일 패턴)
 const EXTENDED_IMAGES = [BANNER_IMAGES[BANNER_IMAGES.length - 1], ...BANNER_IMAGES, BANNER_IMAGES[0]];
 
 const ROTATE_MS = 6000;
@@ -27,7 +24,6 @@ const SWIPE_THRESHOLD_PX = 40;
 
 const WEB_URL = 'https://www.sajugpt.co.kr/';
 
-// 결과 화면 하단(댓글 위)에 공통으로 붙는 사주GPT 광고 배너 — 5개 테스트 전체가 동일한 이미지·클릭 대상을 공유
 export default function SajuGPTBanner({ featureType, resultId }: Props) {
   const [trackIndex, setTrackIndex] = useState(1);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
@@ -47,7 +43,6 @@ export default function SajuGPTBanner({ featureType, resultId }: Props) {
     return () => clearInterval(timer);
   }, []);
 
-  // 클론 위치에 도달한 뒤 트랜지션 없이 실제 이미지 위치로 순간 이동시켜 끊김 없이 이어지게 함
   useEffect(() => {
     if (!transitionEnabled) {
       const raf = requestAnimationFrame(() => setTransitionEnabled(true));
@@ -129,8 +124,6 @@ export default function SajuGPTBanner({ featureType, resultId }: Props) {
         }}
       >
         {EXTENDED_IMAGES.map((src, i) => {
-          // next/image의 최적화 파이프라인(첫 요청 시 서버에서 리사이즈)이 초기 로드 지연의 원인이라
-          // 정적 파일을 그대로 서빙하는 일반 img로 전환 — 보이는 슬라이드만 즉시, 좌우는 eager로 미리 받아둠
           const isCurrent = i === trackIndex;
           const isNeighbor = Math.abs(i - trackIndex) === 1;
           return (

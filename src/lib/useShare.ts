@@ -12,13 +12,9 @@ export interface ShareContent {
   description: string;
   shareUrl: string;
   imageUrl?: string;
-  // 홈 화면 "공유수" 배지의 test_stats 집계 대상 — testCatalog.ts의 id와 일치해야 함.
-  // featureType(analytics용, 예: 'love_chat')과 다르게 하이픈 표기(예: 'love-chat')라 별도로 받는다.
   testId?: string;
 }
 
-// 결과 페이지 공유 CTA 공용 훅 — 테스트별로 title/description/shareUrl(/imageUrl)만 넘기면
-// Web Share API 지원 여부에 따라 네이티브 공유 시트 또는 폴백 모달(카카오/X/페이스북/링크복사)을 처리한다.
 export function useShare(content: ShareContent) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -76,7 +72,6 @@ export function useShare(content: ShareContent) {
     setIsModalOpen(false);
   }, [content]);
 
-  // 중복 클릭 방지 + 네이티브 공유 취소 시 에러 노출 안 함
   const share = useCallback(async () => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
@@ -87,7 +82,6 @@ export function useShare(content: ShareContent) {
           trackShare(content.featureType, 'native', content.resultId);
           if (content.testId) incrementTestStat(content.testId, 'share');
         } catch (err) {
-          // AbortError = 사용자가 공유 시트를 취소한 경우 — 정상 흐름이므로 무시
           if (!(err instanceof Error) || err.name !== 'AbortError') {
             setIsModalOpen(true);
           }

@@ -14,17 +14,11 @@ interface Props {
   style?: CSSProperties;
   bgStyle?: CSSProperties;
   textStyle?: CSSProperties;
-  /** rgba 배경처럼 밝기(filter) 변화가 잘 안 보이는 어두운 배경용 — 호버 시 이 색으로 직접 전환 */
   hoverBackground?: string;
-  /** 지정 시 버튼 위로 사선 빛줄기가 좌→우로 흐르는 CTA 강조 효과를 추가 (색상은 이 값으로 지정) */
   shineColor?: string;
 }
 
-// "시작하기" 버튼과 동일한 프레스/호버 효과를 내는 공용 버튼 —
-// 배경(애니메이션 레이어)과 텍스트(고정 레이어)를 분리해서 눌렀을 때 텍스트가 같이 움직이지 않는다.
 export default function PressableButton({ label, onClick, href, target, rel, disabled, style, bgStyle, textStyle, hoverBackground, shineColor }: Props) {
-  // whileHover/whileTap로 애니메이션된 backgroundColor는 제스처가 끝나도 스스로 원래 값으로 돌아가지 않음 —
-  // bgStyle이 바뀔 때(예: 등록 후 비활성화 색으로 전환)도 항상 이 값으로 복귀하도록 animate에 명시.
   const restingBackground = bgStyle?.backgroundColor ?? bgStyle?.background;
 
   const hoverProps = hoverBackground

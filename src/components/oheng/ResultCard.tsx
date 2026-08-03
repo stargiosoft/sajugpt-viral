@@ -5,13 +5,12 @@ import { motion } from 'framer-motion';
 import { useShareActions } from '@/lib/useShareActions';
 import ShareRow from '@/components/ShareRow';
 import ElementDistribution from './ElementDistribution';
-import CommentBoard from '@/components/CommentBoard';
-import RecommendSection from '@/components/RecommendSection';
-import SajuGPTBanner from '@/components/SajuGPTBanner';
+import ResultFooterSections from '@/components/ResultFooterSections';
 import { AnimalIllustration } from './icons';
 import PressableButton from '@/components/PressableButton';
 import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import { OHENG_COLORS as C } from '@/constants/ohengTheme';
+import { RESULT_GAPS } from '@/constants/layoutGaps';
 import type { OhengPrescription } from '@/types/oheng';
 
 const TITLE_IMAGES: Partial<Record<string, string>> = {
@@ -126,7 +125,7 @@ export default function ResultCard({ result, onRestart }: { result: OhengPrescri
         </div>
       </div>
 
-      <div style={{ marginTop: '20px', display: 'flex', gap: '8px' }}>
+      <div style={{ marginTop: RESULT_GAPS.imageToActions, display: 'flex', gap: '8px' }}>
         <PressableButton
           onClick={onRestart}
           label="다시하기"
@@ -145,7 +144,7 @@ export default function ResultCard({ result, onRestart }: { result: OhengPrescri
         />
       </div>
 
-      <div style={{ marginTop: '32px', textAlign: 'center' }}>
+      <div style={{ marginTop: RESULT_GAPS.actionsToShare, textAlign: 'center' }}>
         <ShareRow
           shareContent={{
             featureType: 'oheng',
@@ -162,22 +161,14 @@ export default function ResultCard({ result, onRestart }: { result: OhengPrescri
         />
       </div>
 
-      <div style={{ marginTop: '32px' }}>
-        <RecommendSection
+      <div style={{ marginBottom: '200px' }}>
+        <ResultFooterSections
           excludeId="oheng"
           titleStyle={{ fontSize: '16px', fontWeight: 700, color: C.text, letterSpacing: '-0.3px', paddingLeft: '2px' }}
           cardBg={C.panelBg}
           cardTitleColor={C.text}
-        />
-      </div>
-
-      <div style={{ marginTop: '12px' }}>
-        <SajuGPTBanner featureType="oheng" resultId={result.resultId} />
-      </div>
-
-      <div style={{ marginTop: '48px', marginBottom: '200px' }}>
-        <CommentBoard
           featureType="oheng"
+          resultId={result.resultId}
           storageKey="oheng_liked_comments"
           placeholder="여러분의 대표 오행은 무엇인가요?"
           themeColor={C.blue}

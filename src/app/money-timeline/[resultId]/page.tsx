@@ -30,9 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           description: `친구의 재물 성향은 '${data.money_style_title}'! 평생 재물운 ${data.overall_score}점, 황금기는 ${data.best_period_label}.`,
           images: [
             {
-              url: '/money-timeline/og-share.png',
+              url: '/money-timeline/og-share.png?v=2',
               width: 1200,
-              height: 630,
+              height: 600,
             },
           ],
         },
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           card: 'summary_large_image',
           title: `${data.money_style_title} · 재물운 ${data.overall_score}점`,
           description: `평생 재물운 ${data.overall_score}점 · 황금기는 ${data.best_period_label}`,
-          images: ['/money-timeline/og-share.png'],
+          images: ['/money-timeline/og-share.png?v=2'],
         },
       };
     }
@@ -56,9 +56,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: '사주를 기반으로 평생 재물운과 인생 자산 황금기를 확인해보세요.',
       images: [
         {
-          url: '/money-timeline/og-share.png',
+          url: '/money-timeline/og-share.png?v=2',
           width: 1200,
-          height: 630,
+          height: 600,
         },
       ],
     },
@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title: '내 돈복 그래프 | 사주로 보는 평생 재물운',
       description: '사주를 기반으로 평생 재물운과 인생 자산 황금기를 확인해보세요.',
-      images: ['/money-timeline/og-share.png'],
+      images: ['/money-timeline/og-share.png?v=2'],
     },
   };
 }

@@ -9,6 +9,7 @@ import { GHOST_BRUSH_FONT } from '@/lib/ghost-tarot/theme';
 import TarotShareRow from './TarotShareRow';
 import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import type { TarotConfig } from '@/types/tarot';
+import { LANDING_GAPS } from '@/constants/layoutGaps';
 
 interface Props {
   config: TarotConfig;
@@ -114,7 +115,12 @@ export default function TarotLanding({
       </motion.div>
 
       {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (
-        <div style={{ marginTop: 48, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.15, duration: .5 }}
+          style={{ marginTop: LANDING_GAPS.shareToComment, marginLeft: 16, marginRight: 16, position: 'relative', zIndex: 2 }}
+        >
           <CommentBoard
             featureType={config.featureType}
             storageKey={`${config.featureType}_liked_comments`}
@@ -122,7 +128,7 @@ export default function TarotLanding({
             themeColor="#B32F17"
             dark
           />
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );

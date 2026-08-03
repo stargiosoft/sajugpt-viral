@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, type RefObject } from 'react';
+import type { RefObject } from 'react';
 import OutlineBoxButton from '@/components/OutlineBoxButton';
 import PressableButton from '@/components/PressableButton';
-import ShareIconRow from './ShareIconRow';
-import { saveImage } from '@/lib/share';
+import ShareRow from '@/components/ShareRow';
+import { useShareActions } from '@/lib/useShareActions';
 import { incrementTestStat } from '@/lib/testStats';
 import type { LoveChatCharacter } from '@/types/love-chat';
 
@@ -15,21 +15,16 @@ interface Props {
 }
 
 export default function ShareView({ character, cardRef, onReset }: Props) {
-  const [saving, setSaving] = useState(false);
-
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const shareUrl = `${origin}/love-chat/${character.id}`;
 
-  const handleSave = async () => {
-    if (!cardRef.current || saving) return;
-    setSaving(true);
-    try {
-      await saveImage(cardRef.current, `카톡연애도감_${character.name}.png`);
-      incrementTestStat('love-chat', 'share');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const { saving, handleSave } = useShareActions({
+    featureType: 'love_chat',
+    resultId: character.id,
+    getShareText: () => shareUrl,
+    imageFilename: `카톡연애도감_${character.name}.png`,
+    onSave: () => incrementTestStat('love-chat', 'share'),
+  });
 
   return (
     <div className="flex flex-col" style={{ gap: '16px' }}>
@@ -41,7 +36,7 @@ export default function ShareView({ character, cardRef, onReset }: Props) {
         </div>
         <PressableButton
           label={saving ? '저장 중...' : '이미지 저장'}
-          onClick={handleSave}
+          onClick={() => handleSave(cardRef)}
           disabled={saving}
           style={{ height: '50px', flex: 1 }}
           bgStyle={{ background: '#FEE500', borderRadius: '12px' }}
@@ -50,7 +45,7 @@ export default function ShareView({ character, cardRef, onReset }: Props) {
       </div>
 
       <div style={{ paddingTop: '16px', paddingBottom: '12px' }}>
-        <ShareIconRow
+        <ShareRow
           shareContent={{
             featureType: 'love_chat',
             testId: 'love-chat',
@@ -60,6 +55,8 @@ export default function ShareView({ character, cardRef, onReset }: Props) {
             shareUrl,
             imageUrl: `${origin}/love-chat/og-share.png`,
           }}
+          copyColor="#3D6FE0"
+          copyHoverColor="#2F58B8"
         />
       </div>
     </div>

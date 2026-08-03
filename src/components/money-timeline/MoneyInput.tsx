@@ -45,9 +45,6 @@ export default function MoneyInput({
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: C.text, marginBottom: '8px', textAlign: 'center' }}>
           정보를 입력해 주세요
         </h1>
-        <p style={{ fontSize: '15px', color: 'rgb(102, 102, 102)', textAlign: 'center' }}>
-          입력한 정보는 저장되지 않아요
-        </p>
       </div>
 
       <motion.div

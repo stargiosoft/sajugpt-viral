@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import GhostIconButton from '@/components/ghost-tarot/GhostIconButton';
+import ShareIconButton from '@/components/ShareIconButton';
 import { KakaoIcon, XIcon, CopyIcon } from '@/components/ShareIcons';
 import { copyToClipboard, shareKakao } from '@/lib/share';
 import { trackEvent, trackShare, type ShareMethod } from '@/lib/analytics';
@@ -61,15 +61,15 @@ export default function DeangShareRow() {
         className="flex items-center justify-center w-full"
         style={{ padding: '12px 20px', gap: '20px' }}
       >
-        <GhostIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare} style={{ ...ICON_STYLE, background: '#FEE500', border: 'none' }} hoverBackground="#F0D900">
+        <ShareIconButton ariaLabel="카카오톡 공유" onClick={handleKakaoShare} style={{ ...ICON_STYLE, background: '#FEE500', border: 'none' }} hoverBackground="#F0D900">
           <KakaoIcon color="#000000" />
-        </GhostIconButton>
-        <GhostIconButton ariaLabel="X에 공유" onClick={handleXShare} style={{ ...ICON_STYLE, background: '#000000', border: 'none' }} hoverBackground="#222222">
+        </ShareIconButton>
+        <ShareIconButton ariaLabel="X에 공유" onClick={handleXShare} style={{ ...ICON_STYLE, background: '#000000', border: 'none' }} hoverBackground="#222222">
           <XIcon color="#FFFFFF" />
-        </GhostIconButton>
-        <GhostIconButton ariaLabel="링크 복사" onClick={handleCopy} style={{ ...ICON_STYLE, background: 'rgb(88, 184, 136)', border: 'none' }} hoverBackground="#4ba679">
+        </ShareIconButton>
+        <ShareIconButton ariaLabel="링크 복사" onClick={handleCopy} style={{ ...ICON_STYLE, background: 'rgb(88, 184, 136)', border: 'none' }} hoverBackground="#4ba679">
           <CopyIcon color="#FFFFFF" copied={copied} />
-        </GhostIconButton>
+        </ShareIconButton>
       </DeangOutlineBox>
       {copied && (
         <p style={{ fontSize: '12px', color: C.ink, fontWeight: 500, WebkitTextStroke: `0.3px ${C.ink}`, marginTop: '10px' }}>

@@ -7,7 +7,6 @@ import type { WealthPeriod, BestPeriodInfo, StargioRaw } from '@/types/money-tim
 import { MONEY_COLORS as C, BODY_TEXT_STYLE } from '@/constants/moneyTimelineTheme';
 import { BulletRow } from './MoneyStyleCard';
 
-// 백엔드 응답 필드(appliedCombos) 및 기존 필드(features) 타입을 안전하게 확장
 type ExtendedBestPeriodInfo = BestPeriodInfo & {
   appliedCombos?: string[];
   features?: string[];
@@ -137,7 +136,6 @@ function splitAgeLabel(label: string) {
 export function GoldenEraCard({ bestPeriod, stargioRaw }: { bestPeriod: ExtendedBestPeriodInfo; stargioRaw: StargioRaw; }) {
   const { number, suffix } = splitAgeLabel(bestPeriod.ageLabel);
 
-  // 백엔드 전달 값(appliedCombos)을 우선 참조하고, 없으면 features 또는 빈 배열 사용
   const featureList: string[] =
     bestPeriod?.appliedCombos || bestPeriod?.features || [];
 

@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 import LandingCTAButton from '@/components/LandingCTAButton';
 import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import CommentBoard from '@/components/CommentBoard';
-import ShareIconRow from './ShareIconRow';
+import ShareRow from '@/components/ShareRow';
 import { MONEY_COLORS as C } from '@/constants/moneyTimelineTheme';
+import { LANDING_GAPS } from '@/constants/layoutGaps';
 
 interface Props {
   onStart: () => void;
@@ -34,13 +35,13 @@ export default function MoneyLanding({ onStart }: Props) {
         />
       </motion.div>
 
-      <div className="w-full flex flex-col items-center" style={{ padding: '20px 16px 0' }}>
+      <div className="w-full flex flex-col items-center" style={{ padding: `${LANDING_GAPS.heroToCta}px 16px 0` }}>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
           className="w-full"
-          style={{ marginBottom: '32px' }}
+          style={{ marginBottom: LANDING_GAPS.ctaToShare }}
         >
           <LandingCTAButton
             onClick={onStart}
@@ -57,17 +58,19 @@ export default function MoneyLanding({ onStart }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.5 }}
           className="w-full"
-          style={{ marginBottom: '28px' }}
         >
-          <ShareIconRow
+          <ShareRow
             shareContent={{
               featureType: 'money_timeline',
               testId: 'money-timeline',
               title: '내 돈복 테스트',
               description: '내 사주 속 돈의 흐름을 분석해 드려요.',
               shareUrl: `${origin}/money-timeline`,
-              imageUrl: `${origin}/money-timeline/og-share.png`,
+              imageUrl: `${origin}/money-timeline/og-share.png?v=2`,
             }}
+            copyColor={C.gold}
+            copyHoverColor="rgb(95, 74, 220)"
+            copyIconColor={C.textOnGold}
           />
           <SajuGPTLinkButton featureType="money_timeline" color={C.textTertiary} hoverColor={C.gold} />
         </motion.div>
@@ -77,7 +80,7 @@ export default function MoneyLanding({ onStart }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
           className="w-full"
-          style={{ marginTop: '20px' }}
+          style={{ marginTop: LANDING_GAPS.shareToComment }}
         >
           <CommentBoard
             featureType="money_timeline"

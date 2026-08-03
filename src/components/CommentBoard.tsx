@@ -8,7 +8,6 @@ import type { FeatureType } from '@/lib/analytics';
 
 const INITIAL_VISIBLE_COUNT = 5;
 
-// 모든 테스트 공통 고정 그레이 톤 — themeColor는 댓글 수 숫자/등록 버튼/더보기 버튼에만 적용된다
 const LIGHT_GRAY = {
   text: '#191F28',
   textSecondary: '#4E5968',
@@ -20,7 +19,6 @@ const LIGHT_GRAY = {
   heartIdle: '#C7CCD3',
 };
 
-// 배경이 흰색이 아닌 어두운 테스트(귀신타로 등)용 — 기존 귀신타로 다크 팔레트 값 재사용
 const DARK_GRAY = {
   text: '#d5d5d5',
   textSecondary: '#8e8e8e',
@@ -42,7 +40,6 @@ function HeartIcon({ filled, idleColor = '', size = 14 }: { filled: boolean; idl
   );
 }
 
-// 좋아요 클릭 시 작은 하트들이 위로 흩어지며 사라지는 1회성 이펙트
 function HeartBurst({ onDone }: { onDone: () => void }) {
   const [particles] = useState(() =>
     Array.from({ length: 4 }, (_, i) => ({
@@ -77,7 +74,6 @@ interface Props {
   placeholder: string;
   themeColor: string;
   dark?: boolean;
-  // 페이지 배경이 유채색이라 기본 그레이 인풋/비활성 배경이 묻히는 테스트용 오버라이드
   inputBg?: string;
   disabledBg?: string;
   anonTag?: (clientId: string) => string;
@@ -110,7 +106,7 @@ export default function CommentBoard({ featureType, storageKey, placeholder, the
 
   return (
     <div style={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif" }}>
-      <p style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: '12px', paddingLeft: '2px' }}>
+      <p style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: '8px', paddingLeft: '2px' }}>
         <span style={{ fontSize: '17px', color: GRAY.text }}>댓글</span>
         <span style={{ fontSize: '17px', color: themeColor }}> {comments.length}</span>
       </p>

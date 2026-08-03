@@ -5,6 +5,7 @@ import PressableButton from '@/components/PressableButton';
 import type { LoveChatCharacter } from '@/types/love-chat';
 import ResultContent from './ResultContent';
 import ChatSimulation from './ChatSimulation';
+import { trackSajuGPTClick } from '@/lib/analytics';
 
 interface Props {
   character: LoveChatCharacter;
@@ -42,6 +43,7 @@ const ResultCard = forwardRef<HTMLDivElement, Props>(function ResultCard({ chara
           href="https://sajugpt.co.kr"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackSajuGPTClick('love_chat', character.id)}
           style={{ height: '48px' }}
           bgStyle={{ background: '#FEE500', borderRadius: '12px' }}
           textStyle={{ fontSize: '17px', fontWeight: 500, color: '#333333', paddingTop: '2px' }}

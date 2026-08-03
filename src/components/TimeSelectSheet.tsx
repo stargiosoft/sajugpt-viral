@@ -57,7 +57,6 @@ interface Props {
   height?: string;
 }
 
-// 태어난 시간을 12띠시 단위로 고르는 공용 바텀시트 — 모든 테스트가 이 컴포넌트로 시간을 입력받는다.
 export default function TimeSelectSheet({
   value,
   unknownTime,

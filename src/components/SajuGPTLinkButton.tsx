@@ -12,7 +12,6 @@ interface Props {
   label?: ReactNode;
 }
 
-// 모든 테스트 랜딩 화면 공용 "사주GPT 바로가기" 링크 — 공유 아이콘 3개 바로 아래 고정 갭/타이포로 배치, color만 테스트별로 다르게
 export default function SajuGPTLinkButton({ featureType, color, hoverColor, label = '사주GPT 바로가기' }: Props) {
   return (
     <motion.a

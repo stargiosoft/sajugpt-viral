@@ -6,7 +6,6 @@ import { CATEGORIES } from '@/constants/categories';
 import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
 import SectionStats from './SectionStats';
 
-// White / Gray 스케일 / 홈 화면 브랜드 오렌지만 사용하는 썸네일 컬러 팔레트
 const THEME_STYLES: Record<TestColorTheme, { bg: string; fg: string }> = {
   orange: { bg: MOAMOA_ORANGE, fg: '#ffffff' },
   orangeDark: { bg: MOAMOA_ORANGE_DARK, fg: '#ffffff' },
@@ -43,7 +42,6 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
         outline: 'none',
       }}
     >
-      {/* 썸네일 (가로형) — 박스는 고정, 내부 이미지만 확대되어 클리핑됨 */}
       <motion.div
         whileTap={item.ready ? { filter: 'brightness(1.05)' } : undefined}
         transition={{ duration: 0.15, ease: 'easeOut' }}
@@ -69,7 +67,6 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
           )}
         </div>
 
-        {/* 좌측 하단 오버레이: NEW 라벨(+사주GPT 뱃지) 또는 참여 수 */}
         <div
           className="flex items-center"
           style={{ position: 'absolute', left: '8px', bottom: '8px', gap: '4px' }}
@@ -104,8 +101,6 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
                 height: '19px',
               }}
             >
-              {/* 한글+영문 혼용 글자가 lineHeight:1만으로는 살짝 위로 떠 보여, 위쪽에 1px 패딩을 줘
-                  전체를 반 픽셀만큼 아래로 내려 광학적으로 가운데에 오도록 보정 */}
               <span style={{ display: 'block', lineHeight: 1, paddingTop: '1px' }}>사주GPT</span>
             </span>
           )}
@@ -121,7 +116,6 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
         )}
       </motion.div>
 
-      {/* 텍스트 */}
       <div style={{ padding: '10px 2px 0' }}>
         <p
           style={{
@@ -131,7 +125,7 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
             letterSpacing: '-0.3px',
             lineHeight: '1.3',
             marginBottom: '3px',
-            paddingBottom: '4px',
+            paddingBottom: '2px',
           }}
         >
           {item.title}

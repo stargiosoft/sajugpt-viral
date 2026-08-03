@@ -10,18 +10,11 @@ declare global {
 }
 
 const AMPLITUDE_KEY = process.env.NEXT_PUBLIC_VIRAL_AMPLITUDE_KEY;
-// 로컬 개발 서버 + Vercel 프리뷰 배포에서의 테스트가 실제 운영 Amplitude/GA4 데이터에 섞이지 않도록 차단
-// (layout.tsx의 GTM 스크립트 렌더링도 이 값을 그대로 가져다 씀 — 두 곳이 따로 판단하면 어긋날 수 있음)
-// NODE_ENV는 next build 시 프리뷰/프로덕션 모두 'production'이라 이것만으로는 구분이 안 됨 —
-// NEXT_PUBLIC_VERCEL_ENV(next.config.ts에서 주입)로 프리뷰 배포만 추가로 걸러낸다.
 export const IS_PROD = process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_VERCEL_ENV !== 'preview';
 
 let analyticsInitialized = false;
 let capturedUTM: UTMParams | null = null;
 
-/**
- * 전체 바이럴 테스트 공용 GA4 + Amplitude 초기화 (feature_type으로 테스트별 구분)
- */
 export function initViralAnalytics(): void {
   if (analyticsInitialized || typeof window === 'undefined' || !IS_PROD) return;
   analyticsInitialized = true;
@@ -31,19 +24,14 @@ export function initViralAnalytics(): void {
   if (AMPLITUDE_KEY) {
     amplitude.init(AMPLITUDE_KEY, { autocapture: false });
 
-    // autocapture를 껐기 때문에 attribution(UTM) 자동 캡처도 꺼짐 — 유입 채널(SNS)별 성과 비교를 위해 수동으로 유저 속성에 기록
     const identify = new amplitude.Identify();
     if (capturedUTM.utmSource) identify.set('utm_source', capturedUTM.utmSource);
     if (capturedUTM.utmMedium) identify.set('utm_medium', capturedUTM.utmMedium);
     if (capturedUTM.utmCampaign) identify.set('utm_campaign', capturedUTM.utmCampaign);
     amplitude.identify(identify);
 
-    // autocapture를 껐기 때문에 공유/전환 없이 이탈하는 방문도 세션으로 잡히도록 수동 기록
     amplitude.track('page_view', { path: window.location.pathname, ...capturedUTM });
   }
-
-  // GA4는 layout.tsx에 설치된 Google 태그 관리자(GTM-WK59VS2L)가 담당 — 직접 gtag.js를
-  // 로드하는 방식은 이 계정에서 브라우저발 히트가 전송되지 않는 문제가 있어 GTM으로 전환함
 }
 
 function sendToThirdParty(eventName: string, properties?: Record<string, unknown>): void {
@@ -52,7 +40,6 @@ function sendToThirdParty(eventName: string, properties?: Record<string, unknown
   if (AMPLITUDE_KEY) {
     amplitude.track(eventName, mergedProperties);
   }
-  // GTM의 "GA4 이벤트" 태그(트리거: 커스텀 이벤트 .*)가 이 dataLayer 이벤트를 GA4로 전달함
   if (typeof window !== 'undefined') {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ event: eventName, ...mergedProperties });
@@ -85,8 +72,6 @@ export function trackEvent(eventName: string, properties?: Record<string, unknow
   sendToThirdParty(eventName, properties);
 }
 
-// ─── 바이럴 이벤트 트래킹 (Supabase) ───
-
 export type FeatureType =
   | 'sexy_battle'
   | 'saju_autopsy'
@@ -116,10 +101,6 @@ interface TrackViralEventParams {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * viral_events 테이블에 이벤트 기록 (fire-and-forget)
- * 실패해도 UX를 차단하지 않음
- */
 export function trackViralEvent(params: TrackViralEventParams): void {
   const fingerprint = getFingerprint();
   if (!fingerprint) return;
@@ -134,7 +115,6 @@ export function trackViralEvent(params: TrackViralEventParams): void {
     metadata: params.metadata ?? {},
   };
 
-  // fire-and-forget — 에러 발생해도 사용자 경험 차단하지 않음
   supabase.from('viral_events').insert(row).then(({ error }) => {
     if (error && process.env.NODE_ENV === 'development') {
       console.error('[ViralEvent] insert failed:', error.message);
@@ -150,9 +130,6 @@ export function trackViralEvent(params: TrackViralEventParams): void {
   });
 }
 
-/**
- * 공유 클릭 트래킹 헬퍼
- */
 export function trackShare(featureType: FeatureType, shareMethod: ShareMethod, resultId?: string, metadata?: Record<string, unknown>): void {
   trackViralEvent({
     featureType,
@@ -163,9 +140,6 @@ export function trackShare(featureType: FeatureType, shareMethod: ShareMethod, r
   });
 }
 
-/**
- * 사주GPT 링크 클릭 트래킹 헬퍼
- */
 export function trackSajuGPTClick(featureType: FeatureType, resultId?: string): void {
   trackViralEvent({
     featureType,
@@ -174,9 +148,6 @@ export function trackSajuGPTClick(featureType: FeatureType, resultId?: string): 
   });
 }
 
-/**
- * 레퍼럴 방문 트래킹 헬퍼 (공유 링크로 진입 시)
- */
 export function trackReferralVisit(featureType: FeatureType, referrerId: string): void {
   trackViralEvent({
     featureType,
@@ -185,9 +156,6 @@ export function trackReferralVisit(featureType: FeatureType, referrerId: string)
   });
 }
 
-/**
- * 랜딩 페이지 유입 트래킹 헬퍼
- */
 export function trackLandingVisit(featureType: FeatureType): void {
   trackViralEvent({
     featureType,

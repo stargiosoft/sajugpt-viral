@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     description: '생년월일로 알아보는 내 평생 재물운 타임라인',
     type: 'website',
     siteName: '사주GPT',
-    images: [{ url: '/money-timeline/og-share.png', width: 1200, height: 600 }],
+    images: [{ url: '/money-timeline/og-share.png?v=2', width: 1200, height: 600 }],
   },
 };
 

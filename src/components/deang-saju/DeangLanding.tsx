@@ -7,6 +7,9 @@ import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import DeangShareRow from './DeangShareRow';
 import CommentBoard from '@/components/CommentBoard';
 import { DEANG_COLORS as C } from '@/constants/deangTheme';
+import { LANDING_GAPS } from '@/constants/layoutGaps';
+
+const SHARE_ROW_HIDDEN_PADDING = 12;
 
 interface Props {
   onStart: () => void;
@@ -32,7 +35,7 @@ export default function DeangLanding({ onStart }: Props) {
         />
       </motion.div>
 
-      <div className="w-full flex flex-col items-center" style={{ padding: '28px 16px 0' }}>
+      <div className="w-full flex flex-col items-center" style={{ padding: `${LANDING_GAPS.heroToCta}px 16px 0` }}>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -53,12 +56,10 @@ export default function DeangLanding({ onStart }: Props) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.5 }}
-          style={{ marginTop: '12px' }}
+          style={{ marginTop: LANDING_GAPS.ctaToShare - SHARE_ROW_HIDDEN_PADDING }}
         >
           <DeangShareRow />
-          {/* DeangShareRow의 DeangOutlineBox가 아이콘 아래 12px 패딩을 이미 갖고 있어(결과 화면과 공유),
-              다른 테스트와 동일한 24px 간격을 맞추려면 그만큼 끌어올려야 한다 */}
-          <div style={{ marginTop: '-12px' }}>
+          <div style={{ marginTop: -SHARE_ROW_HIDDEN_PADDING }}>
             <SajuGPTLinkButton featureType="deang_saju" color="#A8A8A8" hoverColor={C.ink} />
           </div>
         </motion.div>
@@ -68,7 +69,7 @@ export default function DeangLanding({ onStart }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
           className="w-full"
-          style={{ marginTop: '48px' }}
+          style={{ marginTop: LANDING_GAPS.shareToComment }}
         >
           <CommentBoard
             featureType="deang_saju"

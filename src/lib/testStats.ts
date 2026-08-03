@@ -16,7 +16,6 @@ export async function fetchTestStats(): Promise<Record<string, { play: number; s
   }, {});
 }
 
-// 홈 화면 표기 규칙: 1만 이상은 "15.2만" 형태, 미만은 "8,400" 형태
 export function formatStatCount(n: number): string {
   if (n >= 10000) {
     const value = Math.round((n / 10000) * 10) / 10;

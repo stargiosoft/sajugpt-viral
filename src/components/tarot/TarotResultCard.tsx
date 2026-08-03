@@ -12,9 +12,10 @@ import SajuGPTBanner from '@/components/SajuGPTBanner';
 import TarotShareRow from './TarotShareRow';
 import Toast from '@/components/Toast';
 import { saveImage, captureCardImage, isMobileDevice } from '@/lib/share';
-import { trackSajuGPTClick } from '@/lib/analytics';
+import { trackSajuGPTClick, trackShare } from '@/lib/analytics';
 import { incrementTestStat } from '@/lib/testStats';
 import { useIsDesktop, useIsNarrow, NARROW_BREAKPOINT } from '@/lib/ghost-tarot/useBreakpoint';
+import { RESULT_GAPS } from '@/constants/layoutGaps';
 import type { TarotCardData, TarotConfig, TarotResult } from '@/types/tarot';
 
 const PARCHMENT_INK = '#2a1f16';
@@ -82,7 +83,6 @@ export default function TarotResultCard({ config, card, result, error, onReset }
   const messageRef = useRef<HTMLHeadingElement>(null);
   const [messageWrapped, setMessageWrapped] = useState(false);
 
-  // 메시지가 2줄 이상으로 꺾일 때만 폰트를 살짝 줄여서 한 줄일 때의 큼직한 임팩트는 그대로 유지
   useEffect(() => {
     const el = messageRef.current;
     if (!el || !result?.message) return;
@@ -99,6 +99,7 @@ export default function TarotResultCard({ config, card, result, error, onReset }
     clearTimeout(saveResetTimerRef.current);
     saveResetTimerRef.current = setTimeout(() => setSaveState('idle'), 2500);
     incrementTestStat(config.slug, 'share');
+    trackShare(config.featureType, 'image_save', result?.id);
   };
 
   useEffect(() => {
@@ -671,7 +672,7 @@ export default function TarotResultCard({ config, card, result, error, onReset }
             </div>
 
             {(config.slug === 'ghost-tarot' || config.slug === 'romance-ghost-tarot') && (
-              <div style={{ marginTop: 44 }}>
+              <div style={{ marginTop: RESULT_GAPS.actionsToShare }}>
                 <RecommendSection
                   excludeId={config.slug}
                   titleStyle={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontSize: 16, fontWeight: 700, color: palette.ink, letterSpacing: '-0.8px', paddingLeft: '2px' }}

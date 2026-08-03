@@ -6,7 +6,6 @@ export interface TarotCardData {
   front_image: string;
 }
 
-/** DB row에서 뽑아낸, 화면에 실제로 렌더링되는 결과 3필드 (제목/본문/요약) */
 export interface TarotResultContent {
   title: string;
   message: string;
@@ -57,12 +56,9 @@ export interface TarotCopy {
   kakaoTitle: string;
   kakaoDescription: string;
   kakaoButtonText: string;
-  /** 결과 카드 상단, 카드명 아래 뱃지 라벨. 없으면 뱃지 자체를 숨김 */
   badgeLabel?: (title: string) => string;
-  /** 결과 화면 공유 섹션을 액자형 박스로 꾸밀 때 쓰는 문구. 없으면 기존 심플 레이아웃 유지 */
   shareBox?: {
     headline: string;
-    /** headline 안에서 강조색으로 하이라이트할 부분 문자열(선택) */
     headlineHighlight?: string;
     subtextBefore: string;
     subtextHighlight: string;
@@ -75,13 +71,10 @@ export interface TarotConfig {
   table: string;
   featureType: FeatureType;
   fallbackCards: TarotCardData[];
-  /** 레거시 ?mode=5 A/B 훅 — 지정된 풀 안에서만 랜덤 결과가 나오도록 강제. 없으면 비활성 */
   modeOverridePool?: string[];
-  /** 이 슬러그가 항상 이 ID들로만 카드를 보여주도록 고정 (선택 화면 자체가 이 개수로 제한됨) */
   cardPool?: string[];
   theme: TarotTheme;
   assets: TarotAssets;
   copy: TarotCopy;
-  /** DB row(어떤 컬럼명이든) → 공용 title/message/summary로 매핑 */
   toResultContent: (row: Record<string, unknown>) => TarotResultContent;
 }

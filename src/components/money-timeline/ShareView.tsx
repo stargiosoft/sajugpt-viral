@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, type RefObject } from 'react';
+import type { RefObject } from 'react';
 import OutlineBoxButton from '@/components/OutlineBoxButton';
 import PressableButton from '@/components/PressableButton';
-import ShareIconRow from './ShareIconRow';
-import { saveImage } from '@/lib/share';
+import ShareRow from '@/components/ShareRow';
+import { useShareActions } from '@/lib/useShareActions';
 import { incrementTestStat } from '@/lib/testStats';
 import { MONEY_COLORS as C } from '@/constants/moneyTimelineTheme';
 import type { MoneyTimelineProfile } from '@/types/money-timeline';
@@ -17,21 +17,16 @@ interface Props {
 }
 
 export default function ShareView({ resultId, profile, cardRef, onReset }: Props) {
-  const [saving, setSaving] = useState(false);
-
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const shareUrl = `${origin}/money-timeline/${resultId}`;
 
-  const handleSave = async () => {
-    if (!cardRef.current || saving) return;
-    setSaving(true);
-    try {
-      await saveImage(cardRef.current, `내돈복그래프_${profile.overallScore}점.png`);
-      incrementTestStat('money-timeline', 'share');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const { saving, handleSave } = useShareActions({
+    featureType: 'money_timeline',
+    resultId,
+    getShareText: () => shareUrl,
+    imageFilename: `내돈복그래프_${profile.overallScore}점.png`,
+    onSave: () => incrementTestStat('money-timeline', 'share'),
+  });
 
   return (
     <div className="flex flex-col" style={{ gap: '16px' }}>
@@ -54,7 +49,7 @@ export default function ShareView({ resultId, profile, cardRef, onReset }: Props
         </div>
         <PressableButton
           label={saving ? '저장 중...' : '이미지 저장'}
-          onClick={handleSave}
+          onClick={() => handleSave(cardRef)}
           disabled={saving}
           style={{ height: '56px', flex: 1 }}
           bgStyle={{ background: C.gold, borderRadius: '16px' }}
@@ -64,7 +59,7 @@ export default function ShareView({ resultId, profile, cardRef, onReset }: Props
       </div>
 
       <div style={{ paddingTop: '16px', paddingBottom: '12px' }}>
-        <ShareIconRow
+        <ShareRow
           shareContent={{
             featureType: 'money_timeline',
             testId: 'money-timeline',
@@ -72,8 +67,11 @@ export default function ShareView({ resultId, profile, cardRef, onReset }: Props
             title: '💰 내 돈복 테스트 💰',
             description: '내 사주 속 돈의 흐름을 분석해 드려요.',
             shareUrl,
-            imageUrl: `${origin}/money-timeline/og-share.png`,
+            imageUrl: `${origin}/money-timeline/og-share.png?v=2`,
           }}
+          copyColor={C.gold}
+          copyHoverColor="rgb(95, 74, 220)"
+          copyIconColor={C.textOnGold}
         />
       </div>
     </div>

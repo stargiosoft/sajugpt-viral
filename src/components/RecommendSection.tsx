@@ -8,23 +8,16 @@ import { trackEvent } from '@/lib/analytics';
 
 const ALL_IDS = ['ghost-tarot', 'romance-ghost-tarot', 'deang-saju', 'love-chat', 'money-timeline', 'oheng'];
 const GAP_PX = 6;
-// 모바일은 2.5개만 보여서 오른쪽 카드가 살짝 잘려 "더 있다"는 게 드러나고, 데스크탑은 기존대로 4개 꽉 차게
 const DRAG_CLICK_THRESHOLD_PX = 6;
 
 interface RecommendSectionProps {
-  /** 현재 페이지 자신의 testCatalog id — 추천 목록에서 제외됨 */
   excludeId: string;
   titleText?: string;
-  /** 섹션 타이틀 폰트 — 테스트마다 다른 브랜드 폰트를 그대로 사용 (카드 하단 소제목은 항상 Pretendard 고정) */
   titleStyle: CSSProperties;
-  /** 이미지 로드 전 카드 배경색 */
   cardBg?: string;
-  /** 카드 하단 소제목 색상 — 페이지 배경(다크/라이트)에 맞춰 별도로 지정, titleStyle.color와 무관 */
   cardTitleColor: string;
 }
 
-// 결과 화면 하단(댓글 위)에 공통으로 붙는 "다른 테스트 추천" 가로 드래그 스크롤 — 카드 4개가 한 화면에 꽉 차고,
-// 항목이 늘어나면 자연스럽게 드래그로 넘길 수 있도록 폭을 퍼센트 calc로 고정
 export default function RecommendSection({ excludeId, titleText = '추천 테스트', titleStyle, cardBg = '#FFFFFF', cardTitleColor }: RecommendSectionProps) {
   const items = ALL_IDS.filter((id) => id !== excludeId)
     .map((id) => TEST_CATALOG.find((item) => item.id === id))
@@ -36,8 +29,6 @@ export default function RecommendSection({ excludeId, titleText = '추천 테스
 
   const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     const scroller = scrollerRef.current;
-    // 터치는 브라우저 네이티브 스크롤에 맡긴다 — JS로 scrollLeft를 같이 건드리면 네이티브 관성 스크롤과
-    // 충돌해서 뚝뚝 끊기므로, 마우스 드래그(데스크탑)에서만 커스텀 드래그를 사용
     if (!scroller || e.pointerType !== 'mouse' || e.button !== 0) return;
     dragRef.current = { active: true, pointerId: e.pointerId, startX: e.clientX, startScrollLeft: scroller.scrollLeft, moved: false };
     setIsDragging(true);
@@ -89,7 +80,6 @@ export default function RecommendSection({ excludeId, titleText = '추천 테스
           userSelect: 'none',
           scrollbarWidth: 'none',
           WebkitOverflowScrolling: 'touch',
-          // mandatory는 터치 드래그 도중에도 스냅을 강제해서 특히 역방향 스와이프에서 버벅임 유발 — proximity로 완화
           scrollSnapType: isDragging ? 'none' : 'x proximity',
         }}
       >

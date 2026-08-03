@@ -139,8 +139,6 @@ export default function TarotClient({ slug, resultId }: Props) {
     setStep('landing');
   }, []);
 
-  // 플레이 카운트: 실제로 카드를 뽑아 결과 화면에 도달했을 때만 1회 기록
-  // (공유 링크로 들어온 [resultId] 페이지는 TarotResultShareView를 별도로 렌더링하므로 여기 포함되지 않음)
   useEffect(() => {
     if (step !== 'result' || !selectedCard) return;
     incrementTestStat(config.slug, 'play');

@@ -14,11 +14,6 @@ interface Props {
   bestPeriod: ExtendedBestPeriodInfo;
 }
 
-// ----------------------------------------------------------------------
-// Helper Functions & Sub-Components
-// ----------------------------------------------------------------------
-
-/** 한글 받침 여부에 따른 조사('이'/'가') 선택 */
 function getSubjectMarker(text: string): string {
   if (!text) return '이';
   const lastChar = text.charAt(text.length - 1);
@@ -27,7 +22,6 @@ function getSubjectMarker(text: string): string {
   return (code - 0xac00) % 28 > 0 ? '이' : '가';
 }
 
-/** 점수대별 총평 문구 생성 */
 function buildSummaryLine(overallScore: number, bestAgeLabel?: string): string {
   const label = bestAgeLabel || '전성기';
   const marker = getSubjectMarker(label);
@@ -46,7 +40,6 @@ function buildSummaryLine(overallScore: number, bestAgeLabel?: string): string {
   return `${label}${marker} 인생의 자산 성장 골든타임입니다. ${tierText}`;
 }
 
-/** 키워드 하이라이트 분할 함수 */
 function highlightTerms(text: string, terms: string[]) {
   let segments: { text: string; highlight: boolean }[] = [{ text, highlight: false }];
 
@@ -72,7 +65,6 @@ function highlightTerms(text: string, terms: string[]) {
   return segments;
 }
 
-/** 별 아이콘 */
 function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24">
@@ -84,7 +76,6 @@ function StarIcon({ filled }: { filled: boolean }) {
   );
 }
 
-/** 별점 라인 컴포넌트 */
 function StarRow({ score }: { score: number }) {
   const filledCount = Math.max(1, Math.min(5, Math.round(score / 20)));
 
@@ -99,10 +90,6 @@ function StarRow({ score }: { score: number }) {
   );
 }
 
-// ----------------------------------------------------------------------
-// Main Component
-// ----------------------------------------------------------------------
-
 export default function InsightCard({ overallScore, bestPeriod }: Props) {
   const ageLabel = bestPeriod?.ageLabel || '';
 
@@ -115,14 +102,12 @@ export default function InsightCard({ overallScore, bestPeriod }: Props) {
     <div
       style={{ padding: '20px 0 24px',textAlign: 'center' }}
     >
-      {/* 타이틀 */}
       <p
         style={{fontSize: '18.5px', fontWeight: 400, color: C.text, marginTop: '4px', marginBottom: '4px', letterSpacing: '-0.8px', WebkitTextStroke: `0.5px ${C.text}`}}
       >
         재물운 평균 점수
       </p>
 
-      {/* 점수 표시 */}
       <p
         style={{fontSize: '56px', fontWeight: 800, color: '#735EF2', letterSpacing: '-1.1px', paddingLeft: '4px' }}
       >
@@ -138,10 +123,8 @@ export default function InsightCard({ overallScore, bestPeriod }: Props) {
         </span>
       </p>
 
-      {/* 별점 */}
       <StarRow score={overallScore} />
 
-      {/* 요약 메시지 박스 */}
       <div
         style={{ position: 'relative', marginTop: '20px', borderRadius: '14px', backgroundColor: 'rgb(246,245,255)', padding: '16px 20px'}}
       >

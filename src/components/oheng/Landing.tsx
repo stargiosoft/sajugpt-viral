@@ -6,6 +6,7 @@ import CommentBoard from '@/components/CommentBoard';
 import LandingCTAButton from '@/components/LandingCTAButton';
 import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
 import { OHENG_COLORS as C } from '@/constants/ohengTheme';
+import { LANDING_GAPS } from '@/constants/layoutGaps';
 
 export default function Landing({ onStart, thumbnailSrc }: { onStart: () => void; thumbnailSrc?: string }) {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -27,7 +28,7 @@ export default function Landing({ onStart, thumbnailSrc }: { onStart: () => void
         />
       </motion.div>
 
-      <div style={{ padding: '20px 16px 0' }}>
+      <div style={{ padding: `${LANDING_GAPS.heroToCta}px 16px 0` }}>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -47,7 +48,7 @@ export default function Landing({ onStart, thumbnailSrc }: { onStart: () => void
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.5 }}
-          style={{ marginTop: '28px', textAlign: 'center' }}
+          style={{ marginTop: LANDING_GAPS.ctaToShare, textAlign: 'center' }}
         >
           <ShareRow
             shareContent={{
@@ -69,7 +70,7 @@ export default function Landing({ onStart, thumbnailSrc }: { onStart: () => void
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
-          style={{ marginTop: '48px', marginBottom: '200px' }}
+          style={{ marginTop: LANDING_GAPS.shareToComment, marginBottom: '200px' }}
         >
           <CommentBoard
             featureType="oheng"

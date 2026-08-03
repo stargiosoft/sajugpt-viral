@@ -54,7 +54,6 @@ export function shareKakao(params: {
   return true;
 }
 
-// 캡처 대상 안의 <img>들이 실제로 로드 완료됐는지 콘솔에 남김 — 모바일 캡처 실패 원인 추적용 (개발 환경에서만)
 function logImageStates(element: HTMLElement, label: string) {
   const images = Array.from(element.querySelectorAll('img'));
   if (process.env.NODE_ENV === 'development') {
@@ -70,7 +69,6 @@ function logImageStates(element: HTMLElement, label: string) {
   return images;
 }
 
-// 실패한 이미지들의 실제 fetch 응답(상태 코드/CORS 헤더)을 다시 확인해 진짜 원인을 로그로 남김
 async function logImageFetchDiagnostics(images: HTMLImageElement[]) {
   await Promise.all(
     images.map(async (img) => {
@@ -91,18 +89,10 @@ async function logImageFetchDiagnostics(images: HTMLImageElement[]) {
   );
 }
 
-// html-to-image는 Safari/WebKit에서 <img src="data:image/svg+xml">를 drawImage하기 전에
-// 디코딩이 끝나지 않아 이미지 영역이 흰 채로 캡처되는 고질적 버그가 있음
-// (https://bugs.webkit.org/show_bug.cgi?id=201243). modern-screenshot은 이를 fixSvgXmlDecode
-// 옵션(기본 활성화)으로 Safari에서 drawImage를 여러 번 재시도해 우회하므로 라이브러리를 교체함
 export async function captureCardImage(element: HTMLElement): Promise<Blob> {
-  // Bookk Myungjo(@font-face)/East Sea Dokdo(Google Fonts)가 아직 파싱 중일 때 캡처하면
-  // 폴백 시스템 폰트로 렌더링된 화면이 그대로 굳어버림 — 캡처 전 폰트 로딩 완료를 보장
   await document.fonts.ready;
 
   const rect = element.getBoundingClientRect();
-  // 모바일 bleed용 음수 마진은 화면상 부모 패딩을 상쇄하기 위한 것이라 고립된 캡처에서는
-  // 의미가 없고, 오히려 콘텐츠를 좌측으로 밀어 우측에 투명 여백을 남긴다 — 캡처 시엔 0으로 리셋
   const prevMarginLeft = element.style.marginLeft;
   const prevMarginRight = element.style.marginRight;
   element.style.marginLeft = '0px';
@@ -144,10 +134,6 @@ export async function captureCardImage(element: HTMLElement): Promise<Blob> {
 export async function saveImage(element: HTMLElement, filename = '색기배틀_결과.png', preCapturedBlob?: Blob): Promise<void> {
   const blob = preCapturedBlob ?? await captureCardImage(element);
 
-  // 모바일(특히 iOS Safari)은 <a download>가 새 탭으로 열리거나 조용히 실패하는 경우가 많아
-  // 사진첩에 바로 저장할 수 있는 파일 공유 시트(navigator.share)를 우선 시도한다.
-  // navigator.canShare가 없는 일부 모바일 브라우저도 있어 canShare 자체를 게이트로 걸지 않고,
-  // 존재하면 파일 공유 가능 여부만 확인 후 진행 (귀신타로 handleSaveImage와 동일 조건)
   if (isMobileDevice() && navigator.share) {
     const file = new File([blob], filename, { type: 'image/png' });
     if (!navigator.canShare || navigator.canShare({ files: [file] })) {
@@ -155,7 +141,6 @@ export async function saveImage(element: HTMLElement, filename = '색기배틀_�
         await navigator.share({ files: [file] });
         return;
       } catch (err) {
-        // AbortError = 사용자가 공유 시트를 취소한 경우 — 다운로드 폴백으로 넘어가지 않고 그대로 종료
         if (err instanceof Error && err.name === 'AbortError') return;
       }
     }
@@ -168,8 +153,6 @@ export async function saveImage(element: HTMLElement, filename = '색기배틀_�
   document.body.appendChild(link);
   link.click();
   link.remove();
-  // Safari/WebKit은 다운로드를 비동기로 시작하므로 click() 직후 바로 revoke하면
-  // 아직 blob을 읽기 전에 URL이 무효화돼 다운로드가 조용히 실패함 — 잠시 지연 후 해제
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
@@ -205,7 +188,6 @@ export function getShareText(headcount: number, battleId: string): string {
   return `🔥 색기 배틀 — 나한테 꼬인 남자 ${headcount}명\n넌 몇 명이나 꼬이나 해봐 ㅋㅋ\n👉 ${baseUrl}/sexy-battle/${battleId}`;
 }
 
-/** 모바일 여부 판별 — PC에서는 네이티브 공유 사용하지 않음 */
 export function isMobileDevice(): boolean {
   if (typeof window === 'undefined') return false;
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
