@@ -48,7 +48,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
 
   // 캐시 복원 (클라이언트 마운트 후)
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('sexy_battle');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -85,7 +85,7 @@ export default function SexyBattleClient({ battleId, challengerPreview }: Props)
 
   // 입력값 변경 시 공통 캐시에 저장
   useEffect(() => {
-    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju('sexy_battle', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   // 개발용 — ?mock=cut 쿼리로 실제 API 호출 없이 CUT(0명) 컷신/결과 화면 바로 미리보기. 프로덕션 빌드에서는 비활성화.

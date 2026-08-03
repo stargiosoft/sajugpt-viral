@@ -80,7 +80,7 @@ export default function StockClient({ stockId }: Props) {
 
   // 캐시 복원 (클라이언트 마운트 후)
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('saju_stock');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -116,7 +116,7 @@ export default function StockClient({ stockId }: Props) {
 
   // 입력값 변경 시 공통 캐시에 저장
   useEffect(() => {
-    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju('saju_stock', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   // 유효성 검증 — 태어난 시간은 명시적으로 선택(모름 포함)해야 함

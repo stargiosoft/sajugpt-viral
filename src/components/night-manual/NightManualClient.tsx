@@ -39,7 +39,7 @@ export default function NightManualClient({ nightManualId }: Props) {
 
   // 캐시 복원 (클라이언트 마운트 후)
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('night_manual');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -106,7 +106,7 @@ export default function NightManualClient({ nightManualId }: Props) {
     setSubmitting(true);
     setError(null);
 
-    saveSelfSaju({ birthDate, birthTime: effectiveUnknownTime ? '오후 12:00' : birthTime, unknownTime: effectiveUnknownTime, gender });
+    saveSelfSaju('night_manual', { birthDate, birthTime: effectiveUnknownTime ? '오후 12:00' : birthTime, unknownTime: effectiveUnknownTime, gender });
 
     const numbers = birthDate.replace(/[^\d]/g, '');
     const timePart = effectiveUnknownTime ? '1200' : parseKoreanTimeTo24Hour(birthTime);

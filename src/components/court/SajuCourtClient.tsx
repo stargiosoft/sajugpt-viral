@@ -58,7 +58,7 @@ export default function SajuCourtClient() {
 
   // 캐시 복원 (클라이언트 마운트 후)
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('saju_court');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -96,7 +96,7 @@ export default function SajuCourtClient() {
   }, []);
 
   useEffect(() => {
-    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju('saju_court', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
 

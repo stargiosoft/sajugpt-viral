@@ -63,7 +63,7 @@ export default function DatingSimClient({ sharedResultId }: Props) {
 
   // 캐시 복원 (클라이언트 마운트 후)
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('dating');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -74,7 +74,7 @@ export default function DatingSimClient({ sharedResultId }: Props) {
 
   // 입력값 변경 시 공통 캐시에 저장
   useEffect(() => {
-    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju('dating', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   // ─── UTM 자동입력 ──────────────────────────────────

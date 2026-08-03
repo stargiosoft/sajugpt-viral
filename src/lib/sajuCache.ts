@@ -1,4 +1,5 @@
 import type { Gender } from '@/types/autopsy';
+import type { FeatureType } from '@/lib/analytics';
 
 export interface SajuCacheData {
   birthDate: string;
@@ -6,9 +7,6 @@ export interface SajuCacheData {
   unknownTime: boolean;
   gender: Gender;
 }
-
-const SELF_KEY = 'saju_input_self';
-const TARGET_KEY = 'saju_input_target';
 
 function load(key: string): SajuCacheData | null {
   try {
@@ -25,22 +23,22 @@ function remove(key: string) {
   try { localStorage.removeItem(key); } catch { /* noop */ }
 }
 
-export function loadSelfSaju(): SajuCacheData | null {
-  return load(SELF_KEY);
+export function loadSelfSaju(feature: FeatureType): SajuCacheData | null {
+  return load(`saju_input_self_${feature}`);
 }
 
-export function saveSelfSaju(data: SajuCacheData) {
-  save(SELF_KEY, data);
+export function saveSelfSaju(feature: FeatureType, data: SajuCacheData) {
+  save(`saju_input_self_${feature}`, data);
 }
 
-export function removeSelfSaju() {
-  remove(SELF_KEY);
+export function removeSelfSaju(feature: FeatureType) {
+  remove(`saju_input_self_${feature}`);
 }
 
-export function loadTargetSaju(): SajuCacheData | null {
-  return load(TARGET_KEY);
+export function loadTargetSaju(feature: FeatureType): SajuCacheData | null {
+  return load(`saju_input_target_${feature}`);
 }
 
-export function saveTargetSaju(data: SajuCacheData) {
-  save(TARGET_KEY, data);
+export function saveTargetSaju(feature: FeatureType, data: SajuCacheData) {
+  save(`saju_input_target_${feature}`, data);
 }

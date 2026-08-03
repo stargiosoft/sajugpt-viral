@@ -52,7 +52,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
 
   // 캐시 복원 (클라이언트 마운트 후)
   useEffect(() => {
-    const cached = loadTargetSaju();
+    const cached = loadTargetSaju('saju_autopsy');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -92,7 +92,7 @@ export default function AutopsyClient({ autopsyId }: Props) {
 
   // 입력값 변경 시 상대 사주 캐시에 저장
   useEffect(() => {
-    saveTargetSaju({ birthDate, birthTime, unknownTime, gender });
+    saveTargetSaju('saju_autopsy', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   // 유효성 검증

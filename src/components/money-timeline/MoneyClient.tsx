@@ -28,8 +28,8 @@ interface Props {
 export default function MoneyClient({ resultId }: Props) {
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
-  const [unknownTime, setUnknownTime] = useState(false);
-  const [timeSelected, setTimeSelected] = useState(false);
+  const [unknownTime, setUnknownTime] = useState(true);
+  const [timeSelected, setTimeSelected] = useState(true);
   const [gender, setGender] = useState<Gender>('female');
 
   const [step, setStep] = useState<MoneyTimelineStep>('landing');
@@ -39,7 +39,7 @@ export default function MoneyClient({ resultId }: Props) {
   const resultCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('money_timeline');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) {
@@ -83,7 +83,7 @@ export default function MoneyClient({ resultId }: Props) {
   }, [resultId]);
 
   useEffect(() => {
-    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju('money_timeline', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   const isFormValid = () => {
@@ -154,9 +154,6 @@ export default function MoneyClient({ resultId }: Props) {
   const handleReset = () => {
     setResult(null);
     setError(null);
-    setTimeSelected(false);
-    setBirthTime('');
-    setUnknownTime(false);
     setStep('landing');
   };
 

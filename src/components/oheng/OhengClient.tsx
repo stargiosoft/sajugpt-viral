@@ -40,7 +40,7 @@ export default function OhengClient({ resultId }: { resultId?: string }) {
   }, [resultId]);
 
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('oheng');
     if (cached) {
       setForm(prev => ({
         gender: cached.gender ?? prev.gender,
@@ -53,7 +53,7 @@ export default function OhengClient({ resultId }: { resultId?: string }) {
 
   useEffect(() => {
     if (!form.gender || !form.birthday) return;
-    saveSelfSaju({
+    saveSelfSaju('oheng', {
       birthDate: form.birthday,
       birthTime: form.birthTime,
       unknownTime: form.birthTimeUnknown,

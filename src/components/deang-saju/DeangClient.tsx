@@ -32,7 +32,7 @@ export default function DeangClient({ resultId }: Props) {
   const isNarrow = useIsNarrow();
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
-  const [unknownTime, setUnknownTime] = useState(false);
+  const [unknownTime, setUnknownTime] = useState(true);
   const [gender, setGender] = useState<Gender>('female');
 
   const [step, setStep] = useState<DeangStep>('landing');
@@ -42,7 +42,7 @@ export default function DeangClient({ resultId }: Props) {
   const resultCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('deang_saju');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -77,7 +77,7 @@ export default function DeangClient({ resultId }: Props) {
   }, [resultId]);
 
   useEffect(() => {
-    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju('deang_saju', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   const isFormValid = useCallback(() => {

@@ -80,7 +80,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
 
   // 캐시 복원 (클라이언트 마운트 후)
   useEffect(() => {
-    const cached = loadSelfSaju();
+    const cached = loadSelfSaju('gisaeng');
     if (cached) {
       if (cached.birthDate) setBirthDate(cached.birthDate);
       if (cached.birthTime) setBirthTime(cached.birthTime);
@@ -91,7 +91,7 @@ export default function GisaengClient({ resultId: _resultId }: Props) {
 
   // 캐시 저장
   useEffect(() => {
-    saveSelfSaju({ birthDate, birthTime, unknownTime, gender });
+    saveSelfSaju('gisaeng', { birthDate, birthTime, unknownTime, gender });
   }, [birthDate, birthTime, unknownTime, gender]);
 
   // UTM 자동입력
