@@ -109,17 +109,22 @@ export default function SajuGPTBanner({ featureType, resultId }: Props) {
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onDragStart={(e) => e.preventDefault()}
-      className="relative block w-full"
-      style={{ aspectRatio: '1800 / 450', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', touchAction: 'pan-y', userSelect: 'none' }}
+      className="relative block w-full overflow-hidden"
+      style={{
+        aspectRatio: '1800 / 450',
+        borderRadius: '20px',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+        touchAction: 'pan-y',
+        userSelect: 'none',
+        WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+      }}
     >
       <div
         onTransitionEnd={handleTrackTransitionEnd}
-        className="absolute inset-0 flex h-full"
+        className="absolute top-0 left-0 flex h-full will-change-transform"
         style={{
-          borderRadius: 'inherit',
-          overflow: 'hidden',
           width: `${EXTENDED_IMAGES.length * 100}%`,
-          transform: `translateX(calc(${-trackIndex * (100 / EXTENDED_IMAGES.length)}% + ${dragOffsetPx}px))`,
+          transform: `translate3d(calc(${-trackIndex * (100 / EXTENDED_IMAGES.length)}% + ${dragOffsetPx}px), 0, 0)`,
           transition: isDragging || !transitionEnabled ? 'none' : 'transform 0.45s ease-in-out',
         }}
       >
@@ -128,7 +133,6 @@ export default function SajuGPTBanner({ featureType, resultId }: Props) {
           const isNeighbor = Math.abs(i - trackIndex) === 1;
           return (
             <div key={`${src}-${i}`} className="relative h-full shrink-0" style={{ width: `${100 / EXTENDED_IMAGES.length}%` }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src}
                 alt="사주GPT로 더 알아보기"
