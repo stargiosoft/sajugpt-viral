@@ -20,6 +20,7 @@ interface Props {
   fontSize?: string;
   height?: string;
   autoFocus?: boolean;
+  textStrokeWidth?: string;
 }
 
 export default function BirthInput({
@@ -40,6 +41,7 @@ export default function BirthInput({
   fontSize = '16px',
   height = '56px',
   autoFocus = true,
+  textStrokeWidth,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
@@ -110,6 +112,7 @@ export default function BirthInput({
               lineHeight: '20px',
               letterSpacing: '-0.45px',
               color: textColor,
+              ...(textStrokeWidth ? { WebkitTextStroke: `${textStrokeWidth} ${textColor}` } : {}),
             }}
           />
         </div>

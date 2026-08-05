@@ -86,7 +86,8 @@ export type FeatureType =
   | 'love_chat'
   | 'mental_worldcup'
   | 'money_timeline'
-  | 'oheng';
+  | 'oheng'
+  | 'solo_guide';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

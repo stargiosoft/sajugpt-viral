@@ -49,7 +49,7 @@ export default function TestTopNav({ bgColor = '#0d0d0d', logoColor = '#ffffff',
           <MoaMoaWordmark fontSize="21px" color={logoColor} />
         </Link>
 
-        <span style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1, color: xColor ?? logoColor, opacity: 0.5 }}>x</span>
+        <span style={{ fontSize: '12px', fontWeight: 600, lineHeight: 1, color: xColor ?? logoColor, opacity: 0.5, marginLeft: '-4px' }}>x</span>
 
         <SajuGptLogoButton height="20px" width="66px" color={logoColor} />
       </div>

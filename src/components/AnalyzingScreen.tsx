@@ -24,6 +24,7 @@ interface Props {
   lottieLayerOpacities?: number[];
   messageColor?: string;
   messageFontSize?: string;
+  messageFontWeight?: number;
   messageLetterSpacing?: string;
   minHeight?: string;
   heading?: string;
@@ -32,7 +33,11 @@ interface Props {
   wrapWithMotion?: boolean;
   /** 분석 시간이 길어서 메시지가 다 쌓인 뒤에도 대기해야 할 때 — 잠시 멈췄다 처음부터 다시 쌓는다 */
   repeat?: boolean;
+  /** 메시지 글자를 좌→우로 한 글자씩 위아래로 파도타기시키며 무한 반복 (기본 stagger 등장 대신) */
+  waveText?: boolean;
 }
+
+const WAVE_CHAR_STAGGER = 0.08;
 
 // "분석 중" 대기 화면 — 펄싱 링(또는 Lottie) + 순차 등장 메시지. gisaeng은 메시지가 하나씩 누적되며
 // 이전 메시지가 흐려지는 별도 연출이라 이 컴포넌트로 통합하지 않았다.
@@ -48,6 +53,7 @@ export default function AnalyzingScreen({
   lottieLayerOpacities = DEFAULT_LOTTIE_LAYER_OPACITIES,
   messageColor = '#666',
   messageFontSize = '15px',
+  messageFontWeight = 500,
   messageLetterSpacing,
   minHeight = '60vh',
   heading,
@@ -55,6 +61,7 @@ export default function AnalyzingScreen({
   staggerDelay = 0.6,
   wrapWithMotion = false,
   repeat = false,
+  waveText = false,
 }: Props) {
   const lottieData = useMemo(
     () => animationData ?? (lottieColor ? recolorLottie(squareShapeLoading, lottieColor, lottieLayerOpacities) : null),
@@ -105,24 +112,55 @@ export default function AnalyzingScreen({
         </p>
       )}
 
-      {messages.map((msg, i) => (
-        <motion.p
-          key={`${round}-${i}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * staggerDelay, duration: 0.4 }}
-          style={{
-            fontSize: messageFontSize,
-            fontWeight: 500,
-            color: messageColor,
-            marginBottom: '8px',
-            textAlign: 'center',
-            letterSpacing: messageLetterSpacing,
-          }}
-        >
-          {msg}
-        </motion.p>
-      ))}
+      {messages.map((msg, i) =>
+        waveText ? (
+          <p
+            key={`${round}-${i}`}
+            style={{
+              fontSize: messageFontSize,
+              fontWeight: messageFontWeight,
+              color: messageColor,
+              marginBottom: '8px',
+              textAlign: 'center',
+              letterSpacing: messageLetterSpacing,
+            }}
+          >
+            {[...msg].map((ch, ci, chars) => (
+              <motion.span
+                key={ci}
+                style={{ display: 'inline-block' }}
+                animate={{ y: [0, -6, 0] }}
+                transition={{
+                  duration: 0.6,
+                  ease: 'easeInOut',
+                  repeat: Infinity,
+                  delay: ci * WAVE_CHAR_STAGGER,
+                  repeatDelay: chars.length * WAVE_CHAR_STAGGER,
+                }}
+              >
+                {ch === ' ' ? ' ' : ch}
+              </motion.span>
+            ))}
+          </p>
+        ) : (
+          <motion.p
+            key={`${round}-${i}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * staggerDelay, duration: 0.4 }}
+            style={{
+              fontSize: messageFontSize,
+              fontWeight: messageFontWeight,
+              color: messageColor,
+              marginBottom: '8px',
+              textAlign: 'center',
+              letterSpacing: messageLetterSpacing,
+            }}
+          >
+            {msg}
+          </motion.p>
+        )
+      )}
     </div>
   );
 

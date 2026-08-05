@@ -11,16 +11,17 @@ interface Props {
   hoverBackground?: string;
   height?: string;
   boxShadow?: string;
+  borderRadius?: string;
   textStyle?: CSSProperties;
 }
 
-export default function LandingCTAButton({ onClick, label, background, color = '#fff', hoverBackground, height = '56px', boxShadow, textStyle }: Props) {
+export default function LandingCTAButton({ onClick, label, background, color = '#fff', hoverBackground, height = '56px', boxShadow, borderRadius = '16px', textStyle }: Props) {
   return (
     <PressableButton
       onClick={onClick}
       label={label}
       style={{ height }}
-      bgStyle={{ background, borderRadius: '16px', boxShadow }}
+      bgStyle={{ background, borderRadius, boxShadow }}
       hoverBackground={hoverBackground}
       textStyle={{ fontSize: '16px', fontWeight: 700, letterSpacing: '-0.32px', color, ...textStyle }}
     />

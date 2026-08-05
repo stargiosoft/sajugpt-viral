@@ -76,18 +76,44 @@ interface Props {
   dark?: boolean;
   inputBg?: string;
   disabledBg?: string;
+  emptyStateColor?: string;
+  metaColor?: string;
+  heartIdleColor?: string;
+  moreButtonFontSize?: string;
+  moreButtonHoverBg?: string;
+  submitButtonHoverBg?: string;
   anonTag?: (clientId: string) => string;
 }
 
-export default function CommentBoard({ featureType, storageKey, placeholder, themeColor, dark = false, inputBg, disabledBg, anonTag = defaultAnonTag }: Props) {
+export default function CommentBoard({
+  featureType,
+  storageKey,
+  placeholder,
+  themeColor,
+  dark = false,
+  inputBg,
+  disabledBg,
+  emptyStateColor,
+  metaColor,
+  heartIdleColor,
+  moreButtonFontSize,
+  moreButtonHoverBg,
+  submitButtonHoverBg,
+  anonTag = defaultAnonTag,
+}: Props) {
   const { comments, loading, input, setInput, submitting, likedIds, showAll, setShowAll, handleSubmit, handleToggleLike, maxLength } =
     useCommentBoard(featureType, storageKey);
   const [burstIds, setBurstIds] = useState<Set<string>>(new Set());
 
-  const GRAY = { ...(dark ? DARK_GRAY : LIGHT_GRAY), ...(inputBg ? { inputBg } : {}), ...(disabledBg ? { disabledBg } : {}) };
-  const accentHover = darkenHex(themeColor, 26);
+  const GRAY = {
+    ...(dark ? DARK_GRAY : LIGHT_GRAY),
+    ...(inputBg ? { inputBg } : {}),
+    ...(disabledBg ? { disabledBg } : {}),
+    ...(heartIdleColor ? { heartIdle: heartIdleColor } : {}),
+  };
+  const accentHover = submitButtonHoverBg ?? darkenHex(themeColor, 26);
   const moreBg = tintHex(themeColor, 0.08);
-  const moreHoverBg = tintHex(themeColor, 0.18);
+  const moreHoverBg = moreButtonHoverBg ?? tintHex(themeColor, 0.18);
 
   const handleLikeClick = (id: string) => {
     if (!likedIds.has(id)) {
@@ -148,7 +174,7 @@ export default function CommentBoard({ featureType, storageKey, placeholder, the
         {loading && <p style={{ fontSize: '13px', color: GRAY.textSecondary, textAlign: 'center' }}>불러오는 중...</p>}
 
         {!loading && comments.length === 0 && (
-          <p style={{ fontSize: '13px', color: GRAY.textSecondary, textAlign: 'center', padding: '8px 0' }}>
+          <p style={{ fontSize: '13px', color: emptyStateColor ?? GRAY.textSecondary, textAlign: 'center', padding: '8px 0' }}>
             아직 댓글이 없어요. 첫 한마디를 남겨보세요!
           </p>
         )}
@@ -171,8 +197,8 @@ export default function CommentBoard({ featureType, storageKey, placeholder, the
             }}
           >
             <div className="flex items-center" style={{ gap: '6px', marginBottom: '5px' }}>
-              <span style={{ fontSize: '11.5px', fontWeight: 500, letterSpacing: '-0.2px', color: GRAY.textTertiary }}>{anonTag(comment.client_id)}</span>
-              <span style={{ fontSize: '11px', letterSpacing: '-0.1px', color: GRAY.textTertiary, paddingTop: '1px', paddingBottom: '1px' }}>{timeAgo(comment.created_at)}</span>
+              <span style={{ fontSize: '11.5px', fontWeight: 500, letterSpacing: '-0.2px', color: metaColor ?? GRAY.textTertiary }}>{anonTag(comment.client_id)}</span>
+              <span style={{ fontSize: '11px', letterSpacing: '-0.1px', color: metaColor ?? GRAY.textTertiary, paddingTop: '1px', paddingBottom: '1px' }}>{timeAgo(comment.created_at)}</span>
             </div>
             <p style={{ fontSize: '14.5px', fontWeight: 400, letterSpacing: '-0.2px', color: GRAY.text, lineHeight: '22px', marginBottom: '6px' }}>
               {comment.content}
@@ -197,7 +223,7 @@ export default function CommentBoard({ featureType, storageKey, placeholder, the
             style={{ height: '40px', marginTop: '30px' }}
             bgStyle={{ background: moreBg, borderRadius: '14px' }}
             hoverBackground={moreHoverBg}
-            textStyle={{ fontSize: '13.5px', fontWeight: 600, letterSpacing: '-0.2px', color: themeColor }}
+            textStyle={{ fontSize: moreButtonFontSize ?? '13.5px', fontWeight: 600, letterSpacing: '-0.2px', color: themeColor }}
           />
         )}
       </div>

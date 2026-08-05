@@ -20,8 +20,7 @@ export default function SajuGPTLinkButton({ featureType, color, hoverColor, labe
       rel="noopener noreferrer"
       onClick={() => trackSajuGPTClick(featureType)}
       whileHover={hoverColor ? { color: hoverColor } : { opacity: 0.8 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
       style={{
         display: 'block',
         marginTop: '24px',
@@ -31,6 +30,7 @@ export default function SajuGPTLinkButton({ featureType, color, hoverColor, labe
         fontSize: '13px',
         fontWeight: 600,
         textDecoration: 'none',
+        whiteSpace: 'nowrap',
       }}
     >
       {label}

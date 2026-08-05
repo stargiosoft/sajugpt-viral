@@ -29,8 +29,8 @@ export default function ShareIconButton({ ariaLabel, onClick, children, style, h
       aria-label={ariaLabel}
       onClick={onClick}
       whileHover={hoverBackground ? { backgroundColor: hoverBackground } : { filter: 'brightness(1.08)' }}
-      whileTap={{ scale: 0.96 }}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      whileTap={hoverBackground ? { backgroundColor: hoverBackground } : { filter: 'brightness(1.08)' }}
+      transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
       style={{ ...CIRCLE_STYLE, ...style }}
     >
       {children}

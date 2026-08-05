@@ -45,8 +45,7 @@ export default function TextLinkButton({
 
   const motionProps = {
     whileHover: hoverColor ? { color: hoverColor } : { opacity: 0.8 },
-    whileTap: { scale: 0.97 },
-    transition: { duration: 0.15, ease: 'easeOut' as const },
+    transition: { type: 'spring' as const, stiffness: 500, damping: 30, mass: 0.5 },
   };
 
   if (href) {

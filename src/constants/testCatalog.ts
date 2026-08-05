@@ -177,4 +177,20 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     ready: true,
     visibleOnHome: true,
   },
+  {
+    id: 'solo-guide',
+    title: '솔로 탈출 지침서',
+    description: '내 사주 속 오성 분포로 알아보는 진짜 연애 유형과 솔로 탈출 처방전',
+    href: '/solo-guide',
+    emoji: '💘',
+    imageSrc: '/solo-guide/landing-thumbnail.png',
+    category: 'love',
+    colorTheme: 'orange',
+    participantLabel: '142',
+    shareLabel: '18',
+    isNew: true,
+    ready: true,
+    // WhySolo API 장애로 백엔드 결과가 불안정 — 정상화될 때까지 홈 노출만 임시로 끔 (URL 직접 접근은 그대로 가능)
+    visibleOnHome: false,
+  },
 ];

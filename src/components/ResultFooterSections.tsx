@@ -19,6 +19,12 @@ interface Props {
   themeColor: string;
   inputBg?: string;
   disabledBg?: string;
+  emptyStateColor?: string;
+  metaColor?: string;
+  heartIdleColor?: string;
+  moreButtonFontSize?: string;
+  moreButtonHoverBg?: string;
+  submitButtonHoverBg?: string;
   dark?: boolean;
   shareToRecommendGap?: number;
 }
@@ -35,6 +41,12 @@ export default function ResultFooterSections({
   themeColor,
   inputBg,
   disabledBg,
+  emptyStateColor,
+  metaColor,
+  heartIdleColor,
+  moreButtonFontSize,
+  moreButtonHoverBg,
+  submitButtonHoverBg,
   dark,
   shareToRecommendGap = RESULT_GAPS.shareToRecommend,
 }: Props) {
@@ -54,6 +66,12 @@ export default function ResultFooterSections({
           themeColor={themeColor}
           inputBg={inputBg}
           disabledBg={disabledBg}
+          emptyStateColor={emptyStateColor}
+          metaColor={metaColor}
+          heartIdleColor={heartIdleColor}
+          moreButtonFontSize={moreButtonFontSize}
+          moreButtonHoverBg={moreButtonHoverBg}
+          submitButtonHoverBg={submitButtonHoverBg}
           dark={dark}
         />
       </div>

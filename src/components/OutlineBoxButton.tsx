@@ -42,7 +42,7 @@ export default function OutlineBoxButton({
   const hoverProps = hoverBackground
     ? {
         whileHover: { backgroundColor: hoverBackground },
-        whileTap: { backgroundColor: hoverBackground, filter: 'brightness(0.88)', scale: 0.998 },
+        whileTap: { backgroundColor: hoverBackground, filter: 'brightness(0.88)' },
         transition: PRESS_HOVER_PROPS.transition,
       }
     : PRESS_HOVER_PROPS;

@@ -52,8 +52,11 @@ interface Props {
   fontSize?: string;
   arrowColor?: string;
   sheetTitleFontWeight?: number;
+  sheetTitleFontSize?: string;
   sheetTitleTextStrokeWidth?: string;
   sheetTitleLetterSpacing?: string;
+  sheetTitlePaddingBottom?: string;
+  textStrokeWidth?: string;
   height?: string;
 }
 
@@ -75,8 +78,11 @@ export default function TimeSelectSheet({
   fontSize = '16px',
   arrowColor = placeholderColor,
   sheetTitleFontWeight = 700,
+  sheetTitleFontSize = '24px',
   sheetTitleTextStrokeWidth,
   sheetTitleLetterSpacing,
+  sheetTitlePaddingBottom = '14px',
+  textStrokeWidth,
   height = '56px',
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -113,6 +119,7 @@ export default function TimeSelectSheet({
             lineHeight: '20px',
             letterSpacing: '-0.45px',
             color: selected ? textColor : placeholderColor,
+            ...(textStrokeWidth ? { WebkitTextStroke: `${textStrokeWidth} ${selected ? textColor : placeholderColor}` } : {}),
           }}
         >
           {selected ? (selected.isUnknown ? '모름' : `${selected.label} (${selected.range})`) : '태어난 시간을 선택해 주세요'}
@@ -163,25 +170,25 @@ export default function TimeSelectSheet({
             >
               <div
                 onPointerDown={e => dragControls.start(e)}
-                className="flex justify-center"
-                style={{ padding: '10px 0 2px', flexShrink: 0, cursor: 'grab', touchAction: 'none' }}
+                style={{ flexShrink: 0, cursor: 'grab', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}
               >
-                <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: dragHandleColor }} />
+                <div className="flex justify-center" style={{ padding: '10px 0 2px' }}>
+                  <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: dragHandleColor }} />
+                </div>
+                <p
+                  style={{
+                    fontSize: sheetTitleFontSize,
+                    fontWeight: sheetTitleFontWeight,
+                    color: sheetTextColor,
+                    textAlign: 'left',
+                    padding: `30px 20px ${sheetTitlePaddingBottom}`,
+                    ...(sheetTitleLetterSpacing ? { letterSpacing: sheetTitleLetterSpacing } : {}),
+                    ...(sheetTitleTextStrokeWidth ? { WebkitTextStroke: `${sheetTitleTextStrokeWidth} ${sheetTextColor}` } : {}),
+                  }}
+                >
+                  태어난 시간을 선택해 주세요
+                </p>
               </div>
-              <p
-                style={{
-                  fontSize: '24px',
-                  fontWeight: sheetTitleFontWeight,
-                  color: sheetTextColor,
-                  textAlign: 'left',
-                  padding: '30px 20px 14px',
-                  flexShrink: 0,
-                  ...(sheetTitleLetterSpacing ? { letterSpacing: sheetTitleLetterSpacing } : {}),
-                  ...(sheetTitleTextStrokeWidth ? { WebkitTextStroke: `${sheetTitleTextStrokeWidth} ${sheetTextColor}` } : {}),
-                }}
-              >
-                태어난 시간을 선택해 주세요
-              </p>
               <div className="overflow-y-auto" style={{ padding: '0 12px 12px' }}>
                 {TIME_BLOCKS.map(block => {
                   const isSelected = selected?.key === block.key;
