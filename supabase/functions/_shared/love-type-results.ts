@@ -16,6 +16,22 @@ export interface SelectedLoveType {
   topElements: Array<{ key: OhengKey; score: number }>;
 }
 
+const OHENG_KOREAN_MAP: Record<OhengKey, string> = {
+  BI: '비',
+  SIK: '식',
+  JAE: '재',
+  GWAN: '관',
+  IN: '인'
+};
+
+const OHENG_SINGLE_KOREAN_MAP: Record<OhengKey, string> = {
+  BI: '비겁',
+  SIK: '식상',
+  JAE: '재성',
+  GWAN: '관성',
+  IN: '인성'
+};
+
 /**
  * 상위 2개 오행 및 조건에 따른 타입 결정 함수
  */
@@ -36,12 +52,12 @@ export function selectLoveType(
   const scoreA = scores[firstKey] || 0;
   const scoreB = scores[secondKey] || 0;
 
-  // 2-1: 둘 다 45 이상
+  // 2-1: 둘 다 45 이상 -> 3-2 하드 조합 (예: "하드비식")
   if (scoreA >= 45 && scoreB >= 45) {
-    const combinedKey = [firstKey, secondKey].sort().join('_');
+    const sortedKor = [firstKey, secondKey].sort().map(k => OHENG_KOREAN_MAP[k]).join('');
     return {
       section: '3-2',
-      contentKey: combinedKey,
+      contentKey: `하드${sortedKor}`,
       topElements: [
         { key: firstKey, score: scoreA },
         { key: secondKey, score: scoreB }
@@ -49,12 +65,12 @@ export function selectLoveType(
     };
   }
 
-  // 2-2: 둘 중 하나만 45 이상
+  // 2-2: 둘 중 하나만 45 이상 -> 3-3 단독 오성 데이터 (예: "식상")
   if (scoreA >= 45 || scoreB >= 45) {
     const singleKey = scoreA >= 45 ? firstKey : secondKey;
     return {
       section: '3-3',
-      contentKey: singleKey,
+      contentKey: OHENG_SINGLE_KOREAN_MAP[singleKey],
       topElements: [
         { key: firstKey, score: scoreA },
         { key: secondKey, score: scoreB }
@@ -62,11 +78,11 @@ export function selectLoveType(
     };
   }
 
-  // 2-3: 둘 다 45 미만
-  const combinedKey = [firstKey, secondKey].sort().join('_');
+  // 2-3: 둘 다 45 미만 -> 3-1 일반 조합 (예: "식재")
+  const sortedKor = [firstKey, secondKey].sort().map(k => OHENG_KOREAN_MAP[k]).join('');
   return {
     section: '3-1',
-    contentKey: combinedKey,
+    contentKey: sortedKor,
     topElements: [
       { key: firstKey, score: scoreA },
       { key: secondKey, score: scoreB }
@@ -77,27 +93,29 @@ export function selectLoveType(
 /**
  * Supabase DB에서 contentKey에 해당하는 콘텐츠 조회
  */
-export async function lookupContentFromDB(supabase: any, contentKey?: string) {
-  if (!contentKey || typeof contentKey !== 'string') {
-    console.warn('[DB Lookup] 유효하지 않은 contentKey:', contentKey);
+export async function lookupContentFromDB(
+  supabase: any,
+  contentKey?: string,
+  section?: string
+) {
+  if (!contentKey || !section) {
+    console.warn("[DB Lookup]", { contentKey, section });
     return null;
   }
 
-  try {
-    const { data, error } = await supabase
-      .from('solo_guide_results')
-      .select('*')
-      .eq('content_key', contentKey)
-      .maybeSingle();
+  const { data, error } = await supabase
+    .from("solo_guide_results")
+    .select("*")
+    .eq("section", section)
+    .eq("content_key", contentKey)
+    .maybeSingle();
 
-    if (error) {
-      console.error('[DB Lookup Error]:', error.message);
-      return null;
-    }
+  console.log("DB RESULT", data);
 
-    return data;
-  } catch (err) {
-    console.error('[DB Lookup Exception]:', err);
+  if (error) {
+    console.error(error);
     return null;
   }
+
+  return data;
 }

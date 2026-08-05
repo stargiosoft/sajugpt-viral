@@ -1,7 +1,7 @@
 CREATE TABLE solo_guide_results (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   section TEXT NOT NULL,         -- '3-1', '3-2', '3-3'
-  content_key TEXT NOT NULL,     -- 'RE_IN', 'IN_BI', 'BI' 등 (A, B 결합 키)
+  content_key TEXT NOT NULL,     -- '재인', '식관', '하드인비', '식상' 등
   title TEXT NOT NULL,           -- 대표 연애 유형
   reason_solo TEXT NOT NULL,     -- 내가 솔로인 이유
   charm_point TEXT NOT NULL,     -- 나의 반전 매력 포인트
@@ -12,10 +12,11 @@ CREATE TABLE solo_guide_results (
   CONSTRAINT unique_section_key UNIQUE (section, content_key)
 );
 
--- 2. 조회가 가능하도록 RLS Policy 설정 (선택)
+-- 2. RLS 활성화 및 퍼블릭 읽기 권한 설정
 ALTER TABLE solo_guide_results ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read access" 
 ON public.solo_guide_results 
 FOR SELECT 
 USING (true);
+
