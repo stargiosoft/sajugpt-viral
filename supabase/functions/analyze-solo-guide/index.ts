@@ -28,6 +28,8 @@ export interface OhengScoreDetail {
 
 export type OhengFullScores = Record<OhengKey, OhengScoreDetail>;
 
+export type WangSangHyuSuSaOrder = OhengKey[];
+
 export interface SelectedLoveType {
   section: string;
   contentKey: string;
@@ -69,7 +71,33 @@ const OHENG_NAME_MAP: Record<string, OhengKey> = {
   정인: 'IN'
 };
 
-const KOREAN_OHENG_SORT_ORDER = ['관', '비', '식', '인', '재'];
+// 상생 순환 순서: 비겁→식상→재성→관성→인성→(비겁)
+const CYCLE_INDEX: Record<OhengKey, number> = {
+  BI: 0,
+  SIK: 1,
+  JAE: 2,
+  GWAN: 3,
+  IN: 4
+};
+
+/**
+ * 두 오행 중 상생 순환상 "더 짧은 방향"으로 도달하는 쪽을 앞에 오도록 정렬
+ */
+function getCanonicalPairOrder(k1: OhengKey, k2: OhengKey): [OhengKey, OhengKey] {
+  const i1 = CYCLE_INDEX[k1];
+  const i2 = CYCLE_INDEX[k2];
+  const forward = (i2 - i1 + 5) % 5; 
+  const backward = (i1 - i2 + 5) % 5; 
+  return forward <= backward ? [k1, k2] : [k2, k1];
+}
+
+/**
+ * 상생 순환 기준 canonical 조합 키 생성
+ */
+function getMappedCombinationKey(k1: OhengKey, k2: OhengKey, prefix: string = ''): string {
+  const [start, end] = getCanonicalPairOrder(k1, k2);
+  return `${prefix}${OHENG_KOREAN_MAP[start]}${OHENG_KOREAN_MAP[end]}`;
+}
 
 // STARGIO HEADER
 
@@ -78,7 +106,7 @@ const basicAuthToken = btoa('stargio:stargio_key_1507');
 const BROWSER_HEADERS = {
   'Accept': 'application/json, text/plain, */*',
   'Accept-Encoding': 'gzip, deflate, br',
-  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en-US;q=0.7',
   'Cache-Control': 'no-cache',
   'Connection': 'keep-alive',
   'Host': 'service.stargio.co.kr:8400',
@@ -162,7 +190,7 @@ function extractTableFullScores(
 }
 
 /**
- * HTML 전체에서 오성 요약 테이블(버전1, 버전2 등 여러 개 가능)을 모두 파싱
+ * HTML 전체에서 오성 요약 테이블을 모두 파싱
  */
 function parseAllOhengTables($: cheerio.CheerioAPI): OhengFullScores[] {
   const tableScoresList: OhengFullScores[] = [];
@@ -176,87 +204,59 @@ function parseAllOhengTables($: cheerio.CheerioAPI): OhengFullScores[] {
   return tableScoresList;
 }
 
-/**
- * 여러 테이블(버전1, 버전2)을 모두 사용해서 오행별로
- * 가장 높은 오왕 점수를 채택 (그 점수와 함께 기록된 왕상휴수사 점수도 같이 유지)
- */
-function mergeFullScores(tableScoresList: OhengFullScores[]): OhengFullScores {
-  const keys: OhengKey[] = ['BI', 'SIK', 'JAE', 'GWAN', 'IN'];
-  const merged = emptyFullScores();
-
-  keys.forEach(key => {
-    let best: OhengScoreDetail = { score: -Infinity, wshs: 0 };
-
-    for (const table of tableScoresList) {
-      const entry = table[key];
-      if (entry && entry.score > best.score) {
-        best = entry;
-      }
-    }
-
-    merged[key] = best.score === -Infinity ? { score: 0, wshs: 0 } : best;
-  });
-
-  return merged;
-}
-
-export function selectLoveType(scores: OhengFullScores): SelectedLoveType {
+export function selectLoveType(
+  scores: OhengFullScores,
+  wshsOrder: WangSangHyuSuSaOrder = ['BI', 'SIK', 'JAE', 'GWAN', 'IN']
+): SelectedLoveType {
   const keys = (Object.keys(scores) as OhengKey[]).sort((a, b) => {
-    const diff = scores[b].score - scores[a].score;
-    if (diff !== 0) return diff;
-    // 동점일 경우 왕상휴수사 점수가 더 높은(더 왕성한) 쪽 우선
-    return scores[b].wshs - scores[a].wshs;
+    const scoreDiff = (scores[b]?.score || 0) - (scores[a]?.score || 0);
+    if (scoreDiff !== 0) return scoreDiff;
+    const wshsDiff = (scores[b]?.wshs || 0) - (scores[a]?.wshs || 0);
+    if (wshsDiff !== 0) return wshsDiff;
+    const idxA = wshsOrder.indexOf(a);
+    const idxB = wshsOrder.indexOf(b);
+    return (idxA !== -1 ? idxA : 99) - (idxB !== -1 ? idxB : 99);
   });
 
-  const firstKey = keys[0];
-  const secondKey = keys[1];
-  const scoreA = scores[firstKey].score;
-  const scoreB = scores[secondKey].score;
-  const wshsA = scores[firstKey].wshs;
-  const wshsB = scores[secondKey].wshs;
+  const firstKey = keys[0] || 'BI';
+  const secondKey = keys[1] || 'SIK';
+  const scoreA = scores[firstKey]?.score || 0;
+  const scoreB = scores[secondKey]?.score || 0;
+  const wshsA = scores[firstKey]?.wshs || 0;
+  const wshsB = scores[secondKey]?.wshs || 0;
 
-  const getMappedCombinationKey = (k1: OhengKey, k2: OhengKey, prefix: string = '') => {
-    const sortedKor = [k1, k2]
-      .sort((x, y) => {
-        const nameX = OHENG_KOREAN_MAP[x];
-        const nameY = OHENG_KOREAN_MAP[y];
-        return KOREAN_OHENG_SORT_ORDER.indexOf(nameX) - KOREAN_OHENG_SORT_ORDER.indexOf(nameY);
-      })
-      .map(k => OHENG_KOREAN_MAP[k])
-      .join('');
-
-    return `${prefix}${sortedKor}`;
-  };
-
-  const topElements = [
-    { key: firstKey, score: scoreA, wshs: wshsA },
-    { key: secondKey, score: scoreB, wshs: wshsB }
-  ];
-
-  // 2-1. A >= 45 & B >= 45 → 하드 콤보 (3-2)
+  // 1. [3-2 하드 조합] 1위와 2위가 둘 다 최상위권일 때 (둘 다 45 이상)
   if (scoreA >= 45 && scoreB >= 45) {
     return {
       section: '3-2',
       contentKey: getMappedCombinationKey(firstKey, secondKey, '하드'),
-      topElements
+      topElements: [
+        { key: firstKey, score: scoreA, wshs: wshsA },
+        { key: secondKey, score: scoreB, wshs: wshsB }
+      ]
     };
   }
 
-  // 2-2. 둘 중 하나만 45 이상 → 단일 지배 (3-3)
-  if (scoreA >= 45 || scoreB >= 45) {
-    const strongKey = scoreA >= 45 ? firstKey : secondKey;
+  // 2. [3-3 단일 지배] 1위는 45 이상이고, 2위는 35 미만으로 격차가 클 때
+  if (scoreA >= 45 && scoreB < 15) {
     return {
       section: '3-3',
-      contentKey: OHENG_SINGLE_KOREAN_MAP[strongKey],
-      topElements
+      contentKey: OHENG_SINGLE_KOREAN_MAP[firstKey],
+      topElements: [
+        { key: firstKey, score: scoreA, wshs: wshsA },
+        { key: secondKey, score: scoreB, wshs: wshsB }
+      ]
     };
   }
 
-  // 2-3. 그 외 → 표준 조합 (3-1)
+  // 3. [3-1 일반 조합] 1, 2위가 나란히 높거나 할 때 조합(예: '식재') 처리
   return {
     section: '3-1',
     contentKey: getMappedCombinationKey(firstKey, secondKey),
-    topElements
+    topElements: [
+      { key: firstKey, score: scoreA, wshs: wshsA },
+      { key: secondKey, score: scoreB, wshs: wshsB }
+    ]
   };
 }
 
@@ -342,7 +342,6 @@ Deno.serve(async (req: Request) => {
 
     const url = `https://fortune.stargio.co.kr:28082/whySolo/woonse?gender=${gender}&saju=${apiBirthday}&woonYear=${requestedYear}`;
 
-
     console.log(`=== [${requestId}] 요청 입력값 ===`, JSON.stringify({
       name, birthday, birthTime, gender, calendarType, apiBirthday, requestedYear, requestUrl: url
     }));
@@ -360,7 +359,6 @@ Deno.serve(async (req: Request) => {
     const $ = cheerio.load(html);
     $('script, style, noscript').remove();
 
-    // 버전1, 버전2 (또는 그 이상) 오성 요약 테이블을 모두 파싱
     const tableScoresList = parseAllOhengTables($);
 
     console.log(`=== [${requestId}] HTML 진단 ===`, JSON.stringify({
@@ -376,11 +374,8 @@ Deno.serve(async (req: Request) => {
 
     console.log(`=== [${requestId}] 테이블별 원본 점수 ===`, JSON.stringify(tableScoresList));
 
-    // 여러 테이블을 모두 사용해서 오행별 최고 오왕점수로 병합
-    const mergedScores = mergeFullScores(tableScoresList);
-    // 병합된 점수로 상위 2개 오행 선정 + 3-1/3-2/3-3 분기 결정
+    const mergedScores = tableScoresList[tableScoresList.length - 1];
     const selected = selectLoveType(mergedScores);
-    // 결정된 section + contentKey로 실제 콘텐츠 조회
     const content = await lookupContentFromDB(
       supabase,
       selected.contentKey,
