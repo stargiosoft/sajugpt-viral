@@ -7,6 +7,7 @@ import type { Gender } from '@/types/battle';
 interface Props {
   value: Gender | null;
   onChange: (value: Gender) => void;
+  groupId?: string;
   accentColor?: string;
   bgColor?: string;
   unselectedColor?: string;
@@ -18,7 +19,7 @@ interface Props {
   height?: string;
 }
 
-export default function GenderSelect({ value, onChange, accentColor = '#7A38D8', bgColor = '#f8f8f8', unselectedColor = '#b7b7b7', border = 'none', indicatorBoxShadow = '0px 2px 7px 0px rgba(0,0,0,0.12)', icon, fontSize = '15px', textStrokeWidth, height = '48px' }: Props) {
+export default function GenderSelect({ value, onChange, groupId = 'default', accentColor = '#7A38D8', bgColor = '#f8f8f8', unselectedColor = '#b7b7b7', border = 'none', indicatorBoxShadow = '0px 2px 7px 0px rgba(0,0,0,0.12)', icon, fontSize = '15px', textStrokeWidth, height = '48px' }: Props) {
   return (
     <div
       className="overflow-hidden isolate"
@@ -44,7 +45,7 @@ export default function GenderSelect({ value, onChange, accentColor = '#7A38D8',
           >
             {value === g && (
               <motion.div
-                layoutId="sexy-gender-indicator"
+                layoutId={`sexy-gender-indicator-${groupId}`}
                 className="absolute inset-0"
                 style={{
                   backgroundColor: accentColor,
@@ -55,7 +56,7 @@ export default function GenderSelect({ value, onChange, accentColor = '#7A38D8',
               />
             )}
             <span
-              className="relative z-[1]"
+              className="relative z-1"
               style={{
                 fontSize,
                 fontWeight: 500,
@@ -68,7 +69,7 @@ export default function GenderSelect({ value, onChange, accentColor = '#7A38D8',
             >
               {g === 'female' ? '여성' : '남성'}
             </span>
-            <span className="relative z-[1] shrink-0 flex items-center">
+            <span className="relative z-1 shrink-0 flex items-center">
               {icon?.(value === g) ?? (
                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
                   <path

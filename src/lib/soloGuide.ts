@@ -25,7 +25,7 @@ export async function analyzeSoloGuide(input: SoloGuideInput): Promise<SoloGuide
   if (!data.dbContent) throw new Error('해당 유형의 콘텐츠를 찾을 수 없습니다.');
 
   return {
-    resultId: crypto.randomUUID(),
+    resultId: data.resultId,
     birthDate: input.birthDate,
     birthTime: input.birthTime,
     unknownTime: input.unknownTime,

@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useDragControls } from 'framer-motion';
 import { formatKoreanTime } from '@/lib/koreanTime';
 
@@ -86,7 +87,12 @@ export default function TimeSelectSheet({
   height = '56px',
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dragControls = useDragControls();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const selected = unknownTime
     ? TIME_BLOCKS[0]
@@ -96,6 +102,118 @@ export default function TimeSelectSheet({
     onSelect(block.isUnknown ? '오후 12:00' : toDisplayTime(block), !!block.isUnknown);
     setOpen(false);
   }, [onSelect]);
+
+  const modalContent = (
+    <AnimatePresence>
+      {open && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+        >
+          {/* 어두운 백드롭 배경 (투명도 60%로 뒤가 비치지 않게 확실히 가려줌) */}
+          <motion.div
+            key="backdrop"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setOpen(false)}
+          />
+
+          {/* 실제 바텀 시트 박스 */}
+          <motion.div
+            key="sheet"
+            className="flex flex-col w-full max-w-110 md:max-w-150"
+            style={{
+              position: 'relative',
+              backgroundColor: sheetBgColor,
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              maxHeight: '78vh',
+              boxShadow: '0 -8px 30px rgba(0,0,0,0.4)',
+            }}
+            drag="y"
+            dragControls={dragControls}
+            dragListener={false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={(_e, info) => {
+              if (info.offset.y > 100 || info.velocity.y > 600) setOpen(false);
+            }}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+          >
+            <div
+              onPointerDown={e => dragControls.start(e)}
+              style={{ flexShrink: 0, cursor: 'grab', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}
+            >
+              <div className="flex justify-center" style={{ padding: '10px 0 2px' }}>
+                <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: dragHandleColor }} />
+              </div>
+              <p
+                style={{
+                  fontSize: sheetTitleFontSize,
+                  fontWeight: sheetTitleFontWeight,
+                  color: sheetTextColor,
+                  textAlign: 'left',
+                  padding: `30px 20px ${sheetTitlePaddingBottom}`,
+                  ...(sheetTitleLetterSpacing ? { letterSpacing: sheetTitleLetterSpacing } : {}),
+                  ...(sheetTitleTextStrokeWidth ? { WebkitTextStroke: `${sheetTitleTextStrokeWidth} ${sheetTextColor}` } : {}),
+                }}
+              >
+                태어난 시간을 선택해 주세요
+              </p>
+            </div>
+            <div className="overflow-y-auto" style={{ padding: '0 12px 12px' }}>
+              {TIME_BLOCKS.map(block => {
+                const isSelected = selected?.key === block.key;
+                return (
+                  <button
+                    key={block.key}
+                    type="button"
+                    onClick={() => handlePick(block)}
+                    className={`w-full text-left transition-colors duration-150 ${hoverBgClass}`}
+                    style={{
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      backgroundColor: isSelected ? selectedBgColor : undefined,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '15px',
+                        fontWeight: 500,
+                        color: isSelected ? selectedTextColor : sheetTextColor,
+                        letterSpacing: '-0.3px',
+                      }}
+                    >
+                      {block.isUnknown ? '모름' : `${block.label} (${block.range})`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <>
@@ -129,101 +247,8 @@ export default function TimeSelectSheet({
         </svg>
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.div
-              key="backdrop"
-              className="fixed inset-0"
-              style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 90 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setOpen(false)}
-            />
-            <motion.div
-              key="sheet"
-              className="fixed left-0 right-0 bottom-0 flex flex-col"
-              style={{
-                zIndex: 91,
-                maxWidth: '768px',
-                margin: '0 auto',
-                backgroundColor: sheetBgColor,
-                borderTopLeftRadius: '24px',
-                borderTopRightRadius: '24px',
-                paddingBottom: 'env(safe-area-inset-bottom)',
-                maxHeight: '78vh',
-              }}
-              drag="y"
-              dragControls={dragControls}
-              dragListener={false}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.6 }}
-              onDragEnd={(_e, info) => {
-                if (info.offset.y > 100 || info.velocity.y > 600) setOpen(false);
-              }}
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-            >
-              <div
-                onPointerDown={e => dragControls.start(e)}
-                style={{ flexShrink: 0, cursor: 'grab', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none' }}
-              >
-                <div className="flex justify-center" style={{ padding: '10px 0 2px' }}>
-                  <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: dragHandleColor }} />
-                </div>
-                <p
-                  style={{
-                    fontSize: sheetTitleFontSize,
-                    fontWeight: sheetTitleFontWeight,
-                    color: sheetTextColor,
-                    textAlign: 'left',
-                    padding: `30px 20px ${sheetTitlePaddingBottom}`,
-                    ...(sheetTitleLetterSpacing ? { letterSpacing: sheetTitleLetterSpacing } : {}),
-                    ...(sheetTitleTextStrokeWidth ? { WebkitTextStroke: `${sheetTitleTextStrokeWidth} ${sheetTextColor}` } : {}),
-                  }}
-                >
-                  태어난 시간을 선택해 주세요
-                </p>
-              </div>
-              <div className="overflow-y-auto" style={{ padding: '0 12px 12px' }}>
-                {TIME_BLOCKS.map(block => {
-                  const isSelected = selected?.key === block.key;
-                  return (
-                    <button
-                      key={block.key}
-                      type="button"
-                      onClick={() => handlePick(block)}
-                      className={`w-full text-left transition-colors duration-150 ${hoverBgClass}`}
-                      style={{
-                        padding: '14px',
-                        borderRadius: '12px',
-                        border: 'none',
-                        backgroundColor: isSelected ? selectedBgColor : undefined,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: '15px',
-                          fontWeight: 500,
-                          color: isSelected ? selectedTextColor : sheetTextColor,
-                          letterSpacing: '-0.3px',
-                        }}
-                      >
-                        {block.isUnknown ? '모름' : `${block.label} (${block.range})`}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Next.js SSR 환경에서 안전하게 body로 포탈(Portal) 렌더링 */}
+      {mounted && createPortal(modalContent, document.body)}
     </>
   );
 }

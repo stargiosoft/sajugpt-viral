@@ -87,7 +87,8 @@ export type FeatureType =
   | 'mental_worldcup'
   | 'money_timeline'
   | 'oheng'
-  | 'solo_guide';
+  | 'solo_guide'
+  | 'couple_guide';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

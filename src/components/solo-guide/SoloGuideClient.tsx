@@ -97,7 +97,7 @@ export default function SoloGuideClient() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: C.frameBg, display: 'flex', justifyContent: 'center' }}>
       <div
-        className="w-full max-w-[440px] md:max-w-[600px]"
+        className="w-full max-w-110 md:max-w-150"
         style={{ minHeight: '100vh', backgroundColor: C.frameBg, position: 'relative', fontFamily: 'Cafe24 Dongdong, sans-serif' }}
       >
         <motion.div
