@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { TEST_CATALOG } from '@/constants/testCatalog';
 import { trackEvent } from '@/lib/analytics';
 
-const ALL_IDS = ['ghost-tarot', 'romance-ghost-tarot', 'deang-saju', 'love-chat', 'money-timeline', 'oheng'];
+const ALL_IDS = ['ghost-tarot', 'romance-ghost-tarot', 'deang-saju', 'love-chat', 'money-timeline', 'oheng', 'solo-guide'];
 const GAP_PX = 6;
 const DRAG_CLICK_THRESHOLD_PX = 6;
 

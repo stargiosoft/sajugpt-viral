@@ -186,11 +186,11 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     imageSrc: '/solo-guide/landing-thumbnail.png',
     category: 'love',
     colorTheme: 'orange',
-    participantLabel: '142',
-    shareLabel: '18',
+    participantLabel: '3,200',
+    shareLabel: '410',
     isNew: true,
     ready: true,
-    // WhySolo API 장애로 백엔드 결과가 불안정 — 정상화될 때까지 홈 노출만 임시로 끔 (URL 직접 접근은 그대로 가능)
-    visibleOnHome: false,
+    // 2026-08-07: 오행 점수/러브타입 분기 로직 수정 + DB 콘텐츠 25종 확인 후 홈 노출 재개
+    visibleOnHome: true,
   },
 ];
