@@ -1,7 +1,7 @@
 import type { Gender } from '@/types/battle';
 
 export interface PersonBirthInfo {
-  gender: Gender; // 'female' | 'male' — GenderSelect가 그대로 쓰는 값
+  gender: Gender;
   birthday: string;          // 'YYYY-MM-DD'
   birthTime: string;         // TimeSelectSheet가 만든 표시용 문자열
   birthTimeUnknown: boolean; // '모름' 선택 여부

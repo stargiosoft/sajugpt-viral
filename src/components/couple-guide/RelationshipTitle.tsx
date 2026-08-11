@@ -6,11 +6,9 @@ import { COUPLE_COLORS as C, FADE_UP } from '@/constants/coupleGuideTheme';
 interface Props {
   title: string;
   subtitle: string;
-  // hashtags를 선택적 속성으로 변경
   hashtags?: string[]; 
 }
 
-// 매개변수에서 기본값 []을 지정합니다.
 export default function RelationshipTitle({ title, subtitle, hashtags = [] }: Props) {
   return (
     <motion.div

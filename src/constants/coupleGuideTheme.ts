@@ -1,7 +1,3 @@
-// soloGuideTheme.ts 와 동일한 패턴의 couple-guide 전용 테마.
-// 실제 색상 값은 디자인 확정 후 자유롭게 교체하세요 — 지금은 solo-guide와
-// 구분되는 로즈/코랄 계열로 임시 지정해뒀습니다.
-
 export const COUPLE_COLORS = {
   primary: 'rgb(255 107 129)',
   primaryHover: 'rgb(240 90 112)',
