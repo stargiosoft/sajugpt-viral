@@ -3,6 +3,7 @@ export const LOVE_SPOT_COLORS = {
   frameBg: '#FDEEEF', // 은은하고 포근한 파스텔 핑크 베이스
   frameGradient: 'linear-gradient(160deg, #FFF5F7 0%, #FFE4ED 50%, #FFD6E8 100%)', // 부드러운 핑크 파스텔 그라디언트
   frameBorder: '#FFFFFF',
+  panelBg: '#FFFFFF',
 
   primary: '#FF8A9E', // 말랑한 체리 블로섬 핑크
   primaryHover: '#FF738B',
