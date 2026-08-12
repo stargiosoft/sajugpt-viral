@@ -125,7 +125,7 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundImage: 'url(/couple-guide/card-bg-hearts-result.png)',
+                    backgroundImage: 'url(/couple-guide/card-bg-hearts-result.webp)',
                     backgroundSize: '160px auto',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'repeat',
@@ -161,11 +161,12 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                     <div className="flex justify-center mb-3">
                       <div className="w-62.5 md:w-72.5">
                         <img
-                          src={`/couple-guide/char-${result.maxScore ?? 100}.png`}
+                          src={`/couple-guide/char-${result.maxScore ?? 100}.webp`}
                           alt={result.relationshipTitle}
                           className="w-full h-auto object-contain"
+                          fetchPriority="high"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/couple-guide/char-100.jpg';
+                            (e.target as HTMLImageElement).src = '/couple-guide/char-100.webp';
                           }}
                         />
                       </div>

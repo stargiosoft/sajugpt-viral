@@ -177,7 +177,7 @@ export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: 
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: 'url(/couple-guide/card-bg-hearts-result.png)',
+            backgroundImage: 'url(/couple-guide/card-bg-hearts-result.webp)',
             backgroundSize: '160px auto',
             backgroundPosition: 'center',
             backgroundRepeat: 'repeat',

@@ -30,7 +30,7 @@ export default function CoupleLanding({ onStart }: Props) {
           width: '100%',
           aspectRatio: '1448 / 1086',
           backgroundColor: C.primaryDim,
-          backgroundImage: 'url(/couple-guide/landing-title.png)',
+          backgroundImage: 'url(/couple-guide/landing-title.webp)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
