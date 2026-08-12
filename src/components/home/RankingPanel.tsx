@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { TestCatalogItem } from '@/types/testCatalog';
 import PlaceholderRankingRow from './PlaceholderRankingRow';
 import SectionStats from './SectionStats';
@@ -42,10 +43,15 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
         {ranked.map((item, i) => {
           const isDimmed = !!selectedId && selectedId !== item.id;
           return (
-          <button
+          <Link
             key={item.id}
-            onClick={() => { if (item.ready) onSelect(item); }}
-            disabled={!item.ready}
+            href={item.ready ? item.href : '#'}
+            aria-disabled={!item.ready}
+            onClick={(e) => {
+              if (!item.ready) { e.preventDefault(); return; }
+              e.preventDefault();
+              onSelect(item);
+            }}
             className="group flex items-center w-full text-left shrink-0 bg-transparent transition-all duration-200 active:brightness-105 active:scale-[0.995]"
             style={{
               gap: '10px',
@@ -97,7 +103,7 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
               </span>
               <SectionStats plays={item.participantLabel} shares={item.shareLabel ?? '0'} />
             </span>
-          </button>
+          </Link>
           );
         })}
         {Array.from({ length: placeholderCount }, (_, i) => (

@@ -4,8 +4,9 @@ import TarotClient from '@/components/tarot/TarotClient';
 import { romanceTarotConfig } from '@/lib/tarot/configs/romance-tarot.config';
 
 export const metadata: Metadata = {
-  title: "귀신 타로 (연애편)",
-  description: "당신에게 붙은 존재가 인연의 신호를 속삭입니다",
+  title: "귀신 타로 (연애편) — 연애 테스트·타로테스트 | 광필연구소",
+  description: "당신에게 붙은 존재가 인연의 신호를 속삭이는 무료 연애 테스트이자 타로테스트예요.",
+  keywords: ['연애 테스트', '타로테스트', '무료 타로', '연애운 테스트', '온라인 타로'],
   openGraph: {
     title: "귀신타로 (연애편)",
     description: "이번달, 당신의 연애 기운을 확인하세요.",

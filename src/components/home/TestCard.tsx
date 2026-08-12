@@ -1,10 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { TestCatalogItem, TestColorTheme } from '@/types/testCatalog';
 import { CATEGORIES } from '@/constants/categories';
 import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
 import SectionStats from './SectionStats';
+
+// 실제 <a href>로 렌더링해 검색엔진이 크롤링할 수 있게 하면서, 클릭 시 선택 애니메이션 후
+// 이동하는 기존 UX(180ms 지연)는 onClick에서 preventDefault로 유지한다.
+const MotionLink = motion.create(Link);
 
 const THEME_STYLES: Record<TestColorTheme, { bg: string; fg: string }> = {
   orange: { bg: MOAMOA_ORANGE, fg: '#ffffff' },
@@ -28,15 +33,20 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
   const isDimmed = !!selectedId && selectedId !== item.id;
 
   return (
-    <motion.div
-      onClick={() => { if (item.ready) onSelect(item); }}
+    <MotionLink
+      href={item.ready ? item.href : '#'}
+      aria-label={item.title}
+      onClick={(e) => {
+        e.preventDefault();
+        if (item.ready) onSelect(item);
+      }}
       animate={{
         scale: isDimmed ? 0.9998 : 1,
         opacity: isDimmed ? 0.95 : item.ready ? 1 : 0.55,
       }}
       whileTap={item.ready ? { scale: 0.995 } : undefined}
       transition={{ duration: 0.22, ease: 'easeOut' }}
-      className="group transform-gpu w-full"
+      className="group transform-gpu w-full block"
       style={{
         cursor: item.ready ? 'pointer' : 'default',
         outline: 'none',
@@ -136,6 +146,6 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
           <span style={{ fontSize: '11px', fontWeight: 500, color: '#757474', letterSpacing: '-0.2px' }}>{categoryLabel}</span>
         )}
       </div>
-    </motion.div>
+    </MotionLink>
   );
 }

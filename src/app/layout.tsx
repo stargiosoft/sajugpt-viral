@@ -5,13 +5,18 @@ import { IS_PROD } from '@/lib/analytics';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://sajugpt-viral.vercel.app'),
-  title: '광필연구소 | 재밌는 심리·연애·운세 테스트 모음',
-  description: '매일 새로운 심리테스트와 사주·타로 콘텐츠를 만나보세요.',
+  title: '광필연구소 | 연애 테스트·심리테스트·사주테스트·타로테스트 모음',
+  description: '카톡연애도감, 귀신타로, 댕댕사주 등 매일 새로운 연애 테스트, 심리테스트, 사주테스트, 타로테스트를 무료로 즐겨보세요.',
+  keywords: [
+    '연애 테스트', '심리 테스트', '사주 테스트', '타로 테스트',
+    '무료 심리테스트', '무료 사주', '온라인 타로', '연애운 테스트',
+    '성격 테스트', '광필연구소',
+  ],
   icons: { icon: '/favicon.svg' },
   formatDetection: { telephone: false, email: false, address: false, date: false },
   openGraph: {
-    title: '광필연구소 | 재밌는 심리·연애·운세 테스트 모음',
-    description: '매일 새로운 심리테스트와 사주·타로 콘텐츠를 만나보세요.',
+    title: '광필연구소 | 연애 테스트·심리테스트·사주테스트·타로테스트 모음',
+    description: '카톡연애도감, 귀신타로, 댕댕사주 등 매일 새로운 연애 테스트, 심리테스트, 사주테스트, 타로테스트를 무료로 즐겨보세요.',
     type: 'website',
     siteName: '사주GPT',
     images: [{ url: '/og-image.png', width: 1200, height: 600 }],

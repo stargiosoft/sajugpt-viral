@@ -4,8 +4,9 @@ import TarotClient from '@/components/tarot/TarotClient';
 import { ghostTarotConfig } from '@/lib/tarot/configs/ghost-tarot.config';
 
 export const metadata: Metadata = {
-  title: "귀신타로(운세편)",
-  description: "당신에게 붙은 귀신이 전하는 이번 달 운세",
+  title: "귀신타로(운세편) — 타로테스트·사주테스트 | 광필연구소",
+  description: "당신에게 붙은 귀신이 전하는 이번 달 운세를 확인하는 무료 타로테스트예요.",
+  keywords: ['타로테스트', '사주테스트', '무료 타로', '이달의 운세', '온라인 타로'],
   openGraph: {
     title: "귀신타로(운세편)",
     description: "이번 달, 당신을 찾아올 경고를 확인하세요.",

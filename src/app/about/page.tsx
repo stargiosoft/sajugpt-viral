@@ -4,7 +4,9 @@ import PolicyLayout, { InfoSection } from '@/components/policy/PolicyLayout';
 import { MOAMOA_ORANGE } from '@/constants/theme';
 
 export const metadata: Metadata = {
-  title: '광필연구소 소개 | 광필연구소',
+  title: '광필연구소 소개 | 연애·심리·사주·타로 테스트 모음',
+  description: '사주와 심리, 성향을 소재로 한 다양한 연애 테스트, 심리테스트, 사주테스트, 타로테스트를 한곳에 모아둔 광필연구소를 소개합니다.',
+  keywords: ['광필연구소', '연애 테스트', '심리테스트', '사주테스트', '타로테스트'],
 };
 
 // 문단 안에서 강조하고 싶은 문구만 브랜드 컬러 + 굵은 글씨로 표시
