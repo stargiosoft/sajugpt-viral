@@ -93,7 +93,7 @@ export default function CoupleLanding({ onStart }: Props) {
           metaColor="rgb(126 126 126)"
           heartIdleColor="rgb(190 190 190)"
           moreButtonFontSize="12.5px"
-          moreButtonHoverBg="rgba(252, 181, 209, 0.64)"
+          moreButtonHoverBg="rgba(255, 194, 207, 0.32)"
           submitButtonHoverBg={C.primaryHover}
         />
       </motion.div>

@@ -132,11 +132,11 @@ function PersonSection({
             textColor={C.text}
             placeholderColor={C.textTertiary}
             sheetBgColor="#FFFFFF"
-            sheetTextColor={C.text}
-            dragHandleColor={C.border}
+            sheetTextColor="#000000"
+            dragHandleColor="rgb(220 220 220)"
             hoverBgClass="hover:bg-black/[0.03]"
-            selectedBgColor={C.primaryDim}
-            selectedTextColor={C.primary}
+            selectedBgColor="rgb(255 241 243)"
+            selectedTextColor="rgb(235 85 108)"
             fontSize="16px"
             height="52px"
             arrowColor={NEUTRAL_GRAY}
@@ -169,7 +169,7 @@ export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: 
           backgroundColor: C.frameBg,
           border: `2.5px solid ${C.frameBorder}`,
           borderRadius: '28px',
-          padding: '22px 18px',
+          padding: '18px 14px',
           overflow: 'hidden',
         }}
       >
@@ -185,11 +185,29 @@ export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: 
           }}
         />
 
-        <div className="flex items-center justify-center" style={{ position: 'relative', marginBottom: '20px', paddingTop: '4px' }}>
+        <div style={{ position: 'relative', marginBottom: '14px', paddingTop: '4px' }}>
           <div
             className="flex items-center justify-center"
-            style={{ gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '4px 16px', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}
+            style={{
+              position: 'relative',
+              gap: '8px',
+              width: '100%',
+              backgroundColor: '#FFFFFF',
+              borderRadius: '24px',
+              border: `1.5px solid ${C.frameBorder}`,
+              padding: '22px 20px',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
+            }}
           >
+            <div
+              style={{
+                position: 'absolute',
+                inset: '6px',
+                borderRadius: '19px',
+                border: '1.2px dashed #FFC2D6',
+                pointerEvents: 'none',
+              }}
+            />
             <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', transform: 'rotate(-20deg)' }} />
             <h2
               style={{
@@ -209,7 +227,7 @@ export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: 
 
         <motion.div
           className="flex flex-col"
-          style={{ position: 'relative', gap: '16px' }}
+          style={{ position: 'relative', gap: '14px' }}
           initial="hidden"
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.1 } } }}

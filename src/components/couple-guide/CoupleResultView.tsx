@@ -116,7 +116,7 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                   backgroundColor: C.frameBg,
                   border: `2.5px solid ${C.frameBorder}`,
                   borderRadius: '28px',
-                  padding: '16px 18px 20px',
+                  padding: '14px',
                   overflow: 'hidden',
                 }}
               >
@@ -143,8 +143,8 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                       backgroundColor: '#FFFFFF',
                       border: `1.5px solid ${C.frameBorder}`,
                       boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-                      padding: '24px 16px 22px',
-                      marginTop: '8px',
+                      padding: '20px 16px 22px',
+                      marginTop: '0px',
                       textAlign: 'center',
                     }}
                   >
@@ -181,9 +181,14 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                           <span style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.5px' }}>궁합 점수</span>
                           <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', filter: 'brightness(0) invert(1)', transform: 'rotate(20deg)' }} />
                         </div>
-                        <span className="font-black tracking-tighter" style={{ color: C.primary, fontSize: '62px' }}>
+                        <span className="cg-score-num font-black tracking-tighter" style={{ color: C.primary, fontSize: '62px' }}>
                           {result.totalScore}점
                         </span>
+                        <style>{`
+                          @media (max-width: 599px) {
+                            .cg-score-num { font-size: 60px !important; }
+                          }
+                        `}</style>
                       </div>
 
                       {/* 3. 타이틀 및 부제목 (국대급 복식조 커플 등) */}
@@ -236,7 +241,7 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                           <path fill="#FFC2D6" d="m44,5c-4.65,0-8.96,1.97-12,5.44-3.04-3.47-7.35-5.44-12-5.44-8.82,0-16,7.18-16,16,0,22.37,26.44,35.36,27.57,35.9.14.07.29.1.43.1s.3-.03.43-.1c1.13-.54,27.57-13.53,27.57-35.9,0-8.82-7.18-16-16-16Z" />
                         </svg>
 
-                        <div className="flex items-center justify-center" style={{ position: 'relative', marginBottom: '12px' }}>
+                        <div className="flex items-center justify-center" style={{ position: 'relative', marginBottom: '16px' }}>
                           <div
                             className="flex items-center justify-center"
                             style={{ gap: '8px', backgroundColor: C.primary, borderRadius: '12px', padding: '4px 16px' }}
@@ -246,7 +251,7 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                             <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', filter: 'brightness(0) invert(1)', transform: 'rotate(20deg)' }} />
                           </div>
                         </div>
-                        <div className="flex flex-col" style={{ position: 'relative', gap: '24px' }}>
+                        <div className="flex flex-col" style={{ position: 'relative', gap: '20px' }}>
                           {result.stats.map((stat, index) => (
                             <ChemiStatBar
                               key={stat.label}
@@ -360,7 +365,7 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                 metaColor="rgb(126 126 126)"
                 heartIdleColor="rgb(190 190 190)"
                 moreButtonFontSize="12.5px"
-                moreButtonHoverBg="rgba(252, 181, 209, 0.64)"
+                moreButtonHoverBg="rgba(255, 194, 207, 0.32)"
                 submitButtonHoverBg={C.primaryHover}
               />
             </div>

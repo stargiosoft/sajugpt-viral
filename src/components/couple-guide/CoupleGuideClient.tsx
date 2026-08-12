@@ -129,15 +129,11 @@ export default function CoupleGuideClient() {
     <div style={{ minHeight: '100vh', backgroundColor: '#FFFFFF', display: 'flex', justifyContent: 'center' }}>
       <div
         className="w-full max-w-110 md:max-w-150"
-        style={{ minHeight: '100vh', backgroundColor: '#FFFFFF', position: 'relative', fontFamily: 'Cafe24 Dongdong, sans-serif' }}
+        style={{ minHeight: '100vh', backgroundColor: '#FFFFFF', position: 'relative', paddingTop: '53px', fontFamily: 'Cafe24 Dongdong, sans-serif' }}
       >
-        <motion.div
-          animate={{ opacity: step === 'analyzing' ? 0 : 1 }}
-          transition={{ duration: 0.25 }}
-          style={{ pointerEvents: step === 'analyzing' ? 'none' : 'auto' }}
-        >
-          <TestTopNav bgColor="#FFFFFF" logoColor="#000000" xColor="#000000" onBack={step === 'input' ? handleBack : undefined} />
-        </motion.div>
+        <div style={{ opacity: step === 'analyzing' ? 0 : 1, transition: 'opacity 0.25s', pointerEvents: step === 'analyzing' ? 'none' : 'auto' }}>
+          <TestTopNav fixed bgColor="#FFFFFF" logoColor="#000000" xColor="#000000" onBack={step === 'input' ? handleBack : undefined} />
+        </div>
 
         {step === 'landing' && <CoupleLanding onStart={() => setStep('input')} />}
         {step === 'input' && (
