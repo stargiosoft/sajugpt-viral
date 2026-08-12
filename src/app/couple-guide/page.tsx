@@ -11,8 +11,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/couple-guide/og-share.jpg',
-        width: 1448,
-        height: 1086,
+        width: 1200,
+        height: 630,
       },
     ],
   },
