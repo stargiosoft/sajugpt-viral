@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { CoupleGuideFormState, CoupleGuideResult } from '@/types/couple-guide';
+import type { ChemiStat, CoupleGuideFormState, CoupleGuideResult } from '@/types/couple-guide';
 
 export interface RawCoupleGuideResult {
   resultId: string;
@@ -8,12 +8,9 @@ export interface RawCoupleGuideResult {
   description: string;
   relationshipTitle: string;
   relationshipSubtitle: string;
+  maxScore: number;
   hashtags: string[];
-  chemiStats: Array<{ label: string; value: number; color?: string; caption?: string }>;
-  summary?: string;
-  stats?: Array<{ label: string; score: number; description: string }>;
-  strengths?: string[];
-  cautions?: string[];
+  chemiStats: ChemiStat[];
   createdAt: string;
 }
 
@@ -69,37 +66,15 @@ export function loadCoupleGuideResult(resultId: string): RawCoupleGuideResult | 
   }
 }
 
-/** 
- * 원본 데이터를 컴포넌트용 CoupleGuideResult 타입으로 매핑합니다.
- */
-export function mapToCoupleGuideResult(raw: RawCoupleGuideResult): CoupleGuideResult {
+/** 원본 데이터를 결과 화면(CoupleResultView)이 소비하는 형태로 매핑합니다. */
+export function mapToCoupleResult(raw: RawCoupleGuideResult): CoupleGuideResult {
   return {
-    score: raw.totalScore,
-    rawScore: raw.rawScore,
-    description: raw.description,
+    totalScore: raw.totalScore,
+    maxScore: raw.maxScore,
     relationshipTitle: raw.relationshipTitle,
-    relationshipSubtitle: raw.relationshipSubtitle,
-    hashtags: raw.hashtags,
-    chemiStats: raw.chemiStats,
-  };
-}
-
-/**
- * 컴포넌트(`CoupleResultView`)에서 요구하는 `mapToCoupleResult` 별칭 함수를 추가합니다.
- */
-export function mapToCoupleResult(raw: any) {
-  return {
-    totalScore: raw.totalScore ?? 80,
-    relationshipTitle: raw.relationshipTitle ?? '환상의 커플',
-    relationshipDescription: raw.relationshipSubtitle ?? raw.grade ?? '',
+    relationshipDescription: raw.relationshipSubtitle,
     hashtags: raw.hashtags ?? [],
-    summary: raw.summary ?? raw.description ?? '',
-    // DB의 max_score 또는 maxScore 값을 매핑에 포함시킵니다!
-    maxScore: raw.max_score ?? raw.maxScore ?? 100, 
-    stats: raw.chemiStats 
-      ? raw.chemiStats.map((s: any) => ({ label: s.label, score: s.value, description: s.caption || '' }))
-      : (raw.stats ?? []),
-    strengths: raw.strengths ?? [],
-    cautions: raw.cautions ?? [],
+    summary: raw.description ?? '',
+    stats: raw.chemiStats ?? [],
   };
 }

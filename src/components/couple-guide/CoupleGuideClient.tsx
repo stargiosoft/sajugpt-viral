@@ -10,10 +10,11 @@ import CoupleLanding from './CoupleLanding';
 import CoupleInput from './CoupleInput';
 
 import { analyzeCoupleGuide, saveCoupleGuideResult } from '@/lib/coupleGuide';
-import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
+import { loadSelfSaju, saveSelfSaju, type SajuCacheData } from '@/lib/sajuCache';
 import { recolorLottie } from '@/lib/lottieRecolor';
 import heartLottieRaw from '@/lottie/solo-guide-heart.json';
 import { COUPLE_COLORS as C } from '@/constants/coupleGuideTheme';
+import type { Gender } from '@/types/battle';
 
 import type {
   CoupleGuideFormState,
@@ -23,7 +24,7 @@ import type {
 type Step = 'landing' | 'input' | 'analyzing';
 
 const EMPTY_PERSON: PersonBirthInfo = {
-  gender: '' as any,
+  gender: null,
   birthday: '',
   birthTime: '',
   birthTimeUnknown: false,
@@ -35,14 +36,36 @@ const INITIAL_FORM: CoupleGuideFormState = {
   calendarType: 'solar',
 };
 
-const ANALYZING_MESSAGES = [
-  '두 사람의 사주 정보를 확인하고 있어요 🔮',
-  '오행과 십성의 조화를 분석하고 있어요 ✨',
-  '두 사람만의 관계 에너지를 계산하고 있어요 💕',
-  '궁합 리포트를 작성하고 있어요 💌',
-];
+/** 캐시에 저장된 사주 정보를 폼 상태에 병합. 캐시가 없으면 기존 값을 그대로 반환 (참조 유지 → 불필요한 재저장 방지) */
+function mergeCachedPerson(cached: SajuCacheData | null, prev: PersonBirthInfo): PersonBirthInfo {
+  if (!cached) return prev;
+  return {
+    ...prev,
+    gender: cached.gender ?? prev.gender,
+    birthday: cached.birthDate || prev.birthday,
+    birthTime: cached.birthTime || prev.birthTime,
+    birthTimeUnknown: cached.unknownTime ?? prev.birthTimeUnknown,
+  };
+}
 
-const ANALYZING_LOTTIE = recolorLottie(heartLottieRaw, C.primary);
+/** person 정보가 바뀔 때마다 사주 캐시에 자동 저장 */
+function useAutoSaveSaju(storageKey: string, person: PersonBirthInfo) {
+  useEffect(() => {
+    if (!person.gender && !person.birthday) return;
+    saveSelfSaju(storageKey, {
+      birthDate: person.birthday,
+      birthTime: person.birthTime,
+      unknownTime: person.birthTimeUnknown,
+      gender: person.gender as Gender,
+    });
+  }, [storageKey, person]);
+}
+
+const ANALYZING_MESSAGES = ['두 사람의 사주 정보를 확인하고 있어요'];
+
+// recolorLottie는 hex 색상만 파싱 가능 — COUPLE_COLORS.primary는 rgb() 표기라 그대로 넘기면
+// NaN 파싱되어 검정으로 렌더링된다. C.primary('rgb(255 107 129)')와 동일한 색의 hex 값을 직접 지정.
+const ANALYZING_LOTTIE = recolorLottie(heartLottieRaw, '#FF6B81');
 const MIN_ANALYZING_MS = 1200;
 
 export default function CoupleGuideClient() {
@@ -54,49 +77,16 @@ export default function CoupleGuideClient() {
 
   // person1, person2 사주 캐시 복원
   useEffect(() => {
-    const cached1 = loadSelfSaju('couple_guide_person1');
-    const cached2 = loadSelfSaju('couple_guide_person2');
-
     setForm(prev => ({
       ...prev,
-      person1: cached1 ? {
-        ...prev.person1,
-        gender: cached1.gender ?? prev.person1.gender,
-        birthday: cached1.birthDate || prev.person1.birthday,
-        birthTime: cached1.birthTime || prev.person1.birthTime,
-        birthTimeUnknown: cached1.unknownTime ?? prev.person1.birthTimeUnknown,
-      } : prev.person1,
-      person2: cached2 ? {
-        ...prev.person2,
-        gender: cached2.gender ?? prev.person2.gender,
-        birthday: cached2.birthDate || prev.person2.birthday,
-        birthTime: cached2.birthTime || prev.person2.birthTime,
-        birthTimeUnknown: cached2.unknownTime ?? prev.person2.birthTimeUnknown,
-      } : prev.person2,
+      person1: mergeCachedPerson(loadSelfSaju('couple_guide_person1'), prev.person1),
+      person2: mergeCachedPerson(loadSelfSaju('couple_guide_person2'), prev.person2),
     }));
   }, []);
 
-  // person1 사주 데이터 변경 시 자동 저장
-  useEffect(() => {
-    if (!form.person1.gender && !form.person1.birthday) return;
-    saveSelfSaju('couple_guide_person1', {
-      birthDate: form.person1.birthday,
-      birthTime: form.person1.birthTime,
-      unknownTime: form.person1.birthTimeUnknown,
-      gender: form.person1.gender,
-    });
-  }, [form.person1]);
-
-  // person2 사주 데이터 변경 시 자동 저장 (추가됨)
-  useEffect(() => {
-    if (!form.person2.gender && !form.person2.birthday) return;
-    saveSelfSaju('couple_guide_person2', {
-      birthDate: form.person2.birthday,
-      birthTime: form.person2.birthTime,
-      unknownTime: form.person2.birthTimeUnknown,
-      gender: form.person2.gender,
-    });
-  }, [form.person2]);
+  // person1, person2 사주 데이터 변경 시 자동 저장
+  useAutoSaveSaju('couple_guide_person1', form.person1);
+  useAutoSaveSaju('couple_guide_person2', form.person2);
 
   const handleChange = useCallback((patch: Partial<CoupleGuideFormState>) => {
     setForm(prev => ({
@@ -112,14 +102,10 @@ export default function CoupleGuideClient() {
     const minDelay = new Promise(resolve => setTimeout(resolve, MIN_ANALYZING_MS));
 
     try {
-      console.log('=== 제출된 폼 데이터 ===', JSON.stringify(form));
-
       const [result] = await Promise.all([
         analyzeCoupleGuide(form),
         minDelay,
       ]);
-
-      console.log('=== 수신된 분석 결과 ===', result);
 
       if (!result || !result.resultId) {
         throw new Error('resultId가 존재하지 않습니다.');
@@ -140,17 +126,17 @@ export default function CoupleGuideClient() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: C.frameBg, display: 'flex', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#FFFFFF', display: 'flex', justifyContent: 'center' }}>
       <div
         className="w-full max-w-110 md:max-w-150"
-        style={{ minHeight: '100vh', backgroundColor: C.frameBg, position: 'relative', fontFamily: 'Cafe24 Dongdong, sans-serif' }}
+        style={{ minHeight: '100vh', backgroundColor: '#FFFFFF', position: 'relative', fontFamily: 'Cafe24 Dongdong, sans-serif' }}
       >
         <motion.div
           animate={{ opacity: step === 'analyzing' ? 0 : 1 }}
           transition={{ duration: 0.25 }}
           style={{ pointerEvents: step === 'analyzing' ? 'none' : 'auto' }}
         >
-          <TestTopNav bgColor={C.frameBg} logoColor={C.text} xColor={C.text} onBack={step === 'input' ? handleBack : undefined} />
+          <TestTopNav bgColor="#FFFFFF" logoColor="#000000" xColor="#000000" onBack={step === 'input' ? handleBack : undefined} />
         </motion.div>
 
         {step === 'landing' && <CoupleLanding onStart={() => setStep('input')} />}
@@ -168,7 +154,8 @@ export default function CoupleGuideClient() {
             animationData={ANALYZING_LOTTIE}
             messageColor={C.primary}
             messageFontSize="20px"
-            messageFontWeight={600}
+            messageFontWeight={500}
+            messageTextStrokeWidth="0.3px"
             waveText
           />
         )}

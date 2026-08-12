@@ -26,6 +26,7 @@ interface Props {
   messageFontSize?: string;
   messageFontWeight?: number;
   messageLetterSpacing?: string;
+  messageTextStrokeWidth?: string;
   minHeight?: string;
   heading?: string;
   headingColor?: string;
@@ -55,6 +56,7 @@ export default function AnalyzingScreen({
   messageFontSize = '15px',
   messageFontWeight = 500,
   messageLetterSpacing,
+  messageTextStrokeWidth,
   minHeight = '60vh',
   heading,
   headingColor,
@@ -123,6 +125,7 @@ export default function AnalyzingScreen({
               marginBottom: '8px',
               textAlign: 'center',
               letterSpacing: messageLetterSpacing,
+              ...(messageTextStrokeWidth ? { WebkitTextStroke: `${messageTextStrokeWidth} ${messageColor}` } : {}),
             }}
           >
             {[...msg].map((ch, ci, chars) => (
@@ -155,6 +158,7 @@ export default function AnalyzingScreen({
               marginBottom: '8px',
               textAlign: 'center',
               letterSpacing: messageLetterSpacing,
+              ...(messageTextStrokeWidth ? { WebkitTextStroke: `${messageTextStrokeWidth} ${messageColor}` } : {}),
             }}
           >
             {msg}

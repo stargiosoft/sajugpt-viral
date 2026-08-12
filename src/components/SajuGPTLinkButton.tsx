@@ -10,9 +10,22 @@ interface Props {
   color: string;
   hoverColor?: string;
   label?: ReactNode;
+  fontFamily?: string;
+  marginTop?: string;
+  fontSize?: string;
+  letterSpacing?: string;
 }
 
-export default function SajuGPTLinkButton({ featureType, color, hoverColor, label = '사주GPT 바로가기' }: Props) {
+export default function SajuGPTLinkButton({
+  featureType,
+  color,
+  hoverColor,
+  label = '사주GPT 바로가기',
+  fontFamily = 'Pretendard',
+  marginTop = '24px',
+  fontSize = '13px',
+  letterSpacing,
+}: Props) {
   return (
     <motion.a
       href={SAJUGPT_URL}
@@ -23,11 +36,12 @@ export default function SajuGPTLinkButton({ featureType, color, hoverColor, labe
       transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 0.5 }}
       style={{
         display: 'block',
-        marginTop: '24px',
+        marginTop,
         textAlign: 'center',
         color,
-        fontFamily: 'Pretendard',
-        fontSize: '13px',
+        fontFamily,
+        fontSize,
+        letterSpacing,
         fontWeight: 600,
         textDecoration: 'none',
         whiteSpace: 'nowrap',
