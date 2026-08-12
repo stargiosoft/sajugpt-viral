@@ -7,6 +7,7 @@ import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import FieldLabel from '@/components/FieldLabel';
 import PressableButton from '@/components/PressableButton';
+import GenderHeartIcon from '@/components/GenderHeartIcon';
 import { SOLO_COLORS as C, FADE_UP } from '@/constants/soloGuideTheme';
 import type { SoloGuideFormState } from '@/types/solo-guide';
 
@@ -17,17 +18,7 @@ interface Props {
   errorMessage?: string | null;
 }
 
-const HEART_PATH = 'M19.88,4.86a5.15,5.15,0,0,0-4-1.18A5.56,5.56,0,0,0,12.06,6L12,6.05,11.94,6A5.56,5.56,0,0,0,8.12,3.68a5.15,5.15,0,0,0-4,1.18,5.27,5.27,0,0,0-.32,7.77L11.19,20a1.16,1.16,0,0,0,1.62,0l7.39-7.4a5.27,5.27,0,0,0-.32-7.77Z';
-
 const NEUTRAL_GRAY = 'rgb(190 190 190)';
-
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24">
-      <path fill={filled ? '#FFFFFF' : NEUTRAL_GRAY} d={HEART_PATH} />
-    </svg>
-  );
-}
 
 export default function SoloGuideInputForm({ form, onChange, onSubmit, errorMessage }: Props) {
   const isValid = useMemo(() => {
@@ -111,7 +102,7 @@ export default function SoloGuideInputForm({ form, onChange, onSubmit, errorMess
               unselectedColor="rgb(168 168 168)"
               border="none"
               indicatorBoxShadow="none"
-              icon={isSelected => <HeartIcon filled={isSelected} />}
+              icon={isSelected => <GenderHeartIcon filled={isSelected} unselectedColor={NEUTRAL_GRAY} />}
               textStrokeWidth="0.2px"
             />
           </motion.div>

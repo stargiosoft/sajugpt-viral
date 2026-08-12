@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
@@ -19,64 +19,10 @@ import { useShareActions } from '@/lib/useShareActions';
 import { trackSajuGPTClick } from '@/lib/analytics';
 import { SAJUGPT_URL } from '@/constants/links';
 import { RESULT_GAPS } from '@/constants/layoutGaps';
+import { COUPLE_COLORS as C } from '@/constants/coupleGuideTheme';
 import type { CoupleGuideResult } from '@/types/couple-guide';
 
-// 테마 컬러 정의 (커플 가이드용 핑크 테마)
-const COUPLE_COLORS = {
-  frameBg: '#FFF5F8',
-  frameBorder: '#FFD1E0',
-  primary: 'rgb(248, 71, 132)',
-  primaryHover: 'rgb(230, 50, 110)',
-  textOnPrimary: '#FFFFFF',
-  text: '#2D2D2D',
-  textSecondary: '#666666',
-  panelBg: '#FFFFFF',
-};
-
-const TITLE_POINT_COLOR = 'rgb(235, 70, 127)';
-
 type Status = 'loading' | 'found' | 'notFound';
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  return isMobile;
-}
-
-function SectionCard({ children, isMobile }: { children: ReactNode; isMobile: boolean }) {
-  return (
-    <div
-      style={{
-        position: 'relative',
-        backgroundColor: '#FFFFFF',
-        borderRadius: '24px',
-        border: `1.5px solid ${COUPLE_COLORS.frameBorder}`,
-        padding: `26px 18px ${isMobile ? '16px' : '26px'}`,
-        margin: '0 -2px',
-        boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          inset: '6px',
-          borderRadius: '19px',
-          border: '1.2px dashed #FFC2D6',
-          pointerEvents: 'none',
-        }}
-      />
-      {children}
-    </div>
-  );
-}
 
 interface CoupleResultViewProps {
   resultId: string;
@@ -85,18 +31,18 @@ interface CoupleResultViewProps {
 export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
   const router = useRouter();
   const [status, setStatus] = useState<Status>('loading');
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<CoupleGuideResult | null>(null);
 
   const cardRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const shareUrl = origin ? `${origin}/couple-guide/${resultId}` : '';
+  const shareUrl = useMemo(() => (origin ? `${origin}/couple-guide/${resultId}` : ''), [origin, resultId]);
+  const getShareText = useCallback(() => shareUrl, [shareUrl]);
 
   const { saving, handleSave } = useShareActions({
     featureType: 'couple_guide',
     resultId,
-    getShareText: () => shareUrl,
+    getShareText,
     imageFilename: `우리사이_궁합결과_${result?.relationshipTitle || ''}.png`,
   });
 
@@ -117,38 +63,38 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: COUPLE_COLORS.frameBg, display: 'flex', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#FFFFFF', display: 'flex', justifyContent: 'center' }}>
       <div
         className="w-full max-w-110 md:max-w-150"
         style={{
           minHeight: '100vh',
-          backgroundColor: COUPLE_COLORS.frameBg,
+          backgroundColor: '#FFFFFF',
           position: 'relative',
-          fontFamily: "'Pretendard Variable', Pretendard, sans-serif",
+          fontFamily: 'Cafe24 Dongdong, sans-serif',
         }}
       >
-        <TestTopNav bgColor={COUPLE_COLORS.frameBg} logoColor={COUPLE_COLORS.text} xColor={COUPLE_COLORS.text} />
+        <TestTopNav bgColor="#FFFFFF" logoColor="#000000" xColor="#000000" />
 
         {status === 'loading' && (
           <div style={{ padding: '120px 20px', textAlign: 'center' }}>
-            <p style={{ fontSize: '14px', color: COUPLE_COLORS.textSecondary }}>결과를 불러오는 중이에요...</p>
+            <p style={{ fontSize: '14px', color: C.textSecondary }}>결과를 불러오는 중이에요...</p>
           </div>
         )}
 
         {status === 'notFound' && (
           <div style={{ padding: '120px 20px 80px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <p style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</p>
-            <p style={{ fontSize: '16px', fontWeight: 700, color: COUPLE_COLORS.text, marginBottom: '8px' }}>결과를 찾을 수 없어요</p>
-            <p style={{ fontSize: '14px', color: COUPLE_COLORS.textSecondary, marginBottom: '28px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '16px', fontWeight: 700, color: C.text, marginBottom: '8px' }}>결과를 찾을 수 없어요</p>
+            <p style={{ fontSize: '14px', color: C.textSecondary, marginBottom: '28px', lineHeight: 1.6 }}>
               다른 기기에서 열었거나 브라우저 데이터가 지워졌을 수 있어요.
             </p>
             <div style={{ width: '100%', maxWidth: '240px' }}>
               <LandingCTAButton
                 onClick={handleRestart}
                 label="새로 분석하기"
-                background={COUPLE_COLORS.primary}
-                color={COUPLE_COLORS.textOnPrimary}
-                hoverBackground={COUPLE_COLORS.primaryHover}
+                background={C.primary}
+                color={C.textOnPrimary}
+                hoverBackground={C.primaryHover}
                 height="52px"
               />
             </div>
@@ -160,17 +106,17 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: 'easeOut' }}
-            style={{ padding: '12px 8px 48px', backgroundColor: COUPLE_COLORS.frameBg }}
+            style={{ padding: '12px 8px 48px', backgroundColor: '#FFFFFF' }}
           >
             {/* 결과 카드 영역 (이미지 저장 영역) */}
             <div ref={cardRef}>
               <div
                 style={{
                   position: 'relative',
-                  backgroundColor: COUPLE_COLORS.frameBg,
-                  border: `2.5px solid ${COUPLE_COLORS.frameBorder}`,
+                  backgroundColor: C.frameBg,
+                  border: `2.5px solid ${C.frameBorder}`,
                   borderRadius: '28px',
-                  padding: '16px 18px',
+                  padding: '16px 18px 20px',
                   overflow: 'hidden',
                 }}
               >
@@ -179,31 +125,25 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundImage: 'url(/solo-guide/card-bg-notepaper.png)',
-                    backgroundSize: 'cover',
+                    backgroundImage: 'url(/couple-guide/card-bg-hearts-result.png)',
+                    backgroundSize: '160px auto',
                     backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    transform: 'scale(1.15)',
-                    opacity: 0.5,
+                    backgroundRepeat: 'repeat',
+                    opacity: 0.85,
                   }}
                 />
 
                 <div style={{ position: 'relative' }}>
-                  {/* 상단 타이틀 그래픽 */}
-                  <div className="text-center pt-3 pb-2">
-                    <p className="text-xs text-pink-500 font-bold mb-1">✨ 사주 기반 연애 궁합 분석</p>
-                    <h1 className="text-2xl font-black tracking-tight text-gray-800">우리 사이, 얼마나 잘 맞을까?</h1>
-                  </div>
 
                   {/* 스코어 & 대표 특징 헤더 카드 (원형 그래프 제거 및 캐릭터 중심 배치 + 점수 텍스트화) */}
                   <div
                     style={{
                       position: 'relative',
-                      borderRadius: '14px',
+                      borderRadius: '24px',
                       backgroundColor: '#FFFFFF',
-                      border: `1.5px solid ${COUPLE_COLORS.frameBorder}`,
+                      border: `1.5px solid ${C.frameBorder}`,
                       boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-                      padding: '24px 16px',
+                      padding: '24px 16px 22px',
                       marginTop: '8px',
                       textAlign: 'center',
                     }}
@@ -212,64 +152,40 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                       style={{
                         position: 'absolute',
                         inset: '6px',
-                        borderRadius: '9px',
+                        borderRadius: '19px',
                         border: '1.2px dashed #FFC2D6',
                         pointerEvents: 'none',
                       }}
                     />
-                    <img
-                      src="/solo-guide/tape-check-pink.png"
-                      alt=""
-                      style={{
-                        position: 'absolute',
-                        top: '-8px',
-                        right: '-24px',
-                        width: '90px',
-                        transform: 'rotate(45deg)',
-                        pointerEvents: 'none',
-                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))',
-                      }}
-                    />
-                    <img
-                      src="/solo-guide/tape-check-pink.png"
-                      alt=""
-                      style={{
-                        position: 'absolute',
-                        top: '-8px',
-                        left: '-24px',
-                        width: '90px',
-                        transform: 'rotate(-45deg)',
-                        pointerEvents: 'none',
-                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))',
-                      }}
-                    />
-
                     {/* 캐릭터 일러스트 중앙 집중 배치 */}
                     <div className="flex justify-center mb-3">
                       <div className="w-62.5 md:w-72.5">
-                        <img 
+                        <img
                           src={`/couple-guide/char-${result.maxScore ?? 100}.png`}
-                          alt={result.relationshipTitle} 
+                          alt={result.relationshipTitle}
                           className="w-full h-auto object-contain"
                           onError={(e) => {
-                            console.error(`이미지를 찾을 수 없음: char-${result.maxScore}.png`);
-                            (e.target as HTMLImageElement).src = '/couple-guide/char-100.png';
+                            (e.target as HTMLImageElement).src = '/couple-guide/char-100.jpg';
                           }}
                         />
                       </div>
                     </div>
 
                     {/* 2. 궁합 점수 텍스트 */}
-                      <div className="flex items-baseline justify-center gap-2 mb-4">
-                        <span className="text-xl font-bold text-gray-400 tracking-wide">궁합 점수</span>
-                        <span className="text-3xl font-black tracking-tighter" style={{ color: COUPLE_COLORS.primary }}>
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="flex items-center justify-center"
+                          style={{ gap: '8px', backgroundColor: C.primary, borderRadius: '12px', padding: '4px 16px' }}
+                        >
+                          <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', filter: 'brightness(0) invert(1)', transform: 'rotate(-20deg)' }} />
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.5px' }}>궁합 점수</span>
+                          <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', filter: 'brightness(0) invert(1)', transform: 'rotate(20deg)' }} />
+                        </div>
+                        <span className="font-black tracking-tighter" style={{ color: C.primary, fontSize: '62px' }}>
                           {result.totalScore}점
                         </span>
                       </div>
 
-                      {/* 구분선 (선택사항: 필요에 따라 은은한 경계선을 줄 수 있습니다) */}
-                      <div className="w-12 h-0.5 bg-pink-100 mx-auto mb-4" />
-                      
                       {/* 3. 타이틀 및 부제목 (국대급 복식조 커플 등) */}
                       <RelationshipTitle
                         title={result.relationshipTitle}
@@ -278,19 +194,19 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
 
                       {/* 4. 해시태그 목록 */}
                       {result.hashtags && result.hashtags.length > 0 && (
-                        <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+                        <div className="flex flex-wrap items-center justify-center" style={{ gap: '4px', marginTop: '10px' }}>
                           {result.hashtags.map((tag: string, idx: number) => (
                             <span
                               key={idx}
                               style={{
                                 display: 'inline-block',
                                 backgroundColor: '#FFF5F8',
-                                border: `1px solid ${COUPLE_COLORS.frameBorder}`,
-                                borderRadius: '20px',
-                                padding: '5px 12px',
+                                border: `1px solid ${C.frameBorder}`,
+                                borderRadius: '12px',
+                                padding: '4px 10px',
                                 fontSize: '12.5px',
                                 fontWeight: 700,
-                                color: COUPLE_COLORS.primary,
+                                color: C.primary,
                               }}
                             >
                               {tag.startsWith('#') ? tag : `#${tag}`}
@@ -298,89 +214,80 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                           ))}
                         </div>
                       )}
-                    </div>
 
-                  {/* 세부 분석 세션 (케미 스탯) */}
-                  <div style={{ marginTop: '16px' }}>
-                    <SectionCard isMobile={isMobile}>
-                      {/* 스탯 스펙트럼 */}
-                      <div style={{ paddingTop: '4px' }}>
-                        <div className="flex flex-col gap-4 mt-1">
-                          {result.stats.map((stat: { label: string; score: number; description?: string }, index: number) => (
-                              <ChemiStatBar
-                              key={index}
-                              label={stat.label}
-                              value={stat.score}
-                              caption={stat.description}
+                      {/* 5. 궁합 지수 그래프 */}
+                      <div
+                        style={{
+                          position: 'relative',
+                          marginTop: '20px',
+                          padding: '28px 24px',
+                          textAlign: 'left',
+                          backgroundColor: 'rgb(255 252 253)',
+                          border: '2px solid #FFD6E4',
+                          borderRadius: '20px',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {/* 코너 장식 */}
+                        <svg viewBox="0 0 64 64" style={{ position: 'absolute', top: '10px', left: '14px', width: '14px', height: '14px' }}>
+                          <path fill="#FFC2D6" d="m44,5c-4.65,0-8.96,1.97-12,5.44-3.04-3.47-7.35-5.44-12-5.44-8.82,0-16,7.18-16,16,0,22.37,26.44,35.36,27.57,35.9.14.07.29.1.43.1s.3-.03.43-.1c1.13-.54,27.57-13.53,27.57-35.9,0-8.82-7.18-16-16-16Z" />
+                        </svg>
+                        <svg viewBox="0 0 64 64" style={{ position: 'absolute', bottom: '10px', right: '14px', width: '14px', height: '14px' }}>
+                          <path fill="#FFC2D6" d="m44,5c-4.65,0-8.96,1.97-12,5.44-3.04-3.47-7.35-5.44-12-5.44-8.82,0-16,7.18-16,16,0,22.37,26.44,35.36,27.57,35.9.14.07.29.1.43.1s.3-.03.43-.1c1.13-.54,27.57-13.53,27.57-35.9,0-8.82-7.18-16-16-16Z" />
+                        </svg>
+
+                        <div className="flex items-center justify-center" style={{ position: 'relative', marginBottom: '12px' }}>
+                          <div
+                            className="flex items-center justify-center"
+                            style={{ gap: '8px', backgroundColor: C.primary, borderRadius: '12px', padding: '4px 16px' }}
+                          >
+                            <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', filter: 'brightness(0) invert(1)', transform: 'rotate(-20deg)' }} />
+                            <span style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.5px' }}>우리 사이 궁합 지수</span>
+                            <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', filter: 'brightness(0) invert(1)', transform: 'rotate(20deg)' }} />
+                          </div>
+                        </div>
+                        <div className="flex flex-col" style={{ position: 'relative', gap: '24px' }}>
+                          {result.stats.map((stat, index) => (
+                            <ChemiStatBar
+                              key={stat.label}
+                              {...stat}
                               delay={index * 0.15}
+                              barEndIcon={index === 1 ? '/couple-guide/icon-thunder.svg' : undefined}
+                              barEndIconSize={index === 1 ? '20px' : undefined}
+                              color={index === 1 ? '#FF9E45' : stat.color}
                             />
                           ))}
                         </div>
                       </div>
 
-                      {/* 응원 태그 banner */}
-                      <div
-                        style={{
-                          marginTop: isMobile ? '20px' : '26px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundImage: 'url(/solo-guide/cta-tag-bg.png)',
-                          backgroundSize: '100% auto',
-                          backgroundPosition: 'center',
-                          backgroundRepeat: 'no-repeat',
-                          padding: '22px 16px',
-                        }}
-                      >
-                        <p
-                          style={{
-                            fontSize: isMobile ? '15.5px' : '17.5px',
-                            fontWeight: 500,
-                            lineHeight: 1.55,
-                            color: TITLE_POINT_COLOR,
-                            letterSpacing: '-0.7px',
-                            WebkitTextStroke: `0.3px ${TITLE_POINT_COLOR}`,
-                          }}
-                        >
-                          두 사람의 예쁜 사랑을 응원합니다! 💕
-                        </p>
+                      {/* 사주GPT 링크 버튼 */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <SajuGPTLinkButton
+                          featureType="couple_guide"
+                          color={C.primary}
+                          hoverColor={C.primaryHover}
+                          label="사주GPT"
+                          fontFamily="Cafe24 Dongdong, sans-serif"
+                          marginTop="16px"
+                          fontSize="17px"
+                          letterSpacing="-0.5px"
+                        />
                       </div>
-                    </SectionCard>
-                  </div>
-
-                  {/* 사주GPT 테이프 링크 버튼 */}
-                  <div
-                    style={{
-                      marginTop: '6px',
-                      paddingTop: '10px',
-                      paddingBottom: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundImage: 'url(/solo-guide/sajugpt-tape.png)',
-                      backgroundSize: '120px auto',
-                      backgroundPosition: 'center calc(50% + 6.5px)',
-                      backgroundRepeat: 'no-repeat',
-                    }}
-                  >
-                    <div style={{ marginTop: '-10px' }}>
-                      <SajuGPTLinkButton featureType="couple_guide" color="#FFFFFF" hoverColor="rgb(246 79 135)" label="사주GPT" />
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
             {/* 외부 링크 CTA */}
-            <div style={{ marginTop: RESULT_GAPS.imageToActions }}>
+            <div style={{ marginTop: 20 }}>
               <OutlineBoxButton
                 href={SAJUGPT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackSajuGPTClick('couple_guide', resultId)}
-                color={COUPLE_COLORS.primary}
+                color={C.primary}
                 background="#FFFFFF"
-                border={`1.5px solid ${COUPLE_COLORS.primary}`}
+                border={`1.5px solid ${C.primary}`}
                 height="50px"
                 borderRadius="18px"
                 fontSize="15px"
@@ -396,17 +303,17 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                 onClick={handleRestart}
                 label="다시하기"
                 style={{ flex: 1, height: '54px' }}
-                bgStyle={{ backgroundColor: 'rgb(255, 229, 237)', borderRadius: '18px' }}
-                hoverBackground="rgba(252, 181, 209, 0.64)"
-                textStyle={{ color: 'rgb(248, 71, 132)', fontSize: '15px', fontWeight: 600, paddingTop: '2px' }}
+                bgStyle={{ backgroundColor: 'rgba(255, 194, 207, 0.32)', borderRadius: '18px' }}
+                hoverBackground="rgba(255, 107, 129, 0.25)"
+                textStyle={{ color: C.primary, fontSize: '15px', fontWeight: 600, paddingTop: '2px' }}
               />
               <PressableButton
                 onClick={() => handleSave(cardRef)}
                 label={saving ? '저장 중...' : '이미지 저장하기'}
                 style={{ flex: 2, height: '54px' }}
-                bgStyle={{ backgroundColor: COUPLE_COLORS.primary, borderRadius: '18px' }}
-                hoverBackground={COUPLE_COLORS.primaryHover}
-                textStyle={{ color: COUPLE_COLORS.textOnPrimary, fontSize: '15px', fontWeight: 700, paddingTop: '2px' }}
+                bgStyle={{ backgroundColor: C.primary, borderRadius: '18px' }}
+                hoverBackground={C.primaryHover}
+                textStyle={{ color: C.textOnPrimary, fontSize: '15px', fontWeight: 700, paddingTop: '2px' }}
               />
             </div>
 
@@ -416,15 +323,15 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                 shareContent={{
                   featureType: 'couple_guide',
                   resultId,
-                  title: `💕 ${result.relationshipTitle}`,
-                  description: result.summary,
+                  title: '우리 궁합, 같이 볼래? 💕',
+                  description: '궁합 결과를 공유하고 서로의 케미를 확인해보세요.',
                   shareUrl,
                   imageUrl: origin ? `${origin}/couple-guide/og-share.jpg` : '/couple-guide/og-share.jpg',
                   testId: 'couple-guide',
                 }}
-                copyColor={COUPLE_COLORS.primary}
-                copyHoverColor={COUPLE_COLORS.primaryHover}
-                copyIconColor={COUPLE_COLORS.textOnPrimary}
+                copyColor={C.primary}
+                copyHoverColor={C.primaryHover}
+                copyIconColor={C.textOnPrimary}
               />
             </div>
 
@@ -436,25 +343,25 @@ export default function CoupleResultView({ resultId }: CoupleResultViewProps) {
                   fontFamily: "'Pretendard Variable', Pretendard, sans-serif",
                   fontSize: '16px',
                   fontWeight: 700,
-                  color: COUPLE_COLORS.text,
+                  color: C.text,
                   letterSpacing: '-0.3px',
                   paddingLeft: '2px',
                 }}
-                cardBg={COUPLE_COLORS.panelBg}
-                cardTitleColor={COUPLE_COLORS.text}
+                cardBg={C.panelBg}
+                cardTitleColor={C.text}
                 featureType="couple_guide"
                 resultId={resultId}
                 storageKey="couple_guide_liked_comments"
                 placeholder="우리 커플의 궁합 결과는 어땠나요?"
-                themeColor={COUPLE_COLORS.primary}
-                inputBg="#FFFFFF"
-                disabledBg="rgb(237 237 237)"
+                themeColor={C.primary}
+                inputBg="rgb(244, 246, 247)"
+                disabledBg="rgb(235 236 236)"
                 emptyStateColor="rgb(124 124 124)"
                 metaColor="rgb(126 126 126)"
                 heartIdleColor="rgb(190 190 190)"
                 moreButtonFontSize="12.5px"
                 moreButtonHoverBg="rgba(252, 181, 209, 0.64)"
-                submitButtonHoverBg={COUPLE_COLORS.primaryHover}
+                submitButtonHoverBg={C.primaryHover}
               />
             </div>
           </motion.div>

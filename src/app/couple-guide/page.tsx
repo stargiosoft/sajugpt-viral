@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import CoupleGuideClient from '@/components/couple-guide/CoupleGuideClient';
+import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
   title: '우리 사이 궁합 설명서💕 — 사주GPT',
@@ -10,13 +11,18 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/couple-guide/og-share.jpg',
-        width: 1774,
-        height: 887,
+        width: 1448,
+        height: 1086,
       },
     ],
   },
 };
 
 export default function CoupleGuidePage() {
-  return <CoupleGuideClient />;
+  return (
+    <>
+      <LandingTracker featureType="couple_guide" />
+      <CoupleGuideClient />
+    </>
+  );
 }

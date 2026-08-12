@@ -8,6 +8,7 @@ import GenderSelect from '@/components/GenderSelect';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import FieldLabel from '@/components/FieldLabel';
 import PressableButton from '@/components/PressableButton';
+import GenderHeartIcon from '@/components/GenderHeartIcon';
 
 import { COUPLE_COLORS as C, FADE_UP } from '@/constants/coupleGuideTheme';
 
@@ -23,8 +24,7 @@ interface Props {
   errorMessage?: string | null;
 }
 
-function isPersonValid(person?: PersonBirthInfo) {
-  if (!person) return false;
+function isPersonValid(person: PersonBirthInfo) {
   return (
     !!person.gender &&
     /^\d{4}-\d{2}-\d{2}$/.test(person.birthday) &&
@@ -32,18 +32,7 @@ function isPersonValid(person?: PersonBirthInfo) {
   );
 }
 
-const HEART_PATH =
-  'M19.88,4.86a5.15,5.15,0,0,0-4-1.18A5.56,5.56,0,0,0,12.06,6L12,6.05,11.94,6A5.56,5.56,0,0,0,8.12,3.68a5.15,5.15,0,0,0-4,1.18,5.27,5.27,0,0,0-.32,7.77L11.19,20a1.16,1.16,0,0,0,1.62,0l7.39-7.4a5.27,5.27,0,0,0-.32-7.77Z';
-
 const NEUTRAL_GRAY = 'rgb(190 190 190)';
-
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24">
-      <path fill={filled ? '#FFFFFF' : NEUTRAL_GRAY} d={HEART_PATH} />
-    </svg>
-  );
-}
 
 function PersonSection({
   title,
@@ -52,12 +41,10 @@ function PersonSection({
   onEnter,
 }: {
   title: string;
-  person?: PersonBirthInfo;
+  person: PersonBirthInfo;
   onChange: (patch: Partial<PersonBirthInfo>) => void;
   onEnter: () => void;
 }) {
-  const safePerson = person ?? { gender: '', birthday: '', birthTime: '', birthTimeUnknown: false };
-
   return (
     <div
       style={{
@@ -91,7 +78,7 @@ function PersonSection({
           </FieldLabel>
           <GenderSelect
             groupId={title}
-            value={safePerson.gender as any}
+            value={person.gender}
             onChange={gender => onChange({ gender })}
             accentColor={C.primary}
             bgColor={C.inputBg}
@@ -101,7 +88,7 @@ function PersonSection({
             border="none"
             indicatorBoxShadow="none"
             textStrokeWidth="0.2px"
-            icon={selected => <HeartIcon filled={selected} />}
+            icon={selected => <GenderHeartIcon filled={selected} unselectedColor={NEUTRAL_GRAY} />}
           />
         </div>
 
@@ -111,11 +98,8 @@ function PersonSection({
             생년월일 (양력 기준)
           </FieldLabel>
           <BirthInput
-            value={safePerson.birthday}
-            onChange={val => {
-              const dateVal = typeof val === 'object' && val !== null ? (val as any).birthday || (val as any).date || '' : val;
-              onChange({ birthday: dateVal });
-            }}
+            value={person.birthday}
+            onChange={val => onChange({ birthday: val })}
             accentColor={C.primary}
             bgColor={C.inputBg}
             borderColor="transparent"
@@ -124,7 +108,7 @@ function PersonSection({
             height="52px"
             onEnter={onEnter}
             autoFocus={false}
-            textStrokeWidth="0.2px"
+            textStrokeWidth="0px"
           />
         </div>
 
@@ -134,8 +118,8 @@ function PersonSection({
             태어난 시간
           </FieldLabel>
           <TimeSelectSheet
-            value={safePerson.birthTime}
-            unknownTime={safePerson.birthTimeUnknown}
+            value={person.birthTime}
+            unknownTime={person.birthTimeUnknown}
             onSelect={(displayTime, unknown) =>
               onChange({
                 birthTime: displayTime,
@@ -156,7 +140,7 @@ function PersonSection({
             fontSize="16px"
             height="52px"
             arrowColor={NEUTRAL_GRAY}
-            textStrokeWidth="0.2px"
+            textStrokeWidth="0px"
             sheetTitleFontSize="22px"
             sheetTitleLetterSpacing="-0.8px"
             sheetTitlePaddingBottom="2px"
@@ -169,7 +153,7 @@ function PersonSection({
 
 export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: Props) {
   const isValid = useMemo(() => {
-    return isPersonValid(form?.person1) && isPersonValid(form?.person2);
+    return isPersonValid(form.person1) && isPersonValid(form.person2);
   }, [form]);
 
   return (
@@ -193,26 +177,34 @@ export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: 
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: 'url(/solo-guide/card-bg-notepaper.png)',
-            backgroundSize: 'cover',
+            backgroundImage: 'url(/couple-guide/card-bg-hearts-result.png)',
+            backgroundSize: '160px auto',
             backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            transform: 'scale(1.8)',
-            opacity: 0.5,
+            backgroundRepeat: 'repeat',
+            opacity: 0.85,
           }}
         />
 
-        <div className="flex flex-col items-center" style={{ position: 'relative', marginBottom: '20px' }}>
-          <h2
-            style={{
-              textAlign: 'center',
-              fontSize: '20px',
-              fontWeight: 700,
-              color: C.text,
-            }}
+        <div className="flex items-center justify-center" style={{ position: 'relative', marginBottom: '20px', paddingTop: '4px' }}>
+          <div
+            className="flex items-center justify-center"
+            style={{ gap: '8px', backgroundColor: '#FFFFFF', borderRadius: '12px', padding: '4px 16px', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}
           >
-            두 사람의 정보를 알려주세요
-          </h2>
+            <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', transform: 'rotate(-20deg)' }} />
+            <h2
+              style={{
+                textAlign: 'center',
+                fontSize: '22px',
+                fontWeight: 500,
+                color: C.primary,
+                WebkitTextStroke: `0.2px ${C.primary}`,
+                letterSpacing: '-0.5px',
+              }}
+            >
+              두 사람의 정보를 알려주세요
+            </h2>
+            <img src="/couple-guide/icon-heart.svg" alt="" style={{ width: '14px', height: '14px', transform: 'rotate(20deg)' }} />
+          </div>
         </div>
 
         <motion.div
@@ -225,15 +217,8 @@ export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: 
           <motion.div variants={FADE_UP as any}>
             <PersonSection
               title="첫 번째 사람"
-              person={form?.person1}
-              onChange={patch =>
-                onChange({
-                  person1: {
-                    ...(form?.person1 ?? { gender: '', birthday: '', birthTime: '', birthTimeUnknown: false }),
-                    ...patch,
-                  },
-                })
-              }
+              person={form.person1}
+              onChange={patch => onChange({ person1: { ...form.person1, ...patch } })}
               onEnter={onSubmit}
             />
           </motion.div>
@@ -241,15 +226,8 @@ export default function CoupleInput({ form, onChange, onSubmit, errorMessage }: 
           <motion.div variants={FADE_UP as any}>
             <PersonSection
               title="두 번째 사람"
-              person={form?.person2}
-              onChange={patch =>
-                onChange({
-                  person2: {
-                    ...(form?.person2 ?? { gender: '', birthday: '', birthTime: '', birthTimeUnknown: false }),
-                    ...patch,
-                  },
-                })
-              }
+              person={form.person2}
+              onChange={patch => onChange({ person2: { ...form.person2, ...patch } })}
               onEnter={onSubmit}
             />
           </motion.div>
