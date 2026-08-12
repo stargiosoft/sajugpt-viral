@@ -15,8 +15,11 @@ export const COUPLE_COLORS = {
   border: 'rgb(255 214 220)',
 
   text: 'rgb(60 45 48)',
+  textSecondary: 'rgb(102 102 102)',
   textTertiary: 'rgb(150 130 133)',
   placeholder: 'rgb(190 170 173)',
+
+  panelBg: '#FFFFFF',
 };
 
 export const FADE_UP = {
