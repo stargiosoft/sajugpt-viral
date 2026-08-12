@@ -30,11 +30,14 @@ export async function fetchComments(featureType: FeatureType, limit = 30): Promi
 export async function postComment(featureType: FeatureType, content: string, clientId: string): Promise<CommentEntry | null> {
   const { data, error } = await supabase
     .from(TABLE)
-    .insert({ feature_type: featureType, content, client_id: clientId })
+    .insert({ feature_type: featureType, content, client_id: clientId, likes: 0, dislikes: 0, reports: 0, is_deleted: false })
     .select('id, content, client_id, likes, dislikes, created_at')
     .single();
 
-  if (error) return null;
+  if (error) {
+    console.error('🚨 [Supabase 400 에러 상세 분석]:', JSON.stringify(error, null, 2));
+    return null;
+  }
   return data;
 }
 

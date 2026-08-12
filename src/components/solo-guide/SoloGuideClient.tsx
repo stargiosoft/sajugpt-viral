@@ -26,10 +26,8 @@ const INITIAL_FORM: SoloGuideFormState = {
 const ANALYZING_MESSAGES = ['분석중..'];
 const ANALYZING_LOTTIE = recolorLottie(heartLottieRaw, C.primary);
 
-const MIN_ANALYZING_MS = 1200; // analyze-solo-guide 응답이 너무 빨라도 로딩 연출이 순간 스치지 않도록 최소 노출 시간 보장
+const MIN_ANALYZING_MS = 1200;
 
-// 결과는 analyze-solo-guide Edge Function(Stargio + WhySolo API)에서 계산해 받아오고,
-// 사용자별 결과 저장 테이블이 없어 공유 링크는 localStorage에 저장한다(같은 브라우저에서만 열림).
 export default function SoloGuideClient() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('landing');
