@@ -378,18 +378,19 @@ delete twelveGung[gung]['십사정성'];
       delete twelveGung[gung]['6살성'];
       delete twelveGung[gung]['사화성(四化星)'];
 
-      // 🌟 1. UI 차트 모서리에 나이(예: 72~81)를 띄우기 위해 데이터 주입
+      // UI 렌더링용 대한 연령대 주입
       twelveGung[gung]['대한_연령대'] = daeHanAges[gung];
     }
 
     jamidusuData['선천명반_12궁'] = twelveGung;
 
-    // 🌟 2. 클릭 시 하단 테이블에 보여줄 [행운_정보] (대한 2개 + 유년 10년치) 생성
+    // 🌟 [추가] 대한 및 유년 10년치 생성 로직 원복
     jamidusuData['행운_정보'] = {'대한_목록': [], '유년_목록': []};
+    
+    // 대한 목록 추출 (현재 나이가 포함된 대한 및 다음 대한)
     for (const gung of Object.keys(twelveGung)) {
       if ((daeHanAges[gung][0] <= jamidusuData['기본정보']['나이'] && jamidusuData['기본정보']['나이'] <= daeHanAges[gung][1]) ||
           (daeHanAges[gung][0] <= jamidusuData['기본정보']['나이'] + 10 && jamidusuData['기본정보']['나이'] + 10 <= daeHanAges[gung][1])) {
-        
         const daeHanData: any = {
           '연령대': daeHanAges[gung],
           '천간': twelveGung[gung]['궁간비성']['천간'],
@@ -401,6 +402,7 @@ delete twelveGung[gung]['십사정성'];
       }
     }
 
+    // 유년 목록 추출 (현재년도부터 10년치)
     const mDateTime = new Date(dateTime.getFullYear(), 6, 15, 12, 30);
     const mYeonJu = CalendarEngine.getYeonJu(mDateTime);
     let bornYear = jamidusuData['기본정보']['양력생일'][0];
@@ -418,8 +420,7 @@ delete twelveGung[gung]['십사정성'];
       year2GanJi[bornYear + i] = TableData.hjChunJiTable[this.mod(yeonJuIndex + i, 60)];
     }
 
-    // 👉 유년(1년 운)을 10년 치 뽑아냅니다. (i < 10)
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++) { // 10년치 추출
       const targetYear = today.getFullYear() + i;
       const targetAge = addAgeFlag ? (today.getFullYear() - dateTime.getFullYear() + 2 + i) : (today.getFullYear() - dateTime.getFullYear() + 1 + i);
       const thisYearGanJi = year2GanJi[targetYear]!;
