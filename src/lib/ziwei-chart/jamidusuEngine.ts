@@ -373,13 +373,75 @@ export class JamidusuEngine {
         twelveGung[gung]['성요배치']['살성_및_형요'].push({ '명칭': star, '묘왕지': strInfo || '' });
       }
 
-      delete twelveGung[gung]['십사정성'];
+delete twelveGung[gung]['십사정성'];
       delete twelveGung[gung]['6길성'];
       delete twelveGung[gung]['6살성'];
       delete twelveGung[gung]['사화성(四化星)'];
+
+      // 🌟 1. UI 차트 모서리에 나이(예: 72~81)를 띄우기 위해 데이터 주입
+      twelveGung[gung]['대한_연령대'] = daeHanAges[gung];
     }
 
     jamidusuData['선천명반_12궁'] = twelveGung;
+
+    // 🌟 2. 클릭 시 하단 테이블에 보여줄 [행운_정보] (대한 2개 + 유년 10년치) 생성
+    jamidusuData['행운_정보'] = {'대한_목록': [], '유년_목록': []};
+    for (const gung of Object.keys(twelveGung)) {
+      if ((daeHanAges[gung][0] <= jamidusuData['기본정보']['나이'] && jamidusuData['기본정보']['나이'] <= daeHanAges[gung][1]) ||
+          (daeHanAges[gung][0] <= jamidusuData['기본정보']['나이'] + 10 && jamidusuData['기본정보']['나이'] + 10 <= daeHanAges[gung][1])) {
+        
+        const daeHanData: any = {
+          '연령대': daeHanAges[gung],
+          '천간': twelveGung[gung]['궁간비성']['천간'],
+          '대한사화': { ...twelveGung[gung]['궁간비성'] },
+          '십이궁_배치': this.palaceLayout(TableData.hjJiJiTable.indexOf(gung))
+        };
+        delete daeHanData['대한사화']['천간'];
+        jamidusuData['행운_정보']['대한_목록'].push(daeHanData);
+      }
+    }
+
+    const mDateTime = new Date(dateTime.getFullYear(), 6, 15, 12, 30);
+    const mYeonJu = CalendarEngine.getYeonJu(mDateTime);
+    let bornYear = jamidusuData['기본정보']['양력생일'][0];
+    let addAgeFlag = false;
+
+    if (saju[3] && mYeonJu !== saju[3]) {
+      addAgeFlag = true;
+      bornYear -= 1;
+      jamidusuData['기본정보']['나이'] += 1;
+    }
+
+    const yeonJuIndex = saju[3] ? TableData.hjChunJiTable.indexOf(saju[3]) : 0;
+    const year2GanJi: Record<number, string> = {};
+    for (let i = 0; i < 120; i++) {
+      year2GanJi[bornYear + i] = TableData.hjChunJiTable[this.mod(yeonJuIndex + i, 60)];
+    }
+
+    // 👉 유년(1년 운)을 10년 치 뽑아냅니다. (i < 10)
+    for (let i = 0; i < 10; i++) {
+      const targetYear = today.getFullYear() + i;
+      const targetAge = addAgeFlag ? (today.getFullYear() - dateTime.getFullYear() + 2 + i) : (today.getFullYear() - dateTime.getFullYear() + 1 + i);
+      const thisYearGanJi = year2GanJi[targetYear]!;
+      const gung = thisYearGanJi[1];
+
+      const thisYearData: any = {
+        '해당년도': targetYear,
+        '나이': targetAge,
+        '천간': thisYearGanJi[0],
+        '십이궁_배치': this.palaceLayout(TableData.hjJiJiTable.indexOf(gung)),
+        '유년사화': { ...twelveGung[gung]['궁간비성'] }
+      };
+      delete thisYearData['유년사화']['천간'];
+
+      for (const g of Object.keys(twelveGung)) {
+        if (daeHanAges[g][0] <= targetAge && targetAge <= daeHanAges[g][1]) {
+          thisYearData['소속대한_연령대'] = daeHanAges[g];
+        }
+      }
+      jamidusuData['행운_정보']['유년_목록'].push(thisYearData);
+    }
+
     return jamidusuData;
   }
 }

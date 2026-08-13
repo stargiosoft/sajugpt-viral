@@ -6,12 +6,12 @@ import type { Gender } from '@/types/battle';
 import TestTopNav from '@/components/TestTopNav';
 import { loadSelfSaju, saveSelfSaju } from '@/lib/sajuCache';
 import { ZIWEI_PALETTE as C } from '@/lib/ziwei-chart/theme';
+import { JamidusuEngine } from '@/lib/ziwei-chart/jamidusuEngine';
 
 import ZiweiLanding from './ZiweiLanding';
 import ZiweiInput from './ZiweiInput';
 import ZiweiAnalyzing from './ZiweiAnalyzing';
 import ZiweiGrid from './ZiweiGrid';
-import { JamidusuEngine } from '@/lib/ziwei-chart/jamidusuEngine';
 
 export default function ZiweiClient() {
   const [birthDate, setBirthDate] = useState('');
@@ -22,6 +22,7 @@ export default function ZiweiClient() {
 
   const [step, setStep] = useState<'landing' | 'input' | 'analyzing' | 'result'>('landing');
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
 
   useEffect(() => {
     const cached = loadSelfSaju('ziwei_chart');
@@ -50,14 +51,12 @@ export default function ZiweiClient() {
     setBirthTime(displayTime);
   }, []);
 
-
   const handleSubmit = async () => {
     if (!isFormValid()) return;
     setStep('analyzing');
     setError(null);
 
     try {
-      // 1. 생년월일과 시간(오전/오후)을 실제 Date 객체로 변환
       const [year, month, day] = birthDate.split('-').map(Number);
       let hours = 12, minutes = 0;
 
@@ -76,23 +75,17 @@ export default function ZiweiClient() {
       const dt = new Date(Date.UTC(year, month - 1, day, hours, minutes));
       const sexInt = gender === 'male' ? 1 : 0;
 
-      // 2. 엔진을 돌려 명반 JSON 데이터 산출
+      // 엔진 구동
       const engineResult = JamidusuEngine.makePurpleStarTable(dt, sexInt);
 
-      await new Promise(resolve => setTimeout(resolve, 2000)); // 로딩 연출
+      // 로딩 딜레이
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // 3. 디버깅용 콘솔 출력 및 클립보드 복사
-      console.log('%c🔮 자미두수 명반 엔진 산출 결과', 'color: #6B2FC2; font-size: 16px; font-weight: bold;');
-      console.dir(engineResult, { depth: null });
+      console.log('🔮 자미두수 명반 엔진 산출 결과', engineResult);
       
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        const jsonString = JSON.stringify(engineResult, null, 2);
-        navigator.clipboard.writeText(jsonString)
-          .then(() => alert('✅ 명반 JSON 데이터가 클립보드에 복사되었습니다! (Ctrl+V로 확인)'))
-          .catch(err => console.error('클립보드 복사 실패:', err));
-      }
-
+      setResult(engineResult);
       setStep('result');
+      
     } catch (err) {
       console.error(err);
       setError('명반 분석 중 오류가 발생했습니다.');
@@ -120,20 +113,15 @@ export default function ZiweiClient() {
 
             {step === 'analyzing' && <ZiweiAnalyzing key="analyzing" />}
 
-            {step === 'result' && (
+            {step === 'result' && result && (
               <motion.div
                 key="result"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                style={{ padding: '16px 16px 48px' }}
+                style={{ padding: '8px', minWidth: '100%' }}
               >
-                {/* 1단계에서 만든 자미두수 표 렌더링 */}
-                <ZiweiGrid />
-                
-                <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                  <p style={{ color: C.textSub, fontSize: '14px' }}>결과 해석 영역 및 하단 CTA 버튼 엑박</p>
-                </div>
+                <ZiweiGrid chartData={result} />
               </motion.div>
             )}
           </AnimatePresence>
