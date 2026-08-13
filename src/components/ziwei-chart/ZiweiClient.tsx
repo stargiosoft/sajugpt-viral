@@ -11,6 +11,7 @@ import ZiweiLanding from './ZiweiLanding';
 import ZiweiInput from './ZiweiInput';
 import ZiweiAnalyzing from './ZiweiAnalyzing';
 import ZiweiGrid from './ZiweiGrid';
+import { JamidusuEngine } from '@/lib/ziwei-chart/jamidusuEngine';
 
 export default function ZiweiClient() {
   const [birthDate, setBirthDate] = useState('');
@@ -49,16 +50,51 @@ export default function ZiweiClient() {
     setBirthTime(displayTime);
   }, []);
 
+
   const handleSubmit = async () => {
     if (!isFormValid()) return;
     setStep('analyzing');
     setError(null);
 
     try {
-      // 추후 실제 로직이 연동될 때까지 임시로 2초 대기
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 1. 생년월일과 시간(오전/오후)을 실제 Date 객체로 변환
+      const [year, month, day] = birthDate.split('-').map(Number);
+      let hours = 12, minutes = 0;
+
+      if (!unknownTime && birthTime) {
+        const isPM = birthTime.includes('오후');
+        const timeMatch = birthTime.match(/(\d+):(\d+)/);
+        if (timeMatch) {
+          let h = parseInt(timeMatch[1], 10);
+          const m = parseInt(timeMatch[2], 10);
+          if (isPM && h < 12) h += 12;
+          if (!isPM && h === 12) h = 0;
+          hours = h;
+          minutes = m;
+        }
+      }
+      const dt = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+      const sexInt = gender === 'male' ? 1 : 0;
+
+      // 2. 엔진을 돌려 명반 JSON 데이터 산출
+      const engineResult = JamidusuEngine.makePurpleStarTable(dt, sexInt);
+
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 로딩 연출
+      
+      // 3. 디버깅용 콘솔 출력 및 클립보드 복사
+      console.log('%c🔮 자미두수 명반 엔진 산출 결과', 'color: #6B2FC2; font-size: 16px; font-weight: bold;');
+      console.dir(engineResult, { depth: null });
+      
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        const jsonString = JSON.stringify(engineResult, null, 2);
+        navigator.clipboard.writeText(jsonString)
+          .then(() => alert('✅ 명반 JSON 데이터가 클립보드에 복사되었습니다! (Ctrl+V로 확인)'))
+          .catch(err => console.error('클립보드 복사 실패:', err));
+      }
+
       setStep('result');
     } catch (err) {
+      console.error(err);
       setError('명반 분석 중 오류가 발생했습니다.');
       setStep('input');
     }
