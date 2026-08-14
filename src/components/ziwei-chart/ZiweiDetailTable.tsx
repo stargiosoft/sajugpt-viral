@@ -58,7 +58,7 @@ const STAR_DICTIONARY: Record<string, any> = {
   '음살': { 분류: '제흉성', 오행: '-', 특성: '소인의 음해, 시기, 보이지 않는 방해' },
   '겁살': { 분류: '제흉성', 오행: '양화', 특성: '손해, 장애, 사기, 도난' },
   '재살': { 분류: '제흉성', 오행: '수', 특성: '실물, 재난, 질병' },
-  '천월': { 분류: '질병성계', 오행: '-', 특성: '만성질병, 유행병' },
+  '천월(天月)': { 분류: '질병성계', 오행: '-', 특성: '만성질병, 유행병' },
   '병부': { 분류: '질병성계', 오행: '수', 특성: '재병, 질병' },
   '태보': { 분류: '제길성', 오행: '양토', 특성: '지위, 명예, 보호' },
   '봉고': { 분류: '제길성', 오행: '음토', 특성: '지위, 표창, 칭송' },
@@ -167,7 +167,7 @@ export default function ZiweiDetailTable({ viewMode, activeData, basePalaces, da
                           {star.sName} <span className="text-red-600 font-normal text-[10px]">{star.sStr ? `(${star.sStr})` : ''}</span>
                         </td>
                         <td className="border border-gray-300 p-1.5 text-center font-bold">{star.오행}</td>
-                        <td className="border border-gray-300 p-1.5 text-gray-700">{star.특성}</td>
+                        <td className="border border-gray-300 p-1.5 text-gray-700 break-keep leading-relaxed">{star.특성}</td>
                       </tr>
                     )) : (
                       <tr>
@@ -245,13 +245,13 @@ export default function ZiweiDetailTable({ viewMode, activeData, basePalaces, da
                 </thead>
                 <tbody>
                   {getCategorizedStars(activeData).map((star: any, idx: number) => (
-                    <tr key={idx}>
+                    <tr key={idx} className="hover:bg-yellow-50 transition-colors">
                       <td className="border border-gray-300 p-1.5 text-center text-gray-600">{star.분류}</td>
                       <td className="border border-gray-300 p-1.5 text-center font-bold text-blue-900">
                         {star.sName} <span className="text-red-600 font-normal text-[10px]">{star.sStr ? `(${star.sStr})` : ''}</span>
                       </td>
                       <td className="border border-gray-300 p-1.5 text-center font-bold">{star.오행}</td>
-                      <td className="border border-gray-300 p-1.5 text-gray-700">{star.특성}</td>
+                      <td className="border border-gray-300 p-1.5 text-gray-700 break-keep leading-relaxed">{star.특성}</td>
                     </tr>
                   ))}
                 </tbody>

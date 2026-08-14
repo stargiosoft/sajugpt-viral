@@ -35,6 +35,13 @@ function getDynamicPalaces(baseJiJi: string): Record<string, string> {
   return layout;
 }
 
+// 천간 추출 헬퍼 함수 (한글/한자 혼용 문자열에서 한자 천간만 정확히 추출)
+function extractGan(str: string): string {
+  if (!str) return '甲';
+  const match = str.match(/[甲乙丙丁戊己庚辛壬癸]/);
+  return match ? match[0] : '甲';
+}
+
 export default function ZiweiGrid({ chartData }: Props) {
   const [viewMode, setViewMode] = useState<'base' | 'daehan' | 'yunyeon'>('base');
   const [selectedDaehanJiJi, setSelectedDaehanJiJi] = useState<string | null>(null);
@@ -46,7 +53,9 @@ export default function ZiweiGrid({ chartData }: Props) {
   const basicInfo = chartData['기본정보'];
   const saju = basicInfo['사주'];
   const luckInfo = chartData['행운_정보'] || { 대한_목록: [], 유년_목록: [] };
-  const baseGan = saju['년']?.charAt(0) || '甲';
+  
+  // 선천 사화 추출을 위한 년간 파싱
+  const baseGan = extractGan(saju['년']);
 
   let baseMyungGungJiJi = '子';
   for (const [jiji, data] of Object.entries(gungData)) {
@@ -71,9 +80,9 @@ export default function ZiweiGrid({ chartData }: Props) {
   }
 
   const baseSihwaStars = FOUR_HWA_TABLE[baseGan] || [];
-  const daehanGan = gungData[activeJiJi]['궁위간지']?.charAt(0);
+  const daehanGan = extractGan(gungData[activeJiJi]['궁위간지']);
   const daehanSihwaStars = viewMode === 'daehan' || viewMode === 'yunyeon' ? (FOUR_HWA_TABLE[daehanGan] || []) : [];
-  const yunyeonGan = selectedYunyeon ? selectedYunyeon['천간'] : null;
+  const yunyeonGan = selectedYunyeon ? extractGan(selectedYunyeon['천간']) : null;
   const yunyeonSihwaStars = viewMode === 'yunyeon' && yunyeonGan ? (FOUR_HWA_TABLE[yunyeonGan] || []) : [];
 
   const handlePalaceClick = (jiji: string) => {
@@ -84,7 +93,7 @@ export default function ZiweiGrid({ chartData }: Props) {
 
   const handleYunyeonModeClick = () => {
     if (viewMode === 'base') {
-      alert('대한을 먼저 선택해주세요.');
+      alert('대한을 먼저 선택해 주셔야 유년 명반을 분석할 수 있습니다.');
       return;
     }
     setViewMode('yunyeon');
@@ -92,7 +101,7 @@ export default function ZiweiGrid({ chartData }: Props) {
 
   const handleYunyeonSelect = (ynData: any) => {
     if (viewMode === 'base') {
-      alert('대한을 먼저 선택해주세요.');
+      alert('대한을 먼저 선택해 주셔야 유년 명반을 분석할 수 있습니다.');
       return;
     }
     setSelectedYunyeon(ynData);
@@ -121,7 +130,6 @@ export default function ZiweiGrid({ chartData }: Props) {
           else if (baseName === '천이') bgColor = '#E0F2FE';
           else if (baseName === '관록') bgColor = '#DCFCE7';
           else if (baseName === '재백') bgColor = '#F3E8FF';
-
           if (viewMode === 'daehan' && activeJiJi === jiji) bgColor = '#FDE047';
 
           const mainStars = data['성요배치']['십사정성'] || [];
@@ -134,34 +142,37 @@ export default function ZiweiGrid({ chartData }: Props) {
             const name = typeof s === 'string' ? s : s.명칭;
             const str = typeof s === 'string' ? '' : s.묘왕지;
 
-            let baseBadge = '', dhBadge = '', ynBadge = '';
-            if (baseSihwaStars[0] === name) baseBadge = '록';
-            if (baseSihwaStars[1] === name) baseBadge = '권';
-            if (baseSihwaStars[2] === name) baseBadge = '과';
-            if (baseSihwaStars[3] === name) baseBadge = '기';
+            let badgeHtml = null;
 
+            if (baseSihwaStars[0] === name) badgeHtml = <span className="bg-green-100 text-green-700 px-1 rounded ml-0.5 border border-green-300">록</span>;
+            if (baseSihwaStars[1] === name) badgeHtml = <span className="bg-blue-100 text-blue-700 px-1 rounded ml-0.5 border border-blue-300">권</span>;
+            if (baseSihwaStars[2] === name) badgeHtml = <span className="bg-purple-100 text-purple-700 px-1 rounded ml-0.5 border border-purple-300">과</span>;
+            if (baseSihwaStars[3] === name) badgeHtml = <span className="bg-red-100 text-red-700 px-1 rounded ml-0.5 border border-red-300 font-bold">기</span>;
+
+            let dhBadgeHtml = null;
             if ((viewMode === 'daehan' || viewMode === 'yunyeon') && daehanSihwaStars.length > 0) {
-              if (daehanSihwaStars[0] === name) dhBadge = '대록';
-              if (daehanSihwaStars[1] === name) dhBadge = '대권';
-              if (daehanSihwaStars[2] === name) dhBadge = '대과';
-              if (daehanSihwaStars[3] === name) dhBadge = '대기';
+              if (daehanSihwaStars[0] === name) dhBadgeHtml = <span className="bg-green-600 text-white px-1 rounded ml-0.5">대록</span>;
+              if (daehanSihwaStars[1] === name) dhBadgeHtml = <span className="bg-blue-600 text-white px-1 rounded ml-0.5">대권</span>;
+              if (daehanSihwaStars[2] === name) dhBadgeHtml = <span className="bg-purple-600 text-white px-1 rounded ml-0.5">대과</span>;
+              if (daehanSihwaStars[3] === name) dhBadgeHtml = <span className="bg-red-600 text-white px-1 rounded ml-0.5 font-bold">대기</span>;
             }
 
+            let ynBadgeHtml = null;
             if (viewMode === 'yunyeon' && yunyeonSihwaStars.length > 0) {
-              if (yunyeonSihwaStars[0] === name) ynBadge = '년록';
-              if (yunyeonSihwaStars[1] === name) ynBadge = '년권';
-              if (yunyeonSihwaStars[2] === name) ynBadge = '년과';
-              if (yunyeonSihwaStars[3] === name) ynBadge = '년기';
+              if (yunyeonSihwaStars[0] === name) ynBadgeHtml = <span className="bg-orange-500 text-white px-1 rounded ml-0.5">년록</span>;
+              if (yunyeonSihwaStars[1] === name) ynBadgeHtml = <span className="bg-sky-500 text-white px-1 rounded ml-0.5">년권</span>;
+              if (yunyeonSihwaStars[2] === name) ynBadgeHtml = <span className="bg-indigo-500 text-white px-1 rounded ml-0.5">년과</span>;
+              if (yunyeonSihwaStars[3] === name) ynBadgeHtml = <span className="bg-rose-600 text-white px-1 rounded ml-0.5 font-bold">년기</span>;
             }
 
             return (
-              <div key={name} className="flex items-center gap-0.5 whitespace-nowrap mb-0.5">
+              <div key={name} className="flex items-center whitespace-nowrap mb-0.5">
                 <span className={`${colorClass} ${isMain ? 'font-bold text-[13px]' : 'font-semibold text-[11px]'}`}>
                   {name}<span className="text-[10px] text-gray-500 font-normal ml-0.5">{str}</span>
                 </span>
-                {baseBadge && <span className="text-[10px] bg-blue-100 text-blue-800 px-0.5 rounded leading-none">{baseBadge}</span>}
-                {dhBadge && <span className="text-[10px] bg-green-100 text-green-800 px-0.5 rounded leading-none">{dhBadge}</span>}
-                {ynBadge && <span className="text-[10px] bg-orange-100 text-orange-800 px-0.5 rounded leading-none">{ynBadge}</span>}
+                {badgeHtml}
+                {dhBadgeHtml}
+                {ynBadgeHtml}
               </div>
             );
           };
@@ -186,8 +197,8 @@ export default function ZiweiGrid({ chartData }: Props) {
               <div className="flex justify-between items-end w-full mt-2">
                 <div className="flex flex-col font-bold text-[12px] tracking-tighter gap-0.5">
                   <div>
-                    <span className={baseName === '명궁' ? 'text-red-600 bg-yellow-100' : 'text-blue-900'}>{baseName}</span>
-                    {isShinGung && <span className="text-orange-600 ml-0.5">| 신</span>}
+                    <span className={baseName === '명궁' ? 'text-red-600 bg-yellow-100 px-0.5' : 'text-blue-900'}>{baseName}</span>
+                    {isShinGung && <span className="text-orange-600 ml-0.5">| 신궁</span>}
                   </div>
                   {(viewMode === 'daehan' || viewMode === 'yunyeon') && (
                     <div className="text-green-700 font-extrabold">{daehanPalaces[jiji]} (대)</div>
@@ -240,7 +251,7 @@ export default function ZiweiGrid({ chartData }: Props) {
             })}
           </div>
           {(viewMode === 'base' || viewMode === 'daehan') && (
-            <div className="mt-auto text-center font-bold text-[11px] text-blue-600 bg-blue-50 p-1 rounded animate-pulse">주변 12궁을 클릭하면 해당 궁의 상세 분석표가 나타납니다.</div>
+            <div className="mt-auto text-center font-bold text-[11px] text-blue-600 bg-blue-50 p-1 rounded animate-pulse">주변 12궁을 클릭하면 해당 궁의 상세 분석표가 연동됩니다.</div>
           )}
           {viewMode === 'yunyeon' && selectedYunyeon && (
             <div className="mt-auto text-center font-bold text-[11px] text-orange-600 bg-orange-50 p-1 rounded">현재 선택된 유년: {selectedYunyeon['해당년도']}년 ({selectedYunyeon['나이']}세)</div>
