@@ -89,7 +89,8 @@ export type FeatureType =
   | 'oheng'
   | 'solo_guide'
   | 'couple_guide'
-  | 'love_spot';
+  | 'love_spot'
+  | 'loving_season';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 
