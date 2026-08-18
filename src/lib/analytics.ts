@@ -90,7 +90,8 @@ export type FeatureType =
   | 'solo_guide'
   | 'couple_guide'
   | 'love_spot'
-  | 'loving_season';
+  | 'loving_season'
+  | 'shinsal_genius';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

@@ -42,4 +42,11 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #17479 | 10:02 AM | 🟣 | Comprehensive SEO optimization for 광필연구소 test pages | ~365 |
+
+### Aug 18, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #18019 | 2:07 PM | 🔴 | All TypeScript type errors resolved after post-deployment fixes | ~350 |
+| #18016 | 2:03 PM | ✅ | Committed home page visibility for three new test features | ~283 |
 </claude-mem-context>
