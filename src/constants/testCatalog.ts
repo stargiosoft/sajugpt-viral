@@ -222,7 +222,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     isNew: true,
     sajugptBadge: true,
     ready: true,
-    visibleOnHome: true,
+    visibleOnHome: false,
   },
   {
     id: 'ziwei-chart',
@@ -237,6 +237,6 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     isNew: true,
     sajugptBadge: true,
     ready: true,
-    visibleOnHome: true,
+    visibleOnHome: false,
   },
 ];
