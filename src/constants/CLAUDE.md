@@ -28,4 +28,18 @@
 | #15265 | 2:24 PM | 🔵 | Correct feature identified: oheng (인간 사용설명서) not night-manual | ~269 |
 | #15178 | 8:06 AM | 🟣 | Five Elements test theme system created | ~267 |
 | #15171 | 8:03 AM | 🔵 | Theme constants pattern for test features | ~373 |
+
+### Aug 4, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #15774 | 8:33 AM | 🟣 | 솔로탈출 지침서 결과 화면 카와이 핑크 테마 디자인 적용 | ~216 |
+| #15772 | " | 🔄 | Solo guide ResultHero component redesigned with card-style frame | ~406 |
+| #15771 | " | 🟣 | 솔로탈출 지침서 오성 아이콘 상수 추가 | ~50 |
+
+### Aug 12, 2026
+
+| ID | Time | T | Title | Read |
+|----|------|---|-------|------|
+| #17479 | 10:02 AM | 🟣 | Comprehensive SEO optimization for 광필연구소 test pages | ~365 |
 </claude-mem-context>
