@@ -8,26 +8,28 @@ import type { FeatureType } from '@/lib/analytics';
 
 const INITIAL_VISIBLE_COUNT = 5;
 
+// 밝은 배경용 라이트 테마
 const LIGHT_GRAY = {
   text: '#191F28',
   textSecondary: '#4E5968',
   textTertiary: '#7C8794',
   placeholder: '#B0B8C1',
-  divider: 'rgba(25, 31, 40, 0.06)',
+  divider: 'rgba(25, 31, 40, 0.08)',
   inputBg: 'rgb(244, 246, 247)',
   disabledBg: '#EDEFF2',
   heartIdle: '#C7CCD3',
 };
 
+// 어두운 배경용 다크 테마
 const DARK_GRAY = {
-  text: '#d5d5d5',
-  textSecondary: '#8e8e8e',
-  textTertiary: 'rgb(117, 117, 117)',
-  placeholder: '#6b6b6b',
-  divider: 'rgba(255, 255, 255, 0.08)',
-  inputBg: 'rgb(19, 19, 19)',
-  disabledBg: '#1c1c1c',
-  heartIdle: '#4a4a4a',
+  text: '#FFFFFF',
+  textSecondary: '#D1D5DB',
+  textTertiary: '#9CA3AF',
+  placeholder: '#8E8E93',
+  divider: 'rgba(255, 255, 255, 0.12)',
+  inputBg: 'rgba(255, 255, 255, 0.08)',
+  disabledBg: 'rgba(255, 255, 255, 0.15)',
+  heartIdle: '#636366',
 };
 
 const HEART_PATH = 'M21.5,4c-1.82,0-3.7.89-5.5,2.58-1.8-1.69-3.68-2.58-5.5-2.58-4.69,0-8.5,3.81-8.5,8.5,0,6.17,5.48,12.38,13.65,15.44.11.04.23.06.35.06s.24-.02.35-.06c8.16-3.06,13.65-9.26,13.65-15.44,0-4.69-3.81-8.5-8.5-8.5Z';
@@ -105,15 +107,17 @@ export default function CommentBoard({
     useCommentBoard(featureType, storageKey);
   const [burstIds, setBurstIds] = useState<Set<string>>(new Set());
 
+  // dark 여부에 따라 텍스트 및 기본 배경 색상 세트 결정
   const GRAY = {
     ...(dark ? DARK_GRAY : LIGHT_GRAY),
     ...(inputBg ? { inputBg } : {}),
     ...(disabledBg ? { disabledBg } : {}),
     ...(heartIdleColor ? { heartIdle: heartIdleColor } : {}),
   };
+
   const accentHover = submitButtonHoverBg ?? darkenHex(themeColor, 26);
-  const moreBg = tintHex(themeColor, 0.08);
-  const moreHoverBg = moreButtonHoverBg ?? tintHex(themeColor, 0.18);
+  const moreBg = tintHex(themeColor, dark ? 0.15 : 0.08);
+  const moreHoverBg = moreButtonHoverBg ?? tintHex(themeColor, dark ? 0.25 : 0.18);
 
   const handleLikeClick = (id: string) => {
     if (!likedIds.has(id)) {
@@ -132,11 +136,13 @@ export default function CommentBoard({
 
   return (
     <div style={{ fontFamily: "'Pretendard Variable', Pretendard, sans-serif" }}>
+      {/* 타이틀 영역 */}
       <p style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: '8px', paddingLeft: '2px' }}>
         <span style={{ fontSize: '17px', color: GRAY.text }}>댓글</span>
         <span style={{ fontSize: '17px', color: themeColor }}> {comments.length}</span>
       </p>
 
+      {/* 댓글 입력 창 */}
       <div className="flex items-center" style={{ gap: '8px', marginBottom: '20px' }}>
         <textarea
           value={input}
@@ -151,7 +157,7 @@ export default function CommentBoard({
             letterSpacing: '-0.2px',
             color: GRAY.text,
             background: GRAY.inputBg,
-            border: 'none',
+            border: dark ? '1px solid rgba(255, 255, 255, 0.15)' : 'none',
             borderRadius: '14px',
             padding: '12px 14px',
             outline: 'none',
@@ -170,6 +176,7 @@ export default function CommentBoard({
         </div>
       </div>
 
+      {/* 댓글 목록 */}
       <div className="flex flex-col">
         {loading && <p style={{ fontSize: '13px', color: GRAY.textSecondary, textAlign: 'center' }}>불러오는 중...</p>}
 

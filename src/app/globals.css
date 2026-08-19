@@ -73,6 +73,13 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'HSJandari';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/HSJandari.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @theme inline {
   --color-brand-primary: #7A38D8;
   --color-brand-dark: #6B2FC2;
@@ -90,6 +97,7 @@
   --color-grade-a: #4488FF;
   --color-grade-b: #44BB44;
   --font-do-hyeon: "Do Hyeon", sans-serif;
+  --font-jandari: "HSJandari", sans-serif;
 }
 
 @layer base {

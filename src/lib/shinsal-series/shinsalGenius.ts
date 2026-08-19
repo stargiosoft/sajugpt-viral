@@ -7,7 +7,7 @@ export async function generateGeniusResult(
   birthTime: string,
   gender: Gender
 ): Promise<ShinsalGeniusResult> {
-  return callEdgeFunction<ShinsalGeniusResult>('shinsal-genius', {
+  return callEdgeFunction<ShinsalGeniusResult>('analyze-shinsal-genius', {
     birthDate,
     birthTime,
     gender,

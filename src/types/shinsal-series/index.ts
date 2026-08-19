@@ -18,7 +18,7 @@ export interface ShinsalCondition {
 export interface ShinsalGeniusResult {
   resultId: string;
   saju: SajuPillars;
-  crazyScore: number; // 똘끼/천재성 지수 (0~100)
+  crazyScore: number;
   summary: string;
   conditions: ShinsalCondition[];
 }
