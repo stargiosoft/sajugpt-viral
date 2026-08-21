@@ -11,6 +11,7 @@ export interface ShinsalCondition {
   id: string;
   name: string;
   exists: boolean;
+  score: number;
   keyword: string;
   description: string;
 }

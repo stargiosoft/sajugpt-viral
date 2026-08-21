@@ -37,30 +37,30 @@ const SHORT_LABEL: Record<string, string> = {
 };
 
 const GENE_SUBTITLE: Record<string, string> = {
-  gwimun: '새벽 2시에 "우주 끝엔 뭐가 있을까" 진지하게 고민함',
-  hyeonchim: '틀린 말은 절대 안 하는데, 들으면 뼈가 와작코 내려앉음',
-  wonjin: '"쟤 왜 저러지?" 하다가 어느새 스며들어 있는 애증 봇',
-  gwaegang: '평소엔 보살인데 건드리면 그날로 바로 전투력 맥스 찍음',
-  siksang: '머릿속에 떠오른 걸 0.1초 만에 입 밖으로 내뱉어야 직성이 풀림',
-  pyeonin: '한 분야에 꽂히면 위키백과를 능가하는 박사급 인간 지식창고',
+  gwimun: '남들 다 스크롤 내릴 때 혼자 캡처해서 저장해두는 타입',
+  hyeonchim: '돌직구 던졌는데 왜 다들 얼음이 되는지 진심 이해 안 감',
+  wonjin: '"안 보고 싶다"면서 알림 뜨자마자 3초 만에 확인함',
+  gwaegang: '평소엔 순둥순둥, 선 넘으면 사람이 확 바뀜',
+  siksang: '아이디어 떠오르면 그 자리에서 바로 카톡 3줄 씀',
+  pyeonin: '위키 문서를 검수하고 있는 나 자신을 발견함',
 };
 
 const GENE_STORY: Record<string, string> = {
-  gwimun: '남들은 그냥 스쳐 지나가는 사소한 포인트에 엄청나게 과몰입합니다. 가끔은 이 상상력이 예술이나 창작으로 터져 나와 대박을 치지만, 혼자서 북치고 장구치다 영혼이 탈탈 털릴 때도 많아요.',
-  hyeonchim: '눈치 없어서 바른 소릴 하는 게 아니라, 상대의 급소를 찌르는 정확한 논리를 장착하고 있습니다. 돌려 말하는 재주가 없어서 본의 아니게 주변 사람들을 덜덜 떨게 만드는 재주가 있어요.',
-  wonjin: '상대방이 미치도록 좋다가도 갑자기 뚝 식어버리는 마성의 감정 롤러코스터를 타요. 이유 없이 상대의 행동이 거슬리다가도, 막상 없으면 또 신경 쓰이는 복잡미묘한 관계를 자주 만듭니다.',
-  gwaegang: '평소에는 유순하고 다정하게 잘 맞춰주지만, 내 피 같은 선을 넘거나 불합리한 상황을 마주하면 눈이 뒤집힙니다. 굽히고 들어가기보단 차라리 판을 갈아엎는 게 편한 상남자·상여자 재질.',
-  siksang: '아이디어가 솟구치면 가만히 앉아있질 못합니다. 생각한 즉시 행동으로 옮겨야 직성이 풀리고, 내 안에 있는 에너지를 밖으로 뿜어내야 비로소 살아있음을 느끼는 타입이에요.',
-  pyeonin: '대중적인 것보다 마이너하고 깊이 있는 장르에 환장합니다. 한번 파기 시작하면 끝장을 봐야 직성이 풀려서, 주변에서 "도대체 그걸 왜 알아?" 하는 소릴 자주 듣는 덕후 오브 덕후.',
+  gwimun: '남들은 그냥 스쳐 지나가는 단어나 표정 하나에 혼자 꽂혀서 몇 시간째 머릿속으로 온갖 시뮬레이션을 돌립니다. 꼬리에 꼬리를 무는 생각 때문에 밤잠을 설치기도 하지만, 그만큼 남들이 못 보는 사소한 디테일이나 반전 요소를 귀신같이 캐치해냅니다.',
+  hyeonchim: '나는 그저 상황을 있는 그대로 정확하게 정리해 준 것뿐인데, 정신 차려보면 주변 사람들이 조용해져 있습니다. 돌려 말해서 시간 끌 바엔 핵심만 깔끔하게 지적하는 게 훨씬 효율적이라고 느끼지만, 의도치 않게 상대의 뼈를 때려 당황하게 만들곤 합니다.',
+  wonjin: '좋아하는 사람이나 마음 쓰이는 대상이 생기면 이상하게 서운함과 거슬림이 동시에 올라옵니다. 분명 신경 끄고 싶은데 시선은 자꾸 가고, 차단하고 싶다가도 막상 답장이 오면 나도 모르게 안도하며 확인하는 복잡한 감정선을 겪습니다.',
+  gwaegang: '웬만한 일에는 "그럴 수 있지" 하고 넘어가지만, 내가 정해둔 선을 넘어오거나 말도 안 되는 억지를 부리면 그 즉시 스위치가 켜집니다. 가만히 참아주며 호구 되는 꼴을 절대 못 봐서, 차라리 판을 다 뒤엎더라도 할 말은 확실하게 끝까지 해냅니다.',
+  siksang: '머릿속에 좋은 아이디어나 하고 싶은 일이 떠오르면 손가락과 몸이 먼저 움직입니다. 생각만 하고 가만히 있으면 답답해서 미칠 것 같아 일단 저지르고 보는데, 덕분에 일 추진력 하나는 빠르지만 가끔 뒷수습하느라 바빠지기도 합니다.',
+  pyeonin: '하나에 필이 꽂히면 식음을 전폐하고 새벽까지 관련 정보, 후기, 논문, 나무위키까지 끝까지 파헤쳐야 직성이 풀립니다. 남들이 "굳이 그렇게까지 알아야 해?"라고 물어도, 나만의 깊은 지식고간을 채워나가는 그 순수한 몰입 자체에서 엄청난 쾌감을 느낍니다.',
 };
 
 const GENE_MEME: Record<string, string> = {
-  gwimun: '"도대체 평소에 머릿속으로 무슨 생각을 하는 거야...?"',
-  hyeonchim: '"아니, 내 말이 틀렸어? 사실만 말한 건데 왜 그래..."',
-  wonjin: '"좋아하는 건 맞는데, 솔직히 좀 피곤하기도 하고..."',
-  gwaegang: '"오늘 진짜 마지막 경고다. 더 이상은 나도 참아줄 생각이 없어."',
-  siksang: '"이거 완전 대박 아니냐? 일단 당장 질러보자고!"',
-  pyeonin: '"잠깐만요, 제가 그쪽 분야는 조금 잘 아는데 말이죠..."',
+  gwimun: '"한번 파고들기 시작하면 끝을 봐야 마음이 편해."',
+  hyeonchim: '"상처주려는 건 아니고, 상황을 사실대로 말한 것뿐이야."',
+  wonjin: '"좋아하긴 하는데, 가끔은 알 수 없이 신경이 쓰여."',
+  gwaegang: '"내 기준을 넘어선 순간부터는 타협할 생각 없어."',
+  siksang: '"좋은 생각이 떠올랐으니 바로 실행해 보자."',
+  pyeonin: '"이 분야는 내가 오랫동안 관심 있게 찾아본 내용이야."',
 };
 
 const SHINSAL_ORDER = ['gwimun', 'hyeonchim', 'wonjin', 'gwaegang', 'siksang', 'pyeonin'];
@@ -68,12 +68,11 @@ const SHINSAL_ORDER = ['gwimun', 'hyeonchim', 'wonjin', 'gwaegang', 'siksang', '
 const MONO = "'JetBrains Mono', 'Chakra Petch', 'Courier New', monospace";
 const MAIN_FONT = "var(--font-jandari), 'Pretendard', sans-serif";
 
-// 🌙 다크 테마 기반 색상 정의 (CommentBoard의 DARK_GRAY 감성 적용)
 const DARK_GRAY = {
   text: '#FFFFFF',
   textSecondary: '#D1D5DB',
   textTertiary: '#9CA3AF',
-  panel: 'rgba(20, 20, 24, 0.92)', // 어두운 배경에 맞는 모던 다크 패널
+  panel: 'rgba(20, 20, 24, 0.92)',
   cardBg: 'rgba(255, 255, 255, 0.04)',
   border: 'rgba(255, 255, 255, 0.12)',
 };
@@ -89,6 +88,10 @@ const CornerBrackets = ({ color, inset = 6 }: { color: string; inset?: number })
 
 const GeniusResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => {
   const { crazyScore, conditions } = result;
+
+  console.log('[GeniusResultCard] result:', result);
+  console.log('[GeniusResultCard] conditions:', conditions);
+
   const [viewMode, setViewMode] = useState<'summary' | 'detail'>('summary');
   const matched = conditions.filter((c) => c.exists);
   const [activeGeneId, setActiveGeneId] = useState<string>(matched.length > 0 ? matched[0].id : 'gwimun');
@@ -97,21 +100,17 @@ const GeniusResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => 
   const accent2 = '#FF24A9';
   const accentSoft = '#E024FF25';
 
-  const getShinsalScore = (id: string) => {
+  const shinsalScores = SHINSAL_ORDER.map((id) => {
     const found = conditions.find((c) => c.id === id);
-    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return found?.exists ? 75 + (hash % 21) : 20 + (hash % 35);
-  };
+    return {
+      id,
+      name: SHORT_LABEL[id],
+      score: found?.score ?? 0,
+      exists: found?.exists ?? false,
+    };
+});
 
-  const shinsalScores = SHINSAL_ORDER.map((id) => ({
-    id,
-    name: SHORT_LABEL[id],
-    score: getShinsalScore(id),
-    exists: conditions.find((c) => c.id === id)?.exists || false,
-  }));
-
-  const avgScore = Math.round(shinsalScores.reduce((sum, s) => sum + s.score, 0) / shinsalScores.length);
-
+console.log('[GeniusResultCard] shinsalScores:', shinsalScores);
   const center = 130;
   const radius = 92;
 
@@ -130,6 +129,7 @@ const GeniusResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => 
     }).join(' ');
 
   const currentGeneData = conditions.find((c) => c.id === activeGeneId);
+  console.log('[GeniusResultCard] activeGeneId:', activeGeneId, '/ score:', shinsalScores.find((s) => s.id === activeGeneId)?.score);
 
   return (
     <motion.div
@@ -366,9 +366,12 @@ const GeniusResultCard = forwardRef<HTMLDivElement, Props>(({ result }, ref) => 
                     <div style={{ fontFamily: MAIN_FONT, color: DARK_GRAY.textTertiary, fontSize: '13px' }}>항목을 누르면 상세 설명과 밈을 볼 수 있어요</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontFamily: MONO, fontSize: '9px', color: accent, letterSpacing: '1px' }}>AVERAGE</div>
+                    <div style={{ fontFamily: MONO, fontSize: '9px', color: accent, letterSpacing: '1px' }}>
+                      {SHORT_LABEL[activeGeneId]} SCORE
+                    </div>
                     <div style={{ fontFamily: MONO, fontSize: '30px', marginTop: '10px', fontWeight: 900, color: accent, textShadow: `0 0 10px ${accent}90`, lineHeight: 1 }}>
-                      {avgScore}점
+                      {/* activeGeneId 변경 시 실시간 반영 */}
+                      {shinsalScores.find((s) => s.id === activeGeneId)?.score ?? 0}점
                     </div>
                   </div>
                 </div>

@@ -1,4 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// 1. Deno 전역 객체 타입 정의
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+  serve: (handler: (req: Request) => Promise<Response> | Response) => void;
+};
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,14 +27,12 @@ const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
 };
 
-// 1. 지지 조합 체크 헬퍼
-function hasJiJiCombination(jijiList: string[], combinations: string[][]) {
-  return combinations.some(combo => 
+function countJiJiCombinations(jijiList: string[], combinations: string[][]) {
+  return combinations.filter(combo =>
     jijiList.includes(combo[0]) && jijiList.includes(combo[1])
-  );
+  ).length;
 }
 
-// 2. 정확한 십성(10신) 계산 엔진 (글자 2개 카운팅용)
 const getCharInfo = (c: string) => {
   const map: Record<string, {el: string, yy: string}> = {
     '甲': {el: 'wood', yy: '+'}, '乙': {el: 'wood', yy: '-'},
@@ -63,7 +67,6 @@ const getSipsung = (dm: string, target: string) => {
   return relMap[dmInfo.el][tInfo.el][sameYy ? 0 : 1];
 };
 
-// 3. 신살별 세련된 메타데이터 정의
 const CONDITION_META: Record<string, { name: string; keyword: string; description: string }> = {
   gwimun: {
     name: "귀문관살",
@@ -97,11 +100,10 @@ const CONDITION_META: Record<string, { name: string; keyword: string; descriptio
   }
 };
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
-
   try {
     const body = await req.json();
     const { birthDate, birthTime, gender } = body;
@@ -112,8 +114,6 @@ serve(async (req) => {
     if (!sajuApiKey) throw new Error('서버 설정 오류: 수파베이스에 SAJU_API_KEY가 없습니다.');
 
     const apiGender = gender === 'male' ? 'male' : 'female';
-    
-    // 생년월일 + 시간 12자리 변환
     const cleanBirthday = String(birthDate).replace(/[^0-9]/g, '');
     let apiBirthday = cleanBirthday;
 
@@ -127,6 +127,8 @@ serve(async (req) => {
       }
     }
     if (apiBirthday.length < 12) apiBirthday = apiBirthday.padEnd(12, '0');
+
+    const dateHash = apiBirthday.split('').reduce((acc, curr) => acc + curr.charCodeAt(0), 0);
 
     const sajuApiUrl = `https://service.stargio.co.kr:8400/StargioSaju?birthday=${apiBirthday}&lunar=false&gender=${apiGender}&apiKey=${sajuApiKey}`;
     
@@ -153,8 +155,7 @@ serve(async (req) => {
 
     if (!stargioRaw || !stargioRaw.사주) throw new Error("Stargio API에서 사주 데이터를 가져오지 못했습니다.");
 
-    const pillars = stargioRaw.사주; 
-    const allChars = pillars.join(''); 
+    const pillars = stargioRaw.사주; // [시주, 일주, 월주, 년주]
     const jijiList = pillars.map((p: string) => p[1]); 
 
     const sajuPillars = {
@@ -164,56 +165,78 @@ serve(async (req) => {
       year: pillars[3] || ""
     };
     
-    // 사주 8글자 내에서 식상, 편인 글자 수 직접 카운팅
     const dayMaster = sajuPillars.day[0]; 
     let siksangCount = 0;
     let pyeoninCount = 0;
-    let dmSkipped = false;
 
-    for (const char of allChars) {
-      if (char === dayMaster && !dmSkipped) {
-        dmSkipped = true; 
-        continue;
+    pillars.forEach((p: string, pIdx: number) => {
+      if (!p) return;
+      for (let cIdx = 0; cIdx < p.length; cIdx++) {
+        if (pIdx === 1 && cIdx === 0) continue;
+        
+        const char = p[cIdx];
+        const sipsung = getSipsung(dayMaster, char);
+        if (sipsung === '식신' || sipsung === '상관') siksangCount++;
+        if (sipsung === '편인') pyeoninCount++;
       }
-      const sipsung = getSipsung(dayMaster, char);
-      if (sipsung === '식신' || sipsung === '상관') siksangCount++;
-      if (sipsung === '편인') pyeoninCount++;
-    }
+    });
 
-    // 신살 체크 로직
     const gwimunCombos = [['子','酉'], ['丑','午'], ['寅','未'], ['卯','申'], ['辰','亥'], ['巳','戌']];
-    const hasGwimun = hasJiJiCombination(jijiList, gwimunCombos);
+    const gwimunCount = countJiJiCombinations(jijiList, gwimunCombos);
+
+    const allChars = pillars.join('');
     const hyeonchimChars = ['甲', '辛', '卯', '午', '申'];
-    const hasHyeonchim = hyeonchimChars.some(char => allChars.includes(char));
+    const hyeonchimCount = allChars.split('').filter((ch: string) => hyeonchimChars.includes(ch)).length;
+
     const wonjinCombos = [['子','未'], ['丑','午'], ['寅','酉'], ['卯','申'], ['辰','亥'], ['巳','戌']];
-    const hasWonjin = hasJiJiCombination(jijiList, wonjinCombos);
+    const wonjinCount = countJiJiCombinations(jijiList, wonjinCombos);
+
     const gwaegangBaekhoPillars = ['戊戌', '庚辰', '庚戌', '壬辰', '甲辰', '乙未', '丙戌', '丁丑', '戊辰', '壬戌', '癸丑'];
-    const hasGwaegang = pillars.some((pillar: string) => gwaegangBaekhoPillars.includes(pillar));
+    const gwaegangCount = pillars.filter((pillar: string) => gwaegangBaekhoPillars.includes(pillar)).length;
 
-    const hasSiksang = siksangCount >= 2;
-    const hasPyeonin = pyeoninCount >= 1;
-
-    const conditionStatus: Record<string, boolean> = {
-      gwimun: hasGwimun,
-      hyeonchim: hasHyeonchim,
-      wonjin: hasWonjin,
-      gwaegang: hasGwaegang,
-      siksang: hasSiksang,
-      pyeonin: hasPyeonin,
+    const conditionCounts: Record<string, number> = {
+      gwimun: gwimunCount,
+      hyeonchim: hyeonchimCount,
+      wonjin: wonjinCount,
+      gwaegang: gwaegangCount,
+      siksang: siksangCount,
+      pyeonin: pyeoninCount,
     };
 
-    // 6가지 조건 배열 생성
+    const SCORE_STEP: Record<string, number> = {
+      gwimun: 28,
+      hyeonchim: 18,
+      wonjin: 28,
+      gwaegang: 35,
+      siksang: 11,
+      pyeonin: 11,
+    };
+
+    function scoreFromCount(count: number, step: number, dateHash: number) {
+      const variation = (dateHash % 5) - 2;
+      return Math.min(98, Math.max(15, 20 + count * step + variation));
+    }
+
     const conditions = Object.entries(CONDITION_META).map(([id, meta]) => ({
       id,
       name: meta.name,
-      exists: conditionStatus[id] ?? false,
+      exists: (conditionCounts[id] ?? 0) > 0,
+      score: scoreFromCount(conditionCounts[id] ?? 0, SCORE_STEP[id] ?? 20, dateHash),
       keyword: meta.keyword,
       description: meta.description
     }));
 
-    // 점수 로직
-    const activeCount = conditions.filter(c => c.exists).length;
-    const crazyScore = Math.min(100, Math.max(0, activeCount * 17 + 10));
+    const activeConditions = conditions.filter(c => c.exists);
+    const bonusScore = (dateHash % 7) - 3;
+
+    let crazyScore = 15;
+
+    if (activeConditions.length > 0) {
+      const activeSum = activeConditions.reduce((sum, c) => sum + c.score, 0);
+      const activeAvg = activeSum / activeConditions.length;
+      const synergyBonus = activeConditions.length * 6;
+      crazyScore = Math.min(100, Math.max(15, Math.round(activeAvg + synergyBonus + bonusScore)));
+    }
 
     let summary = "아직은 꽤 정상입니다. 근데 방심하진 마세요.";
     if (crazyScore >= 85) {

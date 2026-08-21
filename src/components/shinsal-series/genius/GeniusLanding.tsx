@@ -32,7 +32,7 @@ export default function GeniusLanding({ onStart }: Props) {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="w-full" style={{ marginBottom: '24px' }}>
           <LandingCTAButton
             onClick={onStart}
-            label="내 천재 지수 확인하기"
+            label="내 괴짜 천재력 확인하기"
             background={C.accent}
             color={C.textOnAccent}
             hoverBackground={C.accentHover}
@@ -45,7 +45,7 @@ export default function GeniusLanding({ onStart }: Props) {
             shareContent={{
               featureType: 'shinsal_genius',
               testId: 'analyze-shinsal-genius',
-              title: '사주로 보는 내 안의 천재 지수',
+              title: '사주로 보는 내 안의 괴짜 천재력',
               description: '귀문관살부터 백호살까지! 내 사주 속 숨겨진 천재 스탯을 분석해 드려요.',
               shareUrl: `${origin}/shinsal-series/analyze-shinsal-genius`,
               imageUrl: `${origin}/shinsal-series/analyze-shinsal-genius/og-share.png`,
@@ -73,7 +73,7 @@ export default function GeniusLanding({ onStart }: Props) {
             <CommentBoard
               featureType="shinsal_genius"
               storageKey="genius_liked_comments"
-              placeholder="제 천재 지수는 몇 %인가요?"
+              placeholder="제 괴짜 천재 지수는 몇 %인가요?"
               themeColor={C.accent}
               inputBg={C.panelBg}
               disabledBg="#333"
