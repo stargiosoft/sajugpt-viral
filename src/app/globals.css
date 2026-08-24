@@ -80,6 +80,13 @@
   font-style: normal;
 }
 
+@font-face {
+      font-family: 'GabiaSolmi';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff') format('woff');
+      font-weight: normal;
+      font-display: swap;
+  }
+  
 @theme inline {
   --color-brand-primary: #7A38D8;
   --color-brand-dark: #6B2FC2;

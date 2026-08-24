@@ -91,7 +91,8 @@ export type FeatureType =
   | 'couple_guide'
   | 'love_spot'
   | 'loving_season'
-  | 'shinsal_genius';
+  | 'shinsal_genius'
+  | 'job_dna' ;
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 
