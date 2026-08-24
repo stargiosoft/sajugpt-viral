@@ -98,7 +98,22 @@ export default function GeniusClient() {
     setStep('analyzing');
     setError(null);
 
-    const effectiveTime = unknownTime ? '모름' : birthTime;
+    let formattedTime = birthTime;
+  
+    if (!unknownTime && birthTime) {
+      // 예: "14:30" 형태를 "오후 02:30" 형태로 안전하게 변환하는 로직 (필요시)
+      const timeParts = birthTime.match(/(\d{1,2}):(\d{2})/);
+      if (timeParts && !birthTime.includes('오전') && !birthTime.includes('오후')) {
+        let h = parseInt(timeParts[1], 10);
+        const m = timeParts[2];
+        const period = h >= 12 ? '오후' : '오전';
+        if (h > 12) h -= 12;
+        if (h === 0) h = 12;
+        formattedTime = `${period} ${String(h).padStart(2, '0')}:${m}`;
+      }
+    }
+
+    const effectiveTime = unknownTime ? '모름' : formattedTime;
 
     try {
       const generated = await generateGeniusResult(birthDate, effectiveTime, gender);
