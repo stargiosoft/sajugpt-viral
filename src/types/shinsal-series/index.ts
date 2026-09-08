@@ -1,4 +1,4 @@
-export type ShinsalStep = 'landing' | 'input' | 'analyzing' | 'result';
+export type SkillStep = 'landing' | 'input' | 'analyzing' | 'result';
 
 export interface SajuPillars {
   year: string;

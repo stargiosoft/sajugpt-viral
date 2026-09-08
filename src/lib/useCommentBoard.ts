@@ -21,9 +21,15 @@ export function anonTag(): string {
   return '익명';
 }
 
-// themeColor 하나로 등록 버튼 hover / 더보기 버튼 배경을 자동 파생 — 각 테스트가 색상을 일일이 고르지 않아도 되게
 export function darkenHex(hex: string, amount: number): string {
-  const clean = hex.replace('#', '');
+  // undefined / null / 문자열이 아닌 경우 기본값(#8B5FC7) 지정
+  const safeHex = typeof hex === 'string' && hex ? hex : '#8B5FC7';
+  const clean = safeHex.replace('#', '');
+  
+  if (clean.length < 6) {
+    return 'rgb(139, 95, 199)';
+  }
+
   const r = Math.max(0, parseInt(clean.slice(0, 2), 16) - amount);
   const g = Math.max(0, parseInt(clean.slice(2, 4), 16) - amount);
   const b = Math.max(0, parseInt(clean.slice(4, 6), 16) - amount);
@@ -31,7 +37,13 @@ export function darkenHex(hex: string, amount: number): string {
 }
 
 export function tintHex(hex: string, opacity: number): string {
-  const clean = hex.replace('#', '');
+  const safeHex = typeof hex === 'string' && hex ? hex : '#8B5FC7';
+  const clean = safeHex.replace('#', '');
+
+  if (clean.length < 6) {
+    return `rgba(139, 95, 199, ${opacity})`;
+  }
+
   const r = parseInt(clean.slice(0, 2), 16);
   const g = parseInt(clean.slice(2, 4), 16);
   const b = parseInt(clean.slice(4, 6), 16);
@@ -51,7 +63,7 @@ function saveLikedSet(storageKey: string, set: Set<string>) {
   window.localStorage.setItem(storageKey, JSON.stringify([...set]));
 }
 
-// 댓글 게시판 공용 로직 — 테스트별로 featureType/storageKey만 넘기면 조회·등록·좋아요 상태를 그대로 재사용
+// 댓글 게시판 공용 로직
 export function useCommentBoard(featureType: FeatureType, storageKey: string) {
   const [comments, setComments] = useState<CommentEntry[]>([]);
   const [loading, setLoading] = useState(true);
