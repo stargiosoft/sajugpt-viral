@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import LandingCTAButton from '@/components/LandingCTAButton';
 import { ZIWEI_PALETTE as C } from '@/lib/ziwei-chart/theme';
 
@@ -15,10 +16,16 @@ export default function ZiweiLanding({ onStart }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="w-full flex items-center justify-center"
+        className="w-full relative z-10 flex items-center justify-center"
         style={{ aspectRatio: '1448 / 1086', backgroundColor: '#E5E7EB', position: 'relative' }}
       >
-        <p style={{ color: '#6B7280', fontSize: '16px', fontWeight: 600 }}>메인 썸네일 이미지 영역</p>
+        <Image
+          src="/ziwei-chart/main-thumbnail.png" 
+          alt="메인 썸네일"
+          fill
+          priority
+          className="object-cover"
+        />
       </motion.div>
 
       <div className="w-full flex flex-col items-center" style={{ padding: '40px 16px 0' }}>
@@ -34,7 +41,11 @@ export default function ZiweiLanding({ onStart }: Props) {
             background={C.primary}
             color="#FFFFFF"
             hoverBackground="#5A26A6"
-            textStyle={{ fontWeight: 700, fontSize: '16px' }}
+            textStyle={{ 
+              fontFamily: 'JoseonLogo, JoseonGulim, serif',
+              fontWeight: 700, 
+              fontSize: '16px' 
+            }}
           />
         </motion.div>
       </div>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: '나의 운명을 결정짓는 12궁과 별자리를 확인해보세요.',
     images: [
       {
-        url: '/money-timeline/og-share.png', // 추후 자미두수 전용 썸네일로 교체
+        url: '/ziwei-chart/main-thumbnail.png', 
         width: 1200,
         height: 600,
       },

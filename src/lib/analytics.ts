@@ -93,7 +93,8 @@ export type FeatureType =
   | 'loving_season'
   | 'shinsal_genius'
   | 'shinsal_skill'
-  | 'job_dna' ;
+  | 'job_dna' 
+  | 'gwiin_map' ; 
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 

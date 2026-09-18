@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ZiweiDetailTable from './ZiweiDetailTable';
 
 interface Props {
@@ -8,14 +8,8 @@ interface Props {
 }
 
 const JIJI_LIST = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-const PALACE_ORDER_DISPLAY = ['巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑', '寅', '卯', '辰'];
+const PALACE_ORDER_CIRCLE = ['午', '未', '申', '酉', '戌', '亥', '子', '丑', '寅', '卯', '辰', '巳'];
 const PALACE_NAMES = ['명궁', '형제', '부처', '자녀', '재백', '질액', '천이', '노복', '관록', '전택', '복덕', '부모'];
-
-const GRID_AREAS: Record<string, string> = {
-  '巳': '1 / 1 / 2 / 2', '午': '1 / 2 / 2 / 3', '未': '1 / 3 / 2 / 4', '申': '1 / 4 / 2 / 5',
-  '酉': '2 / 4 / 3 / 5', '戌': '3 / 4 / 4 / 5', '亥': '4 / 4 / 5 / 5', '子': '4 / 3 / 5 / 4',
-  '丑': '4 / 2 / 5 / 3', '寅': '4 / 1 / 5 / 2', '卯': '3 / 1 / 4 / 2', '辰': '2 / 1 / 3 / 2'
-};
 
 const FOUR_HWA_TABLE: Record<string, string[]> = {
   '甲': ['염정', '파군', '무곡', '태양'], '乙': ['천기', '천량', '자미', '태음'],
@@ -24,6 +18,8 @@ const FOUR_HWA_TABLE: Record<string, string[]> = {
   '庚': ['태양', '무곡', '태음', '천동'], '辛': ['거문', '태양', '문곡', '문창'],
   '壬': ['천량', '자미', '좌보', '무곡'], '癸': ['파군', '거문', '태음', '탐랑'],
 };
+
+const BACKGROUND_IMAGE_URL = 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1600&auto=format&fit=crop';
 
 function getDynamicPalaces(baseJiJi: string): Record<string, string> {
   const idx = JIJI_LIST.indexOf(baseJiJi);
@@ -45,6 +41,31 @@ function extractGan(str: string): string {
     return krToHj[krMatch[0]];
   }
   return '甲';
+}
+
+function describeArc(x: number, y: number, innerRadius: number, outerRadius: number, startAngle: number, endAngle: number) {
+  const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
+    const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+    return {
+      x: centerX + radius * Math.cos(angleInRadians),
+      y: centerY + radius * Math.sin(angleInRadians)
+    };
+  };
+
+  const start = polarToCartesian(x, y, outerRadius, endAngle);
+  const end = polarToCartesian(x, y, outerRadius, startAngle);
+  const startInner = polarToCartesian(x, y, innerRadius, endAngle);
+  const endInner = polarToCartesian(x, y, innerRadius, startAngle);
+
+  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+
+  return [
+    'M', start.x, start.y,
+    'A', outerRadius, outerRadius, 0, largeArcFlag, 0, end.x, end.y,
+    'L', endInner.x, endInner.y,
+    'A', innerRadius, innerRadius, 0, largeArcFlag, 1, startInner.x, startInner.y,
+    'Z'
+  ].join(' ');
 }
 
 export default function ZiweiGrid({ chartData }: Props) {
@@ -102,160 +123,212 @@ export default function ZiweiGrid({ chartData }: Props) {
     setViewMode('yunyeon');
   };
 
+  const SIZE = 850;
+  const CENTER = SIZE / 2;
+  const OUTER_RADIUS = 412;
+  const INNER_RADIUS = 252; 
+
   return (
-    <div className="w-full max-w-[900px] mx-auto text-xs" style={{ fontFamily: "'Malgun Gothic', 'Dotum', sans-serif" }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gridTemplateRows: 'repeat(4, minmax(145px, auto))', backgroundColor: '#000', border: '1px solid #000', gap: '1px' }}>
-        {PALACE_ORDER_DISPLAY.map((jiji) => {
-          const data = gungData[jiji];
-          if (!data) return null;
+    <div className="w-full max-w-220 mx-auto text-xs p-2 sm:p-6 bg-[#08090C] rounded-2xl sm:rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-[#2A241A]" style={{ fontFamily: "'JoseonGulim', sans-serif" }}>
+      <div className="relative isolate w-full aspect-square flex items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-black">
+        
+        <div 
+          className="absolute inset-0 bg-cover bg-center z-0 scale-105" 
+          style={{ backgroundImage: `url('${BACKGROUND_IMAGE_URL}')` }}
+        />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-0" />
 
-          const baseName = basePalaces[jiji];
-          const daehanName = daehanPalaces[jiji];
-          const yunyeonName = yunyeonPalaces[jiji];
-          const isShinGung = data['궁_속성']['신궁_포함여부'] === 'true';
-          const ageRange = data['대한_연령대'];
+        {/* SVG 차트 레이어 */}
+        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full h-full absolute inset-0 z-0">
+          <defs>
+            <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#E6C687" />
+              <stop offset="50%" stopColor="#B58E3D" />
+              <stop offset="100%" stopColor="#7D5E1E" />
+            </linearGradient>
+          </defs>
 
-          // 모드에 따른 삼방사정 동적 색상 반영
-          let bgColor = '#FFFFFF';
-          if (viewMode === 'base') {
-            if (baseName === '명궁') bgColor = '#FEF08A';
-            else if (baseName === '천이') bgColor = '#E0F2FE';
-            else if (baseName === '관록') bgColor = '#DCFCE7';
-            else if (baseName === '재백') bgColor = '#F3E8FF';
-          } else if (viewMode === 'daehan') {
-            if (daehanName === '명궁') bgColor = '#FDE047'; 
-            else if (daehanName === '천이') bgColor = '#BAE6FD';
-            else if (daehanName === '관록') bgColor = '#BBF7D0';
-            else if (daehanName === '재백') bgColor = '#E9D5FF';
-          } else if (viewMode === 'yunyeon') {
-            if (yunyeonName === '명궁') bgColor = '#FDBA74'; 
-            else if (yunyeonName === '천이') bgColor = '#FED7AA';
-            else if (yunyeonName === '관록') bgColor = '#FEE2E2';
-            else if (yunyeonName === '재백') bgColor = '#FFEDD5';
-          }
+          {/* 천문도 궤도 링 장식 */}
+          <circle cx={CENTER} cy={CENTER} r={OUTER_RADIUS + 8} fill="none" stroke="url(#goldGlow)" strokeWidth="1" opacity="0.35" />
+          <circle cx={CENTER} cy={CENTER} r={OUTER_RADIUS + 2} fill="none" stroke="#D4AF37" strokeWidth="1.2" opacity="0.6" />
+          <circle cx={CENTER} cy={CENTER} r={INNER_RADIUS - 2} fill="none" stroke="#D4AF37" strokeWidth="1.2" opacity="0.5" />
+          <circle cx={CENTER} cy={CENTER} r={INNER_RADIUS - 8} fill="none" stroke="url(#goldGlow)" strokeWidth="0.8" strokeDasharray="4 4" opacity="0.3" />
 
-          const mainStars = data['성요배치']['십사정성'] || [];
-          const goodStars = data['성요배치']['보좌길성'] || [];
-          const badStars = data['성요배치']['살성_및_형요'] || [];
-          const shinsal = data['성요배치']['4대_십이신살'];
-          const minorStars = [...(data['성요배치']['기타_잡성']['도화성'] || []), ...(data['성요배치']['기타_잡성']['제길성'] || []), ...(data['성요배치']['기타_잡성']['제흉성'] || []), ...(data['성요배치']['기타_잡성']['공망성계'] || [])];
+          {/* 12궁 부채꼴 섹션 */}
+          {PALACE_ORDER_CIRCLE.map((jiji, idx) => {
+            const startAngle = idx * 30 - 15;
+            const endAngle = startAngle + 30;
+            const data = gungData[jiji];
+            if (!data) return null;
 
-          const renderStar = (s: any, colorClass: string, isMain: boolean = false) => {
-            const name = typeof s === 'string' ? s : s.명칭;
-            const str = typeof s === 'string' ? '' : s.묘왕지;
+            const baseName = basePalaces[jiji];
+            const daehanName = daehanPalaces[jiji];
+            const yunyeonName = yunyeonPalaces[jiji];
+            const activeName = viewMode === 'base' ? baseName : viewMode === 'daehan' ? daehanName : yunyeonName;
 
-            let baseBadge = '', dhBadge = '', ynBadge = '';
-            if (baseSihwaStars[0] === name) baseBadge = '록';
-            if (baseSihwaStars[1] === name) baseBadge = '권';
-            if (baseSihwaStars[2] === name) baseBadge = '과';
-            if (baseSihwaStars[3] === name) baseBadge = '기';
+            let fillColor = 'rgba(10, 12, 19, 0.75)';
+            let strokeColor = '#221E18';
 
-            if ((viewMode === 'daehan' || viewMode === 'yunyeon') && daehanSihwaStars.length > 0) {
-              if (daehanSihwaStars[0] === name) dhBadge = '대록';
-              if (daehanSihwaStars[1] === name) dhBadge = '대권';
-              if (daehanSihwaStars[2] === name) dhBadge = '대과';
-              if (daehanSihwaStars[3] === name) dhBadge = '대기';
-            }
+            if (activeName === '명궁') { fillColor = 'rgba(34, 21, 19, 0.85)'; strokeColor = '#E5B84B'; }
+            else if (activeName === '천이') { fillColor = 'rgba(13, 30, 32, 0.85)'; strokeColor = '#2DD4BF'; }
+            else if (activeName === '관록') { fillColor = 'rgba(23, 19, 36, 0.85)'; strokeColor = '#C084FC'; }
+            else if (activeName === '재백') { fillColor = 'rgba(30, 27, 16, 0.85)'; strokeColor = '#F59E0B'; }
 
-            if (viewMode === 'yunyeon' && yunyeonSihwaStars.length > 0) {
-              if (yunyeonSihwaStars[0] === name) ynBadge = '년록';
-              if (yunyeonSihwaStars[1] === name) ynBadge = '년권';
-              if (yunyeonSihwaStars[2] === name) ynBadge = '년과';
-              if (yunyeonSihwaStars[3] === name) ynBadge = '년기';
-            }
+            const pathData = describeArc(CENTER, CENTER, INNER_RADIUS, OUTER_RADIUS, startAngle, endAngle);
+            const isSelected = selectedDaehanJiJi === jiji && (viewMode === 'base' || viewMode === 'daehan');
 
             return (
-              <div key={name} className="flex items-center whitespace-nowrap mb-0.5">
-                <span className={`${colorClass} ${isMain ? 'font-bold text-[13px]' : 'font-semibold text-[11px]'}`}>
-                  {name}<span className="text-[10px] text-gray-500 font-normal ml-0.5">{str}</span>
-                </span>
-                {baseBadge && <span className="text-[10px] bg-blue-600 text-white font-bold px-1 ml-1 rounded leading-none">{baseBadge}</span>}
-                {dhBadge && <span className="text-[10px] bg-green-600 text-white font-bold px-1 ml-0.5 rounded leading-none">{dhBadge}</span>}
-                {ynBadge && <span className="text-[10px] bg-orange-500 text-white font-bold px-1 ml-0.5 rounded leading-none">{ynBadge}</span>}
-              </div>
+              <path
+                key={jiji}
+                d={pathData}
+                fill={fillColor}
+                stroke={isSelected ? '#F5D061' : strokeColor}
+                strokeWidth={isSelected ? '2.5' : '1'}
+                className="transition-all duration-300 hover:fill-opacity-90 cursor-pointer"
+                onClick={() => handlePalaceClick(jiji)}
+              />
             );
-          };
+          })}
+        </svg>
 
-          return (
-            <div key={jiji} onClick={() => handlePalaceClick(jiji)} style={{ gridArea: GRID_AREAS[jiji], backgroundColor: bgColor, cursor: (viewMode === 'base' || viewMode === 'daehan') ? 'pointer' : 'default' }} className="relative flex flex-col justify-between p-1 hover:bg-gray-100 transition-colors">
-              <div className="flex justify-between items-start w-full">
-                <div className="flex flex-col gap-0 w-[65%]">
-                  {mainStars.map((s: any) => renderStar(s, 'text-fuchsia-700', true))}
-                  {goodStars.map((s: any) => renderStar(s, 'text-blue-600'))}
-                  {badStars.map((s: any) => renderStar(s, 'text-red-600'))}
-                  <div className="flex flex-wrap gap-x-1 mt-1 text-[10px] text-gray-700 font-medium leading-none">
-                    {minorStars.map((s: string, i: number) => <span key={'min'+i}>{s}</span>)}
+        {/* 12궁 정보 콘텐츠 층 */}
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          {PALACE_ORDER_CIRCLE.map((jiji, idx) => {
+            const angle = idx * 30;
+            const rad = ((angle - 90) * Math.PI) / 180;
+            const midRadius = (INNER_RADIUS + OUTER_RADIUS) / 2;
+            const x = CENTER + midRadius * Math.cos(rad);
+            const y = CENTER + midRadius * Math.sin(rad);
+
+            const data = gungData[jiji];
+            if (!data) return null;
+
+            const baseName = basePalaces[jiji];
+            const daehanName = daehanPalaces[jiji];
+            const yunyeonName = yunyeonPalaces[jiji];
+            const mainStars = data['성요배치']['십사정성'] || [];
+            const goodStars = data['성요배치']['보좌길성'] || [];
+            const badStars = data['성요배치']['살성_및_형요'] || [];
+
+            const isSelected = selectedDaehanJiJi === jiji && (viewMode === 'base' || viewMode === 'daehan');
+
+            return (
+              <div
+                key={'content-' + jiji}
+                className={`absolute pointer-events-auto flex flex-col items-center justify-between text-center p-0.5 sm:p-1.5 w-[16%] h-[15%] max-w-27.5 max-h-26.25 -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-200 overflow-hidden ${isSelected ? 'scale-105' : 'hover:scale-102'}`}
+                style={{ left: `${(x / SIZE) * 100}%`, top: `${(y / SIZE) * 100}%` }}
+                onClick={() => handlePalaceClick(jiji)}
+              >
+                {/* 상단 궁 명칭 & 지지 */}
+                <div className="flex items-center justify-center gap-0.5 sm:gap-1 border-b border-[#D4AF37]/20 pb-0.5 w-full">
+                  <span className="font-bold text-[9px] sm:text-[11px] md:text-[12px] text-[#F3D082] tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] truncate">
+                    {viewMode === 'base' ? baseName : viewMode === 'daehan' ? daehanName : yunyeonName}
+                  </span>
+                  <span className="text-[7.5px] sm:text-[9px] md:text-[10px] text-[#B58E3D] font-mono shrink-0">
+                    ({data['궁위간지']})
+                  </span>
+                </div>
+
+                {/* 중앙 주요 별(성요) 영역 */}
+                <div className="flex flex-col items-center justify-center gap-0.5 my-auto w-full px-0.5">
+                  {/* 주성 (십사정성) */}
+                  <div className="flex flex-wrap justify-center gap-x-0.5 sm:gap-x-1 w-full">
+                    {mainStars.length > 0 ? (
+                      mainStars.map((s: any) => (
+                        <span key={s.명칭 || s} className="font-bold text-[8.5px] sm:text-[10px] md:text-[11px] text-[#FFF3D1] drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] whitespace-nowrap">
+                          {s.명칭 || s}
+                        </span>
+                      ))
+                    ) : (
+                      /* 공궁(별이 없을 경우) 표시 */
+                      <span className="text-[8px] sm:text-[9.5px] text-[#71717A] italic opacity-75 font-sans">(공궁)</span>
+                    )}
+                  </div>
+
+                  {/* 길성 & 살성 */}
+                  <div className="flex flex-wrap justify-center gap-x-0.5 sm:gap-x-1 gap-y-0.5 text-[7px] sm:text-[8.5px] md:text-[9px] leading-tight mt-0.5 w-full">
+                    {goodStars.map((s: any) => (
+                      <span key={s.명칭 || s} className="text-[#34D399] font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] whitespace-nowrap">{s.명칭 || s}</span>
+                    ))}
+                    {badStars.map((s: any) => (
+                      <span key={s.명칭 || s} className="text-[#F87171] font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] whitespace-nowrap">{s.명칭 || s}</span>
+                    ))}
                   </div>
                 </div>
-                <div className="flex flex-col items-end text-right w-[35%] text-[10px] text-gray-500 leading-tight gap-0.5">
-                  {shinsal['장전십이신']?.map((s: string, i: number) => <span key={'s1'+i}>{s}</span>)}
-                  {shinsal['박사십이신']?.map((s: string, i: number) => <span key={'s2'+i}>{s}</span>)}
-                  {shinsal['태세십이신']?.map((s: string, i: number) => <span key={'s3'+i}>{s}</span>)}
-                </div>
-              </div>
-              <div className="flex justify-between items-end w-full mt-2 border-t border-gray-200 pt-1">
-                <div className="flex flex-col font-bold text-[12px] tracking-tighter gap-0.5">
-                  {viewMode === 'base' ? (
-                    <div className={baseName === '명궁' ? 'text-red-600 bg-yellow-100 px-0.5 text-[13px]' : 'text-blue-900 text-[13px]'}>
-                      {baseName} {isShinGung && <span className="text-orange-600 ml-0.5">| 신궁</span>}
-                    </div>
-                  ) : viewMode === 'daehan' ? (
-                    <>
-                      <div className="text-green-700 font-extrabold text-[13px]">{daehanName} (대)</div>
-                      <div className="text-gray-500 font-normal">선천 {baseName} {isShinGung && '| 신'}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-orange-700 font-extrabold text-[13px]">{yunyeonName} (년)</div>
-                      <div className="text-gray-500 font-normal">선천 {baseName} {isShinGung && '| 신'}</div>
-                    </>
-                  )}
-                </div>
-                <div className="flex flex-col items-end leading-none text-right gap-1">
-                  <span className="text-[11px] text-red-600 font-bold">{data['궁위간지']}</span>
-                  {(viewMode === 'daehan' || viewMode === 'yunyeon') && ageRange && (
-                    <span className="text-[11px] font-bold text-gray-800 bg-gray-100 px-1 rounded">{ageRange[0]}~{ageRange[1]}세</span>
-                  )}
-                  <span className="text-[10px] text-gray-600">{shinsal['장생십이신']?.[0]}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
 
-        <div className="flex flex-col p-3 bg-gray-50 z-20" style={{ gridArea: '2 / 2 / 4 / 4' }}>
-          <div className="flex gap-2 mb-3 justify-center border-b pb-2">
-            <button onClick={() => { setViewMode('base'); setSelectedDaehanJiJi(baseMyungGungJiJi); }} className={`px-4 py-1.5 text-[13px] font-bold rounded border ${viewMode === 'base' ? 'bg-blue-600 text-white border-blue-700 shadow-inner' : 'bg-white text-gray-700 hover:bg-gray-100'}`}>선천명반</button>
-            <button onClick={() => { setViewMode('daehan'); setSelectedDaehanJiJi(baseMyungGungJiJi); }} className={`px-4 py-1.5 text-[13px] font-bold rounded border ${viewMode === 'daehan' ? 'bg-green-600 text-white border-green-700 shadow-inner' : 'bg-white text-gray-700 hover:bg-gray-100'}`}>대한 선택</button>
-            <button onClick={handleYunyeonModeClick} className={`px-4 py-1.5 text-[13px] font-bold rounded border ${viewMode === 'yunyeon' ? 'bg-orange-500 text-white border-orange-600 shadow-inner' : 'bg-white text-gray-700 hover:bg-gray-100'}`}>유년 선택</button>
+                {/* 하단 대한 연령대 */}
+                {data['대한_연령대'] && (
+                  <span className="text-[7px] sm:text-[8px] md:text-[8.5px] text-[#A1A1AA] bg-[#121319]/90 px-1 sm:px-1.5 py-0.2 rounded-full border border-[#27272A] font-mono shadow-sm shrink-0 whitespace-nowrap">
+                    {data['대한_연령대'][0]}~{data['대한_연령대'][1]}세
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 중앙 중궁 (Central Hub) */}
+        <div 
+          className="absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#08090E]/90 backdrop-blur-md border border-[#D4AF37]/40 shadow-[0_0_40px_rgba(0,0,0,0.9)] flex flex-col items-center justify-center p-2 sm:p-4 text-center overflow-hidden"
+          style={{ 
+            width: `${((INNER_RADIUS * 2) / SIZE) * 100 - 2}%`, 
+            height: `${((INNER_RADIUS * 2) / SIZE) * 100 - 2}%` 
+          }}
+        >
+          {/* 세그먼트 탭 버튼 */}
+          <div className="flex bg-[#12141D]/90 p-0.5 sm:p-1 rounded-lg sm:rounded-xl border border-[#2A2D3D] mb-1 sm:mb-2.5">
+            <button 
+              onClick={() => { setViewMode('base'); setSelectedDaehanJiJi(baseMyungGungJiJi); }} 
+              className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[8.5px] sm:text-[10.5px] font-medium rounded-md sm:rounded-lg transition-all ${viewMode === 'base' ? 'bg-linear-to-r from-[#D4AF37] to-[#AA822A] text-[#08090E] font-bold shadow-md' : 'text-[#8E93A4] hover:text-white'}`}
+            >
+              선천
+            </button>
+            <button 
+              onClick={() => { setViewMode('daehan'); setSelectedDaehanJiJi(baseMyungGungJiJi); }} 
+              className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[8.5px] sm:text-[10.5px] font-medium rounded-md sm:rounded-lg transition-all ${viewMode === 'daehan' ? 'bg-linear-to-r from-[#10B981] to-[#059669] text-white font-bold shadow-md' : 'text-[#8E93A4] hover:text-white'}`}
+            >
+              대한
+            </button>
+            <button 
+              onClick={handleYunyeonModeClick} 
+              className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[8.5px] sm:text-[10.5px] font-medium rounded-md sm:rounded-lg transition-all ${viewMode === 'yunyeon' ? 'bg-linear-to-r from-[#F97316] to-[#EA580C] text-white font-bold shadow-md' : 'text-[#8E93A4] hover:text-white'}`}
+            >
+              유년
+            </button>
           </div>
-          <div className="flex justify-between items-start text-[12px] text-gray-700 px-2">
-            <div>
-              <p className="font-bold text-black mb-1">{basicInfo['성별']} / {basicInfo['나이']}세</p>
-              <p>양력: {basicInfo['양력생일'].join('.')}</p>
-              <p>음력: {basicInfo['음력생일'].slice(0,3).join('.')} ({basicInfo['음력생일'][3]})</p>
+
+          {/* 기본 프로필 정보 */}
+          <div className="flex justify-between items-center w-[90%] text-[8.5px] sm:text-[11px] text-[#E4E4E7] border-b border-[#27272A] pb-1 sm:pb-2 my-0.5">
+            <div className="text-left leading-tight">
+              <p className="font-bold text-[#F3C66B] text-[10px] sm:text-[13px]">{basicInfo['성별']} / {basicInfo['나이']}세</p>
+              <p className="text-[7.5px] sm:text-[9.5px] text-[#8E93A4] font-mono">양력 {basicInfo['양력생일'].join('.')}</p>
             </div>
-            <div className="text-right">
-              <p className="font-bold text-blue-800 mb-1">{basicInfo['오행국']} / {basicInfo['납음오행']}</p>
-              <p>명주: {basicInfo['명주성']}, 신주: {basicInfo['신주성']}</p>
+            <div className="text-right leading-tight">
+              <p className="font-bold text-[#E5B84B] text-[9.5px] sm:text-[12px]">{basicInfo['오행국']}</p>
+              <p className="text-[7.5px] sm:text-[9.5px] text-[#8E93A4]">
+                명주 <span className="text-[#F3C66B] font-semibold">{basicInfo['명주성']}</span> · 신주 <span className="text-[#F3C66B] font-semibold">{basicInfo['신주성']}</span>
+              </p>
             </div>
           </div>
-          <div className="flex justify-center gap-6 mt-4">
-            {[saju['시'], saju['일'], saju['월'], saju['년']].map((pillar, idx) => {
-              if (!pillar) return null;
-              const hanja = pillar.match(/\((.*?)\)/)?.[1] || pillar;
-              const title = ['시주', '일주', '월주', '년주'][idx];
+
+          {/* 사주 4주 */}
+          <div className="grid grid-cols-4 gap-1 sm:gap-1.5 my-1 sm:my-2 w-[90%]">
+            {[saju['시'], saju['일'], saju['월'], saju['년']].map((p, i) => {
+              const h = p?.match(/\((.*?)\)/)?.[1] || p;
+              const title = ['시', '일', '월', '년'][i];
               return (
-                <div key={idx} className="flex flex-col items-center">
-                  <span className="text-[11px] text-gray-500 mb-1">{title}</span>
-                  <span className="text-lg font-bold text-gray-900 leading-tight">{hanja[0]}</span>
-                  <span className="text-lg font-bold text-gray-900 leading-tight">{hanja[1]}</span>
+                <div key={i} className="flex flex-col items-center bg-[#11131C]/90 py-0.5 sm:py-1 px-0.5 rounded sm:rounded-lg border border-[#232636]">
+                  <span className="text-[7px] sm:text-[8.5px] text-[#71717A] mb-0.5">{title}</span>
+                  <span className="text-[9.5px] sm:text-[12px] font-bold text-[#F3C66B] leading-none mb-0.5">{h?.[0]}</span>
+                  <span className="text-[9.5px] sm:text-[12px] font-bold text-[#F3C66B] leading-none">{h?.[1]}</span>
                 </div>
               );
             })}
           </div>
-          <div className="mt-auto text-center font-bold text-[12px] text-blue-600 bg-blue-50 p-2 rounded">
-            {viewMode === 'base' ? '👆 12궁을 클릭하여 선천 및 대한 명반을 분석하세요.' : viewMode === 'daehan' ? `📍 현재 선택된 대한: ${gungData[selectedDaehanJiJi || '子']['대한_연령대']?.[0]}~${gungData[selectedDaehanJiJi || '子']['대한_연령대']?.[1]}세` : `📍 현재 선택된 유년: ${selectedYunyeon?.['해당년도']}년`}
+
+          {/* 상태 안내 태그 */}
+          <div className="mt-0.5 text-center text-[7.5px] sm:text-[9.5px] text-[#E5C158] bg-[#1A160E]/90 border border-[#54411C] px-2 sm:px-3 py-0.5 rounded-full shadow-inner truncate max-w-[95%]">
+            {viewMode === 'base' ? '궁을 선택하여 운세를 탐색하세요.' : viewMode === 'daehan' ? `대한: ${gungData[selectedDaehanJiJi || '子']['대한_연령대']?.[0]}~${gungData[selectedDaehanJiJi || '子']['대한_연령대']?.[1]}세` : `유년: ${selectedYunyeon?.['해당년도']}년`}
           </div>
         </div>
       </div>
@@ -272,7 +345,11 @@ export default function ZiweiGrid({ chartData }: Props) {
         yunyeonPalaces={yunyeonPalaces}
         luckInfo={luckInfo} 
         selectedYunyeon={selectedYunyeon} 
-        onYunyeonSelect={(yn) => { setSelectedYunyeon(yn); setViewMode('yunyeon'); setSelectedDaehanJiJi(Object.keys(luckInfo['대한_목록'].find((d: any) => d['연령대'][0] === yn['소속대한_연령대']?.[0])?.['십이궁_배치'] || {}).find(k => luckInfo['대한_목록'].find((d: any) => d['연령대'][0] === yn['소속대한_연령대']?.[0])?.['십이궁_배치'][k] === '명궁') || '子'); }} 
+        onYunyeonSelect={(yn: any) => { 
+          setSelectedYunyeon(yn); 
+          setViewMode('yunyeon'); 
+          setSelectedDaehanJiJi(Object.keys(luckInfo['대한_목록'].find((d: any) => d['연령대'][0] === yn['소속대한_연령대']?.[0])?.['십이궁_배치'] || {}).find(k => luckInfo['대한_목록'].find((d: any) => d['연령대'][0] === yn['소속대한_연령대']?.[0])?.['십이궁_배치'][k] === '명궁') || '子'); 
+        }} 
         gungData={gungData}
         PALACE_NAMES={PALACE_NAMES}
         JIJI_LIST={JIJI_LIST}
