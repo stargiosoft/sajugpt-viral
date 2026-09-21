@@ -94,6 +94,8 @@ export type FeatureType =
   | 'shinsal_genius'
   | 'shinsal_skill'
   | 'job_dna' 
+  | 'ziwei_chart' 
+  | 'future_spouse' 
   | 'gwiin_map' ; 
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
