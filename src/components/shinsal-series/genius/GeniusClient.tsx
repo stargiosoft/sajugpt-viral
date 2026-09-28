@@ -4,7 +4,11 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import type { Gender } from '@/types/battle';
-import type { ShinsalStep, ShinsalGeniusResult } from '@/types/shinsal-series';
+import type { ShinsalGeniusResult } from '@/types/shinsal-series'; // ShinsalStep 제거
+
+// 이 파일에서 바로 쓸 수 있도록 직접 정의해 줍니다.
+type ShinsalStep = 'landing' | 'input' | 'analyzing' | 'result';
+
 import { generateGeniusResult } from '@/lib/shinsal-series/shinsalGenius';
 import { GENIUS_COLORS as C, FADE_UP } from '@/constants/shinsalGeniusTheme';
 import { SAJUGPT_URL } from '@/constants/links';
