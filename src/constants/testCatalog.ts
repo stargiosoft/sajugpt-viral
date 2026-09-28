@@ -325,7 +325,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     participantLabel: '2,100',
     shareLabel: '240',
     isNew: true,
-    editorPick: false,
+    editorPick: false, //추후에 추가하면 좋을듯
     sajugptBadge: true,
     ready: true,
     visibleOnHome: true,
