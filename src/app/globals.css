@@ -74,17 +74,17 @@
 }
 
 @font-face {
-  font-family: 'HSJandari';
-  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/HSJandari.woff') format('woff');
+  font-family: 'HsJandari';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2510-2@1.0/HSJandari.woff2') format('woff2');
   font-weight: normal;
-  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-      font-family: 'GabiaSolmi';
-      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff') format('woff');
-      font-weight: normal;
-      font-display: swap;
+  font-family: 'GabiaSolmi';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff') format('woff');
+  font-weight: normal;
+  font-display: swap;
   }
   
 @font-face {

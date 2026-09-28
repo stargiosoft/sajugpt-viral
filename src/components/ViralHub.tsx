@@ -13,7 +13,7 @@ import { TEST_CATALOG } from '@/constants/testCatalog';
 import type { TestCatalogItem } from '@/types/testCatalog';
 import { SAJUGPT_URL } from '@/constants/links';
 import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
-import { fetchTestStats, formatStatCount } from '@/lib/testStats';
+import { fetchTestStats, formatStatCount, incrementTestStat } from '@/lib/testStats';
 
 // 모아모아 홈 — 오케스트레이터. 데이터/스타일 세부사항은 하위 컴포넌트가 소유하고,
 // 여기서는 조립만 담당한다.
@@ -31,14 +31,16 @@ export default function ViralHub() {
   useEffect(() => {
     let cancelled = false;
     fetchTestStats().then((stats) => {
-      if (cancelled || Object.keys(stats).length === 0) return;
+      if (cancelled || !stats || Object.keys(stats).length === 0) return;
       setCatalog((prev) => prev.map((item) => {
         const stat = stats[item.id];
-        if (!stat) return item;
+        // stat이 없거나, 서버의 play 값이 실제로 존재하지/0보다 클 때만 덮어씀
+        if (!stat || (stat.play === 0 && stat.share === 0)) return item;
+        
         return {
           ...item,
-          participantLabel: formatStatCount(stat.play),
-          shareLabel: formatStatCount(stat.share),
+          participantLabel: stat.play ? formatStatCount(stat.play) : item.participantLabel,
+          shareLabel: stat.share ? formatStatCount(stat.share) : item.shareLabel,
         };
       }));
     });
@@ -47,6 +49,37 @@ export default function ViralHub() {
 
   const handleSelectItem = useCallback((item: TestCatalogItem) => {
     if (!item.ready || navigateTimeoutRef.current) return;
+    
+    // 1. [클라이언트 측 낙관적 업데이트] 기존 값에서 안전하게 숫자를 추출해 1 증가
+    setCatalog((prev) =>
+      prev.map((catItem) => {
+        if (catItem.id === item.id) {
+          const originalLabel = catItem.participantLabel;
+          let rawNum = 0;
+
+          if (originalLabel.includes('만')) {
+            const numPart = parseFloat(originalLabel.replace('만', '')) || 0;
+            rawNum = Math.round(numPart * 10000) + 1;
+          } else {
+            const numPart = parseInt(originalLabel.replace(/,/g, ''), 10) || 0;
+            rawNum = numPart + 1;
+          }
+          
+          const newLabel = rawNum >= 10000 
+            ? `${(rawNum / 10000).toFixed(1).replace(/\.0$/, '')}만` 
+            : rawNum.toLocaleString('ko-KR');
+
+          return { ...catItem, participantLabel: newLabel };
+        }
+        return catItem;
+      })
+    );
+
+    // 2. [서버 연동] Supabase DB에 플레이 카운트 +1 증가 요청 전송
+    incrementTestStat(item.id, 'play').catch((err) => {
+      console.error('플레이 카운트 증가 실패:', err);
+    });
+
     setSelectedId(item.id);
     navigateTimeoutRef.current = setTimeout(() => router.push(item.href), 180);
   }, [router]);
@@ -103,8 +136,9 @@ export default function ViralHub() {
             </div>
           </div>
 
+          {/* 1. 에디터 추천 섹션 */}
           <TestGridSection
-            title="에디터 추천"
+            title="🔥 에디터 추천 픽"
             items={catalog}
             filter={(item) => item.visibleOnHome && item.editorPick}
             paddingBottom={4}
@@ -112,15 +146,24 @@ export default function ViralHub() {
             selectedId={selectedId}
           />
 
+          {/* 2. 설레는 연애 & 궁합 섹션 */}
           <TestGridSection
-            title="최신 테스트"
+            title="💘 설레는 연애 & 궁합"
             items={catalog}
-            filter={(item) => item.visibleOnHome && item.isNew}
-            isNew
+            filter={(item) => item.visibleOnHome && item.category === 'love' && !item.editorPick}
+            paddingBottom={4}
+            onSelect={handleSelectItem}
+            selectedId={selectedId}
+          />
+
+          {/* 3. 심층 사주 & 분석 섹션 */}
+          <TestGridSection
+            title="✨ 심층 사주 & 운세"
+            items={catalog}
+            filter={(item) => item.visibleOnHome && item.category === 'analysis' && !item.editorPick}
             paddingBottom={200}
             onSelect={handleSelectItem}
             selectedId={selectedId}
-            minCount={4}
           />
 
           <div className="px-3 md:px-6 lg:px-8 pb-6">
