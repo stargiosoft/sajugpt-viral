@@ -66,7 +66,7 @@ const GENE_MEME: Record<string, string> = {
 const SHINSAL_ORDER = ['gwimun', 'hyeonchim', 'wonjin', 'gwaegang', 'siksang', 'pyeonin'];
 
 const MONO = "'JetBrains Mono', 'Chakra Petch', 'Courier New', monospace";
-const MAIN_FONT = "var(--font-jandari), 'Pretendard', sans-serif";
+const MAIN_FONT = "'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif";
 
 const DARK_GRAY = {
   text: '#FFFFFF',
@@ -366,10 +366,10 @@ console.log('[GeniusResultCard] shinsalScores:', shinsalScores);
                     <div style={{ fontFamily: MAIN_FONT, color: DARK_GRAY.textTertiary, fontSize: '13px' }}>항목을 누르면 상세 설명과 밈을 볼 수 있어요</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontFamily: MONO, fontSize: '9px', color: accent, letterSpacing: '1px' }}>
+                    <div style={{ fontFamily: MONO, fontSize: '13px', color: accent, letterSpacing: '1px' }}>
                       {SHORT_LABEL[activeGeneId]} SCORE
                     </div>
-                    <div style={{ fontFamily: MONO, fontSize: '30px', marginTop: '10px', fontWeight: 900, color: accent, textShadow: `0 0 10px ${accent}90`, lineHeight: 1 }}>
+                    <div style={{ fontFamily: MONO, fontSize: '32px', marginTop: '10px', fontWeight: 900, color: accent, textShadow: `0 0 10px ${accent}90`, lineHeight: 1 }}>
                       {/* activeGeneId 변경 시 실시간 반영 */}
                       {shinsalScores.find((s) => s.id === activeGeneId)?.score ?? 0}점
                     </div>

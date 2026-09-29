@@ -5,6 +5,7 @@ import LandingCTAButton from '@/components/LandingCTAButton';
 import ShareRow from '@/components/ShareRow';
 import CommentBoard from '@/components/CommentBoard';
 import SajuGPTLinkButton from '@/components/SajuGPTLinkButton';
+import TestTopNav from '@/components/TestTopNav';
 import { SOLO_COLORS as C } from '@/constants/soloGuideTheme';
 import { LANDING_GAPS } from '@/constants/layoutGaps';
 
@@ -34,6 +35,13 @@ export function LoveSeasonLanding({ onStart }: Props) {
           font-display: swap;
         }
       `}</style>
+
+      {/* 0. 상단 브랜드 네비게이션 배너 */}
+      <TestTopNav
+        bgColor="transparent"
+        logoColor={C.text}
+        xColor={C.text}
+      />
 
       {/* 1. 히어로 메인 비주얼 영역 */}
       <motion.div

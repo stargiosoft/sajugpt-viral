@@ -30,9 +30,9 @@ import GeniusResultCard from './GeniusResultCard';
 export default function GeniusClient() {
   const router = useRouter();
   const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
+  const [birthTime, setBirthTime] = useState('unknown');
   const [unknownTime, setUnknownTime] = useState(true);
-  const [timeSelected, setTimeSelected] = useState(false);
+  const [timeSelected, setTimeSelected] = useState(true);
   const [gender, setGender] = useState<Gender>('female');
 
   const [step, setStep] = useState<ShinsalStep>('landing');
@@ -87,7 +87,7 @@ export default function GeniusClient() {
   const isFormValid = () => {
     const numbers = birthDate.replace(/[^\d]/g, '');
     if (numbers.length !== 8) return false;
-    if (!timeSelected) return false;
+    if (!unknownTime && !timeSelected) return false;
     return true;
   };
 
