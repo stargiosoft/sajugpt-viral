@@ -24,9 +24,9 @@ export default function SkillClient() {
   // 입력 상태
   // ─────────────────────────────────────────────
   const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
+  const [birthTime, setBirthTime] = useState('unknown');
   const [unknownTime, setUnknownTime] = useState(true);
-  const [timeSelected, setTimeSelected] = useState(false);
+  const [timeSelected, setTimeSelected] = useState(true);
   const [gender, setGender] = useState<Gender>('female');
 
   // ─────────────────────────────────────────────
@@ -109,11 +109,8 @@ export default function SkillClient() {
     if (numbers.length !== 8) {
       return false;
     }
-    if (!timeSelected) {
-      return false;
-    }
     return true;
-  }, [birthDate, timeSelected]);
+  }, [birthDate]);
 
   const handleTimeSelect = useCallback(
     (displayTime: string, isUnknown: boolean) => {

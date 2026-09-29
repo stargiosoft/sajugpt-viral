@@ -74,7 +74,6 @@ export default function BirthInput() {
     router.push(`/future-spouse/result?${params.toString()}`);
   };
 
-  // 👈 오직 생년월일 유효성만 통과하면 바로 버튼이 활성화됩니다!
   const isFormValid = isValidDate(birthDate);
 
   return (
