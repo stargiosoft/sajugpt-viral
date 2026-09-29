@@ -18,7 +18,8 @@ export default function BirthInput() {
   const router = useRouter();
 
   const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
+  const [birthTime, setBirthTime] = useState('unknown');
+  const [unknownTime, setUnknownTime] = useState(true);
   const [gender, setGender] = useState<'male' | 'female'>('female');
 
   const isValidDate = useCallback((dateStr?: string): boolean => {
@@ -66,17 +67,18 @@ export default function BirthInput() {
 
     const params = new URLSearchParams({
       birthDate,
-      birthTime,
+      birthTime: unknownTime ? 'unknown' : birthTime,
       gender,
     });
 
     router.push(`/future-spouse/result?${params.toString()}`);
   };
 
+  // 👈 오직 생년월일 유효성만 통과하면 바로 버튼이 활성화됩니다!
   const isFormValid = isValidDate(birthDate);
 
   return (
-    <div className="w-full max-w-110 mx-auto p-3 pb-10">
+    <div className="w-full max-w-150 mx-auto p-3 pb-10">
       <div
         style={{
           position: 'relative',
@@ -228,21 +230,34 @@ export default function BirthInput() {
 
               {/* 출생시간 */}
               <div>
-                <label
-                  htmlFor="birthTime"
-                  className="block text-[13px] font-medium text-[rgb(69,69,69)] mb-1.5"
-                >
-                  태어난 시간
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="birthTime"
+                    className="block text-[13px] font-medium text-[rgb(69,69,69)]"
+                  >
+                    태어난 시간
+                  </label>
+                  <label className="flex items-center gap-1.5 text-xs text-[rgb(120,120,120)] cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={unknownTime}
+                      onChange={e => setUnknownTime(e.target.checked)}
+                      className="rounded accent-[rgb(235,85,108)]"
+                    />
+                    시간을 몰라요
+                  </label>
+                </div>
                 <input
                   id="birthTime"
                   type="time"
                   value={birthTime}
+                  disabled={unknownTime}
                   onChange={e => setBirthTime(e.target.value)}
                   className="w-full h-12 px-3.5 rounded-xl text-sm outline-none transition"
                   style={{
-                    backgroundColor: COLORS.inputBg,
-                    color: COLORS.text,
+                    backgroundColor: unknownTime ? 'rgb(240, 240, 240)' : COLORS.inputBg,
+                    color: unknownTime ? 'rgb(160, 160, 160)' : COLORS.text,
+                    cursor: unknownTime ? 'not-allowed' : 'text',
                   }}
                 />
               </div>

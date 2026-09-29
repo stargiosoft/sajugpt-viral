@@ -10,7 +10,7 @@ export default function FutureSpouseMain() {
 
   return (
     <div className="min-h-screen w-full bg-white flex justify-center">
-      <div className="w-full max-w-110 min-h-screen bg-white relative flex flex-col">
+      <div className="w-full max-w-150 min-h-screen bg-white relative flex flex-col">
         <TestTopNav bgColor="#FFFFFF" logoColor="#000000" xColor="#000000" />
 
         <div className="flex-1 w-full">

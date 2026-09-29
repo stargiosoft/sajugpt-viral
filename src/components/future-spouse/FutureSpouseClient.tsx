@@ -55,8 +55,8 @@ export default function FutureSpouseClient() {
   const [form, setForm] = useState<FormState>({
     gender: null,
     birthday: '',
-    birthTime: '',
-    birthTimeUnknown: false,
+    birthTime: 'unknown',
+    birthTimeUnknown: true,
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -106,7 +106,7 @@ export default function FutureSpouseClient() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="w-full max-w-110 mx-auto future-spouse-container"
+        className="w-full max-w-150 mx-auto future-spouse-container"
         style={{ padding: '14px 14px 48px' }}
       >
         {/* OUTER FRAME */}

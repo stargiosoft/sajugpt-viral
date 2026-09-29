@@ -153,7 +153,7 @@ export const TEST_CATALOG: TestCatalogItem[] = [
     href: '/money-timeline',
     emoji: '💰',
     imageSrc: '/money-timeline/thumbnail-v3.png',
-    category: 'money',
+    category: 'analysis',
     colorTheme: 'orange',
     participantLabel: '3,900',
     shareLabel: '510',

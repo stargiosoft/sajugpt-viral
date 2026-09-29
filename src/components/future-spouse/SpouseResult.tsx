@@ -78,7 +78,7 @@ export default function SpouseResult({ result, resultId = '' }: Props) {
       style={{ background: 'linear-gradient(180deg, rgb(255,250,248) 0%, #FFFFFF 55%)' }}
     >
       <div
-        className="w-full max-w-110 min-h-screen relative flex flex-col"
+        className="w-full max-w-150 min-h-screen relative flex flex-col"
         style={{ background: 'linear-gradient(180deg, rgb(255,250,248) 0%, #FFFFFF 360px)' }}
       >
         <TestTopNav
