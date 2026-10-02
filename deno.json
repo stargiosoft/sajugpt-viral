@@ -3,14 +3,8 @@
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
   },
   "compilerOptions": {
-    "lib": ["deno.window"],
+    "lib": ["deno.window", "dom"],
     "strict": true
   },
-  "fmt": {
-    "indentWidth": 2,
-    "singleQuote": true
-  },
-  "lint": {
-    "rules": {}
-  }
+  "exclude": ["node_modules", ".next"]
 }

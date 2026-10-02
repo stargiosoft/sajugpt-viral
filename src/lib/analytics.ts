@@ -96,6 +96,7 @@ export type FeatureType =
   | 'job_dna' 
   | 'ziwei_chart' 
   | 'future_spouse' 
+  | 'child_personality'
   | 'gwiin_map' ; 
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
