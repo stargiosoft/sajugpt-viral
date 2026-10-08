@@ -86,7 +86,7 @@ export default function ViralHub() {
 
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#ffffff' }}>
-      <div className="w-full max-w-[768px] md:max-w-[900px] lg:max-w-[1040px] h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+      <div className="w-full max-w-3xl md:max-w-225 lg:max-w-260 h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
         <AdBanner />
         <div className="flex-1 overflow-auto w-full">
           <MoaMoaHeader />
@@ -102,7 +102,7 @@ export default function ViralHub() {
                 whileHover={{ opacity: 0.9 }}
                 whileTap={{ scale: 0.995, backgroundColor: MOAMOA_ORANGE_DARK }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
-                className="flex items-center justify-center shrink-0 transform-gpu h-[52px] lg:h-[48px] text-[14px] lg:text-[13px]"
+                className="flex items-center justify-center shrink-0 transform-gpu h-13 lg:h-12 text-[14px] lg:text-[13px]"
                 style={{
                   borderRadius: '16px',
                   backgroundColor: MOAMOA_ORANGE,

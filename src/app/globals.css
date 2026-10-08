@@ -157,7 +157,14 @@
     font-display: swap;
 }
 
-@theme inline {
+@font-face {
+    font-family: 'KerisKeduLine';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-3@1.0/KERISKEDU_Line.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+
+@theme {
   --color-brand-primary: #7A38D8;
   --color-brand-dark: #6B2FC2;
   --color-brand-pressed: #5E28AB;
