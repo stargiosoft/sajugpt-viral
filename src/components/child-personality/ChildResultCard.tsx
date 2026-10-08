@@ -334,7 +334,6 @@ const ChildResultCard = forwardRef<
 
   return (
     <>
-
       <motion.div
         ref={ref}
         initial={{
@@ -689,30 +688,44 @@ const ChildResultCard = forwardRef<
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
+              gridTemplateColumns: 'repeat(2, 1fr)',
               gap: '8px',
             }}
           >
             {result.activities.map(
-              (activity, index) => (
-                <div
-                  key={`${activity}-${index}`}
-                  style={{
-                    padding: '10px 8px',
-                    borderRadius: '12px',
-                    background: '#FFFFFF',
-                    textAlign: 'center',
-                    color: '#566650',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    wordBreak: 'keep-all',
-                    overflowWrap: 'anywhere',
-                    border: '1px solid #E5EFE2',
-                  }}
-                >
-                  {activity}
-                </div>
-              ),
+              (activity, index) => {
+                const isLastOdd =
+                  result.activities.length % 2 !== 0 &&
+                  index === result.activities.length - 1;
+
+                return (
+                  <div
+                    key={`${activity}-${index}`}
+                    style={{
+                      padding: '10px 8px',
+                      borderRadius: '12px',
+                      background: '#FFFFFF',
+                      textAlign: 'center',
+                      color: '#566650',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      wordBreak: 'keep-all',
+                      overflowWrap: 'anywhere',
+                      border: '1px solid #E5EFE2',
+                      ...(isLastOdd
+                        ? {
+                            gridColumn: 'span 2',
+                            maxWidth: '70%',
+                            margin: '0 auto',
+                            width: '100%',
+                          }
+                        : {}),
+                    }}
+                  >
+                    {activity}
+                  </div>
+                );
+              },
             )}
           </div>
         </section>

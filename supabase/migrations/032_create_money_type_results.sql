@@ -7,7 +7,6 @@ create table if not exists public.money_type_results (
   birth_date text,
   birth_time text,
   calendar_type text,
-  saju_data jsonb,
   created_at timestamptz default now() not null
 );
 
@@ -56,3 +55,11 @@ using (true);
 
 drop policy if exists "money_type_results_public_insert"
 on public.money_type_results;
+
+-- service_role만 insert를 수행할 수 있도록 정책을 설정하거나, 
+-- anon/authenticated 사용자에게 직접 insert를 막으려면 아래와 같이 설정할 수 있습니다.
+create policy "money_type_results_service_insert"
+on public.money_type_results
+for insert
+to service_role
+with check (true);

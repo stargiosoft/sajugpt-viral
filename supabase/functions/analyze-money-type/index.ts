@@ -488,7 +488,6 @@ async function saveMoneyTypeResult(input: {
       birth_date: input.birthday,
       birth_time: input.birthTime,
       calendar_type: input.calendarType,
-      saju_data: input.sajuData,
     });
 
   if (dbError) throw new Error(`결과 저장 실패: ${dbError.message}`);

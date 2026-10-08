@@ -50,7 +50,6 @@ type ChildPersonalityStep =
   | 'result';
 
 interface ChildPersonalityClientProps {
-  resultId?: string;
   initialData?: ChildPersonalityResult | null;
 }
 
@@ -88,7 +87,6 @@ function getEdgeFunctionUrl() {
 // =========================================================
 
 export default function ChildPersonalityClient({
-  resultId: propResultId,
   initialData,
 }: ChildPersonalityClientProps) {
   const isNarrow = useIsNarrow();
@@ -126,9 +124,6 @@ export default function ChildPersonalityClient({
       initialData ?? null,
     );
 
-  const [currentResultId, setCurrentResultId] =
-    useState(propResultId ?? '');
-
   const resultCardRef =
     useRef<HTMLDivElement>(null);
 
@@ -141,10 +136,7 @@ export default function ChildPersonalityClient({
       ? window.location.origin
       : '';
 
-  const shareUrl =
-    origin && currentResultId
-      ? `${origin}/child-personality/${currentResultId}`
-      : origin;
+  const shareUrl = origin;
 
   // -------------------------------------------------------
   // SHARE
@@ -155,10 +147,9 @@ export default function ChildPersonalityClient({
     handleSave,
   } = useShareActions({
     featureType: 'child_personality',
-    resultId: currentResultId,
+    resultId: '',
     getShareText: () => shareUrl,
-    imageFilename:
-      `우리아이사용설명서_${currentResultId}.png`,
+    imageFilename: '우리아이사용설명서_결과.png',
     onSave: () =>
       incrementTestStat(
         'child-personality',
@@ -201,108 +192,6 @@ export default function ChildPersonalityClient({
       setGender(cached.gender);
     }
   }, []);
-
-  // =======================================================
-  // RESULT LOAD
-  // =======================================================
-
-  useEffect(() => {
-    if (!propResultId || initialData) {
-      return;
-    }
-
-    let isMounted = true;
-
-    async function loadResult() {
-      // TypeScript가 propResultId가
-      // string임을 확실히 알 수 있도록 한 번 좁혀준다.
-      if (!propResultId) return;
-
-      try {
-        setStep('analyzing');
-
-        const edgeUrl =
-          getEdgeFunctionUrl();
-
-        const response =
-          await fetch(
-            `${edgeUrl}?resultId=${encodeURIComponent(
-              propResultId,
-            )}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type':
-                  'application/json',
-
-                ...(SUPABASE_ANON_KEY
-                  ? {
-                      apikey:
-                        SUPABASE_ANON_KEY,
-
-                      Authorization:
-                        `Bearer ${SUPABASE_ANON_KEY}`,
-                    }
-                  : {}),
-              },
-            },
-          );
-
-        const data =
-          await response.json();
-
-        if (
-          !response.ok ||
-          !data.success
-        ) {
-          throw new Error(
-            data.error ||
-              '결과를 불러오지 못했습니다.',
-          );
-        }
-
-        if (!data.profile) {
-          throw new Error(
-            '저장된 결과 데이터가 없습니다.',
-          );
-        }
-
-        if (!isMounted) return;
-
-        setResult(
-          data.profile as ChildPersonalityResult,
-        );
-
-        setCurrentResultId(
-          propResultId,
-        );
-
-        setStep('result');
-      } catch (err) {
-        console.error(
-          '우리 아이 성향 결과 조회 실패:',
-          err,
-        );
-
-        if (!isMounted) return;
-
-        setError(
-          '결과를 불러오지 못했어요.',
-        );
-
-        setStep('landing');
-      }
-    }
-
-    loadResult();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [
-    propResultId,
-    initialData,
-  ]);
 
   // =======================================================
   // SAVE INPUT CACHE
@@ -508,21 +397,13 @@ export default function ChildPersonalityClient({
         );
       }
 
-      // DB 저장을 생략하고 바로 상태에 결과 반영
       setResult(rawProfile);
-      setCurrentResultId('');
 
       trackEvent('child_personality_result', {
         title: 'unknown',
       });
 
       setStep('result');
-
-      window.history.pushState(
-        {},
-        '',
-        '/child-personality',
-      );
     } catch (err) {
       console.error('우리 아이 성향 분석 실패:', err);
 
@@ -542,15 +423,8 @@ export default function ChildPersonalityClient({
 
   const handleReset = () => {
     setResult(null);
-    setCurrentResultId('');
     setError(null);
     setStep('input');
-
-    window.history.pushState(
-      {},
-      '',
-      '/child-personality',
-    );
   };
 
   // =======================================================
@@ -558,10 +432,6 @@ export default function ChildPersonalityClient({
   // =======================================================
 
   useEffect(() => {
-    if (propResultId) {
-      return;
-    }
-
     if (
       step !== 'result' ||
       !result
@@ -576,7 +446,6 @@ export default function ChildPersonalityClient({
   }, [
     step,
     result,
-    propResultId,
   ]);
 
   // =======================================================
@@ -604,10 +473,7 @@ export default function ChildPersonalityClient({
 
           <AnimatePresence mode="wait">
 
-            {/* =========================================
-                LANDING
-            ========================================= */}
-
+            {/* LANDING */}
             {step === 'landing' && (
               <ChildPersonalityLanding
                 key="landing"
@@ -617,110 +483,62 @@ export default function ChildPersonalityClient({
               />
             )}
 
-            {/* =========================================
-                INPUT
-            ========================================= */}
-
+            {/* INPUT */}
             {step === 'input' && (
               <ChildBirthInput
                 key="input"
-                birthDate={
-                  birthDate
-                }
-                onBirthDateChange={
-                  setBirthDate
-                }
-                birthTime={
-                  birthTime
-                }
-                unknownTime={
-                  unknownTime
-                }
-                onTimeSelect={
-                  handleTimeSelect
-                }
-                gender={
-                  gender
-                }
-                onGenderChange={
-                  setGender
-                }
-                isValid={
-                  isFormValid()
-                }
-                error={
-                  error
-                }
-                onSubmit={
-                  handleSubmit
-                }
+                birthDate={birthDate}
+                onBirthDateChange={setBirthDate}
+                birthTime={birthTime}
+                unknownTime={unknownTime}
+                onTimeSelect={handleTimeSelect}
+                gender={gender}
+                onGenderChange={setGender}
+                isValid={isFormValid()}
+                error={error}
+                onSubmit={handleSubmit}
               />
             )}
 
-            {/* =========================================
-                ANALYZING
-            ========================================= */}
-
+            {/* ANALYZING */}
             {step === 'analyzing' && (
               <ChildAnalyzing
                 key="analyzing"
               />
             )}
 
-            {/* =========================================
-                RESULT
-            ========================================= */}
-
+            {/* RESULT */}
             {step === 'result' &&
               result && (
                 <motion.div
                   key="result"
-                  initial={{
-                    opacity: 0,
-                  }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  exit={{
-                    opacity: 0,
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   className="flex-1 flex flex-col"
                   style={{
                     width: '100%',
                     boxSizing: 'border-box',
-                    padding:
-                      isNarrow
-                        ? '0px 8px 48px'
-                        : '0px 12px 48px',
+                    padding: isNarrow ? '0px 8px 48px' : '0px 12px 48px',
                     gap: '16px',
                   }}
                 >
-
                   {/* 결과 카드 */}
                   <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                     <div style={{ width: '100%', maxWidth: '430px' }}>
                       <ChildResultCard
-                          imageUrl="/child-personality/images/baby_bear.png"
-                          ref={resultCardRef}
-                          result={result}
-                        />
+                        imageUrl="/child-personality/images/baby_bear.png"
+                        ref={resultCardRef}
+                        result={result}
+                      />
                     </div>
                   </div>
 
                   {/* 액션 영역 */}
-
                   <motion.div
-                    initial={{
-                      opacity: 0,
-                      y: 10,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    transition={{
-                      delay: 0.12,
-                    }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.12 }}
                     style={{
                       width: '100%',
                       maxWidth: '430px',
@@ -730,205 +548,106 @@ export default function ChildPersonalityClient({
                       gap: '10px',
                     }}
                   >
-
-                    {/* 다시하기 / 이미지 저장 */}
-
-                    <div
-                      style={{
-                        display:
-                          'flex',
-                        gap: '8px',
-                      }}
-                    >
-
+                    <div style={{ display: 'flex', gap: '8px' }}>
                       <PressableButton
-                        onClick={
-                          handleReset
-                        }
+                        onClick={handleReset}
                         label="다시하기"
-                        style={{
-                          flex: 1,
-                          height: '48px',
-                        }}
+                        style={{ flex: 1, height: '48px' }}
                         bgStyle={{
-                          backgroundColor:
-                            CARD_BG,
-                          borderRadius:
-                            '12px',
-                          border:
-                            `1.5px solid ${BORDER_COLOR}`,
+                          backgroundColor: CARD_BG,
+                          borderRadius: '12px',
+                          border: `1.5px solid ${BORDER_COLOR}`,
                         }}
                         textStyle={{
-                          color:
-                            THEME_COLOR,
-                          fontSize:
-                            '15px',
-                          fontWeight:
-                            700,
+                          color: THEME_COLOR,
+                          fontSize: '15px',
+                          fontWeight: 700,
                         }}
                       />
 
                       <PressableButton
-                        onClick={() =>
-                          handleSave(
-                            resultCardRef,
-                          )
-                        }
-                        label={
-                          saving
-                            ? '저장 중...'
-                            : '이미지 저장'
-                        }
-                        disabled={
-                          saving
-                        }
-                        style={{
-                          flex: 1,
-                          height: '48px',
-                        }}
+                        onClick={() => handleSave(resultCardRef)}
+                        label={saving ? '저장 중...' : '이미지 저장'}
+                        disabled={saving}
+                        style={{ flex: 1, height: '48px' }}
                         bgStyle={{
-                          backgroundColor:
-                            THEME_COLOR,
-                          borderRadius:
-                            '12px',
-                          border:
-                            'none',
+                          backgroundColor: THEME_COLOR,
+                          borderRadius: '12px',
+                          border: 'none',
                         }}
                         hoverBackground="#d87b61"
                         textStyle={{
-                          color:
-                            '#ffffff',
-                          fontSize:
-                            '15px',
-                          fontWeight:
-                            700,
+                          color: '#ffffff',
+                          fontSize: '15px',
+                          fontWeight: 700,
                         }}
                       />
-
                     </div>
-
-                    {/* 사주GPT */}
 
                     <OutlineBoxButton
                       onClick={() => {
-                        trackSajuGPTClick(
-                          'child_personality',
-                          currentResultId,
-                        );
-
-                        window.open(
-                          SAJUGPT_URL,
-                          '_blank',
-                        );
+                        trackSajuGPTClick('child_personality', '');
+                        window.open(SAJUGPT_URL, '_blank');
                       }}
                       height="48px"
-                      color={
-                        THEME_COLOR
-                      }
+                      color={THEME_COLOR}
                       background={CARD_BG}
                       border={`1.5px solid ${BORDER_COLOR}`}
                       borderRadius="12px"
                     >
                       <span
                         style={{
-                          fontSize:
-                            '13px',
-                          letterSpacing:
-                            '-0.3px',
-                          fontWeight:
-                            700,
-                          color:
-                            TEXT_COLOR,
+                          fontSize: '13px',
+                          letterSpacing: '-0.3px',
+                          fontWeight: 700,
+                          color: TEXT_COLOR,
                         }}
                       >
-                        내 사주 고민,
-                        사주GPT에게
-                        물어보기
+                        내 사주 고민, 사주GPT에게 물어보기
                       </span>
                     </OutlineBoxButton>
 
-                    {/* 공유 */}
-
-                    <div
-                      style={{
-                        paddingTop:
-                          '6px',
-                        paddingBottom:
-                          '6px',
-                      }}
-                    >
+                    <div style={{ paddingTop: '6px', paddingBottom: '6px' }}>
                       <ShareRow
                         shareContent={{
-                          featureType:
-                            'child_personality',
-                          title:
-                            '🧸 우리 아이 사용설명서 결과는?',
-                          description:
-                            '우리 아이의 본질적인 성향과 맞춤형 소통법을 확인해보세요!',
+                          featureType: 'child_personality',
+                          title: '🧸 우리 아이 사용설명서 결과는?',
+                          description: '우리 아이의 본질적인 성향과 맞춤형 소통법을 확인해보세요!',
                           shareUrl,
-                          imageUrl:
-                            origin
-                              ? `${origin}/child-personality/og-share.png`
-                              : '/child-personality/og-share.png',
-                          testId:
-                            'child-personality',
+                          imageUrl: origin ? `${origin}/child-personality/og-share.png` : '/child-personality/og-share.png',
+                          testId: 'child-personality',
                         }}
-                        copyColor={
-                          THEME_COLOR
-                        }
+                        copyColor={THEME_COLOR}
                         copyHoverColor="#d87b61"
                         copyIconColor="#ffffff"
                       />
                     </div>
-
                   </motion.div>
 
                   {/* 하단 커뮤니티 */}
-
-                  <div
-                    style={{
-                      marginTop:
-                        '8px',
-                    }}
-                  >
+                  <div style={{ marginTop: '8px' }}>
                     <ResultFooterSections
                       excludeId="child-personality"
                       titleStyle={{
-                        fontSize:
-                          '16px',
-                        fontWeight:
-                          700,
-                        letterSpacing:
-                          '-0.9px',
-                        color:
-                          TEXT_COLOR,
-                        paddingLeft:
-                          '2px',
+                        fontSize: '16px',
+                        fontWeight: 700,
+                        letterSpacing: '-0.9px',
+                        color: TEXT_COLOR,
+                        paddingLeft: '2px',
                       }}
                       cardBg="#fffdfa"
-                      cardTitleColor={
-                        TEXT_COLOR
-                      }
+                      cardTitleColor={TEXT_COLOR}
                       featureType="child_personality"
-                      resultId={
-                        currentResultId
-                      }
+                      resultId=""
                       storageKey="child_personality_liked_comments"
                       placeholder="우리 아이 양육 팁에 대해 이야기해봐요 :)"
-                      themeColor={
-                        THEME_COLOR
-                      }
+                      themeColor={THEME_COLOR}
                       inputBg={CARD_BG}
-                      disabledBg={
-                        BORDER_COLOR
-                      }
-                      shareToRecommendGap={
-                        24
-                      }
+                      disabledBg={BORDER_COLOR}
+                      shareToRecommendGap={24}
                       dark={false}
                     />
                   </div>
-
                 </motion.div>
               )}
 
