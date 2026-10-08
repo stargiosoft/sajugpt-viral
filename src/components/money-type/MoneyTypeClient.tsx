@@ -312,20 +312,20 @@ export default function MoneyTypeClient({
   };
 
   const handleReset = () => {
-    setBirthDate("");
-    setBirthTime("");
-    setUnknownTime(true);
-    setGender("female");
-    setError(null);
-    setResult(null);
-    setCurrentResultId(null);
+  setBirthDate("");
+  setBirthTime("");
+  setUnknownTime(true);
+  setGender("female");
+  setError(null);
+  setResult(null);
+  setCurrentResultId(null);
 
-    if (typeof window !== "undefined") {
-    window.history.replaceState(null, "", `/money-type/${normalized.resultId}`);
-    }
+  if (typeof window !== "undefined") {
+    window.history.replaceState(null, "", "/money-type");
+  }
 
-    setStep("landing");
-  };
+  setStep("landing");
+};
 
   if (isLoadingResult && !result) {
     return <MoneyTypeAnalyzing />;

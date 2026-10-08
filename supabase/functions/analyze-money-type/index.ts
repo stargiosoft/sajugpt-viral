@@ -1,32 +1,21 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ─── CORS ───────────────────────────────────────────────
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Max-Age': '86400',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
-function handleCorsPreflightRequest(_req: Request): Response {
-  return new Response(null, { status: 204, headers: corsHeaders });
-}
-
-function jsonResponse(_req: Request, data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
+const json = (data: unknown, status = 200) =>
+  new Response(JSON.stringify(data), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
-}
 
-function errorResponse(_req: Request, message: string, status = 400): Response {
-  return new Response(JSON.stringify({ success: false, error: message }), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
-}
+const error = (message: string, status = 400) =>
+  json({ success: false, error: message }, status);
 
-// ─── 타입 ───────────────────────────────────────────────
 export type MoneyTypeCode =
   | 'stable'
   | 'talent'
@@ -37,17 +26,10 @@ export type MoneyTypeCode =
 
 export type MoneyScores = Record<MoneyTypeCode, number>;
 
-export type MoneyTypeResult = {
-  code: MoneyTypeCode;
-  scores: MoneyScores;
-  reason: string[];
-};
-
 type SajuData = Record<string, any>;
 type TenGodGroup = '비겁' | '식상' | '재성' | '관성' | '인성';
 type Weight = [MoneyTypeCode, number];
 
-// ─── 상수 ───────────────────────────────────────────────
 const TYPE_LABEL: Record<MoneyTypeCode, string> = {
   stable: '안정수입형',
   talent: '재능수익형',
@@ -57,7 +39,6 @@ const TYPE_LABEL: Record<MoneyTypeCode, string> = {
   network: '인맥재물형',
 };
 
-// 동점일 때 우선순위
 const TIE_PRIORITY: MoneyTypeCode[] = [
   'talent',
   'business',
@@ -67,9 +48,14 @@ const TIE_PRIORITY: MoneyTypeCode[] = [
   'stable',
 ];
 
-const GROUPS: TenGodGroup[] = ['비겁', '식상', '재성', '관성', '인성'];
+const GROUPS: TenGodGroup[] = [
+  '비겁',
+  '식상',
+  '재성',
+  '관성',
+  '인성',
+];
 
-// 십성 하나가 각 유형에 주는 점수 (배치 / 월령 / 대운에 공통 사용)
 const TENGOD_WEIGHTS: Record<string, Weight[]> = {
   비견: [['business', 1.5], ['network', 1]],
   겁재: [['business', 1.5], ['network', 0.5]],
@@ -83,7 +69,6 @@ const TENGOD_WEIGHTS: Record<string, Weight[]> = {
   편인: [['stable', 1], ['talent', 0.5]],
 };
 
-// 십성 그룹(용신/희신/기신 판정용)이 각 유형에 주는 점수
 const GROUP_WEIGHTS: Record<TenGodGroup, Weight[]> = {
   비겁: [['business', 1], ['network', 0.5]],
   식상: [['talent', 1], ['opportunity', 0.5]],
@@ -92,32 +77,25 @@ const GROUP_WEIGHTS: Record<TenGodGroup, Weight[]> = {
   인성: [['stable', 1]],
 };
 
-// Stargio `사주`/`십성` 배열 순서는 [시주, 일주, 월주, 연주]
-const HOUR_PILLAR = 0;
-const DAY_PILLAR = 1;
-const MONTH_PILLAR = 2;
+const AVG_SHARE = 20;
+const MONTH_EXTRA = 3;
 
-const AVG_SHARE = 20; // 발달십성 5그룹 합이 100 → 평균 20
-const MONTH_EXTRA = 3; // 월지는 배치에서 1회 + 추가 3회 = 총 4배 반영
-
-// ─── 유틸 ───────────────────────────────────────────────
-function numberValue(value: unknown): number {
+function numberValue(value: unknown) {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value === 'string') {
     const n = Number(value.replace(/[^\d.-]/g, ''));
-    if (Number.isFinite(n)) return n;
+    return Number.isFinite(n) ? n : 0;
   }
   return 0;
 }
 
-function clamp(value: number, min = 0, max = 100): number {
+function clamp(value: number, min = 0, max = 100) {
   return Math.max(min, Math.min(max, Math.round(value)));
 }
 
 function flatten(value: unknown): string[] {
-  if (Array.isArray(value)) return value.flatMap((item) => flatten(item));
-  if (typeof value === 'string') return [value];
-  return [];
+  if (Array.isArray(value)) return value.flatMap(flatten);
+  return typeof value === 'string' ? [value] : [];
 }
 
 function parseRecord(source: unknown): Record<string, number> {
@@ -125,8 +103,8 @@ function parseRecord(source: unknown): Record<string, number> {
   if (!source) return result;
 
   if (typeof source === 'object' && !Array.isArray(source)) {
-    for (const [key, val] of Object.entries(source as Record<string, unknown>)) {
-      result[key] = numberValue(val);
+    for (const [key, value] of Object.entries(source as Record<string, unknown>)) {
+      result[key] = numberValue(value);
     }
   } else if (Array.isArray(source)) {
     for (const item of source) {
@@ -135,15 +113,17 @@ function parseRecord(source: unknown): Record<string, number> {
       }
     }
   }
+
   return result;
 }
 
 function toGroups(value: unknown): TenGodGroup[] {
-  return flatten(value).filter((v): v is TenGodGroup => GROUPS.includes(v as TenGodGroup));
+  return flatten(value).filter(
+    (v): v is TenGodGroup => GROUPS.includes(v as TenGodGroup),
+  );
 }
 
-// ─── 사주 데이터 추출 ────────────────────────────────────
-function getStrengthScore(data: SajuData): number {
+function getStrengthScore(data: SajuData) {
   const value = String(data['사주강약'] ?? '');
   if (value.includes('극신강') || value.includes('태강')) return 90;
   if (value.includes('극신약') || value.includes('태약')) return 20;
@@ -153,12 +133,9 @@ function getStrengthScore(data: SajuData): number {
   return 50;
 }
 
-type UsefulGods = { main: TenGodGroup[]; helper: TenGodGroup[]; avoid: TenGodGroup[] };
-
-// 용신: { 용신: ['비겁'], 희신: ['인성','식상'], 기신: ['재성','관성'] }
-function getUsefulGods(data: SajuData): UsefulGods {
+function getUsefulGods(data: SajuData) {
   const src = data['용신'];
-  let result: UsefulGods = { main: [], helper: [], avoid: [] };
+  let result = { main: [] as TenGodGroup[], helper: [] as TenGodGroup[], avoid: [] as TenGodGroup[] };
 
   if (src && typeof src === 'object' && !Array.isArray(src)) {
     result = {
@@ -168,96 +145,85 @@ function getUsefulGods(data: SajuData): UsefulGods {
     };
   }
 
-  const isEmpty = !result.main.length && !result.helper.length && !result.avoid.length;
-  const alt = data['격용신']; // [[용신],[희신],[기신]]
-  if (isEmpty && Array.isArray(alt)) {
-    result = { main: toGroups(alt[0]), helper: toGroups(alt[1]), avoid: toGroups(alt[2]) };
+  if (!result.main.length && !result.helper.length && !result.avoid.length) {
+    const alt = data['격용신'];
+    if (Array.isArray(alt)) {
+      result = {
+        main: toGroups(alt[0]),
+        helper: toGroups(alt[1]),
+        avoid: toGroups(alt[2]),
+      };
+    }
   }
+
   return result;
 }
 
-// 일간(자기 자신)은 제외하고, 시간을 모르면 시주도 제외
 function collectGods(data: SajuData, hourUnknown: boolean) {
   const gods: string[] = [];
   const stems: string[] = [];
   let monthGod = '';
 
-  const src = data['십성'];
-  if (!Array.isArray(src)) return { gods, stems, monthGod };
+  if (!Array.isArray(data['십성'])) return { gods, stems, monthGod };
 
-  src.forEach((pillar: unknown, index: number) => {
+  data['십성'].forEach((pillar: unknown, index: number) => {
     if (!Array.isArray(pillar)) return;
-    if (index === HOUR_PILLAR && hourUnknown) return;
+    if (index === 0 && hourUnknown) return;
 
-    const stem = pillar[0];
-    const branch = pillar[1];
+    const [stem, branch] = pillar;
 
-    if (index !== DAY_PILLAR && typeof stem === 'string' && stem in TENGOD_WEIGHTS) {
+    if (index !== 1 && typeof stem === 'string' && stem in TENGOD_WEIGHTS) {
       gods.push(stem);
       stems.push(stem);
     }
+
     if (typeof branch === 'string' && branch in TENGOD_WEIGHTS) {
       gods.push(branch);
-      if (index === MONTH_PILLAR) monthGod = branch;
+      if (index === 2) monthGod = branch;
     }
   });
 
   return { gods, stems, monthGod };
 }
 
-// 현재 대운 십성: 대운.현재.간지를 대운순서에서 찾아 같은 인덱스의 십성을 사용
-function getCurrentLuckGods(data: SajuData): { stem: string; branch: string } | null {
+function getCurrentLuckGods(data: SajuData) {
   const current = data['대운']?.['현재']?.['간지'];
   const order = data['대운순서'];
   const gods = data['대운순서십성'];
-  if (typeof current !== 'string' || !Array.isArray(order) || !Array.isArray(gods)) return null;
+
+  if (!current || !Array.isArray(order) || !Array.isArray(gods)) return null;
 
   const index = order.indexOf(current);
-  if (index < 0) return null;
+  const pair = index >= 0 ? gods[index] : null;
 
-  const pair = gods[index];
-  if (!Array.isArray(pair)) return null;
-  return { stem: String(pair[0] ?? ''), branch: String(pair[1] ?? '') };
+  return Array.isArray(pair)
+    ? { stem: String(pair[0] ?? ''), branch: String(pair[1] ?? '') }
+    : null;
 }
 
-// 격국 → 유형 가산점. 종격/화격은 신강약 판정이 뒤집히므로 special로 표시
-function parseStructure(raw: string): { special: boolean; boosts: Weight[] } {
+function parseStructure(raw: string) {
   const s = raw.replace(/\s/g, '');
-  if (!s) return { special: false, boosts: [] };
+  if (!s) return { special: false, boosts: [] as Weight[] };
 
-  if (/종재/.test(s)) return { special: true, boosts: [['investment', 6]] };
-  if (/종아|종식|종상/.test(s)) return { special: true, boosts: [['talent', 6]] };
-  if (/종관|종살/.test(s)) return { special: true, boosts: [['stable', 6]] };
-  if (/종강|종왕|전왕|종비|종겁/.test(s)) return { special: true, boosts: [['business', 6]] };
+  if (/종재/.test(s)) return { special: true, boosts: [['investment', 6] as Weight] };
+  if (/종아|종식|종상/.test(s)) return { special: true, boosts: [['talent', 6] as Weight] };
+  if (/종관|종살/.test(s)) return { special: true, boosts: [['stable', 6] as Weight] };
+  if (/종강|종왕|전왕|종비|종겁/.test(s)) return { special: true, boosts: [['business', 6] as Weight] };
   if (/종|화격/.test(s)) return { special: true, boosts: [] };
 
-  if (/식신|상관|식상/.test(s)) return { special: false, boosts: [['talent', 6]] };
-  if (/편재/.test(s)) return { special: false, boosts: [['opportunity', 6]] };
-  if (/정재|재격/.test(s)) return { special: false, boosts: [['investment', 6]] };
-  if (/정관|편관|칠살|관격/.test(s)) return { special: false, boosts: [['stable', 6]] };
-  if (/정인|편인|인수|인격/.test(s)) return { special: false, boosts: [['stable', 5]] };
-  if (/건록|양인|비겁/.test(s)) return { special: false, boosts: [['business', 5]] };
+  if (/식신|상관|식상/.test(s)) return { special: false, boosts: [['talent', 6] as Weight] };
+  if (/편재/.test(s)) return { special: false, boosts: [['opportunity', 6] as Weight] };
+  if (/정재|재격/.test(s)) return { special: false, boosts: [['investment', 6] as Weight] };
+  if (/정관|편관|칠살|관격/.test(s)) return { special: false, boosts: [['stable', 6] as Weight] };
+  if (/정인|편인|인수|인격/.test(s)) return { special: false, boosts: [['stable', 5] as Weight] };
+  if (/건록|양인|비겁/.test(s)) return { special: false, boosts: [['business', 5] as Weight] };
 
-  return { special: false, boosts: [] };
+  return { special: false, boosts: [] as Weight[] };
 }
 
-// ─── 분석 이유 ───────────────────────────────────────────
-type ReasonContext = {
-  val: (group: TenGodGroup) => number;
-  gods: string[];
-  monthGod: string;
-  luck: { stem: string; branch: string } | null;
-  useful: UsefulGods;
-  special: boolean;
-  isStrong: boolean;
-  isWeak: boolean;
-  siksangSaengJae: boolean;
-  tonggwan: boolean;
-};
-
-function buildReasons(code: MoneyTypeCode, c: ReasonContext): string[] {
+function buildReasons(code: MoneyTypeCode, c: any): string[] {
   const r: string[] = [];
-  const has = (...names: string[]) => c.gods.some((g) => names.includes(g));
+  const has = (...names: string[]) => c.gods.some((g: string) => names.includes(g));
   const monthIs = (...names: string[]) => names.includes(c.monthGod);
   const luckHas = (...names: string[]) =>
     !!c.luck && (names.includes(c.luck.stem) || names.includes(c.luck.branch));
@@ -315,32 +281,20 @@ function buildReasons(code: MoneyTypeCode, c: ReasonContext): string[] {
   return r.slice(0, 4);
 }
 
-// ─── 메인 분석 ───────────────────────────────────────────
-function analyzeMoneyType(
-  data: SajuData,
-  options: { birthTimeUnknown?: boolean } = {},
-): MoneyTypeResult {
+function analyzeMoneyType(data: SajuData, options: { birthTimeUnknown?: boolean } = {}) {
   const scores: MoneyScores = {
-    stable: 50,
-    talent: 50,
-    business: 50,
-    investment: 50,
-    opportunity: 50,
-    network: 50,
+    stable: 50, talent: 50, business: 50,
+    investment: 50, opportunity: 50, network: 50,
   };
 
-  const add = (type: MoneyTypeCode, amount: number) => {
-    scores[type] += amount;
-  };
-  const addWeights = (weights: Weight[] | undefined, factor = 1) => {
-    (weights ?? []).forEach(([type, w]) => add(type, w * factor));
-  };
+  const add = (type: MoneyTypeCode, amount: number) => { scores[type] += amount; };
+  const addWeights = (weights?: Weight[], factor = 1) =>
+    (weights ?? []).forEach(([type, weight]) => add(type, weight * factor));
 
   const developed = parseRecord(data['발달십성']);
   const val = (group: TenGodGroup) => developed[group] ?? AVG_SHARE;
   const dev = (group: TenGodGroup) => val(group) - AVG_SHARE;
 
-  // 1. 발달십성: 평균(20) 대비 얼마나 치우쳤는지로 계산 (고정 임계값 대신)
   add('stable', dev('관성') * 0.6 + dev('인성') * 0.4);
   add('talent', dev('식상') * 0.8);
   add('business', dev('비겁') * 0.5 + dev('식상') * 0.3);
@@ -348,23 +302,19 @@ function analyzeMoneyType(
   add('opportunity', dev('재성') * 0.4 + dev('식상') * 0.4);
   add('network', dev('비겁') * 0.3 + dev('재성') * 0.3);
 
-  // 2. 십성 배치 (일간 제외, 시간 모르면 시주 제외) + 월령 가중
   const { gods, stems, monthGod } = collectGods(data, !!options.birthTimeUnknown);
   gods.forEach((god) => addWeights(TENGOD_WEIGHTS[god]));
   if (monthGod) addWeights(TENGOD_WEIGHTS[monthGod], MONTH_EXTRA);
-  if (stems.includes('편재')) add('opportunity', 3); // 편재가 천간에 드러남
+  if (stems.includes('편재')) add('opportunity', 3);
 
-  // 3. 격국
   const structure = parseStructure(String(data['격구분'] ?? ''));
   addWeights(structure.boosts);
 
-  // 4. 용신 / 희신 / 기신
   const useful = getUsefulGods(data);
   useful.main.forEach((g) => addWeights(GROUP_WEIGHTS[g], 5));
   useful.helper.forEach((g) => addWeights(GROUP_WEIGHTS[g], 2.5));
   useful.avoid.forEach((g) => addWeights(GROUP_WEIGHTS[g], -3));
 
-  // 5. 신강/신약 (강약 가산은 여기서 한 번만, 종격·화격은 제외)
   const strengthScore = getStrengthScore(data);
   const isStrong = strengthScore >= 75;
   const isWeak = strengthScore <= 35;
@@ -373,13 +323,13 @@ function analyzeMoneyType(
     if (isStrong) {
       add('business', 6);
       add('network', 2);
-      if (val('재성') >= 20) add('investment', 4); 
+      if (val('재성') >= 20) add('investment', 4);
     }
+
     if (isWeak) {
       add('stable', 4);
       add('business', -4);
 
-      // 재다신약: 재물이 많아도 내 것으로 만들기 어려움
       const excess = val('재성') - AVG_SHARE;
       if (excess > 0) {
         const penalty = Math.min(12, excess * 0.8);
@@ -389,162 +339,131 @@ function analyzeMoneyType(
       }
     }
 
-    // 군겁쟁재: 비겁은 많고 재성은 약하며 식상 통관도 없음
     if (val('비겁') >= 30 && val('재성') <= 10 && val('식상') < 15) {
       add('investment', -5);
       add('network', -6);
     }
   }
 
-  // 6. 흐름: 식상생재 / 비겁→식상→재성 통관
   const siksangSaengJae = val('식상') >= 25 && val('재성') >= 15;
   const tonggwan = val('비겁') >= 22 && val('식상') >= 20 && val('재성') >= 15;
+
   if (siksangSaengJae) {
     add('opportunity', 4);
     add('investment', 3);
   }
+
   if (tonggwan) add('network', 8);
 
-  // 7. 현재 대운 (영향은 작게)
   const luck = getCurrentLuckGods(data);
   if (luck) {
     addWeights(TENGOD_WEIGHTS[luck.stem], 2);
     addWeights(TENGOD_WEIGHTS[luck.branch], 1.5);
   }
 
-  // 8. 정규화 및 결정
-  const normalized: MoneyScores = {
-    stable: clamp(scores.stable),
-    talent: clamp(scores.talent),
-    business: clamp(scores.business),
-    investment: clamp(scores.investment),
-    opportunity: clamp(scores.opportunity),
-    network: clamp(scores.network),
-  };
+  const normalized = Object.fromEntries(
+    Object.entries(scores).map(([key, value]) => [key, clamp(value)]),
+  ) as MoneyScores;
 
-  const sorted = (Object.entries(normalized) as [MoneyTypeCode, number][]).sort((a, b) => {
-    const diff = b[1] - a[1];
-    if (diff !== 0) return diff;
-    return TIE_PRIORITY.indexOf(a[0]) - TIE_PRIORITY.indexOf(b[0]);
-  });
+  const sorted = (Object.entries(normalized) as [MoneyTypeCode, number][])
+    .sort((a, b) => b[1] - a[1] || TIE_PRIORITY.indexOf(a[0]) - TIE_PRIORITY.indexOf(b[0]));
 
   const code = sorted[0][0];
 
   const reasons = buildReasons(code, {
-    val,
-    gods,
-    monthGod,
-    luck,
-    useful,
-    special: structure.special,
-    isStrong,
-    isWeak,
-    siksangSaengJae,
-    tonggwan,
+    val, gods, monthGod, luck, useful,
+    special: structure.special, isStrong, isWeak,
+    siksangSaengJae, tonggwan,
   });
 
   if (sorted[0][1] - sorted[1][1] <= 5) {
     reasons.push(`${TYPE_LABEL[sorted[1][0]]} 성향도 비슷하게 나타나는 복합형`);
   }
-  if (reasons.length === 0) {
-    reasons.push('사주의 전체적인 구조를 기준으로 분석');
-  }
 
-  return { code, scores: normalized, reason: reasons.slice(0, 5) };
+  if (!reasons.length) reasons.push('사주의 전체적인 구조를 기준으로 분석');
+
+  return {
+    code,
+    scores: normalized,
+    reason: reasons.slice(0, 5),
+  };
 }
 
-// ─── API 요청 처리 ───────────────────────────────────────
-interface RequestBody {
+type RequestBody = {
   birthday: string;
   birthTime?: string;
   gender: 'female' | 'male';
   calendarType?: 'solar' | 'lunar';
   birthTimeUnknown?: boolean;
-}
-
-const BROWSER_HEADERS = {
-  'Accept': 'application/json, text/plain, */*',
-  'Accept-Encoding': 'gzip, deflate, br',
-  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-  'Cache-Control': 'no-cache',
-  'Connection': 'keep-alive',
-  'Host': 'service.stargio.co.kr:8400',
-  'Origin': 'https://nadaunse.com',
-  'Referer': 'https://nadaunse.com/',
-  'Sec-Fetch-Dest': 'empty',
-  'Sec-Fetch-Mode': 'cors',
-  'Sec-Fetch-Site': 'cross-site',
-  'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
 };
 
-function getSajuSource(data: any): any {
-  if (data && typeof data === 'object') {
-    if (data.data && typeof data.data === 'object') return data.data;
-    if (data.result && typeof data.result === 'object') return data.result;
-  }
-  return data;
+const BROWSER_HEADERS = {
+  Accept: 'application/json, text/plain, */*',
+  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+  'Cache-Control': 'no-cache',
+  Origin: 'https://nadaunse.com',
+  Referer: 'https://nadaunse.com/',
+  'User-Agent': 'Mozilla/5.0',
+};
+
+function getSajuSource(data: any) {
+  return data?.data ?? data?.result ?? data;
 }
 
-function convertBirthTime(birthTime?: string): string {
-  if (!birthTime) return '';
+function convertBirthTime(birthTime?: string) {
+  if (!birthTime || ['모름', 'unknown'].includes(birthTime.trim())) return '';
+
   const value = birthTime.trim();
-  if (!value || value === '모름' || value === 'unknown') return '';
+  const ampm = value.match(/(오전|오후)\s*(\d{1,2}):?(\d{2})/);
 
-  const amPmMatch = value.match(/(오전|오후)\s*(\d{1,2}):?(\d{2})/);
-  if (amPmMatch) {
-    let hour = parseInt(amPmMatch[2], 10);
-    const minute = amPmMatch[3];
-    if (amPmMatch[1] === '오후' && hour < 12) hour += 12;
-    if (amPmMatch[1] === '오전' && hour === 12) hour = 0;
-    return String(hour).padStart(2, '0') + minute;
+  if (ampm) {
+    let hour = Number(ampm[2]);
+    if (ampm[1] === '오후' && hour < 12) hour += 12;
+    if (ampm[1] === '오전' && hour === 12) hour = 0;
+    return `${String(hour).padStart(2, '0')}${ampm[3]}`;
   }
 
-  const timeMatch = value.match(/^(\d{1,2}):?(\d{2})$/);
-  if (timeMatch) {
-    const hour = parseInt(timeMatch[1], 10);
-    const minute = timeMatch[2];
-    if (hour >= 0 && hour <= 23) {
-      return String(hour).padStart(2, '0') + minute;
-    }
+  const match = value.match(/^(\d{1,2}):?(\d{2})$/);
+  if (match && Number(match[1]) <= 23) {
+    return `${String(Number(match[1])).padStart(2, '0')}${match[2]}`;
   }
+
   return '';
 }
 
 async function requestStargio(input: RequestBody) {
-  const sajuApiKey = Deno.env.get('SAJU_API_KEY')?.trim();
-  if (!sajuApiKey) throw new Error('SAJU_API_KEY 환경변수가 설정되어 있지 않습니다.');
+  const apiKey = Deno.env.get('SAJU_API_KEY')?.trim();
+  if (!apiKey) throw new Error('SAJU_API_KEY 환경변수가 설정되어 있지 않습니다.');
 
-  const cleanBirthday = input.birthday.replace(/[^0-9]/g, '');
-  if (cleanBirthday.length !== 8) throw new Error('생년월일 형식이 올바르지 않습니다.');
+  const birthday = input.birthday.replace(/\D/g, '');
+  if (birthday.length !== 8) throw new Error('생년월일 형식이 올바르지 않습니다.');
 
-  const convertedTime = input.birthTimeUnknown ? '' : convertBirthTime(input.birthTime);
-  const apiBirthday = cleanBirthday + (convertedTime || '1200');
+  const time = input.birthTimeUnknown ? '' : convertBirthTime(input.birthTime);
+  const url =
+    `https://service.stargio.co.kr:8400/StargioSaju?birthday=${birthday}${time || '1200'}` +
+    `&lunar=${input.calendarType === 'lunar'}&gender=${input.gender}&apiKey=${apiKey}`;
 
-  const isLunar = input.calendarType === 'lunar';
-  const sajuApiUrl = `https://service.stargio.co.kr:8400/StargioSaju?birthday=${encodeURIComponent(
-    apiBirthday,
-  )}&lunar=${isLunar}&gender=${encodeURIComponent(input.gender)}&apiKey=${encodeURIComponent(sajuApiKey)}`;
-
-  let sajuData: any = null;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let i = 1; i <= 3; i++) {
     try {
-      const response = await fetch(sajuApiUrl, { method: 'GET', headers: BROWSER_HEADERS });
+      const response = await fetch(url, { headers: BROWSER_HEADERS });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const parsed = await response.json();
-      if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-        sajuData = parsed;
-        break;
-      }
-      throw new Error('Stargio API 응답이 비어 있습니다.');
-    } catch (error) {
-      console.error(`Stargio API 시도 ${attempt}/3 실패:`, error instanceof Error ? error.message : error);
-      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+
+      const data = await response.json();
+      if (data && typeof data === 'object' && Object.keys(data).length) return data;
+    } catch (err) {
+      console.error(`Stargio API ${i}/3 실패`, err);
+      if (i < 3) await new Promise((r) => setTimeout(r, i * 1000));
     }
   }
 
-  if (!sajuData) throw new Error('Stargio API에서 사주 정보를 가져오지 못했습니다.');
-  return sajuData;
+  throw new Error('Stargio API에서 사주 정보를 가져오지 못했습니다.');
+}
+
+function getServiceSupabase() {
+  const url = Deno.env.get('SUPABASE_URL');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) throw new Error('Supabase 환경변수가 설정되어 있지 않습니다.');
+  return createClient(url, key);
 }
 
 async function saveMoneyTypeResult(input: {
@@ -558,102 +477,125 @@ async function saveMoneyTypeResult(input: {
   calendarType: string;
   sajuData: unknown;
 }) {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  if (!supabaseUrl || !supabaseServiceKey) throw new Error('Supabase 환경변수가 설정되어 있지 않습니다.');
+  const { error: dbError } = await getServiceSupabase()
+    .from('money_type_results')
+    .insert({
+      result_id: input.resultId,
+      type_code: input.typeCode,
+      scores: input.scores,
+      reason: input.reason,
+      gender: input.gender,
+      birth_date: input.birthday,
+      birth_time: input.birthTime,
+      calendar_type: input.calendarType,
+      saju_data: input.sajuData,
+    });
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const { error } = await supabase.from('money_type_results').insert({
-    result_id: input.resultId,
-    type_code: input.typeCode,
-    scores: input.scores,
-    reason: input.reason,
-    gender: input.gender,
-    birth_date: input.birthday,
-    birth_time: input.birthTime,
-    calendar_type: input.calendarType,
-    saju_data: input.sajuData,
-  });
-
-  if (error) throw new Error(`돈 버는 방식 결과 저장 실패: ${error.message}`);
+  if (dbError) throw new Error(`결과 저장 실패: ${dbError.message}`);
 }
 
 async function fetchTypeInfo(code: MoneyTypeCode) {
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const supabase = createClient(supabaseUrl, key);
-  const { data } = await supabase
+  const { data, error } = await getServiceSupabase()
     .from('money_types')
-    .select('code, title, emoji, keyword, description, money_formula, strengths, caution')
+    .select('code,title,emoji,keyword,description,money_formula,strengths,caution')
     .eq('code', code)
     .eq('is_active', true)
     .maybeSingle();
+
+  if (error) throw new Error(`유형 정보 조회 실패: ${error.message}`);
   return data ?? null;
 }
 
-Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') {
-    return handleCorsPreflightRequest(req);
+async function getMoneyTypeResult(req: Request) {
+  const resultId = new URL(req.url).searchParams.get('resultId')?.trim();
+  if (!resultId) return error('resultId가 필요합니다.');
+
+  const { data: result, error: resultError } = await getServiceSupabase()
+    .from('money_type_results')
+    .select('id,result_id,type_code,scores,reason,created_at')
+    .eq('result_id', resultId)
+    .maybeSingle();
+
+  if (resultError) throw new Error(`결과 조회 실패: ${resultError.message}`);
+  if (!result) return error('해당 결과를 찾을 수 없습니다.', 404);
+
+  const typeInfo = await fetchTypeInfo(result.type_code as MoneyTypeCode);
+
+  return json({
+    success: true,
+    resultId: result.result_id,
+    data: {
+      code: result.type_code,
+      scores: result.scores ?? {},
+      reason: Array.isArray(result.reason) ? result.reason : [],
+      typeInfo,
+      created_at: result.created_at,
+    },
+  });
+}
+
+async function createMoneyTypeResult(req: Request) {
+  const body: RequestBody = await req.json();
+  const { birthday, birthTime, gender, calendarType = 'solar', birthTimeUnknown } = body;
+
+  if (!birthday || !gender) {
+    return error('생년월일과 성별은 필수 입력 사항입니다.');
   }
 
-  try {
-    if (req.method !== 'POST') {
-      return errorResponse(req, 'POST 요청만 사용할 수 있습니다.', 405);
-    }
+  const cleanBirthday = birthday.replace(/\D/g, '');
+  if (cleanBirthday.length !== 8) {
+    return error('생년월일은 YYYYMMDD 형식으로 입력해주세요.');
+  }
 
-    const body: RequestBody = await req.json();
-    const { birthday, birthTime, gender, calendarType = 'solar', birthTimeUnknown } = body;
+  const convertedBirthTime = birthTimeUnknown ? '' : convertBirthTime(birthTime);
 
-    if (!birthday || !gender) {
-      return errorResponse(req, '생년월일과 성별은 필수 입력 사항입니다.', 400);
-    }
+  const sajuData = await requestStargio({
+    birthday: cleanBirthday,
+    birthTime: birthTime ?? '',
+    gender,
+    calendarType,
+    birthTimeUnknown,
+  });
 
-    const cleanBirthday = birthday.replace(/[^0-9]/g, '');
-    if (cleanBirthday.length !== 8) {
-      return errorResponse(req, '생년월일은 YYYYMMDD 형식으로 입력해주세요.', 400);
-    }
+  const analysis = analyzeMoneyType(getSajuSource(sajuData), {
+    birthTimeUnknown: !convertedBirthTime,
+  });
 
-    const convertedBirthTime = birthTimeUnknown ? '' : convertBirthTime(birthTime);
-    const hourUnknown = !convertedBirthTime;
+  const resultId = crypto.randomUUID();
 
-    const sajuData = await requestStargio({
-      birthday: cleanBirthday,
-      birthTime: birthTime ?? '',
-      gender,
-      calendarType,
-      birthTimeUnknown,
-    });
+  await saveMoneyTypeResult({
+    resultId,
+    typeCode: analysis.code,
+    scores: analysis.scores,
+    reason: analysis.reason,
+    gender,
+    birthday: cleanBirthday,
+    birthTime: convertedBirthTime,
+    calendarType,
+    sajuData,
+  });
 
-    const analysisSource = getSajuSource(sajuData);
-    const analysis = analyzeMoneyType(analysisSource, { birthTimeUnknown: hourUnknown });
-    const resultId = crypto.randomUUID();
-
-    await saveMoneyTypeResult({
-      resultId,
-      typeCode: analysis.code,
+  return json({
+    success: true,
+    resultId,
+    data: {
+      code: analysis.code,
       scores: analysis.scores,
       reason: analysis.reason,
-      gender,
-      birthday: cleanBirthday,
-      birthTime: convertedBirthTime,
-      calendarType,
-      sajuData,
-    });
+      typeInfo: await fetchTypeInfo(analysis.code),
+    },
+  });
+}
 
-    const typeInfo = await fetchTypeInfo(analysis.code);
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
 
-    return jsonResponse(req, {
-      success: true,
-      resultId,
-      data: {
-        code: analysis.code,
-        scores: analysis.scores,
-        reason: analysis.reason,
-        typeInfo,
-      },
-    });
+  try {
+    if (req.method === 'GET') return await getMoneyTypeResult(req);
+    if (req.method === 'POST') return await createMoneyTypeResult(req);
+    return error('GET, POST 요청만 사용할 수 있습니다.', 405);
   } catch (err) {
-    console.error('💰 돈 버는 방식 분석 API 처리 에러:', err);
-    return errorResponse(req, err instanceof Error ? err.message : '서버 오류가 발생했습니다.', 500);
+    console.error('money-type API error:', err);
+    return error(err instanceof Error ? err.message : '서버 오류가 발생했습니다.', 500);
   }
 });
