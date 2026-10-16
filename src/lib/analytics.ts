@@ -98,7 +98,7 @@ export type FeatureType =
   | 'future_spouse' 
   | 'child_personality'
   | 'money_type'
-  | 'gwiin_map' ; 
+  | 'life-turning-point' ;
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 
