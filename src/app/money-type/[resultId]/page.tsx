@@ -111,7 +111,7 @@ export default async function MoneyTypeResultPage({ params }: PageProps) {
 
   return (
     <>
-      <LandingTracker featureType="money_type_result" />
+      <LandingTracker featureType="money_type" />
 
       <h1 className="sr-only">
         {content.title} — 나의 돈 버는 방식 테스트 결과

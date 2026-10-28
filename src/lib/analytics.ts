@@ -98,7 +98,7 @@ export type FeatureType =
   | 'future_spouse' 
   | 'child_personality'
   | 'money_type'
-  | 'life-turning-point' ;
+  | 'life_turning_point';
 
 export type EventType = 'share_click' | 'sajugpt_link_click' | 'referral_visit' | 'landing_visit';
 
@@ -135,7 +135,7 @@ export function trackViralEvent(params: TrackViralEventParams): void {
         console.warn('[ViralEvent] insert skipped due to schema/constraint:', error.message);
       }
     })
-    .catch((err) => {
+    .then(undefined, (err: unknown) => {
       console.warn('[ViralEvent] network error ignored:', err);
     });
 

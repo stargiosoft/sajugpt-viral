@@ -204,11 +204,9 @@ const MoneyTypeResultCard = forwardRef<HTMLDivElement, MoneyTypeResultCardProps>
 
         {/* 상단 네비게이션 바 */}
         <TestTopNav
-          title="돈 버는 방식 테스트"
           bgColor="transparent"
           logoColor="#493C35"
           xColor="#493C35"
-          onReset={onReset}
         />
 
         <section className="px-4 pt-4">

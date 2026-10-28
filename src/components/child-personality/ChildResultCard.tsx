@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 import type {
   ChildPersonalityResult,
-} from '@/types/child-personality';
+} from '@/lib/child-personality/analyzeChild';
 
 interface Props {
   result: ChildPersonalityResult;

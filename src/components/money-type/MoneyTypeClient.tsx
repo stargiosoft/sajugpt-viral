@@ -51,7 +51,7 @@ export type MoneyTypeInfo = {
 export type MoneyTypeResultData = {
   resultId: string;
   code: MoneyTypeCode;
-  scores: Record<string, number>;
+  scores: Record<MoneyTypeCode, number>;
   reason: string[];
   typeInfo: MoneyTypeInfo | null;
 };
@@ -95,8 +95,8 @@ function normalizeResult(
 
   const scores =
     innerData.scores && typeof innerData.scores === "object"
-      ? innerData.scores
-      : {};
+      ? (innerData.scores as Record<MoneyTypeCode, number>)
+      : ({} as Record<MoneyTypeCode, number>);
 
   const reason = Array.isArray(innerData.reason)
     ? innerData.reason

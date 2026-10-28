@@ -21,11 +21,11 @@ import ChildResultCard from './ChildResultCard';
 
 import {
   analyzeChild,
+  type ChildPersonalityResult,
 } from '@/lib/child-personality/analyzeChild';
 
 import type {
   ChildGender,
-  ChildPersonalityResult,
 } from '@/types/child-personality';
 
 import { trackEvent } from '@/lib/analytics';

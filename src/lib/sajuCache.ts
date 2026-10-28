@@ -5,6 +5,7 @@ export interface SajuCacheData {
   birthTime: string;
   unknownTime: boolean;
   gender: Gender;
+  calendar?: "solar" | "lunar";
 }
 
 function load(key: string): SajuCacheData | null {

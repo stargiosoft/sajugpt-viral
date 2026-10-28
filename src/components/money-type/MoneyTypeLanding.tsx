@@ -158,7 +158,6 @@ export default function MoneyTypeLanding({
               placeholder="내 돈 버는 방식은 어떤가요? 한 마디 남겨보세요!"
               themeColor="#E98C72"
               inputBg="#FAF6F0"
-              inputBorder="1px solid #F0E5DB"
               disabledBg="#DCE0E5"
             />
           </motion.div>

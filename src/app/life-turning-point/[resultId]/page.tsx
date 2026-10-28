@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import type { Gender } from "@/types/battle";
-import type { LifeTurningPointResult } from "@/types/life-turning-point/type.ts";
+import type { LifeTurningPointResult } from "@/types/life-turning-point/types";
 
 import LifeTurningBirthInput from "@/components/life-turning-point/LifeTurningBirthInput";
 import ResultCard from "@/components/life-turning-point/LifeTurningResultCard";

@@ -3,7 +3,7 @@
 import type {
   LifeTurningPointResult,
   LifeTurningPointSection,
-} from "@/types/life-turning-point/type.ts";
+} from "@/types/life-turning-point/types";
 
 type ResultCardProps = {
   result?: LifeTurningPointResult | null;

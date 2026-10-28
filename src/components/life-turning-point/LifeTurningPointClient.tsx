@@ -22,7 +22,7 @@ import { useShareActions } from "@/lib/useShareActions";
 import { SAJUGPT_URL } from "@/constants/links";
 import useIsNarrow from "@/hooks/useIsNarrow";
 
-import type { LifeTurningPointResult } from "@/components/life-turning-point/types";
+import type { LifeTurningPointResult } from "@/types/life-turning-point/types";
 
 type LifeTurningPointStep =
   | "landing"
