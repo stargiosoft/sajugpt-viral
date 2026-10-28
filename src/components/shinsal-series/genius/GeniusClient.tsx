@@ -238,7 +238,7 @@ export default function GeniusClient() {
                         title: `✨ 나의 사주GPT 천재성 결과는?`,
                         description: '내 천재 지수를 확인해보세요!',
                         shareUrl,
-                        imageUrl: origin ? `${origin}/shinsal-genius/og-share.png` : '/shinsal-genius/og-share.png',
+                        imageUrl: origin ? `${origin}/shinsal-series/og-share.png` : '/shinsal-series/og-share.png',
                         testId: 'shinsal-genius',
                       }}
                       copyColor={C.accent}
@@ -251,7 +251,7 @@ export default function GeniusClient() {
                 {/* 4. 하단 커뮤니티 및 댓글 섹션 (ResultFooterSections) */}
                 <div style={{ marginTop: '8px' }}>
                   <ResultFooterSections
-                    excludeId="analyze-shinsal-genius"
+                    excludeId="shinsal-genius"
                     titleStyle={{ fontSize: '16px', fontWeight: 700, color: C.text }}
                     cardBg={C.panelBg}
                     cardTitleColor={C.text}

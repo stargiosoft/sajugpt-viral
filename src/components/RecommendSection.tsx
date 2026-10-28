@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import { TEST_CATALOG } from '@/constants/testCatalog';
 import { trackEvent } from '@/lib/analytics';
 
-const ALL_IDS = ['ghost-tarot', 'romance-ghost-tarot', 'deang-saju', 'love-chat', 'money-timeline', 'oheng', 'solo-guide'];
+// 홈에 노출 중인 테스트 전체를 추천한다. 최신 테스트가 앞에 오도록 카탈로그 역순으로 정렬.
+const ALL_IDS = TEST_CATALOG.filter((item) => item.visibleOnHome).map((item) => item.id).reverse();
 const GAP_PX = 6;
 const DRAG_CLICK_THRESHOLD_PX = 6;
 

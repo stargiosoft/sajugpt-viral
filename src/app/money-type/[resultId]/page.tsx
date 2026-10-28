@@ -52,7 +52,7 @@ export async function generateMetadata({
       siteName: "광필연구소",
       images: [
         {
-          url: "/money-type/og-share.png?v=1",
+          url: "/money-type/og-share.png?v=2",
           width: 1200,
           height: 600,
         },

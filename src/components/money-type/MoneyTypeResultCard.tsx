@@ -276,7 +276,7 @@ const MoneyTypeResultCard = forwardRef<HTMLDivElement, MoneyTypeResultCardProps>
               <div className="mt-4 rounded-[28px] border border-[#F2E3D5] bg-white px-6 py-6 shadow-[0_8px_30px_rgba(73,60,53,0.04)]">
                 <div className="text-center mb-5">
                   <span className="text-[10px] font-extrabold tracking-widest text-[#E98C72] uppercase">
-                    MESSY TO CLEAR FLOW
+                    6 MONEY TYPES
                   </span>
                   <h3 className="mt-0.5 text-[16px] font-black text-[#493C35]">
                     6가지 돈 버는 방식 스펙트럼

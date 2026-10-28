@@ -533,7 +533,7 @@ export function LoveSeasonResult({
         {/* ResultFooterSections */}
         <div style={{ marginTop: '16px' }}>
           <ResultFooterSections
-            excludeId="loving_season"
+            excludeId="loving-season"
             featureType="loving_season"
             resultId={resultId}
             themeColor={LC_COLORS.accent}

@@ -1006,7 +1006,7 @@ export default function ZiweiDetailTable({
                   title: ` ${content.title}`,
                   description: content.tip,
                   shareUrl,
-                  imageUrl: origin ? `${origin}/ziwei/og-share.jpg` : '/ziwei/og-share.jpg',
+                  imageUrl: origin ? `${origin}/ziwei-chart/og-share.png` : '/ziwei-chart/og-share.png',
                   testId: 'ziwei-guide',
                 }}
                 copyColor="#ec4899"

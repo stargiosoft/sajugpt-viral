@@ -136,7 +136,7 @@ export default function ChildPersonalityClient({
       ? window.location.origin
       : '';
 
-  const shareUrl = origin;
+  const shareUrl = origin ? `${origin}/child-personality` : '';
 
   // -------------------------------------------------------
   // SHARE

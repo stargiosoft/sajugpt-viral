@@ -115,10 +115,39 @@ export default function LifeTurningPointClient({
     let isMounted = true;
     setStep("analyzing");
 
-    if (isMounted) {
-      setError("저장된 결과를 불러오는 기능은 준비 중이에요.");
-      setStep("input");
-    }
+    (async () => {
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+        const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+        const response = await fetch(
+          `${supabaseUrl}/functions/v1/analyze-life-turningpoint?resultId=${encodeURIComponent(propResultId)}`,
+          {
+            method: "GET",
+            headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+            cache: "no-store",
+          }
+        );
+        const data = await response.json();
+        const saved = data?.result ?? data?.data;
+
+        if (!isMounted) return;
+
+        if (!response.ok || !data?.success || !saved) {
+          setError("결과를 찾을 수 없어요. 생년월일을 입력해서 다시 확인해 보세요.");
+          setStep("landing");
+          window.history.replaceState({}, "", "/life-turning-point");
+          return;
+        }
+
+        setResult({ ...saved, resultId: data.resultId ?? propResultId } as LifeTurningPointResult);
+        setStep("result");
+      } catch (err) {
+        console.error("공유 결과 조회 실패:", err);
+        if (!isMounted) return;
+        setError("결과를 불러오지 못했어요. 생년월일을 입력해서 다시 확인해 보세요.");
+        setStep("landing");
+      }
+    })();
 
     return () => {
       isMounted = false;

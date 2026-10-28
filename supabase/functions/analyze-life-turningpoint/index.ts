@@ -1,8 +1,57 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   handleCorsPreflightRequest,
   jsonResponse,
   errorResponse,
 } from "../server/cors.ts";
+
+// ─── 결과 저장/조회 (공유 링크용) ─────────────────────────
+
+const RESULT_TABLE = "life_turning_point_results";
+
+function getServiceSupabase() {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) throw new Error("Supabase 환경변수가 설정되어 있지 않습니다.");
+  return createClient(url, key);
+}
+
+async function saveResult(resultId: string, result: unknown): Promise<boolean> {
+  try {
+    const { error } = await getServiceSupabase()
+      .from(RESULT_TABLE)
+      .insert({ result_id: resultId, result });
+    if (error) {
+      console.error("[analyze-life-turningpoint] 결과 저장 실패:", error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[analyze-life-turningpoint] 결과 저장 실패:", err);
+    return false;
+  }
+}
+
+async function handleGetResult(req: Request): Promise<Response> {
+  const resultId = new URL(req.url).searchParams.get("resultId")?.trim();
+  if (!resultId) return errorResponse(req, "resultId가 필요합니다.", 400);
+
+  const { data, error } = await getServiceSupabase()
+    .from(RESULT_TABLE)
+    .select("result_id,result")
+    .eq("result_id", resultId)
+    .maybeSingle();
+
+  if (error) return errorResponse(req, `결과 조회 실패: ${error.message}`, 500);
+  if (!data) return errorResponse(req, "해당 결과를 찾을 수 없습니다.", 404);
+
+  return jsonResponse(req, {
+    success: true,
+    resultId: data.result_id,
+    result: data.result,
+    data: data.result,
+  });
+}
 
 // ─── 타입 정의 ──────────────────────────────────────────
 
@@ -489,7 +538,7 @@ function analyze(raw: UnknownRecord, birthYear: number) {
     "지금 떠오르는 아이디어나 작은 목표를 기록하고, 가볍게 시도해 보세요. 작은 실행이 큰 변화의 시작점이 돼요.";
   const action =
     gisinList.length > 0
-      ? `${baseAction} 반대로 ${gisinList.join("·")} 기운이 과하게 몰리는 환경은 힘이 빠질 수 있으니 거리를 두세요.`
+      ? `${baseAction} 다만 ${gisinList.join("·")} 기운이 과하게 몰리는 환경은 힘이 빠질 수 있으니 거리를 두세요.`
       : baseAction;
 
   return {
@@ -523,7 +572,15 @@ function analyze(raw: UnknownRecord, birthYear: number) {
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return handleCorsPreflightRequest(req);
-  if (req.method !== "POST") return errorResponse(req, "POST 요청만 허용됩니다.", 405);
+  if (req.method === "GET") {
+    try {
+      return await handleGetResult(req);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "결과 조회 중 오류가 발생했습니다.";
+      return errorResponse(req, message, 500);
+    }
+  }
+  if (req.method !== "POST") return errorResponse(req, "GET, POST 요청만 허용됩니다.", 405);
 
   try {
     const body = (await req.json()) as RequestBody;
@@ -556,9 +613,14 @@ Deno.serve(async (req: Request) => {
 
     const result = analyze(raw, Number(birthday.slice(0, 4)));
 
+    // 공유 링크로 같은 결과를 다시 볼 수 있도록 저장한다.
+    // 저장에 실패해도 분석 결과는 그대로 보여주되, 공유용 resultId는 내려주지 않는다.
+    const resultId = crypto.randomUUID();
+    const saved = await saveResult(resultId, result);
+
     return jsonResponse(req, {
       success: true,
-      resultId: crypto.randomUUID(),
+      resultId: saved ? resultId : undefined,
       result,
       data: result,
     });

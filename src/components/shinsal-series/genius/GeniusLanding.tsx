@@ -48,7 +48,7 @@ export default function GeniusLanding({ onStart }: Props) {
               title: '사주로 보는 내 안의 괴짜 천재력',
               description: '귀문관살부터 백호살까지! 내 사주 속 숨겨진 천재 스탯을 분석해 드려요.',
               shareUrl: `${origin}/shinsal-series/analyze-shinsal-genius`,
-              imageUrl: `${origin}/shinsal-series/analyze-shinsal-genius/og-share.png`,
+              imageUrl: `${origin}/shinsal-series/og-share.png`,
             }}
             copyColor={C.accent}
             copyHoverColor={C.accentHover}

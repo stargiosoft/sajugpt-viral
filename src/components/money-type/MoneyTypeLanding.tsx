@@ -43,9 +43,9 @@ export default function MoneyTypeLanding({
           transition={{ duration: 0.5, delay: 0.05 }}
           className="mt-2 text-center"
         >
-          <h1 className="font-keris mt-3.5 text-[32px] font-black tracking-[-0.02em] text-[#493C35] leading-tight">
-            내 안에 숨겨진 
-            <span className="text-[#E98C72]"> 돈 버는 방식</span> 찾기
+          <h1 className="font-keris mt-3.5 text-[32px] font-black tracking-[-0.02em] text-[#493C35] leading-tight break-keep">
+            내 안에 숨겨진<br />
+            <span className="text-[#E98C72]">돈 버는 방식</span> 찾기
           </h1>
           <p className="mt-3 text-[15px] font-medium leading-[1.6] text-[#8C7D75]">
             사주 데이터로 정밀하게 분석하는<br />
@@ -72,23 +72,6 @@ export default function MoneyTypeLanding({
           />
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.55, delay: 0.18 }}
-          className="relative my-2 w-full flex items-center justify-center"
-        >
-          <div className="absolute h-44 w-44 rounded-full bg-[#FFEFEA] opacity-70 blur-3xl pointer-events-none" />
-
-          <Image
-            src="/money-type/money-types-grid.png"
-            alt="6가지 돈 버는 방식 유형"
-            width={500}
-            height={600}
-            className="h-auto w-full max-w-125 object-contain"
-          />
-        </motion.div>
-
         {/* 하단 CTA 및 공유/소통 영역 */}
         <div className="w-full flex flex-col items-center" style={{ padding: `${LANDING_GAPS.heroToCta}px 0 0` }}>
           <motion.div
@@ -107,6 +90,23 @@ export default function MoneyTypeLanding({
               height="58px"
               borderRadius="18px"
               textStyle={{ fontWeight: 800, fontSize: '16px', letterSpacing: '-0.02em' }}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.55, delay: 0.18 }}
+            className="relative mb-6 w-full flex items-center justify-center"
+          >
+            <div className="absolute h-44 w-44 rounded-full bg-[#FFEFEA] opacity-70 blur-3xl pointer-events-none" />
+
+            <Image
+              src="/money-type/money-types-grid.png"
+              alt="6가지 돈 버는 방식 유형"
+              width={500}
+              height={600}
+              className="h-auto w-full max-w-125 object-contain"
             />
           </motion.div>
 

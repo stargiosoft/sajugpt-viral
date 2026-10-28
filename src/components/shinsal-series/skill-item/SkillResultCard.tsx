@@ -566,8 +566,8 @@ const SkillResultCard = forwardRef<HTMLDivElement, Props>(
                 '나에게는 어떤 신살 기운이 함께하고 있는지 확인해보세요!',
               shareUrl,
               imageUrl: origin
-                ? `${origin}/shinsal/og-share.jpg`
-                : '/shinsal/og-share.jpg',
+                ? `${origin}/shinsal-series/skill-item/og-share.jpg`
+                : '/shinsal-series/skill-item/og-share.jpg',
               testId: 'shinsal-skill',
             }}
             copyColor={C.accent}

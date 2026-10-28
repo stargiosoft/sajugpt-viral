@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '내 안의 천재 지수 결과 — 사주GPT',
     description: '사주 스탯으로 알아보는 나만의 천재성 결과를 확인해보세요.',
-    images: [{ url: '/shinsal-series/shinsal-genius/og-share.jpg', width: 1200, height: 600 }],
+    images: [{ url: '/shinsal-series/og-share.png', width: 1200, height: 600 }],
   },
 };
 

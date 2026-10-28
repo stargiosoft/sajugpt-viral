@@ -193,7 +193,7 @@ export default function ResultCard({ result }: ResultCardProps) {
         </p>
 
         <p className="mt-3 text-lg font-bold leading-8" style={{ color: C.text }}>
-          인생의 반전은 기다리는 순간보다
+          인생의 반전은 기다리는 순간보다{" "}
           <br className="hidden sm:block" />
           작은 변화를 시작할 때 가까워져요.
         </p>

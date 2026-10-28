@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: '내 안의 천재 지수 측정기⚡️',
     description: '귀문관살부터 백호살까지! 사주 스탯으로 측정하는 나만의 숨겨진 천재 등급',
-    images: [{ url: '/shinsal-series/og-share.jpg', width: 1200, height: 600 }],
+    images: [{ url: '/shinsal-series/og-share.png', width: 1200, height: 600 }],
   },
 };
 
