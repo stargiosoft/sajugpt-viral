@@ -10,7 +10,7 @@ export default function PlaceholderRankingRow({ rank }: Props) {
     <div className="flex items-center w-full" style={{ gap: '10px', cursor: 'default' }}>
       <span
         className="relative flex shrink-0 items-center justify-center overflow-hidden aspect-[4/3]"
-        style={{ width: '60px', borderRadius: '9px', border: `1.5px solid ${PLACEHOLDER_BORDER}`, backgroundColor: PLACEHOLDER_BG }}
+        style={{ width: '60px', borderRadius: '8px', border: `1.5px solid ${PLACEHOLDER_BORDER}`, backgroundColor: PLACEHOLDER_BG }}
       >
         <img src="/home/fire-gray.svg" alt="" style={{ width: '16px', height: '16px', opacity: PLACEHOLDER_ICON_OPACITY }} />
         <span

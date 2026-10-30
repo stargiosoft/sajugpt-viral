@@ -58,7 +58,7 @@ export function LoveSeasonLanding({ onStart }: Props) {
         />
       </motion.div>
 
-      <div style={{ padding: `${LANDING_GAPS.heroToCta}px 20px 0` }}>
+      <div style={{ padding: `${LANDING_GAPS.heroToCta}px 16px 0` }}>
         {/* 2. 직관적인 헤드라인 섹션 */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}

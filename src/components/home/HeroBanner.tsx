@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { SAJUGPT_URL } from '@/constants/links';
 
@@ -59,33 +59,37 @@ const SLIDES: Slide[] = [
 ];
 
 const AUTOPLAY_MS = 4500;
+// 이 거리(px) 이상 끌면 스와이프로 인정 — 그 미만은 탭/제자리 복귀
+const SWIPE_THRESHOLD_PX = 40;
 
 // 양 끝에 클론 슬라이드를 붙여 무한 롤링처럼 이어지게 하는 트랙 인덱스.
 // trackIndex 0 = 마지막 슬라이드의 클론, 1..N = 실제 슬라이드, N+1 = 첫 슬라이드의 클론.
 const EXTENDED_SLIDES: Slide[] = [SLIDES[SLIDES.length - 1], ...SLIDES, SLIDES[0]];
 
-// 자동재생 히어로 배너 — 스와이프 없이 탭으로만 이동 (드래그 트랙 동기화 버그로 제거)
+// 자동재생 히어로 배너 — 좌우 스와이프(터치/마우스 드래그)로 이동.
+// 드래그 중엔 트랙 전환을 끄고 손가락을 따라가며, 놓을 때 기존 autoplay와 같은 트랙 인덱스 경로로만 이동한다.
 export default function HeroBanner() {
   const router = useRouter();
   const [trackIndex, setTrackIndex] = useState(1);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
   const [paused, setPaused] = useState(false);
-  const [hoverTooltip, setHoverTooltip] = useState(false);
-  const [overIndicator, setOverIndicator] = useState(false);
-  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const [dragPx, setDragPx] = useState<number | null>(null);
   const isAnimatingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const swipedRef = useRef(false);
+  const isDragging = dragPx !== null;
 
   const index = (trackIndex - 1 + SLIDES.length) % SLIDES.length;
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || isDragging) return;
     const timer = setInterval(() => {
       if (isAnimatingRef.current) return;
       isAnimatingRef.current = true;
       setTrackIndex((i) => i + 1);
     }, AUTOPLAY_MS);
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, isDragging]);
 
   // 클론 위치에 도달한 뒤 전환 없이 실제 슬라이드 위치로 순간 이동시켜 끊김 없이 이어지게 한다.
   useEffect(() => {
@@ -116,76 +120,57 @@ export default function HeroBanner() {
     }
   }, [router]);
 
-  // 배너 진입 시 한 번만 getBoundingClientRect()로 좌표 기준을 캐싱 — 매 mousemove마다
-  // 레이아웃을 다시 읽지 않도록 (호버 중엔 배너 위치/크기가 바뀌지 않으므로 안전)
-  const tooltipRectRef = useRef<DOMRect | null>(null);
-
-  const handleMouseEnter = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    tooltipRectRef.current = e.currentTarget.getBoundingClientRect();
-    setPaused(true);
-    setHoverTooltip(true);
+  const handlePointerDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (isAnimatingRef.current) return;
+    dragStartXRef.current = e.clientX;
+    swipedRef.current = false;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDragPx(0);
   }, []);
 
-  const handleMouseMove = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    const rect = tooltipRectRef.current;
-    if (!rect) return;
-    setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  }, []);
+  const handlePointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartXRef.current;
+    if (Math.abs(dx) > 6) swipedRef.current = true;
+    setDragPx(dx);
+  }, [isDragging]);
+
+  const endDrag = useCallback(() => {
+    if (dragPx === null) return;
+    setDragPx(null);
+    if (Math.abs(dragPx) < SWIPE_THRESHOLD_PX) return;
+    isAnimatingRef.current = true;
+    setTrackIndex((i) => i + (dragPx < 0 ? 1 : -1));
+  }, [dragPx]);
 
   return (
     <div
-      onClick={() => navigateTo(slide)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => { setPaused(false); setHoverTooltip(false); setOverIndicator(false); }}
-      onMouseMove={handleMouseMove}
+      onClick={() => { if (!swipedRef.current) navigateTo(slide); }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={() => setDragPx(null)}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
       className="relative w-full shrink-0 overflow-hidden transform-gpu"
       style={{
-        borderRadius: '20px',
+        borderRadius: '12px',
         aspectRatio: '16 / 9',
         maxHeight: '410px',
         cursor: 'pointer',
+        touchAction: 'pan-y',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
       }}
     >
-      {hoverTooltip && !overIndicator && (
-        <span
-          aria-hidden
-          style={{
-            position: 'absolute',
-            left: `${tooltipPos.x + 14}px`,
-            top: `${tooltipPos.y + 14}px`,
-            zIndex: 50,
-            pointerEvents: 'none',
-            backgroundColor: '#FFFFFF',
-            color: '#000000',
-            fontSize: '10px',
-            fontWeight: 600,
-            borderRadius: '6px',
-            paddingTop: '2px',
-            paddingLeft: '6px',
-            paddingBottom: '1px',
-            paddingRight: '4px',
-            border: '1px solid #E5E5E5',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-            whiteSpace: 'nowrap',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '3px',
-          }}
-        >
-          사주GPT 이동
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-            <path d="M5 12h14M13 6l6 6-6 6" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-      )}
-
       <div
         onTransitionEnd={handleTrackTransitionEnd}
         className="absolute inset-0 flex h-full"
         style={{
           width: `${EXTENDED_SLIDES.length * 100}%`,
-          transform: `translate3d(${-trackIndex * (100 / EXTENDED_SLIDES.length)}%, 0, 0)`,
-          transition: !transitionEnabled ? 'none' : 'transform 600ms cubic-bezier(0.65, 0, 0.35, 1)',
+          transform: `translate3d(calc(${-trackIndex * (100 / EXTENDED_SLIDES.length)}% + ${dragPx ?? 0}px), 0, 0)`,
+          transition: !transitionEnabled || isDragging ? 'none' : 'transform 600ms cubic-bezier(0.65, 0, 0.35, 1)',
         }}
       >
         {EXTENDED_SLIDES.map((s, i) => (
@@ -257,9 +242,6 @@ export default function HeroBanner() {
 
           <span
             onClick={(e) => e.stopPropagation()}
-            onMouseEnter={(e) => { e.stopPropagation(); setOverIndicator(true); }}
-            onMouseLeave={(e) => { e.stopPropagation(); setOverIndicator(false); }}
-            onMouseMove={(e) => e.stopPropagation()}
             className="flex items-center shrink-0"
             style={{
               backgroundColor: 'rgba(30,30,30,0.55)',

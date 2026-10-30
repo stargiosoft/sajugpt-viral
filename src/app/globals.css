@@ -225,7 +225,7 @@ input[type='number'] {
 /* RankingPanel: 모바일 전체 폭 vs lg 사이드바(235px) 폭 차이로 인한 반응형 폰트 크기 */
 .ranking-panel {
   --rp-heading-size: 18px;
-  --rp-title-size: 14px;
+  --rp-title-size: 14.5px;
   --rp-sub-size: 12px;
   --rp-padding-bottom: 21px;
   --rp-title-gap: 12px;
@@ -234,7 +234,7 @@ input[type='number'] {
 @media (min-width: 1024px) {
   .ranking-panel {
     --rp-heading-size: 15px;
-    --rp-title-size: 12.5px;
+    --rp-title-size: 13px;
     --rp-sub-size: 11px;
     --rp-padding-bottom: 19px;
     --rp-title-gap: 10px;
@@ -339,4 +339,11 @@ input[type='number'] {
   display: inline-block;
   transform: translateY(2px);
   color: var(--comment-placeholder-color);
+}
+/* 스크롤은 되지만 스크롤바는 숨긴다 (홈 스크롤 컨테이너) */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }

@@ -77,7 +77,7 @@ export default function ChildPersonalityLanding({
         
         <div
           className="flex flex-col items-center w-full"
-          style={{ maxWidth: '440px', padding: '0 20px', marginTop: '30px', marginBottom: '20px'}}
+          style={{ padding: '0 16px', marginTop: '30px', marginBottom: '20px' }}
         >
           {/* 시작하기 버튼 */}
           <motion.div

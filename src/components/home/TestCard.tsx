@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { TestCatalogItem, TestColorTheme } from '@/types/testCatalog';
-import { CATEGORIES } from '@/constants/categories';
 import { MOAMOA_ORANGE, MOAMOA_ORANGE_DARK } from '@/constants/theme';
 import SectionStats from './SectionStats';
 
@@ -29,7 +28,6 @@ interface TestCardProps {
 
 export default function TestCard({ item, isNew, onSelect, selectedId }: TestCardProps) {
   const theme = THEME_STYLES[item.colorTheme];
-  const categoryLabel = CATEGORIES.find((c) => c.key === item.category)?.label ?? '';
   const isDimmed = !!selectedId && selectedId !== item.id;
 
   return (
@@ -57,12 +55,12 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
         transition={{ duration: 0.15, ease: 'easeOut' }}
         className="relative w-full aspect-[4/3]"
         style={{
-          borderRadius: '16px',
+          borderRadius: '12px',
           backgroundColor: item.imageSrc ? undefined : theme.bg,
           overflow: 'hidden',
         }}
       >
-        <div className="w-full h-full transition-transform duration-200 ease-out group-hover:scale-110 transform-gpu" style={{ borderRadius: 'inherit', overflow: 'hidden' }}>
+        <div className="w-full h-full transition-transform duration-200 ease-out transform-gpu" style={{ borderRadius: 'inherit', overflow: 'hidden' }}>
           {item.imageSrc ? (
             <img
               src={item.imageSrc}
@@ -78,25 +76,33 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
         </div>
 
         <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{ borderRadius: 'inherit', border: '1px solid rgba(0,0,0,0.06)' }}
+        />
+
+        <div
           className="flex items-center"
           style={{ position: 'absolute', left: '8px', bottom: '8px', gap: '4px' }}
         >
+          {isNew && (
           <span
             className="inline-flex items-center"
             style={{
               fontSize: '10px',
               lineHeight: 1,
               fontWeight: 700,
-              color: isNew ? '#ffffff' : '#0d0d0d',
-              backgroundColor: isNew ? MOAMOA_ORANGE : 'rgba(255,255,255,0.92)',
+              color: '#ffffff',
+              backgroundColor: MOAMOA_ORANGE,
               padding: '0 6px',
               borderRadius: '6px',
               letterSpacing: '-0.2px',
               height: '19px',
             }}
           >
-            {isNew ? 'New' : `${item.participantLabel} 참여`}
+            New
           </span>
+          )}
           {isNew && item.sajugptBadge && (
             <span
               className="inline-flex items-center"
@@ -129,10 +135,10 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
       <div style={{ padding: '10px 2px 0' }}>
         <p
           style={{
-            fontSize: '13.5px',
-            fontWeight: 600,
+            fontSize: '15px',
+            fontWeight: 700,
             color: '#0d0d0d',
-            letterSpacing: '-0.3px',
+            letterSpacing: '-0.1px',
             lineHeight: '1.3',
             marginBottom: '3px',
             paddingBottom: '2px',
@@ -140,11 +146,7 @@ export default function TestCard({ item, isNew, onSelect, selectedId }: TestCard
         >
           {item.title}
         </p>
-        {isNew ? (
-          <SectionStats plays={item.participantLabel} shares={item.shareLabel ?? '0'} />
-        ) : (
-          <span style={{ fontSize: '11px', fontWeight: 500, color: '#757474', letterSpacing: '-0.2px' }}>{categoryLabel}</span>
-        )}
+        <SectionStats plays={item.participantLabel} shares={item.shareLabel ?? '0'} />
       </div>
     </MotionLink>
   );

@@ -78,7 +78,7 @@ export default function LifeTurningBirthInput({
       style={{
         backgroundColor: C.pageBg,
         color: C.text,
-        padding: "12px 12px 48px",
+        padding: "12px 8px 48px",
       }}
     >
       {/* 뒤로 가기 */}

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import MoaMoaHeader from './home/MoaMoaHeader';
-import AdBanner from './home/AdBanner';
 import HeroBanner from './home/HeroBanner';
 import RankingPanel from './home/RankingPanel';
 import TestGridSection from './home/TestGridSection';
@@ -87,8 +86,7 @@ export default function ViralHub() {
   return (
     <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#ffffff' }}>
       <div className="w-full max-w-3xl md:max-w-225 lg:max-w-260 h-full flex flex-col" style={{ backgroundColor: '#ffffff' }}>
-        <AdBanner />
-        <div className="flex-1 overflow-auto w-full">
+        <div className="flex-1 overflow-auto w-full hide-scrollbar">
           <MoaMoaHeader />
 
           <div className="pt-1 px-3 md:px-6 lg:px-8 lg:grid lg:grid-cols-[1fr_235px] lg:gap-3 lg:items-start">
@@ -104,7 +102,7 @@ export default function ViralHub() {
                 transition={{ duration: 0.12, ease: 'easeOut' }}
                 className="flex items-center justify-center shrink-0 transform-gpu h-13 lg:h-12 text-[14px] lg:text-[13px]"
                 style={{
-                  borderRadius: '16px',
+                  borderRadius: '12px',
                   backgroundColor: MOAMOA_ORANGE,
                   color: '#ffffff',
                   fontWeight: 700,
@@ -138,7 +136,8 @@ export default function ViralHub() {
 
           {/* 1. 에디터 추천 섹션 */}
           <TestGridSection
-            title="🔥 에디터 추천 픽"
+            title="에디터 추천 픽"
+            icon="/home/pin.svg"
             items={catalog}
             filter={(item) => item.visibleOnHome && item.editorPick}
             paddingBottom={4}
@@ -148,7 +147,8 @@ export default function ViralHub() {
 
           {/* 2. 설레는 연애 & 궁합 섹션 */}
           <TestGridSection
-            title="💘 설레는 연애 & 궁합"
+            title="설레는 연애 & 궁합"
+            icon="/home/love.svg"
             items={catalog}
             filter={(item) => item.visibleOnHome && item.category === 'love' && !item.editorPick}
             paddingBottom={4}
@@ -158,10 +158,11 @@ export default function ViralHub() {
 
           {/* 3. 심층 사주 & 분석 섹션 */}
           <TestGridSection
-            title="✨ 심층 사주 & 운세"
+            title="심층 사주 & 운세"
+            icon="/home/star.svg"
             items={catalog}
             filter={(item) => item.visibleOnHome && item.category === 'analysis' && !item.editorPick}
-            paddingBottom={200}
+            paddingBottom={48}
             onSelect={handleSelectItem}
             selectedId={selectedId}
           />

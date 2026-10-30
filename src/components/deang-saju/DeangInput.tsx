@@ -44,7 +44,7 @@ export default function DeangInput({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '12px 12px 48px' }}
+      style={{ padding: '12px 8px 48px' }}
     >
       <DeangCardBox style={{ padding: '28px 32px' }}>
       <div className="flex flex-col items-center">

@@ -106,7 +106,7 @@ export default function LoveChatClient({ sharedCharacter }: Props) {
             <motion.div key="quiz" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
               <TestTopNav bgColor="rgb(245, 248, 253)" logoColor="#1C2333" xColor="#0d0d0d" />
               <KakaoResultHeader onBack={handleQuizBack} />
-              <div style={{ minHeight: '100dvh', background: '#D1E0F5', padding: '24px 16px 32px' }}>
+              <div style={{ minHeight: '100dvh', background: '#D1E0F5', padding: '24px 8px 32px' }}>
                 <div className="flex" style={{ gap: '4px', marginBottom: '8px' }}>
                   {QUESTIONS.map((_, i) => {
                     const segment = i + 1;

@@ -4,16 +4,16 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { MOAMOA_ORANGE } from '@/constants/theme';
 
 interface PolicyLayoutProps {
   title: string;
-  description?: string;
   effectiveDate?: string;
   children: ReactNode;
 }
 
-// 이용약관/개인정보처리방침/소개/문의 폼 등 공용 레이아웃 — 홈 상단 네비와 톤을 맞춘 헤더 + 카드형 본문
-export default function PolicyLayout({ title, description, effectiveDate, children }: PolicyLayoutProps) {
+// 이용약관/개인정보처리방침/소개/문의 폼 등 공용 레이아웃 — 홈(흰 배경, 블랙 메인 컬러, 12px 라운딩)과 톤을 맞춘 헤더(뒤로가기 + 가운데 타이틀) + 카드형 본문
+export default function PolicyLayout({ title, effectiveDate, children }: PolicyLayoutProps) {
   const router = useRouter();
   const [backHovered, setBackHovered] = useState(false);
   const [backPressed, setBackPressed] = useState(false);
@@ -27,7 +27,7 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#F4F4F5' }}>
+    <div className="fixed inset-0 flex justify-center" style={{ backgroundColor: '#ffffff' }}>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -35,7 +35,15 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
         className="w-full max-w-[680px] h-full flex flex-col"
       >
         <div className="flex-1 overflow-auto w-full">
-          <div className="sticky top-0 z-20 flex items-center px-3 py-2 md:px-8" style={{ backgroundColor: '#F4F4F5' }}>
+          <div
+            className="sticky top-0 z-20 px-3 py-2 md:px-8"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.88)',
+              backdropFilter: 'blur(5px)',
+              WebkitBackdropFilter: 'blur(5px)',
+            }}
+          >
+            <div className="relative flex items-center justify-center" style={{ minHeight: '40px', padding: '0 48px' }}>
             <button
               type="button"
               onClick={handleBack}
@@ -44,50 +52,32 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
               onMouseDown={() => setBackPressed(true)}
               onMouseUp={() => setBackPressed(false)}
               aria-label="뒤로가기"
-              className="flex items-center justify-center"
+              className="absolute left-0 flex items-center justify-center"
               style={{
-                width: '38px',
-                height: '38px',
+                width: '40px',
+                height: '40px',
                 marginLeft: '-4px',
-                borderRadius: '999px',
-                backgroundColor: backHovered ? '#FFE9EC' : 'transparent',
-                color: backHovered ? '#fc3e4d' : '#0d0d0d',
+                borderRadius: '12px',
+                backgroundColor: backHovered ? '#F4F4F5' : 'transparent',
+                color: '#0d0d0d',
                 transform: backPressed ? 'scale(0.9)' : 'scale(1)',
                 transition: 'background-color 0.15s, color 0.15s, transform 0.1s',
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ transform: 'translateX(-1px)' }}>
                 <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
+            <h1 className="truncate" style={{ fontSize: '17px', fontWeight: 700, color: '#0d0d0d', letterSpacing: '-0.3px' }}>
+              {title}
+            </h1>
+            </div>
           </div>
 
-          <div className="w-full px-3 py-8 md:px-8">
-            <div className="flex items-center flex-wrap" style={{ gap: '10px', marginBottom: description ? '10px' : '28px', paddingLeft: '4px' }}>
-              <h1 style={{ fontSize: '25px', fontWeight: 800, color: '#0d0d0d', letterSpacing: '-0.4px' }}>
-                {title}
-              </h1>
-              {effectiveDate && (
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    color: '#fc3e4d',
-                    backgroundColor: '#FFE9EC',
-                    padding: '5.5px 11px 5px',
-                    borderRadius: '6px',
-                    letterSpacing: '-0.1px',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  시행일 {effectiveDate}
-                </span>
-              )}
-            </div>
-
-            {description && (
-              <p style={{ fontSize: '14px', color: '#8a8a8a', letterSpacing: '-0.1px', marginBottom: '28px', paddingLeft: '5px' }}>
-                {description}
+          <div className="w-full px-3 pt-4 pb-8 md:px-8">
+            {effectiveDate && (
+              <p style={{ fontSize: '12px', color: '#66666C', letterSpacing: '-0.1px', textAlign: 'center', marginBottom: '14px' }}>
+                시행일 {effectiveDate}
               </p>
             )}
 
@@ -95,8 +85,8 @@ export default function PolicyLayout({ title, description, effectiveDate, childr
               className="flex flex-col [&>section]:py-7 [&>section:first-child]:pt-0 [&>section:last-child]:pb-0 [&>section:not(:last-child)]:border-b [&>section:not(:last-child)]:border-border-light"
               style={{
                 backgroundColor: '#ffffff',
-                border: '1px solid #F0F0F2',
-                borderRadius: '20px',
+                border: '1px solid #E5E5E9',
+                borderRadius: '12px',
                 padding: '20px 26px',
               }}
             >
@@ -122,7 +112,7 @@ export function PolicyArticle({ no, title, paragraphs }: PolicyArticleProps) {
   return (
     <section>
       <h2 style={{ fontSize: '16px', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: '11px' }}>
-        <span style={{ color: '#fc3e4d' }}>제{no}조</span>{' '}
+        <span style={{ color: MOAMOA_ORANGE }}>제{no}조</span>{' '}
         <span style={{ color: '#0d0d0d' }}>({title})</span>
       </h2>
       <div className="flex flex-col" style={{ gap: '9px' }}>

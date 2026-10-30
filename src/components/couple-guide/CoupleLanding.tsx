@@ -19,7 +19,7 @@ export default function CoupleLanding({ onStart }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '0 20px 48px' }}
+      style={{ padding: '0 16px 48px' }}
     >
       <motion.div
         variants={FADE_UP}

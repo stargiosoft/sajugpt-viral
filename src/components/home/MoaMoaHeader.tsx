@@ -14,12 +14,12 @@ export default function MoaMoaHeader() {
         WebkitBackdropFilter: 'blur(5px)',
       }}
     >
-      <img src="/home/symbol.svg" alt="" style={{ width: '22px', height: '22px', marginRight: '6px', display: 'block' }} />
+      <img src="/home/symbol.svg" alt="" style={{ width: '20px', height: '20px', marginRight: '6px', display: 'block', transform: 'translateY(-0.5px)' }} />
       <h1 className="flex items-center">
-        <MoaMoaWordmark fontSize="19px" letterSpacing="-0.55px" />
+        <MoaMoaWordmark fontSize="17px" letterSpacing="-0.55px" />
       </h1>
       <span style={{ fontSize: '13px', fontWeight: 600, lineHeight: 1, color: '#0d0d0d', margin: '0 6px' }}>x</span>
-      <SajuGptLogoButton height="21px" width="60px" color="#0d0d0d" />
+      <SajuGptLogoButton height="19px" width="54px" color="#0d0d0d" />
     </div>
   );
 }

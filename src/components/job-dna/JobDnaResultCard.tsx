@@ -101,8 +101,6 @@ const JobDnaResultCard = forwardRef<HTMLDivElement, JobDnaResultCardProps>(({ pa
   return (
     <div ref={ref} className="mx-auto w-full max-w-120 select-none p-2 flex flex-col items-center">
       <style>{`
-        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff');
-
         @font-face {
             font-family: 'GabiaSolmi';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff') format('woff');

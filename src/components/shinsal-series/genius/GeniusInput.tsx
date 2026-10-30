@@ -35,7 +35,7 @@ export default function GeniusInput(props: Props) {
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }} 
       style={{ 
-        padding: '20px 16px 48px',
+        padding: '20px 8px 48px',
         fontFamily: MAIN_FONT
       }}
     >

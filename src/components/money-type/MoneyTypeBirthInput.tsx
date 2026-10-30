@@ -72,7 +72,7 @@ export default function MoneyTypeBirthInput({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="mx-auto w-full max-w-130 px-5 pb-12"
+        className="mx-auto w-full max-w-110 md:max-w-150 px-2 pb-12"
       >
         {/* 헤더 */}
         <div className="mb-7">

@@ -28,13 +28,14 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
     <div
       className="ranking-panel"
       style={{
-        borderRadius: '20px',
+        borderRadius: '12px',
         backgroundColor: '#ffffff',
         border: '1px solid #E5E5E9',
         padding: '12px 18px var(--rp-padding-bottom)',
       }}
     >
-      <div style={{ marginBottom: 'var(--rp-title-gap)' }}>
+      <div className="flex items-center" style={{ marginBottom: 'var(--rp-title-gap)', gap: '4px' }}>
+        <img src="/home/fire.svg" alt="" style={{ width: 'calc(var(--rp-heading-size) * 1.15 + 2px)', height: 'calc(var(--rp-heading-size) * 1.15 + 2px)', display: 'block' }} />
         <h2 style={{ fontSize: 'var(--rp-heading-size)', fontWeight: 800, color: '#0d0d0d', letterSpacing: '-0.3px', padding: '3px 0 1px' }}>
           인기 테스트
         </h2>
@@ -65,9 +66,9 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
           >
             <span
               className="relative block shrink-0 overflow-hidden aspect-[4/3]"
-              style={{ width: '68px', borderRadius: '9px' }}
+              style={{ width: '68px', borderRadius: '8px' }}
             >
-              <span className="block w-full h-full transition-transform duration-200 ease-out group-hover:scale-110">
+              <span className="block w-full h-full transition-transform duration-200 ease-out">
                 {item.imageSrc ? (
                   <img src={item.imageSrc} alt="" className="w-full h-full" style={{ objectFit: 'cover' }} />
                 ) : (
@@ -84,11 +85,11 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
                   minWidth: '15px',
                   height: '15px',
                   padding: '2px 4px 1px',
-                  borderTopLeftRadius: '9px',
+                  borderTopLeftRadius: '8px',
                   borderTopRightRadius: 0,
                   borderBottomLeftRadius: 0,
-                  borderBottomRightRadius: '6px',
-                  backgroundColor: '#fc3e4d',
+                  borderBottomRightRadius: '5px',
+                  backgroundColor: 'rgba(0,0,0,0.6)',
                   fontSize: '9px',
                   fontWeight: 700,
                   color: '#ffffff',
@@ -98,7 +99,7 @@ export default function RankingPanel({ items, onSelect, selectedId }: RankingPan
               </span>
             </span>
             <span className="flex-1 min-w-0">
-              <span className="block truncate pb-[2px] lg:pb-0" style={{ fontSize: 'var(--rp-title-size)', fontWeight: 600, color: '#0d0d0d', letterSpacing: '-0.2px', marginBottom: '3px' }}>
+              <span className="block truncate pb-[2px] lg:pb-0" style={{ fontSize: 'var(--rp-title-size)', fontWeight: 700, color: '#0d0d0d', letterSpacing: '-0.2px', marginBottom: '3px' }}>
                 {item.title}
               </span>
               <SectionStats plays={item.participantLabel} shares={item.shareLabel ?? '0'} />

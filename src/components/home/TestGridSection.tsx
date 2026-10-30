@@ -6,6 +6,8 @@ import type { TestCatalogItem } from '@/types/testCatalog';
 
 interface TestGridSectionProps {
   title: string;
+  /** 제목 왼쪽에 붙는 아이콘 경로 (public/ 기준) */
+  icon: string;
   items: TestCatalogItem[];
   filter: (item: TestCatalogItem) => boolean | undefined;
   isNew?: boolean;
@@ -17,7 +19,7 @@ interface TestGridSectionProps {
 }
 
 // 에디터 추천 / 새로 올라온 테스트가 공유하는 카드 그리드 레이아웃 — 필터 기준과 하단 여백만 다름
-export default function TestGridSection({ title, items, filter, isNew, paddingBottom, onSelect, selectedId, minCount = 0 }: TestGridSectionProps) {
+export default function TestGridSection({ title, icon, items, filter, isNew, paddingBottom, onSelect, selectedId, minCount = 0 }: TestGridSectionProps) {
   const filtered = items.filter(filter);
   const placeholderCount = Math.max(0, minCount - filtered.length);
 
@@ -25,18 +27,19 @@ export default function TestGridSection({ title, items, filter, isNew, paddingBo
 
   return (
     <div style={{ padding: `32px 0 ${paddingBottom}px` }}>
-      <h2
-        className="px-3 md:px-6 lg:px-8"
-        style={{
-          fontSize: '18px',
-          fontWeight: 800,
-          color: '#0d0d0d',
-          letterSpacing: '-0.4px',
-          marginBottom: '12px',
-        }}
-      >
-        {title}
-      </h2>
+      <div className="flex items-center px-3 md:px-6 lg:px-8" style={{ gap: '5px', marginBottom: '12px' }}>
+        <img src={icon} alt="" style={{ width: '21px', height: '21px', display: 'block' }} />
+        <h2
+          style={{
+            fontSize: '18px',
+            fontWeight: 800,
+            color: '#0d0d0d',
+            letterSpacing: '-0.4px',
+          }}
+        >
+          {title}
+        </h2>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 px-3 md:px-6 lg:px-8" style={{ columnGap: '8px', rowGap: '20px' }}>
         {filtered.map((item) => (
           <TestCard key={item.id} item={item} isNew={isNew} onSelect={onSelect} selectedId={selectedId} />

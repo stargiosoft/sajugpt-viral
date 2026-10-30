@@ -159,9 +159,7 @@ export default function ChildBirthInput({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
-            padding: '12px 16px 48px',
-            maxWidth: '500px',
-            margin: '0 auto',
+            padding: '12px 8px 48px',
           }}
         >
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>

@@ -48,7 +48,7 @@ export default function ZiweiInput({
       exit={{ opacity: 0 }}
       className="relative min-h-screen w-full flex flex-col justify-center items-center"
       style={{ 
-        padding: '24px 16px 48px',
+        padding: '24px 8px 48px',
         fontFamily: "'JoseonLogo', serif"
       }}
     >
@@ -64,7 +64,7 @@ export default function ZiweiInput({
 
       {/* 2. 메인 입력 카드 */}
       <motion.div
-        className="w-full max-w-md flex flex-col rounded-3xl border border-purple-500/20 bg-[#120d26]/80 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_16px_40px_rgba(0,0,0,0.6)]"
+        className="w-full flex flex-col rounded-3xl border border-purple-500/20 bg-[#120d26]/80 backdrop-blur-2xl p-6 sm:p-8 shadow-[0_16px_40px_rgba(0,0,0,0.6)]"
         initial="hidden"
         animate="visible"
         variants={{ visible: { transition: { staggerChildren: 0.08 } } }}

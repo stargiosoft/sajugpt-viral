@@ -69,7 +69,7 @@ export default function JobDnaInput({
       style={{ 
         minHeight: '100vh', 
         backgroundColor: C.pageBg, 
-        padding: '12px 12px 48px', 
+        padding: '12px 8px 48px', 
       }}
     >
       {/* 상단 안내 박스 */}

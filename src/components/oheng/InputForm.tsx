@@ -26,7 +26,7 @@ export default function InputForm({ form, onChange, onSubmit }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '12px 16px 48px' }}
+      style={{ padding: '12px 8px 48px' }}
     >
       <div className="flex flex-col items-center" style={{ paddingTop: '12px', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: 800, color: C.text, textAlign: 'center' }}>

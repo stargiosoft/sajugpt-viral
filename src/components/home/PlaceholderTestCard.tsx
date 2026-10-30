@@ -8,7 +8,7 @@ export default function PlaceholderTestCard() {
       <div
         className="relative w-full aspect-[4/3] flex flex-col items-center justify-center"
         style={{
-          borderRadius: '16px',
+          borderRadius: '12px',
           border: `1.5px solid ${PLACEHOLDER_BORDER}`,
           backgroundColor: PLACEHOLDER_BG,
           gap: '4px',

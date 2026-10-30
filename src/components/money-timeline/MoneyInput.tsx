@@ -39,7 +39,7 @@ export default function MoneyInput({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ padding: '20px 16px 48px' }}
+      style={{ padding: '20px 8px 48px' }}
     >
       <div className="flex flex-col items-center" style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: C.text, marginBottom: '8px', textAlign: 'center' }}>

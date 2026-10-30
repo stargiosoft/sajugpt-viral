@@ -49,7 +49,7 @@ export function LoveSeasonInputForm({
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-90 md:max-w-155 mx-auto py-2 pb-8 md:py-6 md:pb-12 px-0 box-border"
+      className="w-full mx-auto py-2 pb-8 md:py-6 md:pb-12 px-2 box-border"
       style={{
         fontFamily: PRETENDARD_FONT,
       }}

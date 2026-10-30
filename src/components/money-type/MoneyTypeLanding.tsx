@@ -34,7 +34,7 @@ export default function MoneyTypeLanding({
         xColor="#493C35"
       />
 
-      <div className="mx-auto flex w-full max-w-130 flex-col items-center px-5 pb-12">
+      <div className="mx-auto flex w-full max-w-110 md:max-w-150 flex-col items-center px-4 pb-12">
 
         {/* 메인 타이틀 및 소개 영역 */}
         <motion.div
@@ -67,7 +67,7 @@ export default function MoneyTypeLanding({
             alt="내 돈 버는 방식 테스트"
             width={500}
             height={400}
-            className="h-auto w-full max-w-125 object-contain drop-shadow-sm"
+            className="h-auto w-full max-w-125 rounded-xl object-contain drop-shadow-sm"
             priority
           />
         </motion.div>

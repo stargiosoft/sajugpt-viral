@@ -185,8 +185,6 @@ export default function JobDnaClient({ resultId: propResultId, initialData }: { 
       style={{ backgroundColor: '#fffbf0', color: '#1e1409' }}
     >
       <style>{`
-        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff');
-
         @font-face {
             font-family: 'GabiaSolmi';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff') format('woff');

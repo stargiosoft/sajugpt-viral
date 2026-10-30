@@ -51,8 +51,6 @@ function ClawMachineScene({ size = 240 }: { size?: number }) {
       }}
     >
       <style>{`
-        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff');
-
         @font-face {
             font-family: 'GabiaSolmi';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff') format('woff');
@@ -212,8 +210,6 @@ export default function JobDnaAnalyzing() {
       style={{ fontFamily: 'GabiaSolmi, cursive, sans-serif' }}
     >
       <style>{`
-        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff');
-
         @font-face {
             font-family: 'GabiaSolmi';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GabiaSolmee.woff') format('woff');

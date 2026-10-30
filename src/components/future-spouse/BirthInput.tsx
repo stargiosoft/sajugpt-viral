@@ -77,7 +77,7 @@ export default function BirthInput() {
   const isFormValid = isValidDate(birthDate);
 
   return (
-    <div className="w-full max-w-150 mx-auto p-3 pb-10">
+    <div className="w-full max-w-110 md:max-w-150 mx-auto px-2 py-3 pb-10">
       <div
         style={{
           position: 'relative',
