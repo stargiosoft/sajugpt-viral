@@ -3,7 +3,7 @@ import FutureSpouseMain from '@/components/future-spouse/FutureSpouseMain';
 import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
-  title: '미래 배우자 미리보기🔮 — 사주GPT',
+  title: '미래 배우자 미리보기🔮 | 광필연구소',
   description: '내 사주 속 배우자 기운으로 미래 배우자의 특징을 미리 확인해보세요.',
   openGraph: {
     title: '미래 배우자 미리보기🔮',

@@ -13,7 +13,27 @@ interface AnalyzeRequest {
   birthTimeUnknown?: boolean;
 }
 
-type RequestBody = AnalyzeRequest;
+interface SaveRequest {
+  mode: 'save';
+  result: Record<string, unknown>;
+}
+
+type RequestBody = AnalyzeRequest | SaveRequest;
+
+/* =========================================================
+ * 결과 저장 / 조회 (공유 링크용)
+ * - 결과 화면에 보여주는 내용만 저장한다. 생년월일은 저장하지 않는다.
+ * ======================================================= */
+
+const RESULT_TABLE = 'child_personality_results';
+const MAX_RESULT_BYTES = 20000;
+
+function getServiceSupabase() {
+  const url = Deno.env.get('SUPABASE_URL');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) throw new Error('Supabase 환경변수가 설정되어 있지 않습니다.');
+  return createClient(url, key);
+}
 
 /* =========================================================
  * CORS
@@ -283,9 +303,29 @@ Deno.serve(async (req: Request) => {
 
   /*
    * =======================================================
-   * POST만 허용
+   * GET: 공유 링크 결과 조회 (?resultId=)
    * =======================================================
    */
+  if (req.method === 'GET') {
+    try {
+      const resultId = new URL(req.url).searchParams.get('resultId')?.trim();
+      if (!resultId) return errorResponse(req, 'resultId가 필요합니다.', 400);
+
+      const { data, error } = await getServiceSupabase()
+        .from(RESULT_TABLE)
+        .select('result_id,result')
+        .eq('result_id', resultId)
+        .maybeSingle();
+
+      if (error) return errorResponse(req, `결과 조회 실패: ${error.message}`, 500);
+      if (!data) return errorResponse(req, '해당 결과를 찾을 수 없습니다.', 404);
+
+      return jsonResponse(req, { success: true, resultId: data.result_id, result: data.result });
+    } catch (error) {
+      return errorResponse(req, error instanceof Error ? error.message : '서버 오류가 발생했습니다.', 500);
+    }
+  }
+
   if (req.method !== 'POST') {
     return errorResponse(
       req,
@@ -302,6 +342,25 @@ Deno.serve(async (req: Request) => {
   try {
     const body =
       (await req.json()) as RequestBody;
+
+    if (body.mode === 'save') {
+      const result = body.result;
+      if (!result || typeof result !== 'object' || Array.isArray(result)) {
+        return errorResponse(req, '저장할 결과가 없습니다.', 400);
+      }
+      if (JSON.stringify(result).length > MAX_RESULT_BYTES) {
+        return errorResponse(req, '결과 크기가 너무 큽니다.', 400);
+      }
+
+      const resultId = crypto.randomUUID();
+      const { error } = await getServiceSupabase()
+        .from(RESULT_TABLE)
+        .insert({ result_id: resultId, result });
+
+      if (error) return errorResponse(req, `결과 저장 실패: ${error.message}`, 500);
+
+      return jsonResponse(req, { success: true, resultId });
+    }
 
     if (body.mode === 'analyze') {
       if (

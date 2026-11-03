@@ -3,7 +3,7 @@ import CoupleGuideClient from '@/components/couple-guide/CoupleGuideClient';
 import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
-  title: '우리 사이 궁합 설명서💕 — 사주GPT',
+  title: '우리 사이 궁합 설명서💕 | 광필연구소',
   description: '100일 후에도 만날 사이일까? 사주 기반 AI 궁합 분석',
   openGraph: {
     title: '우리 사이 궁합 설명서💕',

@@ -3,7 +3,7 @@ import SkillResultContainer from '@/components/shinsal-series/skill-item/SkillRe
 import ReferralTracker from '@/components/ReferralTracker';
 
 export const metadata: Metadata = {
-  title: '나의 12신살 결과 — 사주GPT',
+  title: '나의 12신살 결과 | 광필연구소',
   description:
     '12신살로 알아보는 나의 성격과 신살을 확인해보세요.',
   openGraph: {

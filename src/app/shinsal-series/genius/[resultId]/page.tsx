@@ -5,7 +5,7 @@ import ReferralTracker from '@/components/ReferralTracker';
 import { supabase } from '@/lib/supabase'; // Supabase DB 연동 추가
 
 export const metadata: Metadata = {
-  title: '내 안의 천재 지수 결과 — 사주GPT',
+  title: '내 안의 천재 지수 결과 | 광필연구소',
   description: '사주 스탯으로 알아보는 나만의 천재성 결과를 확인해보세요.',
   openGraph: {
     title: '내 안의 천재 지수 결과 — 사주GPT',

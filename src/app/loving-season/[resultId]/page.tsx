@@ -4,7 +4,7 @@ import LoveSeasonResultView from '@/components/loving-season/LoveSeasonResultVie
 import ReferralTracker from '@/components/ReferralTracker';
 
 export const metadata: Metadata = {
-  title: '내 연애의 계절 결과 — 사주GPT',
+  title: '내 연애의 계절 결과 | 광필연구소',
   description: '사주로 알아보는 나만의 연애 계절 결과를 확인해보세요.',
   openGraph: {
     title: '내 연애의 계절 결과 — 사주GPT',

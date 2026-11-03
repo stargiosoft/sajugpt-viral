@@ -150,7 +150,7 @@ export default function ViralHub() {
             title="설레는 연애 & 궁합"
             icon="/home/love.svg"
             items={catalog}
-            filter={(item) => item.visibleOnHome && item.category === 'love' && !item.editorPick}
+            filter={(item) => item.visibleOnHome && item.category === 'love'}
             paddingBottom={4}
             onSelect={handleSelectItem}
             selectedId={selectedId}
@@ -161,7 +161,7 @@ export default function ViralHub() {
             title="심층 사주 & 운세"
             icon="/home/star.svg"
             items={catalog}
-            filter={(item) => item.visibleOnHome && item.category === 'analysis' && !item.editorPick}
+            filter={(item) => item.visibleOnHome && item.category === 'analysis'}
             paddingBottom={48}
             onSelect={handleSelectItem}
             selectedId={selectedId}

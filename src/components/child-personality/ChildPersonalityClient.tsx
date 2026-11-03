@@ -51,6 +51,8 @@ type ChildPersonalityStep =
 
 interface ChildPersonalityClientProps {
   initialData?: ChildPersonalityResult | null;
+  /** 공유 링크(/child-personality/{resultId})로 들어온 경우 */
+  resultId?: string;
 }
 
 const THEME_COLOR = '#E98C72';
@@ -88,6 +90,7 @@ function getEdgeFunctionUrl() {
 
 export default function ChildPersonalityClient({
   initialData,
+  resultId: propResultId,
 }: ChildPersonalityClientProps) {
   const isNarrow = useIsNarrow();
 
@@ -107,6 +110,9 @@ export default function ChildPersonalityClient({
   const [gender, setGender] =
     useState<ChildGender>('female');
 
+  const [calendar, setCalendar] =
+    useState<'solar' | 'lunar'>('solar');
+
   // -------------------------------------------------------
   // RESULT
   // -------------------------------------------------------
@@ -124,6 +130,9 @@ export default function ChildPersonalityClient({
       initialData ?? null,
     );
 
+  const [resultId, setResultId] =
+    useState<string>(propResultId ?? '');
+
   const resultCardRef =
     useRef<HTMLDivElement>(null);
 
@@ -136,7 +145,55 @@ export default function ChildPersonalityClient({
       ? window.location.origin
       : '';
 
-  const shareUrl = origin ? `${origin}/child-personality` : '';
+  const shareUrl = origin
+    ? resultId
+      ? `${origin}/child-personality/${resultId}`
+      : `${origin}/child-personality`
+    : '';
+
+  // 공유 링크로 들어온 경우: 저장된 결과를 불러와 바로 보여준다.
+  useEffect(() => {
+    if (!propResultId || initialData) return;
+
+    let isMounted = true;
+    setStep('analyzing');
+
+    (async () => {
+      try {
+        const response = await fetch(
+          `${getEdgeFunctionUrl()}?resultId=${encodeURIComponent(propResultId)}`,
+          {
+            method: 'GET',
+            headers: SUPABASE_ANON_KEY
+              ? { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+              : {},
+            cache: 'no-store',
+          },
+        );
+        const data = await response.json();
+        if (!isMounted) return;
+
+        if (!response.ok || !data?.success || !data?.result) {
+          setResultId('');
+          setStep('landing');
+          window.history.replaceState({}, '', '/child-personality');
+          return;
+        }
+
+        setResult(data.result as ChildPersonalityResult);
+        setStep('result');
+      } catch (err) {
+        console.error('공유 결과 조회 실패:', err);
+        if (!isMounted) return;
+        setResultId('');
+        setStep('landing');
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [propResultId, initialData]);
 
   // -------------------------------------------------------
   // SHARE
@@ -147,7 +204,7 @@ export default function ChildPersonalityClient({
     handleSave,
   } = useShareActions({
     featureType: 'child_personality',
-    resultId: '',
+    resultId,
     getShareText: () => shareUrl,
     imageFilename: '우리아이사용설명서_결과.png',
     onSave: () =>
@@ -171,6 +228,10 @@ export default function ChildPersonalityClient({
 
     if (typeof cached.birthDate === 'string') {
       setBirthDate(cached.birthDate);
+    }
+
+    if (cached.calendar === 'solar' || cached.calendar === 'lunar') {
+      setCalendar(cached.calendar);
     }
 
     if (typeof cached.birthTime === 'string') {
@@ -205,6 +266,7 @@ export default function ChildPersonalityClient({
         birthTime,
         unknownTime,
         gender,
+        calendar,
       },
     );
   }, [
@@ -212,6 +274,7 @@ export default function ChildPersonalityClient({
     birthTime,
     unknownTime,
     gender,
+    calendar,
   ]);
 
   // =======================================================
@@ -363,7 +426,7 @@ export default function ChildPersonalityClient({
             : birthTime,
           birthTimeUnknown: effectiveUnknownTime,
           gender,
-          calendarType: 'solar',
+          calendarType: calendar,
         }),
       });
 
@@ -404,6 +467,27 @@ export default function ChildPersonalityClient({
       });
 
       setStep('result');
+
+      // 공유 링크용 결과 저장 (실패해도 결과 화면은 그대로 보여준다)
+      try {
+        const saveResponse = await fetch(getEdgeFunctionUrl(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(SUPABASE_ANON_KEY
+              ? { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+              : {}),
+          },
+          body: JSON.stringify({ mode: 'save', result: rawProfile }),
+        });
+        const saved = await saveResponse.json();
+        if (saveResponse.ok && saved?.success && saved.resultId) {
+          setResultId(saved.resultId);
+          window.history.pushState({}, '', `/child-personality/${saved.resultId}`);
+        }
+      } catch (saveError) {
+        console.warn('결과 저장 실패(공유 링크 미생성):', saveError);
+      }
     } catch (err) {
       console.error('우리 아이 성향 분석 실패:', err);
 
@@ -423,8 +507,12 @@ export default function ChildPersonalityClient({
 
   const handleReset = () => {
     setResult(null);
+    setResultId('');
     setError(null);
     setStep('input');
+    if (window.location.pathname !== '/child-personality') {
+      window.history.replaceState({}, '', '/child-personality');
+    }
   };
 
   // =======================================================
@@ -494,6 +582,8 @@ export default function ChildPersonalityClient({
                 onTimeSelect={handleTimeSelect}
                 gender={gender}
                 onGenderChange={setGender}
+                calendar={calendar}
+                onCalendarChange={setCalendar}
                 isValid={isFormValid()}
                 error={error}
                 onSubmit={handleSubmit}
@@ -638,7 +728,7 @@ export default function ChildPersonalityClient({
                       cardBg="#fffdfa"
                       cardTitleColor={TEXT_COLOR}
                       featureType="child_personality"
-                      resultId=""
+                      resultId={resultId}
                       storageKey="child_personality_liked_comments"
                       placeholder="우리 아이 양육 팁에 대해 이야기해봐요 :)"
                       themeColor={THEME_COLOR}

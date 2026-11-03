@@ -8,6 +8,7 @@ import TimeSelectSheet from '@/components/TimeSelectSheet';
 import FieldLabel from '@/components/FieldLabel';
 import PressableButton from '@/components/PressableButton';
 import TestTopNav from '@/components/TestTopNav';
+import CalendarToggle, { type CalendarType } from '@/components/CalendarToggle';
 
 interface MoneyTypeBirthInputProps {
   birthDate: string;
@@ -17,6 +18,8 @@ interface MoneyTypeBirthInputProps {
   onTimeSelect: (displayTime: string, isUnknown?: boolean) => void;
   gender: Gender;
   onGenderChange: (value: Gender) => void;
+  calendar: CalendarType;
+  onCalendarChange: (value: CalendarType) => void;
   isValid: boolean;
   error: string | null;
   onSubmit: () => void;
@@ -49,6 +52,8 @@ export default function MoneyTypeBirthInput({
   onTimeSelect,
   gender,
   onGenderChange,
+  calendar,
+  onCalendarChange,
   isValid,
   error,
   onSubmit,
@@ -125,10 +130,18 @@ export default function MoneyTypeBirthInput({
             />
           </motion.div>
 
+          {/* 양력 / 음력 */}
+          <motion.div className="mt-6 flex flex-col w-full" variants={FADE_UP}>
+            <FieldLabel color="rgb(153, 153, 153)" fontSize="13px" marginBottom="6px">
+              달력 기준
+            </FieldLabel>
+            <CalendarToggle value={calendar} onChange={onCalendarChange} accentColor={C.gold} textColor={C.textTertiary} />
+          </motion.div>
+
           {/* 생년월일 */}
           <motion.div className="mt-6 flex flex-col w-full" variants={FADE_UP}>
             <FieldLabel color="rgb(153, 153, 153)" fontSize="13px" marginBottom="6px">
-              생년월일 (양력 기준으로 입력해 주세요)
+              생년월일
             </FieldLabel>
             <BirthInput
               value={birthDate}

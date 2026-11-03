@@ -617,6 +617,19 @@ function getDayMaster(
     }
   }
 
+  /*
+   * Stargio API: 사주 = [시주, 일주, 월주, 연주] 순서
+   */
+  if (Array.isArray(data['사주'])) {
+    const stem = normalizeStem(
+      typeof data['사주'][1] === 'string' ? data['사주'][1].charAt(0) : undefined,
+    );
+
+    if (stem) {
+      return stem;
+    }
+  }
+
   return undefined;
 }
 
@@ -653,6 +666,19 @@ function getMonthBranch(
   for (const candidate of monthPillarCandidates) {
     const branch =
       normalizeBranch(candidate);
+
+    if (branch) {
+      return branch;
+    }
+  }
+
+  /*
+   * Stargio API: 사주 = [시주, 일주, 월주, 연주] 순서
+   */
+  if (Array.isArray(data['사주'])) {
+    const branch = normalizeBranch(
+      typeof data['사주'][2] === 'string' ? data['사주'][2].charAt(1) : undefined,
+    );
 
     if (branch) {
       return branch;
@@ -1372,9 +1398,11 @@ function buildParentMessage(
     );
   }
 
-  return `사주는 아이를 정해진 성격으로 규정하기 위한 것이 아니라,
-    아이를 이해하는 하나의 관점으로 활용하는 것이 좋아요.
-    결과보다 실제 아이의 모습을 함께 관찰해 주세요.`;
+  return (
+    '사주는 아이를 정해진 성격으로 규정하기 위한 것이 아니라, ' +
+    '아이를 이해하는 하나의 관점으로 활용하는 것이 좋아요. ' +
+    '결과보다 실제 아이의 모습을 함께 관찰해 주세요.'
+  );
 }
 
 

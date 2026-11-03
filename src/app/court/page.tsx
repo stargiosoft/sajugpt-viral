@@ -3,7 +3,7 @@ import SajuCourtClient from '@/components/court/SajuCourtClient';
 import LandingTracker from '@/components/LandingTracker';
 
 export const metadata: Metadata = {
-  title: '사주 법정 — 사주GPT',
+  title: '사주 법정 | 광필연구소',
   description: '당신이 연애 못한 이유, 사주로 기소합니다. 검사가 팩폭하고, 변호사가 뒤집어줍니다.',
   openGraph: {
     title: '⚖️ 사주 법정 — 당신이 연애 못한 이유, 사주로 기소합니다',
