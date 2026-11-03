@@ -51,7 +51,8 @@ export default function LifeTurningPointClient({
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
   const [unknownTime, setUnknownTime] = useState(true);
-  const [calendar, setCalendar] = useState<"solar" | "lunar">("solar");
+  // 전체 테스트 양력 기준 통일
+  const calendar = "solar" as const;
   const [gender, setGender] = useState<Gender>("female");
 
   const [step, setStep] = useState<LifeTurningPointStep>(
@@ -92,9 +93,6 @@ export default function LifeTurningPointClient({
     if (cached.birthTime) setBirthTime(cached.birthTime);
     if (cached.unknownTime !== undefined) setUnknownTime(cached.unknownTime);
     if (cached.gender) setGender(cached.gender as Gender);
-    if (cached.calendar === "solar" || cached.calendar === "lunar") {
-      setCalendar(cached.calendar);
-    }
   }, []);
 
   // 2. 입력값 변경 시 캐시 저장
@@ -358,8 +356,6 @@ export default function LifeTurningPointClient({
                   onTimeSelect={handleTimeSelect}
                   gender={gender}
                   onGenderChange={setGender}
-                  calendar={calendar}
-                  onCalendarChange={setCalendar}
                   isValid={isFormValid()}
                   error={error}
                   onSubmit={handleSubmit}

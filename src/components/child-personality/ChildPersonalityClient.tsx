@@ -110,9 +110,6 @@ export default function ChildPersonalityClient({
   const [gender, setGender] =
     useState<ChildGender>('female');
 
-  const [calendar, setCalendar] =
-    useState<'solar' | 'lunar'>('solar');
-
   // -------------------------------------------------------
   // RESULT
   // -------------------------------------------------------
@@ -230,10 +227,6 @@ export default function ChildPersonalityClient({
       setBirthDate(cached.birthDate);
     }
 
-    if (cached.calendar === 'solar' || cached.calendar === 'lunar') {
-      setCalendar(cached.calendar);
-    }
-
     if (typeof cached.birthTime === 'string') {
       setBirthTime(cached.birthTime);
     }
@@ -266,7 +259,6 @@ export default function ChildPersonalityClient({
         birthTime,
         unknownTime,
         gender,
-        calendar,
       },
     );
   }, [
@@ -274,7 +266,6 @@ export default function ChildPersonalityClient({
     birthTime,
     unknownTime,
     gender,
-    calendar,
   ]);
 
   // =======================================================
@@ -426,7 +417,7 @@ export default function ChildPersonalityClient({
             : birthTime,
           birthTimeUnknown: effectiveUnknownTime,
           gender,
-          calendarType: calendar,
+          calendarType: 'solar',
         }),
       });
 
@@ -582,8 +573,6 @@ export default function ChildPersonalityClient({
                 onTimeSelect={handleTimeSelect}
                 gender={gender}
                 onGenderChange={setGender}
-                calendar={calendar}
-                onCalendarChange={setCalendar}
                 isValid={isFormValid()}
                 error={error}
                 onSubmit={handleSubmit}

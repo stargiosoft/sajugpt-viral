@@ -23,8 +23,6 @@ interface Props {
   gender: Gender;
   onGenderChange: (value: Gender) => void;
 
-  calendar: "solar" | "lunar";
-  onCalendarChange: (value: "solar" | "lunar") => void;
 
   isValid: boolean;
   error: string | null;
@@ -60,8 +58,6 @@ export default function LifeTurningBirthInput({
   onTimeSelect,
   gender,
   onGenderChange,
-  calendar,
-  onCalendarChange,
   isValid,
   error,
   onSubmit,
@@ -161,65 +157,6 @@ export default function LifeTurningBirthInput({
                 border={`1px solid ${C.border}`}
                 indicatorBoxShadow="0 0 12px rgba(157, 82, 232, 0.4)"
               />
-            </motion.div>
-
-            {/* 양력 / 음력 */}
-            <motion.div
-              className="mt-6 flex w-full flex-col"
-              variants={FADE_UP}
-            >
-              <FieldLabel
-                color={C.textSecondary}
-                fontSize="13px"
-                marginBottom="8px"
-              >
-                달력 기준
-              </FieldLabel>
-
-              <div className="grid grid-cols-2 gap-2">
-                {(
-                  [
-                    { value: "solar", label: "양력" },
-                    { value: "lunar", label: "음력" },
-                  ] as const
-                ).map((option) => {
-                  const selected = calendar === option.value;
-
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => onCalendarChange(option.value)}
-                      className="rounded-xl transition-all"
-                      style={{
-                        height: "44px",
-                        border: `1px solid ${
-                          selected ? C.accentYellow : C.border
-                        }`,
-                        backgroundColor: selected
-                          ? "rgba(157, 82, 232, 0.25)"
-                          : C.cardBg,
-                        color: selected ? C.accentYellow : C.textTertiary,
-                        fontSize: "15px",
-                        fontWeight: selected ? 700 : 500,
-                        boxShadow: selected
-                          ? "0 0 10px rgba(255, 230, 98, 0.2)"
-                          : "none",
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <p
-                className="mt-2 text-xs leading-5"
-                style={{ color: C.textTertiary }}
-              >
-                음력 생일이라면 음력을 선택해 주세요.
-              </p>
             </motion.div>
 
             {/* 생년월일 */}

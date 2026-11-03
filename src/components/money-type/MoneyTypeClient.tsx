@@ -131,7 +131,6 @@ export default function MoneyTypeClient({
   const [birthTime, setBirthTime] = useState("");
   const [unknownTime, setUnknownTime] = useState(true);
   const [gender, setGender] = useState<"female" | "male">("female");
-  const [calendar, setCalendar] = useState<"solar" | "lunar">("solar");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<MoneyTypeResultData | null>(
     initialData ?? null,
@@ -283,7 +282,7 @@ export default function MoneyTypeClient({
           birthTime: unknownTime ? "" : birthTime,
           birthTimeUnknown: unknownTime,
           gender,
-          calendarType: calendar,
+          calendarType: "solar",
         }),
       });
 
@@ -363,8 +362,6 @@ export default function MoneyTypeClient({
               onTimeSelect={handleTimeSelect}
               gender={gender}
               onGenderChange={setGender}
-              calendar={calendar}
-              onCalendarChange={setCalendar}
               isValid={isValidBirthDate}
               error={error}
               onSubmit={handleSubmit}

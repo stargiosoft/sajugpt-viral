@@ -7,7 +7,6 @@ import type { Gender } from '@/types/battle';
 import BirthInput from '@/components/BirthInput';
 import TimeSelectSheet from '@/components/TimeSelectSheet';
 import FieldLabel from '@/components/FieldLabel';
-import CalendarToggle, { type CalendarType } from '@/components/CalendarToggle';
 import PressableButton from '@/components/PressableButton';
 
 interface ChildGenderSelectProps {
@@ -119,8 +118,6 @@ interface Props {
   onTimeSelect: (time: string, unknown: boolean) => void;
   gender: Gender;
   onGenderChange: (value: Gender) => void;
-  calendar: CalendarType;
-  onCalendarChange: (value: CalendarType) => void;
   isValid: boolean;
   error: string | null;
   onSubmit: () => void;
@@ -144,8 +141,6 @@ export default function ChildBirthInput({
   onTimeSelect,
   gender,
   onGenderChange,
-  calendar,
-  onCalendarChange,
   isValid,
   error,
   onSubmit,
@@ -216,13 +211,6 @@ export default function ChildBirthInput({
                 unselectedColor={COLORS.sub}
                 border={`1.5px solid ${COLORS.border}`}
               />
-            </div>
-
-            <div style={{ marginTop: '22px' }}>
-              <FieldLabel color={COLORS.text} fontSize="13px" marginBottom="7px">
-                달력 기준
-              </FieldLabel>
-              <CalendarToggle value={calendar} onChange={onCalendarChange} accentColor={COLORS.accent} textColor={COLORS.sub} />
             </div>
 
             <div style={{ marginTop: '22px' }}>
